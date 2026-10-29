@@ -269236,7 +269236,7 @@ async function collectSources(root, offline, config2, fetcher = fetch) {
   const temporary = contained(root, `.changelume/observations/stripe-${offline ? "offline" : "online"}.tmp`);
   (0, import_node_fs4.writeFileSync)(temporary, JSON.stringify({ schemaVersion: 1, releases, sourceHash: hash2(text), observedAt: Date.now() }));
   (0, import_node_fs4.renameSync)(temporary, observations);
-  return { evidence, releases, newlyObserved, unclassified: ["Stripe v12 default request API version change requires manual compatibility review.", ...releases.filter((r) => r !== "12.0.0").map((r) => `Release ${r}: observed, changes unclassified (no recipe)`)] };
+  return { evidence, releases, newlyObserved, unclassified: ["Stripe v12 default request API version change requires manual compatibility review.", ...releases.filter((r) => r !== "12.0.0").map((r) => r === "11.0.0" ? "Release 11.0.0: partially classified; legacy request-option rules cover only documented patterns. Other changes require manual review." : `Release ${r}: observed, changes unclassified (no recipe)`)] };
 }
 
 // packages/core/src/git.ts

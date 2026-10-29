@@ -47,5 +47,5 @@ export async function collectSources(root:string,offline:boolean,config:Config,f
   const temporary=contained(root,`.changelume/observations/stripe-${offline?'offline':'online'}.tmp`);
   writeFileSync(temporary,JSON.stringify({schemaVersion:1,releases,sourceHash:hash(text),observedAt:Date.now()}));
   renameSync(temporary,observations);
-  return {evidence,releases,newlyObserved,unclassified: ['Stripe v12 default request API version change requires manual compatibility review.', ...releases.filter(r=>r!=='12.0.0').map(r=>`Release ${r}: observed, changes unclassified (no recipe)`)]};
+  return {evidence,releases,newlyObserved,unclassified: ['Stripe v12 default request API version change requires manual compatibility review.', ...releases.filter(r=>r!=='12.0.0').map(r=>r==='11.0.0'?'Release 11.0.0: partially classified; legacy request-option rules cover only documented patterns. Other changes require manual review.':`Release ${r}: observed, changes unclassified (no recipe)`)]};
 }

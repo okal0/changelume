@@ -2,6 +2,7 @@ import { build } from 'esbuild';
 import { mkdirSync, readFileSync, readdirSync, existsSync, writeFileSync } from 'node:fs';
 import { dirname, resolve, parse } from 'node:path';
 mkdirSync('dist',{recursive:true});
+writeFileSync('dist/STRIPE-SOURCE-LICENSE.txt',readFileSync('fixtures/sources/STRIPE-LICENSE.txt','utf8').replaceAll('\r\n','\n'));
 const results=[];
 for(const [entry,outfile] of [['packages/cli/src/index.ts','dist/cli.cjs'],['packages/core/src/action.ts','dist/action.cjs']]) {
   results.push(await build({entryPoints:[entry],outfile,bundle:true,platform:'node',target:'node24',format:'cjs',loader:{'.md':'text'},legalComments:'external',metafile:true}));
