@@ -1,0 +1,92 @@
+name: Changelume migration
+on:
+  schedule:
+    - cron: '17 6 * * 1'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: changelume-migration
+  cancel-in-progress: false
+jobs:
+  analyze:
+    if: github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
+    runs-on: ubuntu-latest
+    outputs:
+      revision: ${{ steps.analysis.outputs.revision }}
+      bundle: ${{ steps.analysis.outputs.bundle-hash }}
+      patch: ${{ steps.analysis.outputs.patch-hash }}
+      has-edits: ${{ steps.analysis.outputs.has-edits }}
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+      # Consumer installation: replace uses: ./ with uses: ./.github/actions/changelume
+      - uses: ./
+        id: analysis
+        with:
+          stage: analyze
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: changelume-candidate
+          path: .changelume/
+          include-hidden-files: true
+          retention-days: 7
+  verify:
+    needs: analyze
+    if: needs.analyze.outputs.has-edits == 'true'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    outputs:
+      status: ${{ steps.verify.outputs.verification }}
+      patch: ${{ steps.verify.outputs.verified-patch-hash }}
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          ref: ${{ needs.analyze.outputs.revision }}
+          persist-credentials: false
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          name: changelume-candidate
+          path: .changelume/
+      - uses: ./
+        id: verify
+        with:
+          stage: verify
+          revision: ${{ needs.analyze.outputs.revision }}
+          bundle-hash: ${{ needs.analyze.outputs.bundle }}
+          patch-hash: ${{ needs.analyze.outputs.patch }}
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        if: always()
+        with:
+          name: changelume-verification-report
+          path: .changelume/report.*
+          include-hidden-files: true
+  publish:
+    needs: [analyze, verify]
+    if: needs.verify.outputs.status == 'passed'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          ref: ${{ needs.analyze.outputs.revision }}
+          persist-credentials: false
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
+        with:
+          name: changelume-candidate
+          path: .changelume/
+      - uses: ./
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        with:
+          stage: publish
+          publish-pr: 'true'
+          revision: ${{ needs.analyze.outputs.revision }}
+          bundle-hash: ${{ needs.analyze.outputs.bundle }}
+          patch-hash: ${{ needs.analyze.outputs.patch }}
+          verification: ${{ needs.verify.outputs.status }}
+          verified-patch-hash: ${{ needs.verify.outputs.patch }}

@@ -1,0 +1,46 @@
+name: Changelume
+description: Evidence-backed, local Stripe constructor migration MVP
+author: Changelume contributors
+inputs:
+  stage:
+    description: analyze, verify, or publish
+    default: analyze
+  cwd:
+    description: Customer checkout path
+  config:
+    description: Configuration path
+    default: changelume.yml
+  offline:
+    description: Use official historical snapshot
+    default: 'false'
+  publish-pr:
+    description: Explicit opt-in to PR creation
+    default: 'false'
+  revision:
+    description: Trusted analysis job revision output
+  bundle-hash:
+    description: Trusted analysis job bundle digest output
+  patch-hash:
+    description: Trusted analysis job patch digest output
+  verification:
+    description: Trusted verification job status output
+  verified-patch-hash:
+    description: Trusted verification job patch digest output
+outputs:
+  revision:
+    description: Analyzed commit
+  bundle-hash:
+    description: Artifact digest
+  patch-hash:
+    description: Patch digest
+  has-edits:
+    description: Whether the recipe generated changes
+  verification:
+    description: passed, failed, or skipped
+  verified-patch-hash:
+    description: Verified patch digest
+  pr-url:
+    description: Created or existing PR URL
+runs:
+  using: node24
+  main: dist/action.cjs

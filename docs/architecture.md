@@ -1,0 +1,17 @@
+# Architecture and trust boundaries
+
+`packages/core` contains Zod configuration/state validation, models, source collection, TypeScript analysis, recipe planning, isolated candidate generation, verification, LLM adapter, and Octokit publishing. `packages/cli` is a Commander adapter. Vendor/language interface types identify extension points; only Stripe and TypeScript are implemented. There is no Rust component or persistent service.
+
+The TypeScript compiler's binding information, accessed through ts-morph, traces default import symbols and local client declarations. Shadowed identifiers and unrelated objects do not match. Discovery uses an isolated project with no dependency resolution or project-script execution. If SDK packages are absent, reports explain that SDK type checking is unavailable. Edits use ts-morph text ranges and preserve unrelated source exactly.
+
+Source collection always includes a bundled, unmodified official v12 changelog snapshot with a computed SHA-256. Online mode additionally fetches the official master changelog, limits response bytes, times out requests, retries at most the configured count, and caches validated content for one hour. A changed upstream format is an error. There is no stale-cache fallback on network failure: use `--offline` deliberately. The cache is disposable.
+
+Release headings are observations, not understood changes. The recipe understands only the v12 constructor-alias removal. The v12 default API behavior and every other observed release remain explicitly unclassified. `newlyObserved` means absent from accepted state, not “published since the last scan”; scans do not advance accepted state. This conservative implementation continues to show unaccepted releases on later scans.
+
+Plans bind source evidence, version applicability, locations, file hashes, a stable recipe ID, and Git revision. Reports omit full edited-file contents; candidate artifacts necessarily contain the selected source. The baseline accepts only the recipe and its historical source hash; it never marks all observed releases understood.
+
+Candidate generation clones the local committed repository into a new temporary directory, applies allowed edits, generates a patch, and optionally runs configured commands with a minimal environment. Git hooks and external diff/textconv are disabled. Source file bytes and overall edit sizes are bounded. Failed checks retain artifacts, and unexpected tracked mutations during local verification fail the candidate. The temporary checkout is removed afterward. Normal application rechecks revision, dirty state, and every file hash. Filesystem failures during multi-file application are not transactional; review Git diff and use the preserved patch if recovery is needed.
+
+LLM context is opt-in, hash-confirmed, and limited to affected files. The provider can return data only. The MVP validates output against the deterministic recipe as an additional semantic boundary. Credential heuristics cannot identify arbitrary sensitive strings: preview remains essential.
+
+GitHub publication creates a tree and commit through the API; it does not run customer code or push a checked-out worktree. Branch identity includes recipe ID and analyzed commit. Existing PRs are returned unchanged; orphan branches require manual inspection. A moved base branch requires reanalysis. PR publication is mocked in tests, not live-tested against a customer repository.

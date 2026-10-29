@@ -1,0 +1,6 @@
+{
+  "name": "changelume-workspace", "private": true, "version": "0.1.0", "type": "module",
+  "packageManager": "pnpm@11.25.0", "engines": {"node": ">=24 <25"}, "bin": {"changelume":"dist/cli.cjs"},
+  "scripts": {"build": "node scripts/build.mjs", "typecheck": "tsc --noEmit", "test": "vitest run", "demo": "node scripts/demo.mjs", "changelume": "node dist/cli.cjs"},
+  "devDependencies": {"changelume":"workspace:*", "@types/node": "24.10.1", "esbuild": "0.28.2", "typescript": "5.9.3", "vitest": "5.0.5"}
+}

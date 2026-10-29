@@ -1,0 +1,4 @@
+include: ['src/**/*.ts']
+verification:
+  - command: node
+    args: [verify.cjs]

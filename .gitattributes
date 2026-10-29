@@ -1,0 +1,2 @@
+* text=auto eol=lf
+dist/*.cjs text eol=lf

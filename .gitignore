@@ -1,0 +1,7 @@
+node_modules/
+.changelume/
+.demo/
+coverage/
+*.tsbuildinfo
+demo-output.txt
+.pnpm-store/

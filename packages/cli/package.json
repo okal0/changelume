@@ -1,0 +1,1 @@
+{"name":"changelume","version":"0.1.0","private":true,"type":"module","bin":{"changelume":"bin/changelume.cjs"},"dependencies":{"@changelume/core":"workspace:*","commander":"15.0.0"}}
