@@ -26,4 +26,4 @@ for(const input of results.flatMap(r=>Object.keys(r.metafile.inputs))) {
     directory=dirname(directory);
   }
 }
-writeFileSync('dist/THIRD-PARTY-NOTICES.txt','Bundled runtime dependency notices\n\n'+[...notices].sort(([a],[b])=>a<b?-1:a>b?1:0).map(([,text])=>text).join('\n\n---\n\n'));
+writeFileSync('dist/THIRD-PARTY-NOTICES.txt',('Bundled runtime dependency notices\n\n'+[...notices].sort(([a],[b])=>a<b?-1:a>b?1:0).map(([,text])=>text).join('\n\n---\n\n')).replaceAll('\r\n','\n'));
