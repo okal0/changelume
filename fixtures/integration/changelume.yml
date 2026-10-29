@@ -1,0 +1,11 @@
+include: ['src/**/*.ts']
+verification:
+  - command: node
+    args: [install.cjs]
+  - command: node
+    args: [typecheck.cjs]
+  - command: node
+    args: [verify.cjs]
+pr:
+  base: main
+  draft: true

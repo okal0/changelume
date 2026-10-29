@@ -5,6 +5,8 @@ mkdirSync('dist',{recursive:true});
 const results=[];
 for(const [entry,outfile] of [['packages/cli/src/index.ts','dist/cli.cjs'],['packages/core/src/action.ts','dist/action.cjs']]) {
   results.push(await build({entryPoints:[entry],outfile,bundle:true,platform:'node',target:'node24',format:'cjs',loader:{'.md':'text'},legalComments:'external',metafile:true}));
+  // pnpm shortens long virtual-store names on Windows. Normalize only generated path comments.
+  writeFileSync(outfile,readFileSync(outfile,'utf8').replace(/^\/\/ node_modules\/\.pnpm\/[^/]+\/node_modules\//gm,'// node_modules/'));
 }
 const notices=new Map();
 for(const input of results.flatMap(r=>Object.keys(r.metafile.inputs))) {

@@ -6,7 +6,7 @@ import type { Config } from '../../config.js';
 import type { Inventory, Usage, Edit } from '../../models.js';
 import { hash } from '../../safety.js';
 
-const manifest=z.object({dependencies:z.record(z.string(),z.string()).optional(),devDependencies:z.record(z.string(),z.string()).optional()});
+const manifest=z.object({type:z.string().optional(),dependencies:z.record(z.string(),z.string()).optional(),devDependencies:z.record(z.string(),z.string()).optional()});
 const lockSchema=z.object({lockfileVersion:z.number(),packages:z.record(z.string(),z.object({version:z.string().optional()}).passthrough()).optional(),dependencies:z.record(z.string(),z.object({version:z.string()}).passthrough()).optional()}).passthrough();
 export function sourceFiles(root:string,config:Config):string[] {
   const paths:string[]=[];
@@ -23,7 +23,14 @@ export function sourceFiles(root:string,config:Config):string[] {
 export function analyze(root:string,config:Config):{inventory:Inventory;edits:Edit[]} {
   const inventory:Inventory={vendor:'stripe',sdkPackage:'stripe',versionOrigin:'unknown',usages:[],limitations:[],webhookVersion:config.vendors.stripe.webhookVersion??'unknown; endpoint configuration is external'};
   if(!config.vendors.stripe.enabled) {inventory.limitations.push('Stripe disabled by configuration');return {inventory,edits:[]};}
-  if(existsSync(resolve(root,'package.json'))) {const p=manifest.parse(JSON.parse(readFileSync(resolve(root,'package.json'),'utf8')));inventory.declared=p.dependencies?.stripe??p.devDependencies?.stripe;}
+  inventory.moduleMode='unknown';
+  if(existsSync(resolve(root,'package.json'))) {const p=manifest.parse(JSON.parse(readFileSync(resolve(root,'package.json'),'utf8')));inventory.declared=p.dependencies?.stripe??p.devDependencies?.stripe;inventory.moduleMode=p.type==='module'?'esm':p.type==='commonjs'?'commonjs':'unknown';}
+  if(existsSync(resolve(root,'tsconfig.json'))) {
+    const result=ts.readConfigFile(resolve(root,'tsconfig.json'),ts.sys.readFile);
+    if(result.error||result.config.extends) inventory.moduleMode='unknown';
+    else {const mode=String(result.config.compilerOptions?.module??'').toLowerCase();if(mode==='commonjs')inventory.moduleMode='commonjs';else if(['esnext','es2022','es2020','es2015'].includes(mode))inventory.moduleMode='esm';}
+  }
+  inventory.limitations.push('Constructor aliases are removed in Stripe 12 ESM; CommonJS retains them. Module-mode inference uses root package/tsconfig only; nested settings and bundler rewrites require manual review.');
   if(existsSync(resolve(root,'package-lock.json'))) {
     const lock=lockSchema.parse(JSON.parse(readFileSync(resolve(root,'package-lock.json'),'utf8')));
     inventory.resolved=lock.packages?.['node_modules/stripe']?.version??lock.dependencies?.stripe?.version;

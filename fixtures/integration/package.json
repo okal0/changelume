@@ -1,0 +1,8 @@
+{
+  "name": "changelume-stripe-integration",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "dependencies": {"stripe": "12.0.0", "stripe11": "npm:stripe@11.18.0"},
+  "devDependencies": {"typescript": "5.9.3", "@types/node": "24.10.1"}
+}

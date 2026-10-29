@@ -1,7 +1,7 @@
 export type Outcome = 'confirmed impact' | 'possible impact' | 'no detected impact within supported analysis' | 'unsupported analysis';
 export interface Location {file:string; line:number; symbol:string}
 export interface Usage extends Location {kind:'import'|'client'|'call'|'field'|'webhook'|'unsupported'; requestApiVersion?:string; start?:number; end?:number; replacement?:string}
-export interface Inventory {vendor:'stripe'; sdkPackage:'stripe'; declared?:string; resolved?:string; versionOrigin:string; usages:Usage[]; limitations:string[]; webhookVersion:string}
+export interface Inventory {vendor:'stripe'; sdkPackage:'stripe'; declared?:string; resolved?:string; versionOrigin:string; moduleMode?:'esm'|'commonjs'|'unknown'; usages:Usage[]; limitations:string[]; webhookVersion:string}
 export interface Evidence {url:string; sha256:string; origin:'offline snapshot'|'network'|'cache'; release:string}
 export interface Finding {outcome:Outcome; location?:Location; explanation:string; changeId:string}
 export interface Edit {path:string; beforeHash:string; content:string}

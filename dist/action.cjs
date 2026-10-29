@@ -33,7 +33,7 @@ var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__ge
   mod
 ));
 
-// node_modules/.pnpm/yaml@2.8.1/node_modules/yaml/dist/nodes/identity.js
+// node_modules/yaml/dist/nodes/identity.js
 var require_identity = __commonJS({
   "node_modules/.pnpm/yaml@2.8.1/node_modules/yaml/dist/nodes/identity.js"(exports2) {
     "use strict";
@@ -90,7 +90,7 @@ var require_identity = __commonJS({
   }
 });
 
-// node_modules/.pnpm/yaml@2.8.1/node_modules/yaml/dist/visit.js
+// node_modules/yaml/dist/visit.js
 var require_visit = __commonJS({
   "node_modules/.pnpm/yaml@2.8.1/node_modules/yaml/dist/visit.js"(exports2) {
     "use strict";
@@ -248,7 +248,7 @@ var require_visit = __commonJS({
   }
 });
 
-// node_modules/.pnpm/yaml@2.8.1/node_modules/yaml/dist/doc/directives.js
+// node_modules/yaml/dist/doc/directives.js
 var require_directives = __commonJS({
   "node_modules/.pnpm/yaml@2.8.1/node_modules/yaml/dist/doc/directives.js"(exports2) {
     "use strict";
@@ -419,7 +419,7 @@ var require_directives = __commonJS({
   }
 });
 
-// node_modules/.pnpm/yaml@2.8.1/node_modules/yaml/dist/doc/anchors.js
+// node_modules/yaml/dist/doc/anchors.js
 var require_anchors = __commonJS({
   "node_modules/.pnpm/yaml@2.8.1/node_modules/yaml/dist/doc/anchors.js"(exports2) {
     "use strict";
@@ -489,7 +489,7 @@ var require_anchors = __commonJS({
   }
 });
 
-// node_modules/.pnpm/yaml@2.8.1/node_modules/yaml/dist/doc/applyReviver.js
+// node_modules/yaml/dist/doc/applyReviver.js
 var require_applyReviver = __commonJS({
   "node_modules/.pnpm/yaml@2.8.1/node_modules/yaml/dist/doc/applyReviver.js"(exports2) {
     "use strict";
@@ -539,7 +539,7 @@ var require_applyReviver = __commonJS({
   }
 });
 
-// node_modules/.pnpm/yaml@2.8.1/node_modules/yaml/dist/nodes/toJS.js
+// node_modules/yaml/dist/nodes/toJS.js
 var require_toJS = __commonJS({
   "node_modules/.pnpm/yaml@2.8.1/node_modules/yaml/dist/nodes/toJS.js"(exports2) {
     "use strict";
@@ -569,7 +569,7 @@ var require_toJS = __commonJS({
   }
 });
 
-// node_modules/.pnpm/yaml@2.8.1/node_modules/yaml/dist/nodes/Node.js
+// node_modules/yaml/dist/nodes/Node.js
 var require_Node = __commonJS({
   "node_modules/.pnpm/yaml@2.8.1/node_modules/yaml/dist/nodes/Node.js"(exports2) {
     "use strict";
@@ -610,7 +610,7 @@ var require_Node = __commonJS({
   }
 });
 
-// node_modules/.pnpm/yaml@2.8.1/node_modules/yaml/dist/nodes/Alias.js
+// node_modules/yaml/dist/nodes/Alias.js
 var require_Alias = __commonJS({
   "node_modules/.pnpm/yaml@2.8.1/node_modules/yaml/dist/nodes/Alias.js"(exports2) {
     "use strict";
@@ -724,7 +724,7 @@ var require_Alias = __commonJS({
   }
 });
 
-// node_modules/.pnpm/yaml@2.8.1/node_modules/yaml/dist/nodes/Scalar.js
+// node_modules/yaml/dist/nodes/Scalar.js
 var require_Scalar = __commonJS({
   "node_modules/.pnpm/yaml@2.8.1/node_modules/yaml/dist/nodes/Scalar.js"(exports2) {
     "use strict";
@@ -754,7 +754,7 @@ var require_Scalar = __commonJS({
   }
 });
 
-// node_modules/.pnpm/yaml@2.8.1/node_modules/yaml/dist/doc/createNode.js
+// node_modules/yaml/dist/doc/createNode.js
 var require_createNode = __commonJS({
   "node_modules/.pnpm/yaml@2.8.1/node_modules/yaml/dist/doc/createNode.js"(exports2) {
     "use strict";
@@ -829,7 +829,7 @@ var require_createNode = __commonJS({
   }
 });
 
-// node_modules/.pnpm/yaml@2.8.1/node_modules/yaml/dist/nodes/Collection.js
+// node_modules/yaml/dist/nodes/Collection.js
 var require_Collection = __commonJS({
   "node_modules/.pnpm/yaml@2.8.1/node_modules/yaml/dist/nodes/Collection.js"(exports2) {
     "use strict";
@@ -972,7 +972,7 @@ var require_Collection = __commonJS({
   }
 });
 
-// node_modules/.pnpm/yaml@2.8.1/node_modules/yaml/dist/stringify/stringifyComment.js
+// node_modules/yaml/dist/stringify/stringifyComment.js
 var require_stringifyComment = __commonJS({
   "node_modules/.pnpm/yaml@2.8.1/node_modules/yaml/dist/stringify/stringifyComment.js"(exports2) {
     "use strict";
@@ -989,7 +989,7 @@ var require_stringifyComment = __commonJS({
   }
 });
 
-// node_modules/.pnpm/yaml@2.8.1/node_modules/yaml/dist/stringify/foldFlowLines.js
+// node_modules/yaml/dist/stringify/foldFlowLines.js
 var require_foldFlowLines = __commonJS({
   "node_modules/.pnpm/yaml@2.8.1/node_modules/yaml/dist/stringify/foldFlowLines.js"(exports2) {
     "use strict";
@@ -1125,7 +1125,7 @@ ${indent}${text.slice(fold + 1, end2)}`;
   }
 });
 
-// node_modules/.pnpm/yaml@2.8.1/node_modules/yaml/dist/stringify/stringifyString.js
+// node_modules/yaml/dist/stringify/stringifyString.js
 var require_stringifyString = __commonJS({
   "node_modules/.pnpm/yaml@2.8.1/node_modules/yaml/dist/stringify/stringifyString.js"(exports2) {
     "use strict";
@@ -1408,7 +1408,7 @@ ${indent}`);
   }
 });
 
-// node_modules/.pnpm/yaml@2.8.1/node_modules/yaml/dist/stringify/stringify.js
+// node_modules/yaml/dist/stringify/stringify.js
 var require_stringify = __commonJS({
   "node_modules/.pnpm/yaml@2.8.1/node_modules/yaml/dist/stringify/stringify.js"(exports2) {
     "use strict";
@@ -1531,7 +1531,7 @@ ${ctx.indent}${str}`;
   }
 });
 
-// node_modules/.pnpm/yaml@2.8.1/node_modules/yaml/dist/stringify/stringifyPair.js
+// node_modules/yaml/dist/stringify/stringifyPair.js
 var require_stringifyPair = __commonJS({
   "node_modules/.pnpm/yaml@2.8.1/node_modules/yaml/dist/stringify/stringifyPair.js"(exports2) {
     "use strict";
@@ -1664,7 +1664,7 @@ ${ctx.indent}`;
   }
 });
 
-// node_modules/.pnpm/yaml@2.8.1/node_modules/yaml/dist/log.js
+// node_modules/yaml/dist/log.js
 var require_log = __commonJS({
   "node_modules/.pnpm/yaml@2.8.1/node_modules/yaml/dist/log.js"(exports2) {
     "use strict";
@@ -1686,7 +1686,7 @@ var require_log = __commonJS({
   }
 });
 
-// node_modules/.pnpm/yaml@2.8.1/node_modules/yaml/dist/schema/yaml-1.1/merge.js
+// node_modules/yaml/dist/schema/yaml-1.1/merge.js
 var require_merge = __commonJS({
   "node_modules/.pnpm/yaml@2.8.1/node_modules/yaml/dist/schema/yaml-1.1/merge.js"(exports2) {
     "use strict";
@@ -1743,7 +1743,7 @@ var require_merge = __commonJS({
   }
 });
 
-// node_modules/.pnpm/yaml@2.8.1/node_modules/yaml/dist/nodes/addPairToJSMap.js
+// node_modules/yaml/dist/nodes/addPairToJSMap.js
 var require_addPairToJSMap = __commonJS({
   "node_modules/.pnpm/yaml@2.8.1/node_modules/yaml/dist/nodes/addPairToJSMap.js"(exports2) {
     "use strict";
@@ -1807,7 +1807,7 @@ var require_addPairToJSMap = __commonJS({
   }
 });
 
-// node_modules/.pnpm/yaml@2.8.1/node_modules/yaml/dist/nodes/Pair.js
+// node_modules/yaml/dist/nodes/Pair.js
 var require_Pair = __commonJS({
   "node_modules/.pnpm/yaml@2.8.1/node_modules/yaml/dist/nodes/Pair.js"(exports2) {
     "use strict";
@@ -1847,7 +1847,7 @@ var require_Pair = __commonJS({
   }
 });
 
-// node_modules/.pnpm/yaml@2.8.1/node_modules/yaml/dist/stringify/stringifyCollection.js
+// node_modules/yaml/dist/stringify/stringifyCollection.js
 var require_stringifyCollection = __commonJS({
   "node_modules/.pnpm/yaml@2.8.1/node_modules/yaml/dist/stringify/stringifyCollection.js"(exports2) {
     "use strict";
@@ -1991,7 +1991,7 @@ ${indent}${end}`;
   }
 });
 
-// node_modules/.pnpm/yaml@2.8.1/node_modules/yaml/dist/nodes/YAMLMap.js
+// node_modules/yaml/dist/nodes/YAMLMap.js
 var require_YAMLMap = __commonJS({
   "node_modules/.pnpm/yaml@2.8.1/node_modules/yaml/dist/nodes/YAMLMap.js"(exports2) {
     "use strict";
@@ -2135,7 +2135,7 @@ var require_YAMLMap = __commonJS({
   }
 });
 
-// node_modules/.pnpm/yaml@2.8.1/node_modules/yaml/dist/schema/common/map.js
+// node_modules/yaml/dist/schema/common/map.js
 var require_map = __commonJS({
   "node_modules/.pnpm/yaml@2.8.1/node_modules/yaml/dist/schema/common/map.js"(exports2) {
     "use strict";
@@ -2157,7 +2157,7 @@ var require_map = __commonJS({
   }
 });
 
-// node_modules/.pnpm/yaml@2.8.1/node_modules/yaml/dist/nodes/YAMLSeq.js
+// node_modules/yaml/dist/nodes/YAMLSeq.js
 var require_YAMLSeq = __commonJS({
   "node_modules/.pnpm/yaml@2.8.1/node_modules/yaml/dist/nodes/YAMLSeq.js"(exports2) {
     "use strict";
@@ -2273,7 +2273,7 @@ var require_YAMLSeq = __commonJS({
   }
 });
 
-// node_modules/.pnpm/yaml@2.8.1/node_modules/yaml/dist/schema/common/seq.js
+// node_modules/yaml/dist/schema/common/seq.js
 var require_seq = __commonJS({
   "node_modules/.pnpm/yaml@2.8.1/node_modules/yaml/dist/schema/common/seq.js"(exports2) {
     "use strict";
@@ -2295,7 +2295,7 @@ var require_seq = __commonJS({
   }
 });
 
-// node_modules/.pnpm/yaml@2.8.1/node_modules/yaml/dist/schema/common/string.js
+// node_modules/yaml/dist/schema/common/string.js
 var require_string = __commonJS({
   "node_modules/.pnpm/yaml@2.8.1/node_modules/yaml/dist/schema/common/string.js"(exports2) {
     "use strict";
@@ -2314,7 +2314,7 @@ var require_string = __commonJS({
   }
 });
 
-// node_modules/.pnpm/yaml@2.8.1/node_modules/yaml/dist/schema/common/null.js
+// node_modules/yaml/dist/schema/common/null.js
 var require_null = __commonJS({
   "node_modules/.pnpm/yaml@2.8.1/node_modules/yaml/dist/schema/common/null.js"(exports2) {
     "use strict";
@@ -2332,7 +2332,7 @@ var require_null = __commonJS({
   }
 });
 
-// node_modules/.pnpm/yaml@2.8.1/node_modules/yaml/dist/schema/core/bool.js
+// node_modules/yaml/dist/schema/core/bool.js
 var require_bool = __commonJS({
   "node_modules/.pnpm/yaml@2.8.1/node_modules/yaml/dist/schema/core/bool.js"(exports2) {
     "use strict";
@@ -2356,7 +2356,7 @@ var require_bool = __commonJS({
   }
 });
 
-// node_modules/.pnpm/yaml@2.8.1/node_modules/yaml/dist/stringify/stringifyNumber.js
+// node_modules/yaml/dist/stringify/stringifyNumber.js
 var require_stringifyNumber = __commonJS({
   "node_modules/.pnpm/yaml@2.8.1/node_modules/yaml/dist/stringify/stringifyNumber.js"(exports2) {
     "use strict";
@@ -2383,7 +2383,7 @@ var require_stringifyNumber = __commonJS({
   }
 });
 
-// node_modules/.pnpm/yaml@2.8.1/node_modules/yaml/dist/schema/core/float.js
+// node_modules/yaml/dist/schema/core/float.js
 var require_float = __commonJS({
   "node_modules/.pnpm/yaml@2.8.1/node_modules/yaml/dist/schema/core/float.js"(exports2) {
     "use strict";
@@ -2429,7 +2429,7 @@ var require_float = __commonJS({
   }
 });
 
-// node_modules/.pnpm/yaml@2.8.1/node_modules/yaml/dist/schema/core/int.js
+// node_modules/yaml/dist/schema/core/int.js
 var require_int = __commonJS({
   "node_modules/.pnpm/yaml@2.8.1/node_modules/yaml/dist/schema/core/int.js"(exports2) {
     "use strict";
@@ -2474,7 +2474,7 @@ var require_int = __commonJS({
   }
 });
 
-// node_modules/.pnpm/yaml@2.8.1/node_modules/yaml/dist/schema/core/schema.js
+// node_modules/yaml/dist/schema/core/schema.js
 var require_schema = __commonJS({
   "node_modules/.pnpm/yaml@2.8.1/node_modules/yaml/dist/schema/core/schema.js"(exports2) {
     "use strict";
@@ -2502,7 +2502,7 @@ var require_schema = __commonJS({
   }
 });
 
-// node_modules/.pnpm/yaml@2.8.1/node_modules/yaml/dist/schema/json/schema.js
+// node_modules/yaml/dist/schema/json/schema.js
 var require_schema2 = __commonJS({
   "node_modules/.pnpm/yaml@2.8.1/node_modules/yaml/dist/schema/json/schema.js"(exports2) {
     "use strict";
@@ -2569,7 +2569,7 @@ var require_schema2 = __commonJS({
   }
 });
 
-// node_modules/.pnpm/yaml@2.8.1/node_modules/yaml/dist/schema/yaml-1.1/binary.js
+// node_modules/yaml/dist/schema/yaml-1.1/binary.js
 var require_binary = __commonJS({
   "node_modules/.pnpm/yaml@2.8.1/node_modules/yaml/dist/schema/yaml-1.1/binary.js"(exports2) {
     "use strict";
@@ -2635,7 +2635,7 @@ var require_binary = __commonJS({
   }
 });
 
-// node_modules/.pnpm/yaml@2.8.1/node_modules/yaml/dist/schema/yaml-1.1/pairs.js
+// node_modules/yaml/dist/schema/yaml-1.1/pairs.js
 var require_pairs = __commonJS({
   "node_modules/.pnpm/yaml@2.8.1/node_modules/yaml/dist/schema/yaml-1.1/pairs.js"(exports2) {
     "use strict";
@@ -2713,7 +2713,7 @@ ${cn.comment}` : item.comment;
   }
 });
 
-// node_modules/.pnpm/yaml@2.8.1/node_modules/yaml/dist/schema/yaml-1.1/omap.js
+// node_modules/yaml/dist/schema/yaml-1.1/omap.js
 var require_omap = __commonJS({
   "node_modules/.pnpm/yaml@2.8.1/node_modules/yaml/dist/schema/yaml-1.1/omap.js"(exports2) {
     "use strict";
@@ -2791,7 +2791,7 @@ var require_omap = __commonJS({
   }
 });
 
-// node_modules/.pnpm/yaml@2.8.1/node_modules/yaml/dist/schema/yaml-1.1/bool.js
+// node_modules/yaml/dist/schema/yaml-1.1/bool.js
 var require_bool2 = __commonJS({
   "node_modules/.pnpm/yaml@2.8.1/node_modules/yaml/dist/schema/yaml-1.1/bool.js"(exports2) {
     "use strict";
@@ -2823,7 +2823,7 @@ var require_bool2 = __commonJS({
   }
 });
 
-// node_modules/.pnpm/yaml@2.8.1/node_modules/yaml/dist/schema/yaml-1.1/float.js
+// node_modules/yaml/dist/schema/yaml-1.1/float.js
 var require_float2 = __commonJS({
   "node_modules/.pnpm/yaml@2.8.1/node_modules/yaml/dist/schema/yaml-1.1/float.js"(exports2) {
     "use strict";
@@ -2872,7 +2872,7 @@ var require_float2 = __commonJS({
   }
 });
 
-// node_modules/.pnpm/yaml@2.8.1/node_modules/yaml/dist/schema/yaml-1.1/int.js
+// node_modules/yaml/dist/schema/yaml-1.1/int.js
 var require_int2 = __commonJS({
   "node_modules/.pnpm/yaml@2.8.1/node_modules/yaml/dist/schema/yaml-1.1/int.js"(exports2) {
     "use strict";
@@ -2951,7 +2951,7 @@ var require_int2 = __commonJS({
   }
 });
 
-// node_modules/.pnpm/yaml@2.8.1/node_modules/yaml/dist/schema/yaml-1.1/set.js
+// node_modules/yaml/dist/schema/yaml-1.1/set.js
 var require_set = __commonJS({
   "node_modules/.pnpm/yaml@2.8.1/node_modules/yaml/dist/schema/yaml-1.1/set.js"(exports2) {
     "use strict";
@@ -3040,7 +3040,7 @@ var require_set = __commonJS({
   }
 });
 
-// node_modules/.pnpm/yaml@2.8.1/node_modules/yaml/dist/schema/yaml-1.1/timestamp.js
+// node_modules/yaml/dist/schema/yaml-1.1/timestamp.js
 var require_timestamp = __commonJS({
   "node_modules/.pnpm/yaml@2.8.1/node_modules/yaml/dist/schema/yaml-1.1/timestamp.js"(exports2) {
     "use strict";
@@ -3128,7 +3128,7 @@ var require_timestamp = __commonJS({
   }
 });
 
-// node_modules/.pnpm/yaml@2.8.1/node_modules/yaml/dist/schema/yaml-1.1/schema.js
+// node_modules/yaml/dist/schema/yaml-1.1/schema.js
 var require_schema3 = __commonJS({
   "node_modules/.pnpm/yaml@2.8.1/node_modules/yaml/dist/schema/yaml-1.1/schema.js"(exports2) {
     "use strict";
@@ -3172,7 +3172,7 @@ var require_schema3 = __commonJS({
   }
 });
 
-// node_modules/.pnpm/yaml@2.8.1/node_modules/yaml/dist/schema/tags.js
+// node_modules/yaml/dist/schema/tags.js
 var require_tags = __commonJS({
   "node_modules/.pnpm/yaml@2.8.1/node_modules/yaml/dist/schema/tags.js"(exports2) {
     "use strict";
@@ -3266,7 +3266,7 @@ var require_tags = __commonJS({
   }
 });
 
-// node_modules/.pnpm/yaml@2.8.1/node_modules/yaml/dist/schema/Schema.js
+// node_modules/yaml/dist/schema/Schema.js
 var require_Schema = __commonJS({
   "node_modules/.pnpm/yaml@2.8.1/node_modules/yaml/dist/schema/Schema.js"(exports2) {
     "use strict";
@@ -3298,7 +3298,7 @@ var require_Schema = __commonJS({
   }
 });
 
-// node_modules/.pnpm/yaml@2.8.1/node_modules/yaml/dist/stringify/stringifyDocument.js
+// node_modules/yaml/dist/stringify/stringifyDocument.js
 var require_stringifyDocument = __commonJS({
   "node_modules/.pnpm/yaml@2.8.1/node_modules/yaml/dist/stringify/stringifyDocument.js"(exports2) {
     "use strict";
@@ -3378,7 +3378,7 @@ var require_stringifyDocument = __commonJS({
   }
 });
 
-// node_modules/.pnpm/yaml@2.8.1/node_modules/yaml/dist/doc/Document.js
+// node_modules/yaml/dist/doc/Document.js
 var require_Document = __commonJS({
   "node_modules/.pnpm/yaml@2.8.1/node_modules/yaml/dist/doc/Document.js"(exports2) {
     "use strict";
@@ -3687,7 +3687,7 @@ var require_Document = __commonJS({
   }
 });
 
-// node_modules/.pnpm/yaml@2.8.1/node_modules/yaml/dist/errors.js
+// node_modules/yaml/dist/errors.js
 var require_errors = __commonJS({
   "node_modules/.pnpm/yaml@2.8.1/node_modules/yaml/dist/errors.js"(exports2) {
     "use strict";
@@ -3752,7 +3752,7 @@ ${pointer}
   }
 });
 
-// node_modules/.pnpm/yaml@2.8.1/node_modules/yaml/dist/compose/resolve-props.js
+// node_modules/yaml/dist/compose/resolve-props.js
 var require_resolve_props = __commonJS({
   "node_modules/.pnpm/yaml@2.8.1/node_modules/yaml/dist/compose/resolve-props.js"(exports2) {
     "use strict";
@@ -3886,7 +3886,7 @@ var require_resolve_props = __commonJS({
   }
 });
 
-// node_modules/.pnpm/yaml@2.8.1/node_modules/yaml/dist/compose/util-contains-newline.js
+// node_modules/yaml/dist/compose/util-contains-newline.js
 var require_util_contains_newline = __commonJS({
   "node_modules/.pnpm/yaml@2.8.1/node_modules/yaml/dist/compose/util-contains-newline.js"(exports2) {
     "use strict";
@@ -3928,7 +3928,7 @@ var require_util_contains_newline = __commonJS({
   }
 });
 
-// node_modules/.pnpm/yaml@2.8.1/node_modules/yaml/dist/compose/util-flow-indent-check.js
+// node_modules/yaml/dist/compose/util-flow-indent-check.js
 var require_util_flow_indent_check = __commonJS({
   "node_modules/.pnpm/yaml@2.8.1/node_modules/yaml/dist/compose/util-flow-indent-check.js"(exports2) {
     "use strict";
@@ -3946,7 +3946,7 @@ var require_util_flow_indent_check = __commonJS({
   }
 });
 
-// node_modules/.pnpm/yaml@2.8.1/node_modules/yaml/dist/compose/util-map-includes.js
+// node_modules/yaml/dist/compose/util-map-includes.js
 var require_util_map_includes = __commonJS({
   "node_modules/.pnpm/yaml@2.8.1/node_modules/yaml/dist/compose/util-map-includes.js"(exports2) {
     "use strict";
@@ -3962,7 +3962,7 @@ var require_util_map_includes = __commonJS({
   }
 });
 
-// node_modules/.pnpm/yaml@2.8.1/node_modules/yaml/dist/compose/resolve-block-map.js
+// node_modules/yaml/dist/compose/resolve-block-map.js
 var require_resolve_block_map = __commonJS({
   "node_modules/.pnpm/yaml@2.8.1/node_modules/yaml/dist/compose/resolve-block-map.js"(exports2) {
     "use strict";
@@ -4070,7 +4070,7 @@ var require_resolve_block_map = __commonJS({
   }
 });
 
-// node_modules/.pnpm/yaml@2.8.1/node_modules/yaml/dist/compose/resolve-block-seq.js
+// node_modules/yaml/dist/compose/resolve-block-seq.js
 var require_resolve_block_seq = __commonJS({
   "node_modules/.pnpm/yaml@2.8.1/node_modules/yaml/dist/compose/resolve-block-seq.js"(exports2) {
     "use strict";
@@ -4121,7 +4121,7 @@ var require_resolve_block_seq = __commonJS({
   }
 });
 
-// node_modules/.pnpm/yaml@2.8.1/node_modules/yaml/dist/compose/resolve-end.js
+// node_modules/yaml/dist/compose/resolve-end.js
 var require_resolve_end = __commonJS({
   "node_modules/.pnpm/yaml@2.8.1/node_modules/yaml/dist/compose/resolve-end.js"(exports2) {
     "use strict";
@@ -4164,7 +4164,7 @@ var require_resolve_end = __commonJS({
   }
 });
 
-// node_modules/.pnpm/yaml@2.8.1/node_modules/yaml/dist/compose/resolve-flow-collection.js
+// node_modules/yaml/dist/compose/resolve-flow-collection.js
 var require_resolve_flow_collection = __commonJS({
   "node_modules/.pnpm/yaml@2.8.1/node_modules/yaml/dist/compose/resolve-flow-collection.js"(exports2) {
     "use strict";
@@ -4358,7 +4358,7 @@ var require_resolve_flow_collection = __commonJS({
   }
 });
 
-// node_modules/.pnpm/yaml@2.8.1/node_modules/yaml/dist/compose/compose-collection.js
+// node_modules/yaml/dist/compose/compose-collection.js
 var require_compose_collection = __commonJS({
   "node_modules/.pnpm/yaml@2.8.1/node_modules/yaml/dist/compose/compose-collection.js"(exports2) {
     "use strict";
@@ -4423,7 +4423,7 @@ var require_compose_collection = __commonJS({
   }
 });
 
-// node_modules/.pnpm/yaml@2.8.1/node_modules/yaml/dist/compose/resolve-block-scalar.js
+// node_modules/yaml/dist/compose/resolve-block-scalar.js
 var require_resolve_block_scalar = __commonJS({
   "node_modules/.pnpm/yaml@2.8.1/node_modules/yaml/dist/compose/resolve-block-scalar.js"(exports2) {
     "use strict";
@@ -4606,7 +4606,7 @@ var require_resolve_block_scalar = __commonJS({
   }
 });
 
-// node_modules/.pnpm/yaml@2.8.1/node_modules/yaml/dist/compose/resolve-flow-scalar.js
+// node_modules/yaml/dist/compose/resolve-flow-scalar.js
 var require_resolve_flow_scalar = __commonJS({
   "node_modules/.pnpm/yaml@2.8.1/node_modules/yaml/dist/compose/resolve-flow-scalar.js"(exports2) {
     "use strict";
@@ -4825,7 +4825,7 @@ var require_resolve_flow_scalar = __commonJS({
   }
 });
 
-// node_modules/.pnpm/yaml@2.8.1/node_modules/yaml/dist/compose/compose-scalar.js
+// node_modules/yaml/dist/compose/compose-scalar.js
 var require_compose_scalar = __commonJS({
   "node_modules/.pnpm/yaml@2.8.1/node_modules/yaml/dist/compose/compose-scalar.js"(exports2) {
     "use strict";
@@ -4906,7 +4906,7 @@ var require_compose_scalar = __commonJS({
   }
 });
 
-// node_modules/.pnpm/yaml@2.8.1/node_modules/yaml/dist/compose/util-empty-scalar-position.js
+// node_modules/yaml/dist/compose/util-empty-scalar-position.js
 var require_util_empty_scalar_position = __commonJS({
   "node_modules/.pnpm/yaml@2.8.1/node_modules/yaml/dist/compose/util-empty-scalar-position.js"(exports2) {
     "use strict";
@@ -4936,7 +4936,7 @@ var require_util_empty_scalar_position = __commonJS({
   }
 });
 
-// node_modules/.pnpm/yaml@2.8.1/node_modules/yaml/dist/compose/compose-node.js
+// node_modules/yaml/dist/compose/compose-node.js
 var require_compose_node = __commonJS({
   "node_modules/.pnpm/yaml@2.8.1/node_modules/yaml/dist/compose/compose-node.js"(exports2) {
     "use strict";
@@ -5037,7 +5037,7 @@ var require_compose_node = __commonJS({
   }
 });
 
-// node_modules/.pnpm/yaml@2.8.1/node_modules/yaml/dist/compose/compose-doc.js
+// node_modules/yaml/dist/compose/compose-doc.js
 var require_compose_doc = __commonJS({
   "node_modules/.pnpm/yaml@2.8.1/node_modules/yaml/dist/compose/compose-doc.js"(exports2) {
     "use strict";
@@ -5080,7 +5080,7 @@ var require_compose_doc = __commonJS({
   }
 });
 
-// node_modules/.pnpm/yaml@2.8.1/node_modules/yaml/dist/compose/composer.js
+// node_modules/yaml/dist/compose/composer.js
 var require_composer = __commonJS({
   "node_modules/.pnpm/yaml@2.8.1/node_modules/yaml/dist/compose/composer.js"(exports2) {
     "use strict";
@@ -5286,7 +5286,7 @@ ${end.comment}` : end.comment;
   }
 });
 
-// node_modules/.pnpm/yaml@2.8.1/node_modules/yaml/dist/parse/cst-scalar.js
+// node_modules/yaml/dist/parse/cst-scalar.js
 var require_cst_scalar = __commonJS({
   "node_modules/.pnpm/yaml@2.8.1/node_modules/yaml/dist/parse/cst-scalar.js"(exports2) {
     "use strict";
@@ -5471,7 +5471,7 @@ var require_cst_scalar = __commonJS({
   }
 });
 
-// node_modules/.pnpm/yaml@2.8.1/node_modules/yaml/dist/parse/cst-stringify.js
+// node_modules/yaml/dist/parse/cst-stringify.js
 var require_cst_stringify = __commonJS({
   "node_modules/.pnpm/yaml@2.8.1/node_modules/yaml/dist/parse/cst-stringify.js"(exports2) {
     "use strict";
@@ -5532,7 +5532,7 @@ var require_cst_stringify = __commonJS({
   }
 });
 
-// node_modules/.pnpm/yaml@2.8.1/node_modules/yaml/dist/parse/cst-visit.js
+// node_modules/yaml/dist/parse/cst-visit.js
 var require_cst_visit = __commonJS({
   "node_modules/.pnpm/yaml@2.8.1/node_modules/yaml/dist/parse/cst-visit.js"(exports2) {
     "use strict";
@@ -5594,7 +5594,7 @@ var require_cst_visit = __commonJS({
   }
 });
 
-// node_modules/.pnpm/yaml@2.8.1/node_modules/yaml/dist/parse/cst.js
+// node_modules/yaml/dist/parse/cst.js
 var require_cst = __commonJS({
   "node_modules/.pnpm/yaml@2.8.1/node_modules/yaml/dist/parse/cst.js"(exports2) {
     "use strict";
@@ -5696,7 +5696,7 @@ var require_cst = __commonJS({
   }
 });
 
-// node_modules/.pnpm/yaml@2.8.1/node_modules/yaml/dist/parse/lexer.js
+// node_modules/yaml/dist/parse/lexer.js
 var require_lexer = __commonJS({
   "node_modules/.pnpm/yaml@2.8.1/node_modules/yaml/dist/parse/lexer.js"(exports2) {
     "use strict";
@@ -6275,7 +6275,7 @@ var require_lexer = __commonJS({
   }
 });
 
-// node_modules/.pnpm/yaml@2.8.1/node_modules/yaml/dist/parse/line-counter.js
+// node_modules/yaml/dist/parse/line-counter.js
 var require_line_counter = __commonJS({
   "node_modules/.pnpm/yaml@2.8.1/node_modules/yaml/dist/parse/line-counter.js"(exports2) {
     "use strict";
@@ -6306,7 +6306,7 @@ var require_line_counter = __commonJS({
   }
 });
 
-// node_modules/.pnpm/yaml@2.8.1/node_modules/yaml/dist/parse/parser.js
+// node_modules/yaml/dist/parse/parser.js
 var require_parser = __commonJS({
   "node_modules/.pnpm/yaml@2.8.1/node_modules/yaml/dist/parse/parser.js"(exports2) {
     "use strict";
@@ -7173,7 +7173,7 @@ var require_parser = __commonJS({
   }
 });
 
-// node_modules/.pnpm/yaml@2.8.1/node_modules/yaml/dist/public-api.js
+// node_modules/yaml/dist/public-api.js
 var require_public_api = __commonJS({
   "node_modules/.pnpm/yaml@2.8.1/node_modules/yaml/dist/public-api.js"(exports2) {
     "use strict";
@@ -7270,7 +7270,7 @@ var require_public_api = __commonJS({
   }
 });
 
-// node_modules/.pnpm/yaml@2.8.1/node_modules/yaml/dist/index.js
+// node_modules/yaml/dist/index.js
 var require_dist = __commonJS({
   "node_modules/.pnpm/yaml@2.8.1/node_modules/yaml/dist/index.js"(exports2) {
     "use strict";
@@ -7322,7 +7322,7 @@ var require_dist = __commonJS({
   }
 });
 
-// node_modules/.pnpm/@ts-morph+common@0.29.0/node_modules/@ts-morph/common/dist/typescript.js
+// node_modules/@ts-morph/common/dist/typescript.js
 var require_typescript = __commonJS({
   "node_modules/.pnpm/@ts-morph+common@0.29.0/node_modules/@ts-morph/common/dist/typescript.js"(exports2, module2) {
     var ts2 = {};
@@ -218832,7 +218832,7 @@ Additional information: BADCLIENT: Bad error code, ${badCode} not found in range
   }
 });
 
-// node_modules/.pnpm/balanced-match@4.0.4/node_modules/balanced-match/dist/commonjs/index.js
+// node_modules/balanced-match/dist/commonjs/index.js
 var require_commonjs = __commonJS({
   "node_modules/.pnpm/balanced-match@4.0.4/node_modules/balanced-match/dist/commonjs/index.js"(exports2) {
     "use strict";
@@ -218894,7 +218894,7 @@ var require_commonjs = __commonJS({
   }
 });
 
-// node_modules/.pnpm/brace-expansion@5.0.12/node_modules/brace-expansion/dist/commonjs/index.js
+// node_modules/brace-expansion/dist/commonjs/index.js
 var require_commonjs2 = __commonJS({
   "node_modules/.pnpm/brace-expansion@5.0.12/node_modules/brace-expansion/dist/commonjs/index.js"(exports2) {
     "use strict";
@@ -219131,7 +219131,7 @@ var require_commonjs2 = __commonJS({
   }
 });
 
-// node_modules/.pnpm/minimatch@10.2.6/node_modules/minimatch/dist/commonjs/assert-valid-pattern.js
+// node_modules/minimatch/dist/commonjs/assert-valid-pattern.js
 var require_assert_valid_pattern = __commonJS({
   "node_modules/.pnpm/minimatch@10.2.6/node_modules/minimatch/dist/commonjs/assert-valid-pattern.js"(exports2) {
     "use strict";
@@ -219150,7 +219150,7 @@ var require_assert_valid_pattern = __commonJS({
   }
 });
 
-// node_modules/.pnpm/minimatch@10.2.6/node_modules/minimatch/dist/commonjs/brace-expressions.js
+// node_modules/minimatch/dist/commonjs/brace-expressions.js
 var require_brace_expressions = __commonJS({
   "node_modules/.pnpm/minimatch@10.2.6/node_modules/minimatch/dist/commonjs/brace-expressions.js"(exports2) {
     "use strict";
@@ -219267,7 +219267,7 @@ var require_brace_expressions = __commonJS({
   }
 });
 
-// node_modules/.pnpm/minimatch@10.2.6/node_modules/minimatch/dist/commonjs/unescape.js
+// node_modules/minimatch/dist/commonjs/unescape.js
 var require_unescape = __commonJS({
   "node_modules/.pnpm/minimatch@10.2.6/node_modules/minimatch/dist/commonjs/unescape.js"(exports2) {
     "use strict";
@@ -219283,7 +219283,7 @@ var require_unescape = __commonJS({
   }
 });
 
-// node_modules/.pnpm/minimatch@10.2.6/node_modules/minimatch/dist/commonjs/ast.js
+// node_modules/minimatch/dist/commonjs/ast.js
 var require_ast = __commonJS({
   "node_modules/.pnpm/minimatch@10.2.6/node_modules/minimatch/dist/commonjs/ast.js"(exports2) {
     "use strict";
@@ -219937,7 +219937,7 @@ var require_ast = __commonJS({
   }
 });
 
-// node_modules/.pnpm/minimatch@10.2.6/node_modules/minimatch/dist/commonjs/escape.js
+// node_modules/minimatch/dist/commonjs/escape.js
 var require_escape = __commonJS({
   "node_modules/.pnpm/minimatch@10.2.6/node_modules/minimatch/dist/commonjs/escape.js"(exports2) {
     "use strict";
@@ -219953,7 +219953,7 @@ var require_escape = __commonJS({
   }
 });
 
-// node_modules/.pnpm/minimatch@10.2.6/node_modules/minimatch/dist/commonjs/index.js
+// node_modules/minimatch/dist/commonjs/index.js
 var require_commonjs3 = __commonJS({
   "node_modules/.pnpm/minimatch@10.2.6/node_modules/minimatch/dist/commonjs/index.js"(exports2) {
     "use strict";
@@ -220793,7 +220793,7 @@ var require_commonjs3 = __commonJS({
   }
 });
 
-// node_modules/.pnpm/path-browserify@1.0.1/node_modules/path-browserify/index.js
+// node_modules/path-browserify/index.js
 var require_path_browserify = __commonJS({
   "node_modules/.pnpm/path-browserify@1.0.1/node_modules/path-browserify/index.js"(exports2, module2) {
     "use strict";
@@ -221200,7 +221200,7 @@ var require_path_browserify = __commonJS({
   }
 });
 
-// node_modules/.pnpm/picomatch@4.0.7/node_modules/picomatch/lib/constants.js
+// node_modules/picomatch/lib/constants.js
 var require_constants = __commonJS({
   "node_modules/.pnpm/picomatch@4.0.7/node_modules/picomatch/lib/constants.js"(exports2, module2) {
     "use strict";
@@ -221402,7 +221402,7 @@ var require_constants = __commonJS({
   }
 });
 
-// node_modules/.pnpm/picomatch@4.0.7/node_modules/picomatch/lib/utils.js
+// node_modules/picomatch/lib/utils.js
 var require_utils = __commonJS({
   "node_modules/.pnpm/picomatch@4.0.7/node_modules/picomatch/lib/utils.js"(exports2) {
     "use strict";
@@ -221466,7 +221466,7 @@ var require_utils = __commonJS({
   }
 });
 
-// node_modules/.pnpm/picomatch@4.0.7/node_modules/picomatch/lib/scan.js
+// node_modules/picomatch/lib/scan.js
 var require_scan = __commonJS({
   "node_modules/.pnpm/picomatch@4.0.7/node_modules/picomatch/lib/scan.js"(exports2, module2) {
     "use strict";
@@ -221804,7 +221804,7 @@ var require_scan = __commonJS({
   }
 });
 
-// node_modules/.pnpm/picomatch@4.0.7/node_modules/picomatch/lib/parse.js
+// node_modules/picomatch/lib/parse.js
 var require_parse = __commonJS({
   "node_modules/.pnpm/picomatch@4.0.7/node_modules/picomatch/lib/parse.js"(exports2, module2) {
     "use strict";
@@ -222819,7 +222819,7 @@ var require_parse = __commonJS({
   }
 });
 
-// node_modules/.pnpm/picomatch@4.0.7/node_modules/picomatch/lib/picomatch.js
+// node_modules/picomatch/lib/picomatch.js
 var require_picomatch = __commonJS({
   "node_modules/.pnpm/picomatch@4.0.7/node_modules/picomatch/lib/picomatch.js"(exports2, module2) {
     "use strict";
@@ -222959,7 +222959,7 @@ var require_picomatch = __commonJS({
   }
 });
 
-// node_modules/.pnpm/picomatch@4.0.7/node_modules/picomatch/index.js
+// node_modules/picomatch/index.js
 var require_picomatch2 = __commonJS({
   "node_modules/.pnpm/picomatch@4.0.7/node_modules/picomatch/index.js"(exports2, module2) {
     "use strict";
@@ -222976,7 +222976,7 @@ var require_picomatch2 = __commonJS({
   }
 });
 
-// node_modules/.pnpm/fdir@6.5.0_picomatch@4.0.7/node_modules/fdir/dist/index.cjs
+// node_modules/fdir/dist/index.cjs
 var require_dist2 = __commonJS({
   "node_modules/.pnpm/fdir@6.5.0_picomatch@4.0.7/node_modules/fdir/dist/index.cjs"(exports2) {
     var __create2 = Object.create;
@@ -223508,7 +223508,7 @@ var require_dist2 = __commonJS({
   }
 });
 
-// node_modules/.pnpm/tinyglobby@0.2.17/node_modules/tinyglobby/dist/index.cjs
+// node_modules/tinyglobby/dist/index.cjs
 var require_dist3 = __commonJS({
   "node_modules/.pnpm/tinyglobby@0.2.17/node_modules/tinyglobby/dist/index.cjs"(exports2) {
     Object.defineProperty(exports2, Symbol.toStringTag, { value: "Module" });
@@ -223815,7 +223815,7 @@ var require_dist3 = __commonJS({
   }
 });
 
-// node_modules/.pnpm/@ts-morph+common@0.29.0/node_modules/@ts-morph/common/dist/ts-morph-common.js
+// node_modules/@ts-morph/common/dist/ts-morph-common.js
 var require_ts_morph_common = __commonJS({
   "node_modules/.pnpm/@ts-morph+common@0.29.0/node_modules/@ts-morph/common/dist/ts-morph-common.js"(exports2) {
     "use strict";
@@ -227081,7 +227081,7 @@ ${nodeLocation}` : message;
   }
 });
 
-// node_modules/.pnpm/code-block-writer@13.0.3/node_modules/code-block-writer/script/utils/string_utils.js
+// node_modules/code-block-writer/script/utils/string_utils.js
 var require_string_utils = __commonJS({
   "node_modules/.pnpm/code-block-writer@13.0.3/node_modules/code-block-writer/script/utils/string_utils.js"(exports2) {
     "use strict";
@@ -227112,7 +227112,7 @@ var require_string_utils = __commonJS({
   }
 });
 
-// node_modules/.pnpm/code-block-writer@13.0.3/node_modules/code-block-writer/script/mod.js
+// node_modules/code-block-writer/script/mod.js
 var require_mod = __commonJS({
   "node_modules/.pnpm/code-block-writer@13.0.3/node_modules/code-block-writer/script/mod.js"(exports2) {
     "use strict";
@@ -227948,7 +227948,7 @@ var require_mod = __commonJS({
   }
 });
 
-// node_modules/.pnpm/ts-morph@28.0.0/node_modules/ts-morph/dist/ts-morph.js
+// node_modules/ts-morph/dist/ts-morph.js
 var require_ts_morph = __commonJS({
   "node_modules/.pnpm/ts-morph@28.0.0/node_modules/ts-morph/dist/ts-morph.js"(exports2) {
     "use strict";
@@ -249079,7 +249079,7 @@ Node text: ${this.#forgottenText}`;
   }
 });
 
-// node_modules/.pnpm/openai@7.45.1_zod@4.6.7/node_modules/openai/internal/auth/x509-transport-state.js
+// node_modules/openai/internal/auth/x509-transport-state.js
 var require_x509_transport_state = __commonJS({
   "node_modules/.pnpm/openai@7.45.1_zod@4.6.7/node_modules/openai/internal/auth/x509-transport-state.js"(exports2, module2) {
     "use strict";
@@ -249112,7 +249112,7 @@ var require_x509_transport_state = __commonJS({
 var import_node_path6 = require("node:path");
 var import_node_fs6 = require("node:fs");
 
-// node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/classic/external.js
+// node_modules/zod/v4/classic/external.js
 var external_exports = {};
 __export(external_exports, {
   $brand: () => $brand,
@@ -249375,7 +249375,7 @@ __export(external_exports, {
   xor: () => xor
 });
 
-// node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/core/index.js
+// node_modules/zod/v4/core/index.js
 var core_exports2 = {};
 __export(core_exports2, {
   $ZodAny: () => $ZodAny,
@@ -249692,7 +249692,7 @@ __export(core_exports2, {
   withParser: () => withParser
 });
 
-// node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/core/util.js
+// node_modules/zod/v4/core/util.js
 var util_exports = {};
 __export(util_exports, {
   BIGINT_FORMAT_RANGES: () => BIGINT_FORMAT_RANGES,
@@ -250548,7 +250548,7 @@ function constantCatch(value) {
   return fn;
 }
 
-// node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/core/core.js
+// node_modules/zod/v4/core/core.js
 var _a;
 var NEVER = /* @__PURE__ */ Object.freeze({
   status: "aborted"
@@ -250670,7 +250670,7 @@ function config(newConfig) {
   return globalConfig;
 }
 
-// node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/core/errors.js
+// node_modules/zod/v4/core/errors.js
 function _getMessage() {
   const internals = this._zod;
   internals.message ?? (internals.message = JSON.stringify(internals.def, jsonStringifyReplacer, 2));
@@ -250862,7 +250862,7 @@ function prettifyError(error62) {
   return lines.join("\n");
 }
 
-// node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/core/parse.js
+// node_modules/zod/v4/core/parse.js
 function finalizeParams(callee, params) {
   return { callee: params?.callee ?? callee, Err: params?.Err };
 }
@@ -251022,7 +251022,7 @@ var _safeDecodeAsync = (_Err) => async (schema, value, _ctx) => {
 };
 var safeDecodeAsync = /* @__PURE__ */ _safeDecodeAsync($ZodRealError);
 
-// node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/core/regexes.js
+// node_modules/zod/v4/core/regexes.js
 var regexes_exports = {};
 __export(regexes_exports, {
   anyString: () => anyString,
@@ -251194,7 +251194,7 @@ var sha512_hex = /^[0-9a-fA-F]{128}$/;
 var sha512_base64 = /* @__PURE__ */ fixedBase64(86, "==");
 var sha512_base64url = /* @__PURE__ */ fixedBase64url(86);
 
-// node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/core/checks.js
+// node_modules/zod/v4/core/checks.js
 var $ZodCheck = /* @__PURE__ */ $constructor("$ZodCheck", (inst, def) => {
   var _a7;
   inst._zod ?? (inst._zod = {});
@@ -251670,7 +251670,7 @@ var $ZodCheckOverwrite = /* @__PURE__ */ $constructor("$ZodCheckOverwrite", (ins
   };
 });
 
-// node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/core/doc.js
+// node_modules/zod/v4/core/doc.js
 var Doc = class {
   constructor(args = [], closed = {}) {
     this.content = [];
@@ -251711,14 +251711,14 @@ ${content.join("\n")}
   }
 };
 
-// node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/core/versions.js
+// node_modules/zod/v4/core/versions.js
 var version = {
   major: 4,
   minor: 6,
   patch: 7
 };
 
-// node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/core/schemas.js
+// node_modules/zod/v4/core/schemas.js
 var $ZodType = /* @__PURE__ */ $constructor("$ZodType", (inst, def) => {
   var _a7;
   inst ?? (inst = {});
@@ -254160,7 +254160,7 @@ function handleRefineResult(result, payload, input3, inst) {
   }
 }
 
-// node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/core/memoizer.js
+// node_modules/zod/v4/core/memoizer.js
 var $ZodCyclicError = class extends Error {
   constructor() {
     super(`Cannot parse a reference cycle that closes through a transform`);
@@ -254437,7 +254437,7 @@ function isBackEdge(ctx, value) {
   return backEdges !== void 0 && isRef(value) && backEdges.has(value);
 }
 
-// node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/locales/index.js
+// node_modules/zod/v4/locales/index.js
 var locales_exports = {};
 __export(locales_exports, {
   ar: () => ar_default,
@@ -254505,7 +254505,7 @@ __export(locales_exports, {
   zhTW: () => zh_TW_default
 });
 
-// node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/locales/ar.js
+// node_modules/zod/v4/locales/ar.js
 var error = () => {
   const Sizable = {
     string: { unit: "\u062D\u0631\u0641", verb: "\u0623\u0646 \u064A\u062D\u0648\u064A" },
@@ -254617,7 +254617,7 @@ function ar_default() {
   };
 }
 
-// node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/locales/az.js
+// node_modules/zod/v4/locales/az.js
 var error2 = () => {
   const Sizable = {
     string: { unit: "simvol", verb: "olmal\u0131d\u0131r" },
@@ -254728,7 +254728,7 @@ function az_default() {
   };
 }
 
-// node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/locales/be.js
+// node_modules/zod/v4/locales/be.js
 function getBelarusianPlural(count, one, few, many) {
   const absCount = Math.abs(count);
   const lastDigit = absCount % 10;
@@ -254897,7 +254897,7 @@ function be_default() {
   };
 }
 
-// node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/locales/bg.js
+// node_modules/zod/v4/locales/bg.js
 var error4 = () => {
   const Sizable = {
     string: { unit: "\u0441\u0438\u043C\u0432\u043E\u043B\u0430", verb: "\u0434\u0430 \u0441\u044A\u0434\u044A\u0440\u0436\u0430" },
@@ -255023,7 +255023,7 @@ function bg_default() {
   };
 }
 
-// node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/locales/bn.js
+// node_modules/zod/v4/locales/bn.js
 var error5 = () => {
   const Sizable = {
     string: { unit: "\u0985\u0995\u09CD\u09B7\u09B0", verb: "\u09A5\u09BE\u0995\u09A4\u09C7 \u09B9\u09AC\u09C7" },
@@ -255137,7 +255137,7 @@ function bn_default() {
   };
 }
 
-// node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/locales/ca.js
+// node_modules/zod/v4/locales/ca.js
 var error6 = () => {
   const Sizable = {
     string: { unit: "car\xE0cters", verb: "contenir" },
@@ -255251,7 +255251,7 @@ function ca_default() {
   };
 }
 
-// node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/locales/ckb.js
+// node_modules/zod/v4/locales/ckb.js
 var error7 = () => {
   const Sizable = {
     string: { unit: "\u067E\u06CC\u062A", verb: "\u0628\u06CE\u062A" },
@@ -255384,7 +255384,7 @@ function ckb_default() {
   };
 }
 
-// node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/locales/cs.js
+// node_modules/zod/v4/locales/cs.js
 var error8 = () => {
   const Sizable = {
     string: { unit: "znak\u016F", verb: "m\xEDt" },
@@ -255501,7 +255501,7 @@ function cs_default() {
   };
 }
 
-// node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/locales/da.js
+// node_modules/zod/v4/locales/da.js
 var error9 = () => {
   const Sizable = {
     string: { unit: "tegn", verb: "havde" },
@@ -255622,7 +255622,7 @@ function da_default() {
   };
 }
 
-// node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/locales/de.js
+// node_modules/zod/v4/locales/de.js
 var error10 = () => {
   const Sizable = {
     string: { unit: "Zeichen", verb: "zu haben" },
@@ -255736,7 +255736,7 @@ function de_default() {
   };
 }
 
-// node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/locales/el.js
+// node_modules/zod/v4/locales/el.js
 var error11 = () => {
   const Sizable = {
     string: { unit: "\u03C7\u03B1\u03C1\u03B1\u03BA\u03C4\u03AE\u03C1\u03B5\u03C2", verb: "\u03BD\u03B1 \u03AD\u03C7\u03B5\u03B9" },
@@ -255849,7 +255849,7 @@ function el_default() {
   };
 }
 
-// node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/locales/en.js
+// node_modules/zod/v4/locales/en.js
 var error12 = () => {
   const Sizable = {
     string: { unit: "characters", verb: "to have" },
@@ -255974,7 +255974,7 @@ function en_default() {
   };
 }
 
-// node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/locales/eo.js
+// node_modules/zod/v4/locales/eo.js
 var error13 = () => {
   const Sizable = {
     string: { unit: "karaktrojn", verb: "havi" },
@@ -256089,7 +256089,7 @@ function eo_default() {
   };
 }
 
-// node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/locales/es.js
+// node_modules/zod/v4/locales/es.js
 var error14 = () => {
   const Sizable = {
     string: { unit: "caracteres", verb: "tener" },
@@ -256226,7 +256226,7 @@ function es_default() {
   };
 }
 
-// node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/locales/fa.js
+// node_modules/zod/v4/locales/fa.js
 var error15 = () => {
   const Sizable = {
     string: { unit: "\u06A9\u0627\u0631\u0627\u06A9\u062A\u0631", verb: "\u062F\u0627\u0634\u062A\u0647 \u0628\u0627\u0634\u062F" },
@@ -256346,7 +256346,7 @@ function fa_default() {
   };
 }
 
-// node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/locales/fi.js
+// node_modules/zod/v4/locales/fi.js
 var error16 = () => {
   const Sizable = {
     string: { unit: "merkki\xE4", subject: "merkkijonon" },
@@ -256464,7 +256464,7 @@ function fi_default() {
   };
 }
 
-// node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/locales/fr.js
+// node_modules/zod/v4/locales/fr.js
 var error17 = () => {
   const Sizable = {
     string: { unit: "caract\xE8res", verb: "avoir" },
@@ -256594,7 +256594,7 @@ function fr_default() {
   };
 }
 
-// node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/locales/fr-CA.js
+// node_modules/zod/v4/locales/fr-CA.js
 var error18 = () => {
   const Sizable = {
     string: { unit: "caract\xE8res", verb: "avoir" },
@@ -256707,7 +256707,7 @@ function fr_CA_default() {
   };
 }
 
-// node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/locales/gu.js
+// node_modules/zod/v4/locales/gu.js
 var error19 = () => {
   const Sizable = {
     string: { unit: "\u0A85\u0A95\u0ACD\u0AB7\u0AB0", verb: "\u0AB9\u0ACB\u0AB5\u0ABE \u0A9C\u0ACB\u0A88\u0A8F" },
@@ -256821,7 +256821,7 @@ function gu_default() {
   };
 }
 
-// node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/locales/he.js
+// node_modules/zod/v4/locales/he.js
 var error20 = () => {
   const TypeNames = {
     string: { label: "\u05DE\u05D7\u05E8\u05D5\u05D6\u05EA", gender: "f" },
@@ -257023,7 +257023,7 @@ function he_default() {
   };
 }
 
-// node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/locales/hi.js
+// node_modules/zod/v4/locales/hi.js
 var error21 = () => {
   const Sizable = {
     string: { unit: "\u0905\u0915\u094D\u0937\u0930", verb: "\u0930\u0916\u0928\u0947 \u0915\u0947 \u0932\u093F\u090F" },
@@ -257135,7 +257135,7 @@ function hi_default() {
   };
 }
 
-// node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/locales/hr.js
+// node_modules/zod/v4/locales/hr.js
 var error22 = () => {
   const Sizable = {
     string: { unit: "znakova", verb: "imati" },
@@ -257262,7 +257262,7 @@ function hr_default() {
   };
 }
 
-// node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/locales/hu.js
+// node_modules/zod/v4/locales/hu.js
 var error23 = () => {
   const Sizable = {
     string: { unit: "karakter", verb: "legyen" },
@@ -257376,7 +257376,7 @@ function hu_default() {
   };
 }
 
-// node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/locales/hy.js
+// node_modules/zod/v4/locales/hy.js
 function getArmenianPlural(count, one, many) {
   return Math.abs(count) === 1 ? one : many;
 }
@@ -257535,7 +257535,7 @@ function hy_default() {
   };
 }
 
-// node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/locales/id.js
+// node_modules/zod/v4/locales/id.js
 var error25 = () => {
   const Sizable = {
     string: { unit: "karakter", verb: "memiliki" },
@@ -257647,7 +257647,7 @@ function id_default() {
   };
 }
 
-// node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/locales/is.js
+// node_modules/zod/v4/locales/is.js
 var error26 = () => {
   const Sizable = {
     string: { unit: "stafi", verb: "a\xF0 hafa" },
@@ -257762,7 +257762,7 @@ function is_default() {
   };
 }
 
-// node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/locales/it.js
+// node_modules/zod/v4/locales/it.js
 var error27 = () => {
   const Sizable = {
     string: { unit: "caratteri", verb: "avere" },
@@ -257876,7 +257876,7 @@ function it_default() {
   };
 }
 
-// node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/locales/ja.js
+// node_modules/zod/v4/locales/ja.js
 var error28 = () => {
   const Sizable = {
     string: { unit: "\u6587\u5B57", verb: "\u3067\u3042\u308B" },
@@ -257989,7 +257989,7 @@ function ja_default() {
   };
 }
 
-// node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/locales/ka.js
+// node_modules/zod/v4/locales/ka.js
 var error29 = () => {
   const Sizable = {
     string: { unit: "\u10E1\u10D8\u10DB\u10D1\u10DD\u10DA\u10DD", verb: "\u10E3\u10DC\u10D3\u10D0 \u10E8\u10D4\u10D8\u10EA\u10D0\u10D5\u10D3\u10D4\u10E1" },
@@ -258107,7 +258107,7 @@ function ka_default() {
   };
 }
 
-// node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/locales/km.js
+// node_modules/zod/v4/locales/km.js
 var error30 = () => {
   const Sizable = {
     string: { unit: "\u178F\u17BD\u17A2\u1780\u17D2\u179F\u179A", verb: "\u1782\u17BD\u179A\u1798\u17B6\u1793" },
@@ -258223,12 +258223,12 @@ function km_default() {
   };
 }
 
-// node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/locales/kh.js
+// node_modules/zod/v4/locales/kh.js
 function kh_default() {
   return km_default();
 }
 
-// node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/locales/kn.js
+// node_modules/zod/v4/locales/kn.js
 var error31 = () => {
   const Sizable = {
     string: { unit: "\u0C85\u0C95\u0CCD\u0CB7\u0CB0\u0C97\u0CB3\u0CC1", verb: "\u0CB9\u0CCA\u0C82\u0CA6\u0CB2\u0CC1" },
@@ -258344,7 +258344,7 @@ function kn_default() {
   };
 }
 
-// node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/locales/ko.js
+// node_modules/zod/v4/locales/ko.js
 var error32 = () => {
   const Sizable = {
     string: { unit: "\uBB38\uC790", verb: "to have" },
@@ -258461,7 +258461,7 @@ function ko_default() {
   };
 }
 
-// node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/locales/lt.js
+// node_modules/zod/v4/locales/lt.js
 var capitalizeFirstCharacter = (text) => {
   return text.charAt(0).toUpperCase() + text.slice(1);
 };
@@ -258669,7 +258669,7 @@ function lt_default() {
   };
 }
 
-// node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/locales/mk.js
+// node_modules/zod/v4/locales/mk.js
 var error34 = () => {
   const Sizable = {
     string: { unit: "\u0437\u043D\u0430\u0446\u0438", verb: "\u0434\u0430 \u0438\u043C\u0430\u0430\u0442" },
@@ -258784,7 +258784,7 @@ function mk_default() {
   };
 }
 
-// node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/locales/ms.js
+// node_modules/zod/v4/locales/ms.js
 var error35 = () => {
   const Sizable = {
     string: { unit: "aksara", verb: "mempunyai" },
@@ -258897,7 +258897,7 @@ function ms_default() {
   };
 }
 
-// node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/locales/ne.js
+// node_modules/zod/v4/locales/ne.js
 var error36 = () => {
   const Sizable = {
     string: { unit: "\u0905\u0915\u094D\u0937\u0930", verb: "\u0939\u0941\u0928\u0941\u092A\u0930\u094D\u091B" },
@@ -259009,7 +259009,7 @@ function ne_default() {
   };
 }
 
-// node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/locales/nl.js
+// node_modules/zod/v4/locales/nl.js
 var error37 = () => {
   const Sizable = {
     string: { unit: "tekens", verb: "heeft" },
@@ -259125,7 +259125,7 @@ function nl_default() {
   };
 }
 
-// node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/locales/nn.js
+// node_modules/zod/v4/locales/nn.js
 var error38 = () => {
   const Sizable = {
     string: { unit: "teikn", verb: "\xE5 ha" },
@@ -259239,7 +259239,7 @@ function nn_default() {
   };
 }
 
-// node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/locales/no.js
+// node_modules/zod/v4/locales/no.js
 var error39 = () => {
   const Sizable = {
     string: { unit: "tegn", verb: "\xE5 ha" },
@@ -259353,7 +259353,7 @@ function no_default() {
   };
 }
 
-// node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/locales/ota.js
+// node_modules/zod/v4/locales/ota.js
 var error40 = () => {
   const Sizable = {
     string: { unit: "harf", verb: "olmal\u0131d\u0131r" },
@@ -259468,7 +259468,7 @@ function ota_default() {
   };
 }
 
-// node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/locales/ps.js
+// node_modules/zod/v4/locales/ps.js
 var error41 = () => {
   const Sizable = {
     string: { unit: "\u062A\u0648\u06A9\u064A", verb: "\u0648\u0644\u0631\u064A" },
@@ -259588,7 +259588,7 @@ function ps_default() {
   };
 }
 
-// node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/locales/pl.js
+// node_modules/zod/v4/locales/pl.js
 var error42 = () => {
   const Sizable = {
     string: { unit: "znak\xF3w", verb: "mie\u0107" },
@@ -259703,7 +259703,7 @@ function pl_default() {
   };
 }
 
-// node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/locales/pt.js
+// node_modules/zod/v4/locales/pt.js
 var error43 = () => {
   const Sizable = {
     string: { unit: "caracteres" },
@@ -259847,7 +259847,7 @@ function pt_default() {
   };
 }
 
-// node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/locales/pt-BR.js
+// node_modules/zod/v4/locales/pt-BR.js
 var error44 = () => {
   const Sizable = {
     string: { unit: "caracteres" },
@@ -259992,7 +259992,7 @@ function pt_BR_default() {
   };
 }
 
-// node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/locales/ro.js
+// node_modules/zod/v4/locales/ro.js
 var error45 = () => {
   const Sizable = {
     string: { unit: "caractere", verb: "s\u0103 aib\u0103" },
@@ -260115,7 +260115,7 @@ function ro_default() {
   };
 }
 
-// node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/locales/ru.js
+// node_modules/zod/v4/locales/ru.js
 function getRussianPlural(count, one, few, many) {
   const absCount = Math.abs(count);
   const lastDigit = absCount % 10;
@@ -260284,7 +260284,7 @@ function ru_default() {
   };
 }
 
-// node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/locales/sk.js
+// node_modules/zod/v4/locales/sk.js
 var error47 = () => {
   const Sizable = {
     string: { unit: "znakov", verb: "ma\u0165" },
@@ -260401,7 +260401,7 @@ function sk_default() {
   };
 }
 
-// node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/locales/sl.js
+// node_modules/zod/v4/locales/sl.js
 var error48 = () => {
   const Sizable = {
     string: { unit: "znakov", verb: "imeti" },
@@ -260516,7 +260516,7 @@ function sl_default() {
   };
 }
 
-// node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/locales/sv.js
+// node_modules/zod/v4/locales/sv.js
 var error49 = () => {
   const Sizable = {
     string: { unit: "tecken", verb: "att ha" },
@@ -260632,7 +260632,7 @@ function sv_default() {
   };
 }
 
-// node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/locales/ta.js
+// node_modules/zod/v4/locales/ta.js
 var error50 = () => {
   const Sizable = {
     string: { unit: "\u0B8E\u0BB4\u0BC1\u0BA4\u0BCD\u0BA4\u0BC1\u0B95\u0BCD\u0B95\u0BB3\u0BCD", verb: "\u0B95\u0BCA\u0BA3\u0BCD\u0B9F\u0BBF\u0BB0\u0BC1\u0B95\u0BCD\u0B95 \u0BB5\u0BC7\u0BA3\u0BCD\u0B9F\u0BC1\u0BAE\u0BCD" },
@@ -260748,7 +260748,7 @@ function ta_default() {
   };
 }
 
-// node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/locales/tg.js
+// node_modules/zod/v4/locales/tg.js
 var error51 = () => {
   const Sizable = {
     string: { unit: "\u0430\u043B\u043E\u043C\u0430\u0442", verb: "\u0434\u043E\u0448\u0442\u0430 \u0431\u043E\u0448\u0430\u0434" },
@@ -260865,7 +260865,7 @@ function tg_default() {
   };
 }
 
-// node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/locales/th.js
+// node_modules/zod/v4/locales/th.js
 var error52 = () => {
   const Sizable = {
     string: { unit: "\u0E15\u0E31\u0E27\u0E2D\u0E31\u0E01\u0E29\u0E23", verb: "\u0E04\u0E27\u0E23\u0E21\u0E35" },
@@ -260981,7 +260981,7 @@ function th_default() {
   };
 }
 
-// node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/locales/tk.js
+// node_modules/zod/v4/locales/tk.js
 var error53 = () => {
   const Sizable = {
     string: { unit: "simwol", verb: "bolmaly" },
@@ -261089,7 +261089,7 @@ function tk_default() {
   };
 }
 
-// node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/locales/tr.js
+// node_modules/zod/v4/locales/tr.js
 var error54 = () => {
   const Sizable = {
     string: { unit: "karakter", verb: "olmal\u0131" },
@@ -261200,7 +261200,7 @@ function tr_default() {
   };
 }
 
-// node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/locales/uk.js
+// node_modules/zod/v4/locales/uk.js
 var error55 = () => {
   const Sizable = {
     string: { unit: "\u0441\u0438\u043C\u0432\u043E\u043B\u0456\u0432", verb: "\u043C\u0430\u0442\u0438\u043C\u0435" },
@@ -261314,12 +261314,12 @@ function uk_default() {
   };
 }
 
-// node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/locales/ua.js
+// node_modules/zod/v4/locales/ua.js
 function ua_default() {
   return uk_default();
 }
 
-// node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/locales/ur.js
+// node_modules/zod/v4/locales/ur.js
 var error56 = () => {
   const Sizable = {
     string: { unit: "\u062D\u0631\u0648\u0641", verb: "\u06C1\u0648\u0646\u0627" },
@@ -261435,7 +261435,7 @@ function ur_default() {
   };
 }
 
-// node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/locales/uz.js
+// node_modules/zod/v4/locales/uz.js
 var error57 = () => {
   const Sizable = {
     string: { unit: "belgi", verb: "bo\u2018lishi kerak" },
@@ -261549,7 +261549,7 @@ function uz_default() {
   };
 }
 
-// node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/locales/vi.js
+// node_modules/zod/v4/locales/vi.js
 var error58 = () => {
   const Sizable = {
     string: { unit: "k\xFD t\u1EF1", verb: "c\xF3" },
@@ -261663,7 +261663,7 @@ function vi_default() {
   };
 }
 
-// node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/locales/zh-CN.js
+// node_modules/zod/v4/locales/zh-CN.js
 var error59 = () => {
   const Sizable = {
     string: { unit: "\u5B57\u7B26", verb: "\u5305\u542B" },
@@ -261778,7 +261778,7 @@ function zh_CN_default() {
   };
 }
 
-// node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/locales/zh-TW.js
+// node_modules/zod/v4/locales/zh-TW.js
 var error60 = () => {
   const Sizable = {
     string: { unit: "\u5B57\u5143", verb: "\u64C1\u6709" },
@@ -261891,7 +261891,7 @@ function zh_TW_default() {
   };
 }
 
-// node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/locales/yo.js
+// node_modules/zod/v4/locales/yo.js
 var error61 = () => {
   const Sizable = {
     string: { unit: "\xE0mi", verb: "n\xED" },
@@ -262004,7 +262004,7 @@ function yo_default() {
   };
 }
 
-// node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/core/registries.js
+// node_modules/zod/v4/core/registries.js
 var _a2;
 var $output = /* @__PURE__ */ Symbol("ZodOutput");
 var $input = /* @__PURE__ */ Symbol("ZodInput");
@@ -262054,7 +262054,7 @@ function registry() {
 (_a2 = globalThis).__zod_globalRegistry ?? (_a2.__zod_globalRegistry = registry());
 var globalRegistry = globalThis.__zod_globalRegistry;
 
-// node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/core/compile.js
+// node_modules/zod/v4/core/compile.js
 var INVALID = /* @__PURE__ */ Symbol.for("zod.compile.invalid");
 var FALLBACK_FLAG = /* @__PURE__ */ Symbol.for("zod.compile.fallback");
 var ZodCompileAsyncError = class extends Error {
@@ -263664,7 +263664,7 @@ function generateTransformCheck(doc, ctx, schema, accessor) {
   return accessor;
 }
 
-// node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/core/api.js
+// node_modules/zod/v4/core/api.js
 function snapshotChecks(def) {
   if (def.checks)
     def.checks = [...def.checks];
@@ -264723,7 +264723,7 @@ function _stringFormat(Class2, format, fnOrRegex, _params = {}) {
   return inst;
 }
 
-// node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/core/to-json-schema.js
+// node_modules/zod/v4/core/to-json-schema.js
 function assignProps(target, ...sources) {
   for (const source of sources) {
     for (const key of Reflect.ownKeys(source)) {
@@ -265253,7 +265253,7 @@ var createStandardJSONSchemaMethod = (schema, io, processors = {}) => (params) =
   return finalize(ctx, schema);
 };
 
-// node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/core/json-schema-processors.js
+// node_modules/zod/v4/core/json-schema-processors.js
 var narrowMin = (agg, key, value) => {
   if (agg[key] === void 0 || value > agg[key])
     agg[key] = value;
@@ -266001,7 +266001,7 @@ function toJSONSchema(input3, params) {
   return finalize(ctx, input3);
 }
 
-// node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/core/json-schema-generator.js
+// node_modules/zod/v4/core/json-schema-generator.js
 var JSONSchemaGenerator = class {
   /** @deprecated Access via ctx instead */
   get metadataRegistry() {
@@ -266079,10 +266079,10 @@ var JSONSchemaGenerator = class {
   }
 };
 
-// node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/core/json-schema.js
+// node_modules/zod/v4/core/json-schema.js
 var json_schema_exports = {};
 
-// node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/classic/schemas.js
+// node_modules/zod/v4/classic/schemas.js
 var schemas_exports2 = {};
 __export(schemas_exports2, {
   ZodAny: () => ZodAny,
@@ -266263,7 +266263,7 @@ __export(schemas_exports2, {
   xor: () => xor
 });
 
-// node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/classic/checks.js
+// node_modules/zod/v4/classic/checks.js
 var checks_exports2 = {};
 __export(checks_exports2, {
   endsWith: () => _endsWith,
@@ -266298,7 +266298,7 @@ __export(checks_exports2, {
   uppercase: () => _uppercase
 });
 
-// node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/classic/errors.js
+// node_modules/zod/v4/classic/errors.js
 var _installedErrorProtos = /* @__PURE__ */ new WeakSet([Object.prototype, Error.prototype]);
 function _lazyMethod(proto, key, make) {
   Object.defineProperty(proto, key, {
@@ -266344,7 +266344,7 @@ var ZodRealError = /* @__PURE__ */ $constructor("ZodError", initializer2, void 0
   Parent: Error
 });
 
-// node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/classic/parse.js
+// node_modules/zod/v4/classic/parse.js
 var parse2 = /* @__PURE__ */ _parse(ZodRealError);
 var parseAsync2 = /* @__PURE__ */ _parseAsync(ZodRealError);
 var safeParse2 = /* @__PURE__ */ _safeParse(ZodRealError);
@@ -266358,7 +266358,7 @@ var safeDecode2 = /* @__PURE__ */ _safeDecode(ZodRealError);
 var safeEncodeAsync2 = /* @__PURE__ */ _safeEncodeAsync(ZodRealError);
 var safeDecodeAsync2 = /* @__PURE__ */ _safeDecodeAsync(ZodRealError);
 
-// node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/classic/schemas.js
+// node_modules/zod/v4/classic/schemas.js
 function _ensureDefaultLocale() {
   if (!globalConfig.localeError)
     config(en_default());
@@ -267823,7 +267823,7 @@ function preprocess(fn, schema) {
   });
 }
 
-// node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/classic/compat.js
+// node_modules/zod/v4/classic/compat.js
 var ZodIssueCode = {
   invalid_type: "invalid_type",
   too_big: "too_big",
@@ -267849,7 +267849,7 @@ var ZodFirstPartyTypeKind;
 /* @__PURE__ */ (function(ZodFirstPartyTypeKind2) {
 })(ZodFirstPartyTypeKind || (ZodFirstPartyTypeKind = {}));
 
-// node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/classic/iso.js
+// node_modules/zod/v4/classic/iso.js
 var iso_exports = {};
 __export(iso_exports, {
   ZodISODate: () => ZodISODate,
@@ -267874,7 +267874,7 @@ function duration2(params) {
   return _isoDuration(ZodISODuration, params);
 }
 
-// node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/classic/from-json-schema.js
+// node_modules/zod/v4/classic/from-json-schema.js
 var z = {
   ...schemas_exports2,
   ...checks_exports2,
@@ -268607,7 +268607,7 @@ function fromJSONSchema(schema, params) {
   return convertSchema(normalized, ctx);
 }
 
-// node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/core/visit.js
+// node_modules/zod/v4/core/visit.js
 var RESOLVING = /* @__PURE__ */ Symbol("z.visit/resolving");
 function visit(schema, fnOrHandlers) {
   const fn = typeof fnOrHandlers === "function" ? fnOrHandlers : (node2, rewritten) => {
@@ -268762,7 +268762,7 @@ function visit(schema, fnOrHandlers) {
   return run(schema);
 }
 
-// node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/classic/deep-partial.js
+// node_modules/zod/v4/classic/deep-partial.js
 function deepPartial(schema) {
   return visit(schema, {
     object: (s) => s.partial(),
@@ -268774,7 +268774,7 @@ function deepPartial(schema) {
   });
 }
 
-// node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/classic/in-out.js
+// node_modules/zod/v4/classic/in-out.js
 function withChecks(side, checks) {
   if (!checks?.length)
     return side;
@@ -268804,7 +268804,7 @@ function output(schema) {
   });
 }
 
-// node_modules/.pnpm/zod@4.6.7/node_modules/zod/v4/classic/coerce.js
+// node_modules/zod/v4/classic/coerce.js
 var coerce_exports = {};
 __export(coerce_exports, {
   bigint: () => bigint3,
@@ -268849,6 +268849,7 @@ function loadConfig(root, name = "changelume.yml") {
 
 // packages/core/src/pipeline.ts
 var import_node_fs5 = require("node:fs");
+var import_node_crypto2 = require("node:crypto");
 var import_node_path5 = require("node:path");
 var import_node_os = require("node:os");
 var import_node_child_process2 = require("node:child_process");
@@ -268895,7 +268896,7 @@ function validateEdits(root, raw, allowed, baseline2 = false) {
 }
 
 // packages/core/src/languages/typescript/analyze.ts
-var manifest = external_exports.object({ dependencies: external_exports.record(external_exports.string(), external_exports.string()).optional(), devDependencies: external_exports.record(external_exports.string(), external_exports.string()).optional() });
+var manifest = external_exports.object({ type: external_exports.string().optional(), dependencies: external_exports.record(external_exports.string(), external_exports.string()).optional(), devDependencies: external_exports.record(external_exports.string(), external_exports.string()).optional() });
 var lockSchema = external_exports.object({ lockfileVersion: external_exports.number(), packages: external_exports.record(external_exports.string(), external_exports.object({ version: external_exports.string().optional() }).passthrough()).optional(), dependencies: external_exports.record(external_exports.string(), external_exports.object({ version: external_exports.string() }).passthrough()).optional() }).passthrough();
 function sourceFiles(root, config2) {
   const paths = [];
@@ -268920,10 +268921,22 @@ function analyze(root, config2) {
     inventory.limitations.push("Stripe disabled by configuration");
     return { inventory, edits: [] };
   }
+  inventory.moduleMode = "unknown";
   if ((0, import_node_fs3.existsSync)((0, import_node_path3.resolve)(root, "package.json"))) {
     const p = manifest.parse(JSON.parse((0, import_node_fs3.readFileSync)((0, import_node_path3.resolve)(root, "package.json"), "utf8")));
     inventory.declared = p.dependencies?.stripe ?? p.devDependencies?.stripe;
+    inventory.moduleMode = p.type === "module" ? "esm" : p.type === "commonjs" ? "commonjs" : "unknown";
   }
+  if ((0, import_node_fs3.existsSync)((0, import_node_path3.resolve)(root, "tsconfig.json"))) {
+    const result = import_ts_morph.ts.readConfigFile((0, import_node_path3.resolve)(root, "tsconfig.json"), import_ts_morph.ts.sys.readFile);
+    if (result.error || result.config.extends) inventory.moduleMode = "unknown";
+    else {
+      const mode = String(result.config.compilerOptions?.module ?? "").toLowerCase();
+      if (mode === "commonjs") inventory.moduleMode = "commonjs";
+      else if (["esnext", "es2022", "es2020", "es2015"].includes(mode)) inventory.moduleMode = "esm";
+    }
+  }
+  inventory.limitations.push("Constructor aliases are removed in Stripe 12 ESM; CommonJS retains them. Module-mode inference uses root package/tsconfig only; nested settings and bundler rewrites require manual review.");
   if ((0, import_node_fs3.existsSync)((0, import_node_path3.resolve)(root, "package-lock.json"))) {
     const lock = lockSchema.parse(JSON.parse((0, import_node_fs3.readFileSync)((0, import_node_path3.resolve)(root, "package-lock.json"), "utf8")));
     inventory.resolved = lock.packages?.["node_modules/stripe"]?.version ?? lock.dependencies?.stripe?.version;
@@ -269033,6 +269046,7 @@ var CHANGE_ID = "stripe-node-12-constructor-aliases";
 var historicalUrl = "https://raw.githubusercontent.com/stripe/stripe-node/v12.0.0/CHANGELOG.md";
 var currentUrl = "https://raw.githubusercontent.com/stripe/stripe-node/master/CHANGELOG.md";
 var cacheSchema = external_exports.object({ url: external_exports.string(), text: external_exports.string().max(2e6), sha256: external_exports.string(), fetchedAt: external_exports.number() });
+var observationSchema = external_exports.object({ schemaVersion: external_exports.literal(1), releases: external_exports.array(external_exports.string()), sourceHash: external_exports.string(), observedAt: external_exports.number() });
 function releaseHeadings(text) {
   const releases = [...new Set([...text.matchAll(/^##\s+(?:<a\s+id="[\w.-]+"><\/a>\s*)?v?(\d+\.\d+\.\d+(?:-[\w.-]+)?)\b/gm)].map((m) => m[1]))];
   if (!releases.length) throw new Error("Unsupported upstream changelog format");
@@ -269065,6 +269079,7 @@ async function fetchSource(url2, config2, fetcher = fetch) {
   throw new Error("Unreachable");
 }
 async function collectSources(root, offline, config2, fetcher = fetch) {
+  if (!config2.vendors.stripe.enabled) return { evidence: [], releases: [], newlyObserved: [], unclassified: [] };
   const evidence = [{ url: historicalUrl, sha256: hash2(stripe_v12_changelog_default), origin: "offline snapshot", release: "12.0.0" }];
   let text = stripe_v12_changelog_default;
   if (!offline) {
@@ -269073,7 +269088,7 @@ async function collectSources(root, offline, config2, fetcher = fetch) {
     if ((0, import_node_fs4.existsSync)(path2)) {
       try {
         const c = cacheSchema.safeParse(JSON.parse((0, import_node_fs4.readFileSync)(path2, "utf8")));
-        if (c.success && c.data.url === currentUrl && hash2(c.data.text) === c.data.sha256 && Date.now() - c.data.fetchedAt < 36e5) {
+        if (c.success && c.data.url === currentUrl && hash2(c.data.text) === c.data.sha256 && Date.now() - c.data.fetchedAt >= 0 && Date.now() - c.data.fetchedAt < 36e5) {
           text = c.data.text;
           origin = "cache";
         }
@@ -269082,13 +269097,25 @@ async function collectSources(root, offline, config2, fetcher = fetch) {
     }
     if (origin === "network") {
       text = await fetchSource(currentUrl, config2.sources, fetcher);
+      releaseHeadings(text);
       (0, import_node_fs4.mkdirSync)((0, import_node_path4.resolve)(root, ".changelume/cache"), { recursive: true });
       (0, import_node_fs4.writeFileSync)(path2, JSON.stringify({ url: currentUrl, text, sha256: hash2(text), fetchedAt: Date.now() }));
     }
     evidence.push({ url: currentUrl, sha256: hash2(text), origin, release: "observed changelog" });
   }
   const releases = releaseHeadings(text);
-  return { evidence, releases, unclassified: ["Stripe v12 default request API version change requires manual compatibility review.", ...releases.filter((r) => r !== "12.0.0").map((r) => `Release ${r}: observed, changes unclassified (no recipe)`)] };
+  const observations = contained(root, `.changelume/observations/stripe-${offline ? "offline" : "online"}.json`);
+  let previous = [];
+  try {
+    previous = observationSchema.parse(JSON.parse((0, import_node_fs4.readFileSync)(observations, "utf8"))).releases;
+  } catch {
+  }
+  const newlyObserved = releases.filter((r) => !previous.includes(r));
+  (0, import_node_fs4.mkdirSync)((0, import_node_path4.resolve)(root, ".changelume/observations"), { recursive: true });
+  const temporary = contained(root, `.changelume/observations/stripe-${offline ? "offline" : "online"}.tmp`);
+  (0, import_node_fs4.writeFileSync)(temporary, JSON.stringify({ schemaVersion: 1, releases, sourceHash: hash2(text), observedAt: Date.now() }));
+  (0, import_node_fs4.renameSync)(temporary, observations);
+  return { evidence, releases, newlyObserved, unclassified: ["Stripe v12 default request API version change requires manual compatibility review.", ...releases.filter((r) => r !== "12.0.0").map((r) => `Release ${r}: observed, changes unclassified (no recipe)`)] };
 }
 
 // packages/core/src/git.ts
@@ -269104,7 +269131,7 @@ function assertClean(root) {
   if (git(root, "status", "--porcelain", "--untracked-files=all", "--", ".", ":(exclude).changelume")) throw new Error("Dirty working tree: commit or stash changes before migration");
 }
 
-// node_modules/.pnpm/openai@7.45.1_zod@4.6.7/node_modules/openai/internal/tslib.mjs
+// node_modules/openai/internal/tslib.mjs
 function __classPrivateFieldSet(receiver, state2, value, kind, f) {
   if (kind === "m")
     throw new TypeError("Private method is not writable");
@@ -269122,7 +269149,7 @@ function __classPrivateFieldGet(receiver, state2, kind, f) {
   return kind === "m" ? f : kind === "a" ? f.call(receiver) : f ? f.value : state2.get(receiver);
 }
 
-// node_modules/.pnpm/openai@7.45.1_zod@4.6.7/node_modules/openai/internal/utils/uuid.mjs
+// node_modules/openai/internal/utils/uuid.mjs
 var uuid42 = function() {
   const { crypto: crypto2 } = globalThis;
   if (crypto2?.randomUUID) {
@@ -269134,7 +269161,7 @@ var uuid42 = function() {
   return "10000000-1000-4000-8000-100000000000".replace(/[018]/g, (c) => (+c ^ randomByte() & 15 >> +c / 4).toString(16));
 };
 
-// node_modules/.pnpm/openai@7.45.1_zod@4.6.7/node_modules/openai/internal/errors.mjs
+// node_modules/openai/internal/errors.mjs
 function isAbortError(err) {
   return typeof err === "object" && err !== null && // Spec-compliant fetch implementations
   ("name" in err && err.name === "AbortError" || // Expo fetch
@@ -269166,7 +269193,7 @@ var castToError = (err) => {
   return new Error(err);
 };
 
-// node_modules/.pnpm/openai@7.45.1_zod@4.6.7/node_modules/openai/core/error.mjs
+// node_modules/openai/core/error.mjs
 var OpenAIError = class extends Error {
 };
 var APIError = class _APIError extends OpenAIError {
@@ -269300,7 +269327,7 @@ var SubjectTokenProviderError = class extends OpenAIError {
   }
 };
 
-// node_modules/.pnpm/openai@7.45.1_zod@4.6.7/node_modules/openai/internal/utils/values.mjs
+// node_modules/openai/internal/utils/values.mjs
 var startsWithSchemeRegexp = /^[a-z][a-z0-9+.-]*:/i;
 var isAbsoluteURL = (url2) => {
   return startsWithSchemeRegexp.test(url2);
@@ -269343,7 +269370,7 @@ var safeJSON = (text) => {
   }
 };
 
-// node_modules/.pnpm/openai@7.45.1_zod@4.6.7/node_modules/openai/internal/utils/sleep.mjs
+// node_modules/openai/internal/utils/sleep.mjs
 var sleep = (ms, ...signals) => new Promise((resolve7, reject) => {
   const activeSignals = [...new Set(signals.filter((signal) => signal != null))];
   let timeout;
@@ -269393,7 +269420,7 @@ var sleep = (ms, ...signals) => new Promise((resolve7, reject) => {
   }
 });
 
-// node_modules/.pnpm/openai@7.45.1_zod@4.6.7/node_modules/openai/internal/utils/abort.mjs
+// node_modules/openai/internal/utils/abort.mjs
 var weakGlobals = globalThis;
 var finalizer = (
   // oxlint-disable-next-line anti-slop/no-runtime-typeof -- Weak references and finalizers are optional host capabilities, so probe them before constructing either.
@@ -269466,7 +269493,7 @@ function addRequestAbortListener(signal, abort, requestSignal) {
   return cleanup;
 }
 
-// node_modules/.pnpm/openai@7.45.1_zod@4.6.7/node_modules/openai/internal/shims.mjs
+// node_modules/openai/internal/shims.mjs
 function getDefaultFetch() {
   if (typeof fetch !== "undefined") {
     return fetch;
@@ -269538,7 +269565,7 @@ async function CancelReadableStream(stream) {
   await cancelPromise;
 }
 
-// node_modules/.pnpm/openai@7.45.1_zod@4.6.7/node_modules/openai/internal/utils/bytes.mjs
+// node_modules/openai/internal/utils/bytes.mjs
 var encodeUTF8_;
 function encodeUTF8(str) {
   let encoder;
@@ -269550,7 +269577,7 @@ function decodeUTF8(bytes) {
   return (decodeUTF8_ ?? (decoder = new globalThis.TextDecoder(), decodeUTF8_ = decoder.decode.bind(decoder)))(bytes);
 }
 
-// node_modules/.pnpm/openai@7.45.1_zod@4.6.7/node_modules/openai/internal/decoders/line.mjs
+// node_modules/openai/internal/decoders/line.mjs
 var _LineDecoder_instances;
 var _LineDecoder_buffer;
 var _LineDecoder_start;
@@ -269711,7 +269738,7 @@ function lineEndingLength(buffer, index) {
   return 0;
 }
 
-// node_modules/.pnpm/openai@7.45.1_zod@4.6.7/node_modules/openai/internal/utils/log.mjs
+// node_modules/openai/internal/utils/log.mjs
 var levelNumbers = {
   off: 0,
   error: 200,
@@ -269848,7 +269875,7 @@ var formatRequestDetails = (details) => {
   return details;
 };
 
-// node_modules/.pnpm/openai@7.45.1_zod@4.6.7/node_modules/openai/core/streaming.mjs
+// node_modules/openai/core/streaming.mjs
 var _Stream_instances;
 var _Stream_client;
 var _Stream_isTeeBranch;
@@ -270441,7 +270468,7 @@ function partition(str, delimiter) {
   return [str, "", ""];
 }
 
-// node_modules/.pnpm/openai@7.45.1_zod@4.6.7/node_modules/openai/internal/parse.mjs
+// node_modules/openai/internal/parse.mjs
 async function defaultParseResponse(client, props) {
   const { response, requestLogID, retryOfRequestLogID, startTime } = props;
   let jsonBodyLength;
@@ -270509,10 +270536,10 @@ function addRequestID(value, response) {
   });
 }
 
-// node_modules/.pnpm/openai@7.45.1_zod@4.6.7/node_modules/openai/version.mjs
+// node_modules/openai/version.mjs
 var VERSION = "7.45.1";
 
-// node_modules/.pnpm/openai@7.45.1_zod@4.6.7/node_modules/openai/internal/detect-platform.mjs
+// node_modules/openai/internal/detect-platform.mjs
 var isRunningInBrowser = () => {
   return (
     // @ts-ignore
@@ -270646,7 +270673,7 @@ var getPlatformHeaders = () => {
   return _platformHeaders ?? (_platformHeaders = getPlatformProperties());
 };
 
-// node_modules/.pnpm/openai@7.45.1_zod@4.6.7/node_modules/openai/internal/request-options.mjs
+// node_modules/openai/internal/request-options.mjs
 var jsonRequestBodyObservers = /* @__PURE__ */ new WeakMap();
 function observeJSONRequestBody(body, observer) {
   let observers = jsonRequestBodyObservers.get(body);
@@ -270695,7 +270722,7 @@ var FallbackEncoder = ({ headers, body }) => {
   };
 };
 
-// node_modules/.pnpm/openai@7.45.1_zod@4.6.7/node_modules/openai/internal/qs/formats.mjs
+// node_modules/openai/internal/qs/formats.mjs
 var default_format = "RFC3986";
 var default_formatter = String;
 var formatters = {
@@ -270704,7 +270731,7 @@ var formatters = {
 };
 var RFC1738 = "RFC1738";
 
-// node_modules/.pnpm/openai@7.45.1_zod@4.6.7/node_modules/openai/internal/qs/utils.mjs
+// node_modules/openai/internal/qs/utils.mjs
 var cachedHas;
 var has = (obj, key) => {
   const resolvedHas = cachedHas ?? Object.hasOwn ?? Function.prototype.call.bind(Object.prototype.hasOwnProperty);
@@ -270791,7 +270818,7 @@ function maybe_map(val, fn) {
   return fn(val);
 }
 
-// node_modules/.pnpm/openai@7.45.1_zod@4.6.7/node_modules/openai/internal/qs/stringify.mjs
+// node_modules/openai/internal/qs/stringify.mjs
 var array_prefix_generators = {
   brackets(prefix) {
     return String(prefix) + "[]";
@@ -271084,12 +271111,12 @@ function stringify(object2, opts = {}) {
   return joined.length > 0 ? prefix + joined : "";
 }
 
-// node_modules/.pnpm/openai@7.45.1_zod@4.6.7/node_modules/openai/internal/utils/query.mjs
+// node_modules/openai/internal/utils/query.mjs
 function stringifyQuery(query) {
   return stringify(query, { arrayFormat: "brackets" });
 }
 
-// node_modules/.pnpm/openai@7.45.1_zod@4.6.7/node_modules/openai/internal/data-residency.mjs
+// node_modules/openai/internal/data-residency.mjs
 var endpoints = /* @__PURE__ */ new Map([
   ["global", "https://api.openai.com/v1"],
   ["us", "https://us.api.openai.com/v1"],
@@ -271110,7 +271137,7 @@ function resolveDataResidency(options) {
   return endpoint2;
 }
 
-// node_modules/.pnpm/openai@7.45.1_zod@4.6.7/node_modules/openai/core/api-promise.mjs
+// node_modules/openai/core/api-promise.mjs
 var _APIPromise_client;
 var APIPromise = class _APIPromise extends Promise {
   constructor(client, responsePromise, parseResponse2 = defaultParseResponse) {
@@ -271173,7 +271200,7 @@ var APIPromise = class _APIPromise extends Promise {
 };
 _APIPromise_client = /* @__PURE__ */ new WeakMap();
 
-// node_modules/.pnpm/openai@7.45.1_zod@4.6.7/node_modules/openai/core/pagination.mjs
+// node_modules/openai/core/pagination.mjs
 var _AbstractPage_client;
 var AbstractPage = class {
   constructor(client, response, body, options) {
@@ -271364,7 +271391,7 @@ var TokenPage = class extends AbstractPage {
   }
 };
 
-// node_modules/.pnpm/openai@7.45.1_zod@4.6.7/node_modules/openai/auth/workload-identity-auth.mjs
+// node_modules/openai/auth/workload-identity-auth.mjs
 var SUBJECT_TOKEN_TYPES = {
   jwt: "urn:ietf:params:oauth:token-type:jwt",
   id: "urn:ietf:params:oauth:token-type:id_token"
@@ -271576,7 +271603,7 @@ var WorkloadIdentityAuth = class _WorkloadIdentityAuth {
   }
 };
 
-// node_modules/.pnpm/openai@7.45.1_zod@4.6.7/node_modules/openai/internal/auth/x509-api-origin.mjs
+// node_modules/openai/internal/auth/x509-api-origin.mjs
 var X509_API_BASE_URL = "https://mtls.api.openai.com/v1";
 function assertX509APIOrigin(value) {
   let target;
@@ -271596,7 +271623,7 @@ function assertX509APIOrigin(value) {
   return target;
 }
 
-// node_modules/.pnpm/openai@7.45.1_zod@4.6.7/node_modules/openai/internal/headers.mjs
+// node_modules/openai/internal/headers.mjs
 var brand_privateNullableHeaders = /* @__PURE__ */ Symbol("brand.privateNullableHeaders");
 var httpTokenHeaderName = /^[!#$%&'*+\-.^_`|~0-9A-Za-z]+$/;
 function* iterateHeaders(headers) {
@@ -271662,7 +271689,7 @@ var buildHeaders = (newHeaders) => {
   return { [brand_privateNullableHeaders]: true, values: targetHeaders, nulls: nullHeaders };
 };
 
-// node_modules/.pnpm/openai@7.45.1_zod@4.6.7/node_modules/openai/internal/auth/x509-transport-state-browser.mjs
+// node_modules/openai/internal/auth/x509-transport-state-browser.mjs
 var x509_transport_state_browser_exports = {};
 __export(x509_transport_state_browser_exports, {
   findRegisteredX509Transport: () => findRegisteredX509Transport,
@@ -271697,7 +271724,7 @@ var findX509OAuthError = WeakMap.prototype.get.bind(approvedX509OAuthErrors);
 var rememberX509Credential = WeakMap.prototype.set.bind(approvedX509Credentials);
 var findX509Credential = WeakMap.prototype.get.bind(approvedX509Credentials);
 
-// node_modules/.pnpm/openai@7.45.1_zod@4.6.7/node_modules/openai/internal/auth/x509-transport-state.mjs
+// node_modules/openai/internal/auth/x509-transport-state.mjs
 var nodeState = __toESM(require_x509_transport_state(), 1);
 var state = typeof nodeState.findRegisteredX509Transport === "function" ? nodeState : x509_transport_state_browser_exports;
 var {
@@ -271715,7 +271742,7 @@ var {
   findX509Credential: findX509Credential2
 } = state;
 
-// node_modules/.pnpm/openai@7.45.1_zod@4.6.7/node_modules/openai/internal/auth/x509-transport-registry.mjs
+// node_modules/openai/internal/auth/x509-transport-registry.mjs
 function resolveX509Transport(value) {
   if (!value || typeof value !== "object") {
     throw new OpenAIError("X.509 workload identity requires an approved X.509 transport capability.");
@@ -271727,7 +271754,7 @@ function resolveX509Transport(value) {
   return registered;
 }
 
-// node_modules/.pnpm/openai@7.45.1_zod@4.6.7/node_modules/openai/internal/auth/x509-workload-identity-auth.mjs
+// node_modules/openai/internal/auth/x509-workload-identity-auth.mjs
 var _X509WorkloadIdentityAuth_instances;
 var _a3;
 var _X509WorkloadIdentityAuth_identityProviderId;
@@ -272436,7 +272463,7 @@ _a3 = X509WorkloadIdentityAuth, _X509WorkloadIdentityAuth_identityProviderId = /
   }
 };
 
-// node_modules/.pnpm/openai@7.45.1_zod@4.6.7/node_modules/openai/internal/auth/x509-credential-options.mjs
+// node_modules/openai/internal/auth/x509-credential-options.mjs
 function normalizeX509CredentialOptions(options) {
   const { credential } = options;
   if (credential === void 0) {
@@ -272536,7 +272563,7 @@ function prepareX509ClientClone(inherited, overrides, credential, currentlyX509)
   return { credential: nextCredential, provider: prepareProviderClone(inherited, overrides) };
 }
 
-// node_modules/.pnpm/openai@7.45.1_zod@4.6.7/node_modules/openai/internal/uploads.mjs
+// node_modules/openai/internal/uploads.mjs
 var brand_privateStreamingFile = /* @__PURE__ */ Symbol("brand.privateStreamingFile");
 function toStreamingFile(data, name, options) {
   if (typeof name !== "string" || !name) {
@@ -272915,7 +272942,7 @@ var addFormValue = async (form, key, value, options) => {
   }
 };
 
-// node_modules/.pnpm/openai@7.45.1_zod@4.6.7/node_modules/openai/internal/to-file.mjs
+// node_modules/openai/internal/to-file.mjs
 var isBlobLike = (value) => value != null && typeof value === "object" && typeof value.size === "number" && typeof value.type === "string" && typeof value.text === "function" && typeof value.slice === "function" && typeof value.arrayBuffer === "function";
 var isFileLike = (value) => value != null && typeof value === "object" && typeof value.name === "string" && typeof value.lastModified === "number" && isBlobLike(value);
 var isResponseLike = (value) => value != null && typeof value === "object" && typeof value.url === "string" && typeof value.blob === "function";
@@ -272979,14 +273006,14 @@ function propsForError(value) {
   return `; props: [${props.map((p) => `"${p}"`).join(", ")}]`;
 }
 
-// node_modules/.pnpm/openai@7.45.1_zod@4.6.7/node_modules/openai/core/resource.mjs
+// node_modules/openai/core/resource.mjs
 var APIResource = class {
   constructor(client) {
     this._client = client;
   }
 };
 
-// node_modules/.pnpm/openai@7.45.1_zod@4.6.7/node_modules/openai/internal/utils/path.mjs
+// node_modules/openai/internal/utils/path.mjs
 function encodeURIPath(str) {
   return str.replace(/[^A-Za-z0-9\-._~!$&'()*+,;=:@]+/g, encodeURIComponent);
 }
@@ -273048,7 +273075,7 @@ ${underline}`);
 };
 var path = /* @__PURE__ */ createPathTagFunction(encodeURIPath);
 
-// node_modules/.pnpm/openai@7.45.1_zod@4.6.7/node_modules/openai/resources/chat/completions/messages.mjs
+// node_modules/openai/resources/chat/completions/messages.mjs
 function resolveResourceRequestOptions(options, buildOptions) {
   return Promise.resolve(options).then(buildOptions);
 }
@@ -273109,7 +273136,7 @@ var Messages = class extends APIResource {
   }
 };
 
-// node_modules/.pnpm/openai@7.45.1_zod@4.6.7/node_modules/openai/lib/parser.mjs
+// node_modules/openai/lib/parser.mjs
 function isChatCompletionFunctionTool(tool) {
   return tool !== void 0 && "function" in tool && tool.function !== void 0;
 }
@@ -273231,11 +273258,11 @@ function validateInputTools(tools) {
   }
 }
 
-// node_modules/.pnpm/openai@7.45.1_zod@4.6.7/node_modules/openai/lib/chatCompletionUtils.mjs
+// node_modules/openai/lib/chatCompletionUtils.mjs
 var isAssistantMessage = (message) => message?.role === "assistant";
 var isToolMessage = (message) => message?.role === "tool";
 
-// node_modules/.pnpm/openai@7.45.1_zod@4.6.7/node_modules/openai/lib/EventStream.mjs
+// node_modules/openai/lib/EventStream.mjs
 var _EventStream_instances;
 var _EventStream_connectedPromise;
 var _EventStream_resolveConnectedPromise;
@@ -274717,12 +274744,12 @@ _EventStream_connectedPromise = /* @__PURE__ */ new WeakMap(), _EventStream_reso
   }
 };
 
-// node_modules/.pnpm/openai@7.45.1_zod@4.6.7/node_modules/openai/lib/RunnableFunction.mjs
+// node_modules/openai/lib/RunnableFunction.mjs
 function isRunnableFunctionWithParse(fn) {
   return typeof fn.parse === "function";
 }
 
-// node_modules/.pnpm/openai@7.45.1_zod@4.6.7/node_modules/openai/lib/AbstractChatCompletionRunner.mjs
+// node_modules/openai/lib/AbstractChatCompletionRunner.mjs
 var _AbstractChatCompletionRunner_instances;
 var _a4;
 var _AbstractChatCompletionRunner_completionArrivedBeforeAbort;
@@ -275175,7 +275202,7 @@ _a4 = AbstractChatCompletionRunner, _AbstractChatCompletionRunner_completionArri
   return JSON.stringify(rawContent);
 };
 
-// node_modules/.pnpm/openai@7.45.1_zod@4.6.7/node_modules/openai/lib/ChatCompletionRunner.mjs
+// node_modules/openai/lib/ChatCompletionRunner.mjs
 var ChatCompletionRunner = class _ChatCompletionRunner extends AbstractChatCompletionRunner {
   /** Starts a non-streaming tool loop and returns its event-driven conversation runner. */
   static runTools(client, params, options) {
@@ -275199,7 +275226,7 @@ var ChatCompletionRunner = class _ChatCompletionRunner extends AbstractChatCompl
   }
 };
 
-// node_modules/.pnpm/openai@7.45.1_zod@4.6.7/node_modules/openai/_vendor/partial-json-parser/parser.mjs
+// node_modules/openai/_vendor/partial-json-parser/parser.mjs
 var STR = 1;
 var NUM = 2;
 var ARR = 4;
@@ -275424,7 +275451,7 @@ var _parseJSON = (jsonString, allow) => {
 };
 var partialParse = (input3) => parseJSON(input3, Allow.ALL ^ Allow.NUM);
 
-// node_modules/.pnpm/openai@7.45.1_zod@4.6.7/node_modules/openai/lib/chat-completions/streaming.mjs
+// node_modules/openai/lib/chat-completions/streaming.mjs
 function normalizeChatCompletionChunk(chunk) {
   if (!Array.isArray(chunk?.choices)) {
     return chunk;
@@ -275445,7 +275472,7 @@ function normalizeChatCompletionStream(stream) {
   return stream;
 }
 
-// node_modules/.pnpm/openai@7.45.1_zod@4.6.7/node_modules/openai/lib/ChatCompletionStream.mjs
+// node_modules/openai/lib/ChatCompletionStream.mjs
 var _ChatCompletionStream_instances;
 var _ChatCompletionStream_params;
 var _ChatCompletionStream_rejectsUnfinishedTurns;
@@ -276995,7 +277022,7 @@ function assertNever2(_x) {
   return _x;
 }
 
-// node_modules/.pnpm/openai@7.45.1_zod@4.6.7/node_modules/openai/lib/ChatCompletionStreamingRunner.mjs
+// node_modules/openai/lib/ChatCompletionStreamingRunner.mjs
 var ChatCompletionStreamingRunner = class _ChatCompletionStreamingRunner extends ChatCompletionStream {
   /** Restores a serialized tool run, including intermediate completions and tool-result messages. */
   static fromReadableStream(stream) {
@@ -277050,7 +277077,7 @@ var ChatCompletionStreamingRunner = class _ChatCompletionStreamingRunner extends
   }
 };
 
-// node_modules/.pnpm/openai@7.45.1_zod@4.6.7/node_modules/openai/resources/chat/completions/completions.mjs
+// node_modules/openai/resources/chat/completions/completions.mjs
 function resolveResourceRequestOptions2(options, buildOptions) {
   return Promise.resolve(options).then(buildOptions);
 }
@@ -277187,7 +277214,7 @@ var Completions2 = class extends APIResource {
 };
 Completions2.Messages = Messages;
 
-// node_modules/.pnpm/openai@7.45.1_zod@4.6.7/node_modules/openai/resources/chat/chat.mjs
+// node_modules/openai/resources/chat/chat.mjs
 var Chat = class extends APIResource {
   constructor() {
     super(...arguments);
@@ -277196,7 +277223,7 @@ var Chat = class extends APIResource {
 };
 Chat.Completions = Completions2;
 
-// node_modules/.pnpm/openai@7.45.1_zod@4.6.7/node_modules/openai/resources/admin/organization/admin-api-keys.mjs
+// node_modules/openai/resources/admin/organization/admin-api-keys.mjs
 function resolveResourceRequestOptions3(options, buildOptions) {
   return Promise.resolve(options).then(buildOptions);
 }
@@ -277309,7 +277336,7 @@ var AdminAPIKeys = class extends APIResource {
   }
 };
 
-// node_modules/.pnpm/openai@7.45.1_zod@4.6.7/node_modules/openai/resources/admin/organization/audit-logs.mjs
+// node_modules/openai/resources/admin/organization/audit-logs.mjs
 function resolveResourceRequestOptions4(options, buildOptions) {
   return Promise.resolve(options).then(buildOptions);
 }
@@ -277381,7 +277408,7 @@ var AuditLogs = class extends APIResource {
   }
 };
 
-// node_modules/.pnpm/openai@7.45.1_zod@4.6.7/node_modules/openai/resources/admin/organization/certificates.mjs
+// node_modules/openai/resources/admin/organization/certificates.mjs
 function resolveResourceRequestOptions5(options, buildOptions) {
   return Promise.resolve(options).then(buildOptions);
 }
@@ -277559,7 +277586,7 @@ var Certificates = class extends APIResource {
   }
 };
 
-// node_modules/.pnpm/openai@7.45.1_zod@4.6.7/node_modules/openai/resources/admin/organization/data-retention.mjs
+// node_modules/openai/resources/admin/organization/data-retention.mjs
 function resolveResourceRequestOptions6(options, buildOptions) {
   return Promise.resolve(options).then(buildOptions);
 }
@@ -277599,7 +277626,7 @@ var DataRetention = class extends APIResource {
   }
 };
 
-// node_modules/.pnpm/openai@7.45.1_zod@4.6.7/node_modules/openai/resources/admin/organization/external-storage.mjs
+// node_modules/openai/resources/admin/organization/external-storage.mjs
 function resolveResourceRequestOptions7(options, buildOptions) {
   return Promise.resolve(options).then(buildOptions);
 }
@@ -277737,7 +277764,7 @@ var ExternalStorage = class extends APIResource {
   }
 };
 
-// node_modules/.pnpm/openai@7.45.1_zod@4.6.7/node_modules/openai/resources/admin/organization/invites.mjs
+// node_modules/openai/resources/admin/organization/invites.mjs
 function resolveResourceRequestOptions8(options, buildOptions) {
   return Promise.resolve(options).then(buildOptions);
 }
@@ -277852,7 +277879,7 @@ var Invites = class extends APIResource {
   }
 };
 
-// node_modules/.pnpm/openai@7.45.1_zod@4.6.7/node_modules/openai/resources/admin/organization/roles.mjs
+// node_modules/openai/resources/admin/organization/roles.mjs
 function resolveResourceRequestOptions9(options, buildOptions) {
   return Promise.resolve(options).then(buildOptions);
 }
@@ -277980,7 +278007,7 @@ var Roles = class extends APIResource {
   }
 };
 
-// node_modules/.pnpm/openai@7.45.1_zod@4.6.7/node_modules/openai/resources/admin/organization/spend-alerts.mjs
+// node_modules/openai/resources/admin/organization/spend-alerts.mjs
 function resolveResourceRequestOptions10(options, buildOptions) {
   return Promise.resolve(options).then(buildOptions);
 }
@@ -278126,7 +278153,7 @@ var SpendAlerts = class extends APIResource {
   }
 };
 
-// node_modules/.pnpm/openai@7.45.1_zod@4.6.7/node_modules/openai/resources/admin/organization/spend-limit.mjs
+// node_modules/openai/resources/admin/organization/spend-limit.mjs
 function resolveResourceRequestOptions11(options, buildOptions) {
   return Promise.resolve(options).then(buildOptions);
 }
@@ -278183,7 +278210,7 @@ var SpendLimit = class extends APIResource {
   }
 };
 
-// node_modules/.pnpm/openai@7.45.1_zod@4.6.7/node_modules/openai/resources/admin/organization/usage.mjs
+// node_modules/openai/resources/admin/organization/usage.mjs
 function resolveResourceRequestOptions12(options, buildOptions) {
   return Promise.resolve(options).then(buildOptions);
 }
@@ -278406,7 +278433,7 @@ var Usage = class extends APIResource {
   }
 };
 
-// node_modules/.pnpm/openai@7.45.1_zod@4.6.7/node_modules/openai/resources/admin/organization/groups/roles.mjs
+// node_modules/openai/resources/admin/organization/groups/roles.mjs
 function resolveResourceRequestOptions13(options, buildOptions) {
   return Promise.resolve(options).then(buildOptions);
 }
@@ -278524,7 +278551,7 @@ var Roles2 = class extends APIResource {
   }
 };
 
-// node_modules/.pnpm/openai@7.45.1_zod@4.6.7/node_modules/openai/resources/admin/organization/groups/users.mjs
+// node_modules/openai/resources/admin/organization/groups/users.mjs
 function resolveResourceRequestOptions14(options, buildOptions) {
   return Promise.resolve(options).then(buildOptions);
 }
@@ -278642,7 +278669,7 @@ var Users = class extends APIResource {
   }
 };
 
-// node_modules/.pnpm/openai@7.45.1_zod@4.6.7/node_modules/openai/resources/admin/organization/groups/groups.mjs
+// node_modules/openai/resources/admin/organization/groups/groups.mjs
 function resolveResourceRequestOptions15(options, buildOptions) {
   return Promise.resolve(options).then(buildOptions);
 }
@@ -278778,7 +278805,7 @@ var Groups = class extends APIResource {
 Groups.Users = Users;
 Groups.Roles = Roles2;
 
-// node_modules/.pnpm/openai@7.45.1_zod@4.6.7/node_modules/openai/resources/admin/organization/projects/api-keys.mjs
+// node_modules/openai/resources/admin/organization/projects/api-keys.mjs
 function resolveResourceRequestOptions16(options, buildOptions) {
   return Promise.resolve(options).then(buildOptions);
 }
@@ -278923,7 +278950,7 @@ var APIKeys = class extends APIResource {
   }
 };
 
-// node_modules/.pnpm/openai@7.45.1_zod@4.6.7/node_modules/openai/resources/admin/organization/projects/certificates.mjs
+// node_modules/openai/resources/admin/organization/projects/certificates.mjs
 function resolveResourceRequestOptions17(options, buildOptions) {
   return Promise.resolve(options).then(buildOptions);
 }
@@ -279031,7 +279058,7 @@ var Certificates2 = class extends APIResource {
   }
 };
 
-// node_modules/.pnpm/openai@7.45.1_zod@4.6.7/node_modules/openai/resources/admin/organization/projects/data-retention.mjs
+// node_modules/openai/resources/admin/organization/projects/data-retention.mjs
 function resolveResourceRequestOptions18(options, buildOptions) {
   return Promise.resolve(options).then(buildOptions);
 }
@@ -279074,7 +279101,7 @@ var DataRetention2 = class extends APIResource {
   }
 };
 
-// node_modules/.pnpm/openai@7.45.1_zod@4.6.7/node_modules/openai/resources/admin/organization/projects/hosted-tool-permissions.mjs
+// node_modules/openai/resources/admin/organization/projects/hosted-tool-permissions.mjs
 function resolveResourceRequestOptions19(options, buildOptions) {
   return Promise.resolve(options).then(buildOptions);
 }
@@ -279116,7 +279143,7 @@ var HostedToolPermissions = class extends APIResource {
   }
 };
 
-// node_modules/.pnpm/openai@7.45.1_zod@4.6.7/node_modules/openai/resources/admin/organization/projects/model-permissions.mjs
+// node_modules/openai/resources/admin/organization/projects/model-permissions.mjs
 function resolveResourceRequestOptions20(options, buildOptions) {
   return Promise.resolve(options).then(buildOptions);
 }
@@ -279176,7 +279203,7 @@ var ModelPermissions = class extends APIResource {
   }
 };
 
-// node_modules/.pnpm/openai@7.45.1_zod@4.6.7/node_modules/openai/resources/admin/organization/projects/rate-limits.mjs
+// node_modules/openai/resources/admin/organization/projects/rate-limits.mjs
 function resolveResourceRequestOptions21(options, buildOptions) {
   return Promise.resolve(options).then(buildOptions);
 }
@@ -279257,7 +279284,7 @@ var RateLimits = class extends APIResource {
   }
 };
 
-// node_modules/.pnpm/openai@7.45.1_zod@4.6.7/node_modules/openai/resources/admin/organization/projects/roles.mjs
+// node_modules/openai/resources/admin/organization/projects/roles.mjs
 function resolveResourceRequestOptions22(options, buildOptions) {
   return Promise.resolve(options).then(buildOptions);
 }
@@ -279395,7 +279422,7 @@ var Roles3 = class extends APIResource {
   }
 };
 
-// node_modules/.pnpm/openai@7.45.1_zod@4.6.7/node_modules/openai/resources/admin/organization/projects/spend-alerts.mjs
+// node_modules/openai/resources/admin/organization/projects/spend-alerts.mjs
 function resolveResourceRequestOptions23(options, buildOptions) {
   return Promise.resolve(options).then(buildOptions);
 }
@@ -279550,7 +279577,7 @@ var SpendAlerts2 = class extends APIResource {
   }
 };
 
-// node_modules/.pnpm/openai@7.45.1_zod@4.6.7/node_modules/openai/resources/admin/organization/projects/spend-limit.mjs
+// node_modules/openai/resources/admin/organization/projects/spend-limit.mjs
 function resolveResourceRequestOptions24(options, buildOptions) {
   return Promise.resolve(options).then(buildOptions);
 }
@@ -279614,7 +279641,7 @@ var SpendLimit2 = class extends APIResource {
   }
 };
 
-// node_modules/.pnpm/openai@7.45.1_zod@4.6.7/node_modules/openai/resources/admin/organization/projects/groups/roles.mjs
+// node_modules/openai/resources/admin/organization/projects/groups/roles.mjs
 function resolveResourceRequestOptions25(options, buildOptions) {
   return Promise.resolve(options).then(buildOptions);
 }
@@ -279701,7 +279728,7 @@ var Roles4 = class extends APIResource {
   }
 };
 
-// node_modules/.pnpm/openai@7.45.1_zod@4.6.7/node_modules/openai/resources/admin/organization/projects/groups/groups.mjs
+// node_modules/openai/resources/admin/organization/projects/groups/groups.mjs
 function resolveResourceRequestOptions26(options, buildOptions) {
   return Promise.resolve(options).then(buildOptions);
 }
@@ -279825,7 +279852,7 @@ var Groups2 = class extends APIResource {
 };
 Groups2.Roles = Roles4;
 
-// node_modules/.pnpm/openai@7.45.1_zod@4.6.7/node_modules/openai/resources/admin/organization/projects/service-accounts/api-keys.mjs
+// node_modules/openai/resources/admin/organization/projects/service-accounts/api-keys.mjs
 function resolveResourceRequestOptions27(options, buildOptions) {
   return Promise.resolve(options).then(buildOptions);
 }
@@ -279852,7 +279879,7 @@ var APIKeys2 = class extends APIResource {
   }
 };
 
-// node_modules/.pnpm/openai@7.45.1_zod@4.6.7/node_modules/openai/resources/admin/organization/projects/service-accounts/service-accounts.mjs
+// node_modules/openai/resources/admin/organization/projects/service-accounts/service-accounts.mjs
 function resolveResourceRequestOptions28(options, buildOptions) {
   return Promise.resolve(options).then(buildOptions);
 }
@@ -279999,7 +280026,7 @@ var ServiceAccounts = class extends APIResource {
 };
 ServiceAccounts.APIKeys = APIKeys2;
 
-// node_modules/.pnpm/openai@7.45.1_zod@4.6.7/node_modules/openai/resources/admin/organization/projects/users/roles.mjs
+// node_modules/openai/resources/admin/organization/projects/users/roles.mjs
 function resolveResourceRequestOptions29(options, buildOptions) {
   return Promise.resolve(options).then(buildOptions);
 }
@@ -280086,7 +280113,7 @@ var Roles5 = class extends APIResource {
   }
 };
 
-// node_modules/.pnpm/openai@7.45.1_zod@4.6.7/node_modules/openai/resources/admin/organization/projects/users/users.mjs
+// node_modules/openai/resources/admin/organization/projects/users/users.mjs
 function resolveResourceRequestOptions30(options, buildOptions) {
   return Promise.resolve(options).then(buildOptions);
 }
@@ -280233,7 +280260,7 @@ var Users2 = class extends APIResource {
 };
 Users2.Roles = Roles5;
 
-// node_modules/.pnpm/openai@7.45.1_zod@4.6.7/node_modules/openai/resources/admin/organization/projects/projects.mjs
+// node_modules/openai/resources/admin/organization/projects/projects.mjs
 function resolveResourceRequestOptions31(options, buildOptions) {
   return Promise.resolve(options).then(buildOptions);
 }
@@ -280393,7 +280420,7 @@ Projects.SpendLimit = SpendLimit2;
 Projects.SpendAlerts = SpendAlerts2;
 Projects.Certificates = Certificates2;
 
-// node_modules/.pnpm/openai@7.45.1_zod@4.6.7/node_modules/openai/resources/admin/organization/users/roles.mjs
+// node_modules/openai/resources/admin/organization/users/roles.mjs
 function resolveResourceRequestOptions32(options, buildOptions) {
   return Promise.resolve(options).then(buildOptions);
 }
@@ -280511,7 +280538,7 @@ var Roles6 = class extends APIResource {
   }
 };
 
-// node_modules/.pnpm/openai@7.45.1_zod@4.6.7/node_modules/openai/resources/admin/organization/users/users.mjs
+// node_modules/openai/resources/admin/organization/users/users.mjs
 function resolveResourceRequestOptions33(options, buildOptions) {
   return Promise.resolve(options).then(buildOptions);
 }
@@ -280624,7 +280651,7 @@ var Users3 = class extends APIResource {
 };
 Users3.Roles = Roles6;
 
-// node_modules/.pnpm/openai@7.45.1_zod@4.6.7/node_modules/openai/resources/admin/organization/organization.mjs
+// node_modules/openai/resources/admin/organization/organization.mjs
 var Organization = class extends APIResource {
   constructor() {
     super(...arguments);
@@ -280657,7 +280684,7 @@ Organization.SpendAlerts = SpendAlerts;
 Organization.Certificates = Certificates;
 Organization.Projects = Projects;
 
-// node_modules/.pnpm/openai@7.45.1_zod@4.6.7/node_modules/openai/resources/admin/admin.mjs
+// node_modules/openai/resources/admin/admin.mjs
 var Admin = class extends APIResource {
   constructor() {
     super(...arguments);
@@ -280666,7 +280693,7 @@ var Admin = class extends APIResource {
 };
 Admin.Organization = Organization;
 
-// node_modules/.pnpm/openai@7.45.1_zod@4.6.7/node_modules/openai/resources/audio/speech.mjs
+// node_modules/openai/resources/audio/speech.mjs
 function resolveResourceRequestOptions34(options, buildOptions) {
   return Promise.resolve(options).then(buildOptions);
 }
@@ -280699,7 +280726,7 @@ var Speech = class extends APIResource {
   }
 };
 
-// node_modules/.pnpm/openai@7.45.1_zod@4.6.7/node_modules/openai/resources/audio/transcriptions.mjs
+// node_modules/openai/resources/audio/transcriptions.mjs
 function resolveResourceRequestOptions35(options, buildOptions) {
   return Promise.resolve(options).then(buildOptions);
 }
@@ -280717,7 +280744,7 @@ var Transcriptions = class extends APIResource {
   }
 };
 
-// node_modules/.pnpm/openai@7.45.1_zod@4.6.7/node_modules/openai/resources/audio/translations.mjs
+// node_modules/openai/resources/audio/translations.mjs
 function resolveResourceRequestOptions36(options, buildOptions) {
   return Promise.resolve(options).then(buildOptions);
 }
@@ -280731,7 +280758,7 @@ var Translations = class extends APIResource {
   }
 };
 
-// node_modules/.pnpm/openai@7.45.1_zod@4.6.7/node_modules/openai/resources/audio/voice-consents.mjs
+// node_modules/openai/resources/audio/voice-consents.mjs
 function resolveResourceRequestOptions37(options, buildOptions) {
   return Promise.resolve(options).then(buildOptions);
 }
@@ -280851,7 +280878,7 @@ var VoiceConsents = class extends APIResource {
   }
 };
 
-// node_modules/.pnpm/openai@7.45.1_zod@4.6.7/node_modules/openai/resources/audio/voices.mjs
+// node_modules/openai/resources/audio/voices.mjs
 function resolveResourceRequestOptions38(options, buildOptions) {
   return Promise.resolve(options).then(buildOptions);
 }
@@ -280903,7 +280930,7 @@ var Voices = class extends APIResource {
   }
 };
 
-// node_modules/.pnpm/openai@7.45.1_zod@4.6.7/node_modules/openai/resources/audio/audio.mjs
+// node_modules/openai/resources/audio/audio.mjs
 var Audio = class extends APIResource {
   constructor() {
     super(...arguments);
@@ -280920,7 +280947,7 @@ Audio.Speech = Speech;
 Audio.Voices = Voices;
 Audio.VoiceConsents = VoiceConsents;
 
-// node_modules/.pnpm/openai@7.45.1_zod@4.6.7/node_modules/openai/resources/batches.mjs
+// node_modules/openai/resources/batches.mjs
 function resolveResourceRequestOptions39(options, buildOptions) {
   return Promise.resolve(options).then(buildOptions);
 }
@@ -281005,7 +281032,7 @@ var Batches = class extends APIResource {
   }
 };
 
-// node_modules/.pnpm/openai@7.45.1_zod@4.6.7/node_modules/openai/resources/beta/assistants.mjs
+// node_modules/openai/resources/beta/assistants.mjs
 function resolveResourceRequestOptions40(options, buildOptions) {
   return Promise.resolve(options).then(buildOptions);
 }
@@ -281117,7 +281144,7 @@ var Assistants = class extends APIResource {
   }
 };
 
-// node_modules/.pnpm/openai@7.45.1_zod@4.6.7/node_modules/openai/resources/beta/agents/automations/invocations.mjs
+// node_modules/openai/resources/beta/agents/automations/invocations.mjs
 function resolveResourceRequestOptions41(options, buildOptions) {
   return Promise.resolve(options).then(buildOptions);
 }
@@ -281217,7 +281244,7 @@ var Invocations = class extends APIResource {
   }
 };
 
-// node_modules/.pnpm/openai@7.45.1_zod@4.6.7/node_modules/openai/resources/beta/agents/automations/automations.mjs
+// node_modules/openai/resources/beta/agents/automations/automations.mjs
 function resolveResourceRequestOptions42(options, buildOptions) {
   return Promise.resolve(options).then(buildOptions);
 }
@@ -281409,7 +281436,7 @@ var Automations = class extends APIResource {
 };
 Automations.Invocations = Invocations;
 
-// node_modules/.pnpm/openai@7.45.1_zod@4.6.7/node_modules/openai/lib/beta/agents/files.mjs
+// node_modules/openai/lib/beta/agents/files.mjs
 var AgentFileUploadError = class extends OpenAIError {
   constructor(uploadedFiles, cause) {
     super("Agent file preparation or staging failed; uploaded files remain caller-owned.");
@@ -281487,7 +281514,7 @@ async function uploadAgentFile(client, resource, environmentID, params, options)
   }
 }
 
-// node_modules/.pnpm/openai@7.45.1_zod@4.6.7/node_modules/openai/resources/beta/agents/environments/files.mjs
+// node_modules/openai/resources/beta/agents/environments/files.mjs
 function resolveResourceRequestOptions43(options, buildOptions) {
   return Promise.resolve(options).then(buildOptions);
 }
@@ -281548,7 +281575,7 @@ var Files = class extends APIResource {
   }
 };
 
-// node_modules/.pnpm/openai@7.45.1_zod@4.6.7/node_modules/openai/resources/beta/agents/environments/templates.mjs
+// node_modules/openai/resources/beta/agents/environments/templates.mjs
 function resolveResourceRequestOptions44(options, buildOptions) {
   return Promise.resolve(options).then(buildOptions);
 }
@@ -281690,7 +281717,7 @@ var Templates = class extends APIResource {
   }
 };
 
-// node_modules/.pnpm/openai@7.45.1_zod@4.6.7/node_modules/openai/resources/beta/agents/environments/environments.mjs
+// node_modules/openai/resources/beta/agents/environments/environments.mjs
 function resolveResourceRequestOptions45(options, buildOptions) {
   return Promise.resolve(options).then(buildOptions);
 }
@@ -281814,7 +281841,7 @@ var EnvironmentInfosPage = class extends CursorPage {
 Environments.Files = Files;
 Environments.Templates = Templates;
 
-// node_modules/.pnpm/openai@7.45.1_zod@4.6.7/node_modules/openai/lib/beta/agents/pages.mjs
+// node_modules/openai/lib/beta/agents/pages.mjs
 async function* agentItems(load) {
   let after;
   while (true) {
@@ -281833,7 +281860,7 @@ async function* agentItems(load) {
   }
 }
 
-// node_modules/.pnpm/openai@7.45.1_zod@4.6.7/node_modules/openai/lib/beta/agents/result-artifacts.mjs
+// node_modules/openai/lib/beta/agents/result-artifacts.mjs
 var _AgentResultArtifacts_resource;
 var _AgentResultArtifacts_sessionID;
 var _AgentResultArtifacts_turnID;
@@ -281889,7 +281916,7 @@ var AgentResultArtifacts = class {
 };
 _AgentResultArtifacts_resource = /* @__PURE__ */ new WeakMap(), _AgentResultArtifacts_sessionID = /* @__PURE__ */ new WeakMap(), _AgentResultArtifacts_turnID = /* @__PURE__ */ new WeakMap();
 
-// node_modules/.pnpm/openai@7.45.1_zod@4.6.7/node_modules/openai/resources/beta/agents/sessions/artifacts.mjs
+// node_modules/openai/resources/beta/agents/sessions/artifacts.mjs
 function resolveResourceRequestOptions46(options, buildOptions) {
   return Promise.resolve(options).then(buildOptions);
 }
@@ -282027,7 +282054,7 @@ var Artifacts = class extends APIResource {
   }
 };
 
-// node_modules/.pnpm/openai@7.45.1_zod@4.6.7/node_modules/openai/resources/beta/agents/sessions/events.mjs
+// node_modules/openai/resources/beta/agents/sessions/events.mjs
 function resolveResourceRequestOptions47(options, buildOptions) {
   return Promise.resolve(options).then(buildOptions);
 }
@@ -282105,7 +282132,7 @@ var Events = class extends APIResource {
   }
 };
 
-// node_modules/.pnpm/openai@7.45.1_zod@4.6.7/node_modules/openai/resources/beta/agents/sessions/items.mjs
+// node_modules/openai/resources/beta/agents/sessions/items.mjs
 function resolveResourceRequestOptions48(options, buildOptions) {
   return Promise.resolve(options).then(buildOptions);
 }
@@ -282167,7 +282194,7 @@ var Items = class extends APIResource {
   }
 };
 
-// node_modules/.pnpm/openai@7.45.1_zod@4.6.7/node_modules/openai/resources/beta/agents/sessions/traces.mjs
+// node_modules/openai/resources/beta/agents/sessions/traces.mjs
 function resolveResourceRequestOptions49(options, buildOptions) {
   return Promise.resolve(options).then(buildOptions);
 }
@@ -282229,7 +282256,7 @@ var Traces = class extends APIResource {
   }
 };
 
-// node_modules/.pnpm/openai@7.45.1_zod@4.6.7/node_modules/openai/resources/beta/agents/sessions/subagents/items.mjs
+// node_modules/openai/resources/beta/agents/sessions/subagents/items.mjs
 function resolveResourceRequestOptions50(options, buildOptions) {
   return Promise.resolve(options).then(buildOptions);
 }
@@ -282260,7 +282287,7 @@ var Items2 = class extends APIResource {
   }
 };
 
-// node_modules/.pnpm/openai@7.45.1_zod@4.6.7/node_modules/openai/resources/beta/agents/sessions/subagents/turns/items.mjs
+// node_modules/openai/resources/beta/agents/sessions/subagents/turns/items.mjs
 function resolveResourceRequestOptions51(options, buildOptions) {
   return Promise.resolve(options).then(buildOptions);
 }
@@ -282291,7 +282318,7 @@ var Items3 = class extends APIResource {
   }
 };
 
-// node_modules/.pnpm/openai@7.45.1_zod@4.6.7/node_modules/openai/resources/beta/agents/sessions/subagents/turns/turns.mjs
+// node_modules/openai/resources/beta/agents/sessions/subagents/turns/turns.mjs
 function resolveResourceRequestOptions52(options, buildOptions) {
   return Promise.resolve(options).then(buildOptions);
 }
@@ -282351,7 +282378,7 @@ var Turns = class extends APIResource {
 };
 Turns.Items = Items3;
 
-// node_modules/.pnpm/openai@7.45.1_zod@4.6.7/node_modules/openai/resources/beta/agents/sessions/subagents/subagents.mjs
+// node_modules/openai/resources/beta/agents/sessions/subagents/subagents.mjs
 function resolveResourceRequestOptions53(options, buildOptions) {
   return Promise.resolve(options).then(buildOptions);
 }
@@ -282441,7 +282468,7 @@ var Subagents = class extends APIResource {
 Subagents.Items = Items2;
 Subagents.Turns = Turns;
 
-// node_modules/.pnpm/openai@7.45.1_zod@4.6.7/node_modules/openai/resources/beta/agents/sessions/turns/items.mjs
+// node_modules/openai/resources/beta/agents/sessions/turns/items.mjs
 function resolveResourceRequestOptions54(options, buildOptions) {
   return Promise.resolve(options).then(buildOptions);
 }
@@ -282473,7 +282500,7 @@ var Items4 = class extends APIResource {
   }
 };
 
-// node_modules/.pnpm/openai@7.45.1_zod@4.6.7/node_modules/openai/resources/beta/agents/sessions/turns/turns.mjs
+// node_modules/openai/resources/beta/agents/sessions/turns/turns.mjs
 function resolveResourceRequestOptions55(options, buildOptions) {
   return Promise.resolve(options).then(buildOptions);
 }
@@ -282562,7 +282589,7 @@ var Turns2 = class extends APIResource {
 };
 Turns2.Items = Items4;
 
-// node_modules/.pnpm/openai@7.45.1_zod@4.6.7/node_modules/openai/lib/agents/turn-state.mjs
+// node_modules/openai/lib/agents/turn-state.mjs
 var _TurnState_turnID;
 var _TurnState_turnEnded;
 var _TurnState_eventIDs;
@@ -282614,7 +282641,7 @@ var TurnState = class {
 };
 _TurnState_turnID = /* @__PURE__ */ new WeakMap(), _TurnState_turnEnded = /* @__PURE__ */ new WeakMap(), _TurnState_eventIDs = /* @__PURE__ */ new WeakMap(), _TurnState_calls = /* @__PURE__ */ new WeakMap();
 
-// node_modules/.pnpm/openai@7.45.1_zod@4.6.7/node_modules/openai/lib/beta/agents/tool-output.mjs
+// node_modules/openai/lib/beta/agents/tool-output.mjs
 function isInputContent(value) {
   if (!isObj(value)) {
     return false;
@@ -282631,10 +282658,10 @@ function isInputContent(value) {
   return hasOwn(content, "type") && hasOwn(content, field) && typeof content[field] === "string";
 }
 
-// node_modules/.pnpm/openai@7.45.1_zod@4.6.7/node_modules/openai/lib/beta/agents/tool-stages.mjs
+// node_modules/openai/lib/beta/agents/tool-stages.mjs
 var toolStages = /* @__PURE__ */ Symbol.for("openai.beta.agents.toolStages");
 
-// node_modules/.pnpm/openai@7.45.1_zod@4.6.7/node_modules/openai/lib/beta/agents/tool-dispatcher.mjs
+// node_modules/openai/lib/beta/agents/tool-dispatcher.mjs
 var _AgentToolDispatcher_instances;
 var _AgentToolDispatcher_handlers;
 var _AgentToolDispatcher_options;
@@ -282800,12 +282827,12 @@ _AgentToolDispatcher_handlers = /* @__PURE__ */ new WeakMap(), _AgentToolDispatc
   }
 };
 
-// node_modules/.pnpm/openai@7.45.1_zod@4.6.7/node_modules/openai/lib/agents/output-text.mjs
+// node_modules/openai/lib/agents/output-text.mjs
 function outputText(message) {
   return message.content.map((block) => block.type === "output_text" ? block.text : "").join("");
 }
 
-// node_modules/.pnpm/openai@7.45.1_zod@4.6.7/node_modules/openai/lib/beta/agents/agent-turn-result.mjs
+// node_modules/openai/lib/beta/agents/agent-turn-result.mjs
 var AgentTurnResult = class {
   constructor(turn, messages) {
     this.turn = turn;
@@ -282822,7 +282849,7 @@ var AgentTurnResult = class {
   }
 };
 
-// node_modules/.pnpm/openai@7.45.1_zod@4.6.7/node_modules/openai/lib/beta/agents/parsed-agent-turn-result.mjs
+// node_modules/openai/lib/beta/agents/parsed-agent-turn-result.mjs
 var ParsedAgentTurnResult = class extends AgentTurnResult {
   constructor(result, parsed) {
     super(result.turn, result.messages);
@@ -282831,7 +282858,7 @@ var ParsedAgentTurnResult = class extends AgentTurnResult {
   }
 };
 
-// node_modules/.pnpm/openai@7.45.1_zod@4.6.7/node_modules/openai/lib/beta/agents/output-parse-error.mjs
+// node_modules/openai/lib/beta/agents/output-parse-error.mjs
 var _AgentOutputParseError_rawResult;
 var AgentOutputParseError = class extends OpenAIError {
   constructor(result) {
@@ -282847,7 +282874,7 @@ var AgentOutputParseError = class extends OpenAIError {
 };
 _AgentOutputParseError_rawResult = /* @__PURE__ */ new WeakMap();
 
-// node_modules/.pnpm/openai@7.45.1_zod@4.6.7/node_modules/openai/lib/beta/agents/parse-result.mjs
+// node_modules/openai/lib/beta/agents/parse-result.mjs
 function parseAgentResult(result, format) {
   try {
     if (!format) {
@@ -282938,7 +282965,7 @@ async function parseAgentResultPromise(result, format) {
   return parseAgentResult(await result, format);
 }
 
-// node_modules/.pnpm/openai@7.45.1_zod@4.6.7/node_modules/openai/lib/beta/agents/agent-turn-result-error.mjs
+// node_modules/openai/lib/beta/agents/agent-turn-result-error.mjs
 var AgentTurnResultError = class extends OpenAIError {
   constructor(reason, session_id, turn, messages, required_actions = [], cause) {
     super(`Could not collect the agent turn result: ${reason}`);
@@ -282955,7 +282982,7 @@ var AgentTurnResultError = class extends OpenAIError {
   }
 };
 
-// node_modules/.pnpm/openai@7.45.1_zod@4.6.7/node_modules/openai/lib/beta/agents/agent-turn-result-collector.mjs
+// node_modules/openai/lib/beta/agents/agent-turn-result-collector.mjs
 var _AgentTurnResultCollector_instances;
 var _AgentTurnResultCollector_sessionID;
 var _AgentTurnResultCollector_turn;
@@ -283054,7 +283081,7 @@ _AgentTurnResultCollector_sessionID = /* @__PURE__ */ new WeakMap(), _AgentTurnR
   return [...__classPrivateFieldGet(this, _AgentTurnResultCollector_messages, "f").values()].sort((a, b) => a.index - b.index).map(({ message }) => message);
 };
 
-// node_modules/.pnpm/openai@7.45.1_zod@4.6.7/node_modules/openai/lib/beta/agents/result-collection.mjs
+// node_modules/openai/lib/beta/agents/result-collection.mjs
 var _ResultCollection_instances;
 var _ResultCollection_iterator;
 var _ResultCollection_ended;
@@ -283157,7 +283184,7 @@ _ResultCollection_iterator = /* @__PURE__ */ new WeakMap(), _ResultCollection_en
   }
 };
 
-// node_modules/.pnpm/openai@7.45.1_zod@4.6.7/node_modules/openai/lib/agents/agent-session-stream.mjs
+// node_modules/openai/lib/agents/agent-session-stream.mjs
 var _AgentSessionStream_instances;
 var _AgentSessionStream_consumed;
 var _AgentSessionStream_format;
@@ -283313,7 +283340,7 @@ _AgentSessionStream_iterate = async function* _AgentSessionStream_iterate2() {
   return error62;
 };
 
-// node_modules/.pnpm/openai@7.45.1_zod@4.6.7/node_modules/openai/lib/beta/agents/agent-session-create-stream.mjs
+// node_modules/openai/lib/beta/agents/agent-session-create-stream.mjs
 async function* dispatchCreationTools(source, dispatcher, signal) {
   const state2 = new TurnState();
   let sessionID;
@@ -283389,7 +283416,7 @@ function captureCreationTools(body, options) {
   };
 }
 
-// node_modules/.pnpm/openai@7.45.1_zod@4.6.7/node_modules/openai/resources/beta/agents/sessions/sessions.mjs
+// node_modules/openai/resources/beta/agents/sessions/sessions.mjs
 function resolveResourceRequestOptions56(options, buildOptions) {
   return Promise.resolve(options).then(buildOptions);
 }
@@ -283544,7 +283571,7 @@ Sessions.Events = Events;
 Sessions.Traces = Traces;
 Sessions.Turns = Turns2;
 
-// node_modules/.pnpm/openai@7.45.1_zod@4.6.7/node_modules/openai/resources/beta/agents/vaults/credentials.mjs
+// node_modules/openai/resources/beta/agents/vaults/credentials.mjs
 function resolveResourceRequestOptions57(options, buildOptions) {
   return Promise.resolve(options).then(buildOptions);
 }
@@ -283699,7 +283726,7 @@ var Credentials = class extends APIResource {
   }
 };
 
-// node_modules/.pnpm/openai@7.45.1_zod@4.6.7/node_modules/openai/resources/beta/agents/vaults/vaults.mjs
+// node_modules/openai/resources/beta/agents/vaults/vaults.mjs
 function resolveResourceRequestOptions58(options, buildOptions) {
   return Promise.resolve(options).then(buildOptions);
 }
@@ -283840,7 +283867,7 @@ var Vaults = class extends APIResource {
 };
 Vaults.Credentials = Credentials;
 
-// node_modules/.pnpm/openai@7.45.1_zod@4.6.7/node_modules/openai/resources/beta/agents/agents.mjs
+// node_modules/openai/resources/beta/agents/agents.mjs
 function resolveResourceRequestOptions59(options, buildOptions) {
   return Promise.resolve(options).then(buildOptions);
 }
@@ -283983,7 +284010,7 @@ Agents.Environments = Environments;
 Agents.Vaults = Vaults;
 Agents.Sessions = Sessions;
 
-// node_modules/.pnpm/openai@7.45.1_zod@4.6.7/node_modules/openai/resources/beta/chatkit/sessions.mjs
+// node_modules/openai/resources/beta/chatkit/sessions.mjs
 function resolveResourceRequestOptions60(options, buildOptions) {
   return Promise.resolve(options).then(buildOptions);
 }
@@ -284028,7 +284055,7 @@ var Sessions2 = class extends APIResource {
   }
 };
 
-// node_modules/.pnpm/openai@7.45.1_zod@4.6.7/node_modules/openai/resources/beta/chatkit/threads.mjs
+// node_modules/openai/resources/beta/chatkit/threads.mjs
 function resolveResourceRequestOptions61(options, buildOptions) {
   return Promise.resolve(options).then(buildOptions);
 }
@@ -284137,7 +284164,7 @@ var Threads = class extends APIResource {
   }
 };
 
-// node_modules/.pnpm/openai@7.45.1_zod@4.6.7/node_modules/openai/resources/beta/chatkit/chatkit.mjs
+// node_modules/openai/resources/beta/chatkit/chatkit.mjs
 var ChatKit = class extends APIResource {
   constructor() {
     super(...arguments);
@@ -284148,7 +284175,7 @@ var ChatKit = class extends APIResource {
 ChatKit.Sessions = Sessions2;
 ChatKit.Threads = Threads;
 
-// node_modules/.pnpm/openai@7.45.1_zod@4.6.7/node_modules/openai/resources/beta/responses/input-items.mjs
+// node_modules/openai/resources/beta/responses/input-items.mjs
 function resolveResourceRequestOptions62(options, buildOptions) {
   return Promise.resolve(options).then(buildOptions);
 }
@@ -284214,7 +284241,7 @@ var InputItems = class extends APIResource {
   }
 };
 
-// node_modules/.pnpm/openai@7.45.1_zod@4.6.7/node_modules/openai/resources/beta/responses/input-tokens.mjs
+// node_modules/openai/resources/beta/responses/input-tokens.mjs
 function resolveResourceRequestOptions63(options, buildOptions) {
   return Promise.resolve(options).then(buildOptions);
 }
@@ -284245,7 +284272,7 @@ var InputTokens = class extends APIResource {
   }
 };
 
-// node_modules/.pnpm/openai@7.45.1_zod@4.6.7/node_modules/openai/resources/beta/responses/responses.mjs
+// node_modules/openai/resources/beta/responses/responses.mjs
 function resolveResourceRequestOptions64(options, buildOptions) {
   return Promise.resolve(options).then(buildOptions);
 }
@@ -284410,7 +284437,7 @@ var Responses = class extends APIResource {
 Responses.InputItems = InputItems;
 Responses.InputTokens = InputTokens;
 
-// node_modules/.pnpm/openai@7.45.1_zod@4.6.7/node_modules/openai/resources/beta/threads/messages.mjs
+// node_modules/openai/resources/beta/threads/messages.mjs
 function resolveResourceRequestOptions65(options, buildOptions) {
   return Promise.resolve(options).then(buildOptions);
 }
@@ -284525,7 +284552,7 @@ var Messages2 = class extends APIResource {
   }
 };
 
-// node_modules/.pnpm/openai@7.45.1_zod@4.6.7/node_modules/openai/resources/beta/threads/runs/steps.mjs
+// node_modules/openai/resources/beta/threads/runs/steps.mjs
 function resolveResourceRequestOptions66(options, buildOptions) {
   return Promise.resolve(options).then(buildOptions);
 }
@@ -284560,7 +284587,7 @@ var Steps = class extends APIResource {
   }
 };
 
-// node_modules/.pnpm/openai@7.45.1_zod@4.6.7/node_modules/openai/lib/polling.mjs
+// node_modules/openai/lib/polling.mjs
 function sleepUntilAborted(milliseconds, signal) {
   return new Promise((resolve7, reject) => {
     let timer;
@@ -284665,7 +284692,7 @@ async function pollWithResponse(retrieve, intermediateStatuses, terminalStatuses
   }
 }
 
-// node_modules/.pnpm/openai@7.45.1_zod@4.6.7/node_modules/openai/lib/assistant-run-polling.mjs
+// node_modules/openai/lib/assistant-run-polling.mjs
 function pollAssistantRun(resource, runID, params, options) {
   return pollWithResponse((headers) => resource.retrieve(runID, params, {
     ...options,
@@ -284673,7 +284700,7 @@ function pollAssistantRun(resource, runID, params, options) {
   }), ["queued", "in_progress", "cancelling"], ["requires_action", "incomplete", "cancelled", "completed", "failed", "expired"], options);
 }
 
-// node_modules/.pnpm/openai@7.45.1_zod@4.6.7/node_modules/openai/internal/utils/base64.mjs
+// node_modules/openai/internal/utils/base64.mjs
 var fromBase64 = (str) => {
   if (typeof globalThis.Buffer !== "undefined") {
     const buf = globalThis.Buffer.from(str, "base64");
@@ -284707,7 +284734,7 @@ var toFloat32Array = (base64Str) => {
   }
 };
 
-// node_modules/.pnpm/openai@7.45.1_zod@4.6.7/node_modules/openai/internal/utils/env.mjs
+// node_modules/openai/internal/utils/env.mjs
 var readEnv = (env) => {
   try {
     if (typeof globalThis.process !== "undefined") {
@@ -284722,7 +284749,7 @@ var readEnv = (env) => {
   return void 0;
 };
 
-// node_modules/.pnpm/openai@7.45.1_zod@4.6.7/node_modules/openai/internal/assistant-stream-delta.mjs
+// node_modules/openai/internal/assistant-stream-delta.mjs
 var MAX_ASSISTANT_STREAM_ARRAY_GROWTH = 1024;
 var MAX_EXTERNALLY_MUTABLE_ASSISTANT_STREAM_ARRAY_LENGTH = 65536;
 function getAssistantStreamDiagnosticProperty(property) {
@@ -285005,7 +285032,7 @@ function createAssistantStreamArrayDeltaCommit(accumulator, delta, kind, cacheAr
   return () => commitAssistantStreamArrayProjection(projection);
 }
 
-// node_modules/.pnpm/openai@7.45.1_zod@4.6.7/node_modules/openai/lib/AssistantStream.mjs
+// node_modules/openai/lib/AssistantStream.mjs
 var _AssistantStream_instances;
 var _AssistantStream_runStepSnapshots;
 var _AssistantStream_runStepIDOwners;
@@ -285699,7 +285726,7 @@ function assertNever3(_x) {
   return _x;
 }
 
-// node_modules/.pnpm/openai@7.45.1_zod@4.6.7/node_modules/openai/resources/beta/threads/runs/runs.mjs
+// node_modules/openai/resources/beta/threads/runs/runs.mjs
 function resolveResourceRequestOptions67(options, buildOptions) {
   return Promise.resolve(options).then(buildOptions);
 }
@@ -285876,7 +285903,7 @@ var Runs = class extends APIResource {
 };
 Runs.Steps = Steps;
 
-// node_modules/.pnpm/openai@7.45.1_zod@4.6.7/node_modules/openai/resources/beta/threads/threads.mjs
+// node_modules/openai/resources/beta/threads/threads.mjs
 function resolveResourceRequestOptions68(options, buildOptions) {
   return Promise.resolve(options).then(buildOptions);
 }
@@ -285968,7 +285995,7 @@ var Threads2 = class extends APIResource {
 Threads2.Runs = Runs;
 Threads2.Messages = Messages2;
 
-// node_modules/.pnpm/openai@7.45.1_zod@4.6.7/node_modules/openai/resources/beta/realtime/sessions.mjs
+// node_modules/openai/resources/beta/realtime/sessions.mjs
 var Sessions3 = class extends APIResource {
   /**
    * Create an ephemeral API token for use in client-side applications with the
@@ -285995,7 +286022,7 @@ var Sessions3 = class extends APIResource {
   }
 };
 
-// node_modules/.pnpm/openai@7.45.1_zod@4.6.7/node_modules/openai/resources/beta/realtime/transcription-sessions.mjs
+// node_modules/openai/resources/beta/realtime/transcription-sessions.mjs
 var TranscriptionSessions = class extends APIResource {
   /**
    * Create an ephemeral API token for use in client-side applications with the
@@ -286022,7 +286049,7 @@ var TranscriptionSessions = class extends APIResource {
   }
 };
 
-// node_modules/.pnpm/openai@7.45.1_zod@4.6.7/node_modules/openai/resources/beta/realtime/realtime.mjs
+// node_modules/openai/resources/beta/realtime/realtime.mjs
 var Realtime = class extends APIResource {
   constructor() {
     super(...arguments);
@@ -286033,7 +286060,7 @@ var Realtime = class extends APIResource {
 Realtime.Sessions = Sessions3;
 Realtime.TranscriptionSessions = TranscriptionSessions;
 
-// node_modules/.pnpm/openai@7.45.1_zod@4.6.7/node_modules/openai/resources/beta/beta.mjs
+// node_modules/openai/resources/beta/beta.mjs
 var Beta = class extends APIResource {
   constructor() {
     super(...arguments);
@@ -286052,7 +286079,7 @@ Beta.ChatKit = ChatKit;
 Beta.Assistants = Assistants;
 Beta.Threads = Threads2;
 
-// node_modules/.pnpm/openai@7.45.1_zod@4.6.7/node_modules/openai/resources/completions.mjs
+// node_modules/openai/resources/completions.mjs
 function resolveResourceRequestOptions69(options, buildOptions) {
   return Promise.resolve(options).then(buildOptions);
 }
@@ -286065,7 +286092,7 @@ var Completions3 = class extends APIResource {
   }
 };
 
-// node_modules/.pnpm/openai@7.45.1_zod@4.6.7/node_modules/openai/resources/containers/files/content.mjs
+// node_modules/openai/resources/containers/files/content.mjs
 function resolveResourceRequestOptions70(options, buildOptions) {
   return Promise.resolve(options).then(buildOptions);
 }
@@ -286084,7 +286111,7 @@ var Content = class extends APIResource {
   }
 };
 
-// node_modules/.pnpm/openai@7.45.1_zod@4.6.7/node_modules/openai/resources/containers/files/files.mjs
+// node_modules/openai/resources/containers/files/files.mjs
 function resolveResourceRequestOptions71(options, buildOptions) {
   return Promise.resolve(options).then(buildOptions);
 }
@@ -286180,7 +286207,7 @@ var Files2 = class extends APIResource {
 };
 Files2.Content = Content;
 
-// node_modules/.pnpm/openai@7.45.1_zod@4.6.7/node_modules/openai/resources/containers/containers.mjs
+// node_modules/openai/resources/containers/containers.mjs
 function resolveResourceRequestOptions72(options, buildOptions) {
   return Promise.resolve(options).then(buildOptions);
 }
@@ -286272,7 +286299,7 @@ var Containers = class extends APIResource {
 };
 Containers.Files = Files2;
 
-// node_modules/.pnpm/openai@7.45.1_zod@4.6.7/node_modules/openai/resources/content-provenance-checks.mjs
+// node_modules/openai/resources/content-provenance-checks.mjs
 function resolveResourceRequestOptions73(options, buildOptions) {
   return Promise.resolve(options).then(buildOptions);
 }
@@ -286293,7 +286320,7 @@ var ContentProvenanceChecks = class extends APIResource {
   }
 };
 
-// node_modules/.pnpm/openai@7.45.1_zod@4.6.7/node_modules/openai/resources/conversations/items.mjs
+// node_modules/openai/resources/conversations/items.mjs
 function resolveResourceRequestOptions74(options, buildOptions) {
   return Promise.resolve(options).then(buildOptions);
 }
@@ -286384,7 +286411,7 @@ var Items5 = class extends APIResource {
   }
 };
 
-// node_modules/.pnpm/openai@7.45.1_zod@4.6.7/node_modules/openai/resources/conversations/conversations.mjs
+// node_modules/openai/resources/conversations/conversations.mjs
 function resolveResourceRequestOptions75(options, buildOptions) {
   return Promise.resolve(options).then(buildOptions);
 }
@@ -286428,7 +286455,7 @@ var Conversations = class extends APIResource {
 };
 Conversations.Items = Items5;
 
-// node_modules/.pnpm/openai@7.45.1_zod@4.6.7/node_modules/openai/resources/decisions.mjs
+// node_modules/openai/resources/decisions.mjs
 function resolveResourceRequestOptions76(options, buildOptions) {
   return Promise.resolve(options).then(buildOptions);
 }
@@ -286446,7 +286473,7 @@ var Decisions = class extends APIResource {
   }
 };
 
-// node_modules/.pnpm/openai@7.45.1_zod@4.6.7/node_modules/openai/lib/embeddings.mjs
+// node_modules/openai/lib/embeddings.mjs
 function createEmbedding(client, body, options) {
   const hasUserProvidedEncodingFormat = !!body.encoding_format;
   const encodingFormat = hasUserProvidedEncodingFormat ? body.encoding_format : "base64";
@@ -286486,14 +286513,14 @@ function createEmbedding(client, body, options) {
   });
 }
 
-// node_modules/.pnpm/openai@7.45.1_zod@4.6.7/node_modules/openai/resources/embeddings.mjs
+// node_modules/openai/resources/embeddings.mjs
 var Embeddings = class extends APIResource {
   create(body, options) {
     return createEmbedding(this._client, body, options);
   }
 };
 
-// node_modules/.pnpm/openai@7.45.1_zod@4.6.7/node_modules/openai/resources/evals/runs/output-items.mjs
+// node_modules/openai/resources/evals/runs/output-items.mjs
 function resolveResourceRequestOptions77(options, buildOptions) {
   return Promise.resolve(options).then(buildOptions);
 }
@@ -286518,7 +286545,7 @@ var OutputItems = class extends APIResource {
   }
 };
 
-// node_modules/.pnpm/openai@7.45.1_zod@4.6.7/node_modules/openai/resources/evals/runs/runs.mjs
+// node_modules/openai/resources/evals/runs/runs.mjs
 function resolveResourceRequestOptions78(options, buildOptions) {
   return Promise.resolve(options).then(buildOptions);
 }
@@ -286617,7 +286644,7 @@ var Runs2 = class extends APIResource {
 };
 Runs2.OutputItems = OutputItems;
 
-// node_modules/.pnpm/openai@7.45.1_zod@4.6.7/node_modules/openai/resources/evals/evals.mjs
+// node_modules/openai/resources/evals/evals.mjs
 function resolveResourceRequestOptions79(options, buildOptions) {
   return Promise.resolve(options).then(buildOptions);
 }
@@ -286720,7 +286747,7 @@ var Evals = class extends APIResource {
 };
 Evals.Runs = Runs2;
 
-// node_modules/.pnpm/openai@7.45.1_zod@4.6.7/node_modules/openai/lib/file-processing.mjs
+// node_modules/openai/lib/file-processing.mjs
 async function waitForFileProcessing(resource, id, pollInterval, maxWait) {
   const terminalStates = /* @__PURE__ */ new Set(["processed", "error", "deleted"]);
   const start = performance.now();
@@ -286737,7 +286764,7 @@ async function waitForFileProcessing(resource, id, pollInterval, maxWait) {
   return file2;
 }
 
-// node_modules/.pnpm/openai@7.45.1_zod@4.6.7/node_modules/openai/resources/files.mjs
+// node_modules/openai/resources/files.mjs
 function resolveResourceRequestOptions80(options, buildOptions) {
   return Promise.resolve(options).then(buildOptions);
 }
@@ -286859,11 +286886,11 @@ var Files3 = class extends APIResource {
   }
 };
 
-// node_modules/.pnpm/openai@7.45.1_zod@4.6.7/node_modules/openai/resources/fine-tuning/methods.mjs
+// node_modules/openai/resources/fine-tuning/methods.mjs
 var Methods = class extends APIResource {
 };
 
-// node_modules/.pnpm/openai@7.45.1_zod@4.6.7/node_modules/openai/resources/fine-tuning/alpha/graders.mjs
+// node_modules/openai/resources/fine-tuning/alpha/graders.mjs
 function resolveResourceRequestOptions81(options, buildOptions) {
   return Promise.resolve(options).then(buildOptions);
 }
@@ -286918,7 +286945,7 @@ var Graders = class extends APIResource {
   }
 };
 
-// node_modules/.pnpm/openai@7.45.1_zod@4.6.7/node_modules/openai/resources/fine-tuning/alpha/alpha.mjs
+// node_modules/openai/resources/fine-tuning/alpha/alpha.mjs
 var Alpha = class extends APIResource {
   constructor() {
     super(...arguments);
@@ -286927,7 +286954,7 @@ var Alpha = class extends APIResource {
 };
 Alpha.Graders = Graders;
 
-// node_modules/.pnpm/openai@7.45.1_zod@4.6.7/node_modules/openai/resources/fine-tuning/checkpoints/permissions.mjs
+// node_modules/openai/resources/fine-tuning/checkpoints/permissions.mjs
 function resolveResourceRequestOptions82(options, buildOptions) {
   return Promise.resolve(options).then(buildOptions);
 }
@@ -287053,7 +287080,7 @@ var Permissions = class extends APIResource {
   }
 };
 
-// node_modules/.pnpm/openai@7.45.1_zod@4.6.7/node_modules/openai/resources/fine-tuning/checkpoints/checkpoints.mjs
+// node_modules/openai/resources/fine-tuning/checkpoints/checkpoints.mjs
 var Checkpoints = class extends APIResource {
   constructor() {
     super(...arguments);
@@ -287062,7 +287089,7 @@ var Checkpoints = class extends APIResource {
 };
 Checkpoints.Permissions = Permissions;
 
-// node_modules/.pnpm/openai@7.45.1_zod@4.6.7/node_modules/openai/resources/fine-tuning/jobs/checkpoints.mjs
+// node_modules/openai/resources/fine-tuning/jobs/checkpoints.mjs
 function resolveResourceRequestOptions83(options, buildOptions) {
   return Promise.resolve(options).then(buildOptions);
 }
@@ -287123,7 +287150,7 @@ var Checkpoints2 = class extends APIResource {
   }
 };
 
-// node_modules/.pnpm/openai@7.45.1_zod@4.6.7/node_modules/openai/resources/fine-tuning/jobs/jobs.mjs
+// node_modules/openai/resources/fine-tuning/jobs/jobs.mjs
 function resolveResourceRequestOptions84(options, buildOptions) {
   return Promise.resolve(options).then(buildOptions);
 }
@@ -287280,7 +287307,7 @@ var Jobs = class extends APIResource {
 };
 Jobs.Checkpoints = Checkpoints2;
 
-// node_modules/.pnpm/openai@7.45.1_zod@4.6.7/node_modules/openai/resources/fine-tuning/fine-tuning.mjs
+// node_modules/openai/resources/fine-tuning/fine-tuning.mjs
 var FineTuning = class extends APIResource {
   constructor() {
     super(...arguments);
@@ -287295,11 +287322,11 @@ FineTuning.Jobs = Jobs;
 FineTuning.Checkpoints = Checkpoints;
 FineTuning.Alpha = Alpha;
 
-// node_modules/.pnpm/openai@7.45.1_zod@4.6.7/node_modules/openai/resources/graders/grader-models.mjs
+// node_modules/openai/resources/graders/grader-models.mjs
 var GraderModels = class extends APIResource {
 };
 
-// node_modules/.pnpm/openai@7.45.1_zod@4.6.7/node_modules/openai/resources/graders/graders.mjs
+// node_modules/openai/resources/graders/graders.mjs
 var Graders2 = class extends APIResource {
   constructor() {
     super(...arguments);
@@ -287308,7 +287335,7 @@ var Graders2 = class extends APIResource {
 };
 Graders2.GraderModels = GraderModels;
 
-// node_modules/.pnpm/openai@7.45.1_zod@4.6.7/node_modules/openai/resources/images.mjs
+// node_modules/openai/resources/images.mjs
 function resolveResourceRequestOptions85(options, buildOptions) {
   return Promise.resolve(options).then(buildOptions);
 }
@@ -287346,7 +287373,7 @@ var Images = class extends APIResource {
   }
 };
 
-// node_modules/.pnpm/openai@7.45.1_zod@4.6.7/node_modules/openai/resources/live/sessions.mjs
+// node_modules/openai/resources/live/sessions.mjs
 function resolveResourceRequestOptions86(options, buildOptions) {
   return Promise.resolve(options).then(buildOptions);
 }
@@ -287466,15 +287493,15 @@ var Sessions4 = class extends APIResource {
   }
 };
 
-// node_modules/.pnpm/openai@7.45.1_zod@4.6.7/node_modules/openai/resources/live/forks/forks.mjs
+// node_modules/openai/resources/live/forks/forks.mjs
 var Forks = class extends APIResource {
 };
 
-// node_modules/.pnpm/openai@7.45.1_zod@4.6.7/node_modules/openai/resources/live/sideband/sideband.mjs
+// node_modules/openai/resources/live/sideband/sideband.mjs
 var Sideband = class extends APIResource {
 };
 
-// node_modules/.pnpm/openai@7.45.1_zod@4.6.7/node_modules/openai/resources/live/live.mjs
+// node_modules/openai/resources/live/live.mjs
 function resolveResourceRequestOptions87(options, buildOptions) {
   return Promise.resolve(options).then(buildOptions);
 }
@@ -287509,7 +287536,7 @@ Live.Sideband = Sideband;
 Live.Forks = Forks;
 Live.Sessions = Sessions4;
 
-// node_modules/.pnpm/openai@7.45.1_zod@4.6.7/node_modules/openai/resources/models.mjs
+// node_modules/openai/resources/models.mjs
 function resolveResourceRequestOptions88(options, buildOptions) {
   return Promise.resolve(options).then(buildOptions);
 }
@@ -287537,7 +287564,7 @@ var Models = class extends APIResource {
   }
 };
 
-// node_modules/.pnpm/openai@7.45.1_zod@4.6.7/node_modules/openai/resources/moderations.mjs
+// node_modules/openai/resources/moderations.mjs
 function resolveResourceRequestOptions89(options, buildOptions) {
   return Promise.resolve(options).then(buildOptions);
 }
@@ -287556,7 +287583,7 @@ var Moderations = class extends APIResource {
   }
 };
 
-// node_modules/.pnpm/openai@7.45.1_zod@4.6.7/node_modules/openai/internal/multipart-encoding.mjs
+// node_modules/openai/internal/multipart-encoding.mjs
 async function encodedMultipartFormRequestOptions(options, client, encodings, rawBodyField = null) {
   if (options.body === null || typeof options.body !== "object" || Array.isArray(options.body)) {
     throw new TypeError("Multipart request body must be an object");
@@ -287598,7 +287625,7 @@ async function encodedMultipartFormRequestOptions(options, client, encodings, ra
   };
 }
 
-// node_modules/.pnpm/openai@7.45.1_zod@4.6.7/node_modules/openai/resources/realtime/calls.mjs
+// node_modules/openai/resources/realtime/calls.mjs
 function resolveResourceRequestOptions90(options, buildOptions) {
   return Promise.resolve(options).then(buildOptions);
 }
@@ -287696,7 +287723,7 @@ var Calls = class extends APIResource {
   }
 };
 
-// node_modules/.pnpm/openai@7.45.1_zod@4.6.7/node_modules/openai/resources/realtime/client-secrets.mjs
+// node_modules/openai/resources/realtime/client-secrets.mjs
 function resolveResourceRequestOptions91(options, buildOptions) {
   return Promise.resolve(options).then(buildOptions);
 }
@@ -287733,7 +287760,7 @@ var ClientSecrets = class extends APIResource {
   }
 };
 
-// node_modules/.pnpm/openai@7.45.1_zod@4.6.7/node_modules/openai/resources/realtime/translations/client-secrets.mjs
+// node_modules/openai/resources/realtime/translations/client-secrets.mjs
 function resolveResourceRequestOptions92(options, buildOptions) {
   return Promise.resolve(options).then(buildOptions);
 }
@@ -287767,7 +287794,7 @@ var ClientSecrets2 = class extends APIResource {
   }
 };
 
-// node_modules/.pnpm/openai@7.45.1_zod@4.6.7/node_modules/openai/resources/realtime/translations/translations.mjs
+// node_modules/openai/resources/realtime/translations/translations.mjs
 var Translations2 = class extends APIResource {
   constructor() {
     super(...arguments);
@@ -287776,7 +287803,7 @@ var Translations2 = class extends APIResource {
 };
 Translations2.ClientSecrets = ClientSecrets2;
 
-// node_modules/.pnpm/openai@7.45.1_zod@4.6.7/node_modules/openai/resources/realtime/realtime.mjs
+// node_modules/openai/resources/realtime/realtime.mjs
 var Realtime2 = class extends APIResource {
   constructor() {
     super(...arguments);
@@ -287789,7 +287816,7 @@ Realtime2.ClientSecrets = ClientSecrets;
 Realtime2.Calls = Calls;
 Realtime2.Translations = Translations2;
 
-// node_modules/.pnpm/openai@7.45.1_zod@4.6.7/node_modules/openai/resources/responses/input-items.mjs
+// node_modules/openai/resources/responses/input-items.mjs
 function resolveResourceRequestOptions93(options, buildOptions) {
   return Promise.resolve(options).then(buildOptions);
 }
@@ -287850,7 +287877,7 @@ var InputItems2 = class extends APIResource {
   }
 };
 
-// node_modules/.pnpm/openai@7.45.1_zod@4.6.7/node_modules/openai/resources/responses/input-tokens.mjs
+// node_modules/openai/resources/responses/input-tokens.mjs
 function resolveResourceRequestOptions94(options, buildOptions) {
   return Promise.resolve(options).then(buildOptions);
 }
@@ -287875,7 +287902,7 @@ var InputTokens2 = class extends APIResource {
   }
 };
 
-// node_modules/.pnpm/openai@7.45.1_zod@4.6.7/node_modules/openai/lib/ResponsesParser.mjs
+// node_modules/openai/lib/ResponsesParser.mjs
 function maybeParseResponse(response, params) {
   if (!params || !hasAutoParseableInput2(params)) {
     const parsed = {
@@ -288010,7 +288037,7 @@ function addOutputText(rsp) {
   rsp.output_text = texts.join("");
 }
 
-// node_modules/.pnpm/openai@7.45.1_zod@4.6.7/node_modules/openai/internal/responses/output-text-index.mjs
+// node_modules/openai/internal/responses/output-text-index.mjs
 var OutputTextIndex = class {
   constructor() {
     this.capacity = 1;
@@ -288077,7 +288104,7 @@ var OutputTextIndex = class {
   }
 };
 
-// node_modules/.pnpm/openai@7.45.1_zod@4.6.7/node_modules/openai/internal/responses/canonical-output-text.mjs
+// node_modules/openai/internal/responses/canonical-output-text.mjs
 function createCanonicalResponseContext() {
   return {
     canonicalSnapshot: void 0,
@@ -288193,7 +288220,7 @@ function updateOutputText(context, snapshot, outputIndex, previousText, nextText
   snapshot.output_text = snapshot.output_text.slice(0, offset) + nextText + snapshot.output_text.slice(offset + previousText.length);
 }
 
-// node_modules/.pnpm/openai@7.45.1_zod@4.6.7/node_modules/openai/internal/responses/response-accumulator.mjs
+// node_modules/openai/internal/responses/response-accumulator.mjs
 var responseOutputIdentityIndexes = /* @__PURE__ */ new WeakMap();
 function validateArrayIndex(collection, index, kind, allowAppend = false) {
   if (!Array.isArray(collection) || !Number.isSafeInteger(index) || index < 0 || index > collection.length || (index === collection.length ? !allowAppend || index in collection : !hasOwn(collection, index))) {
@@ -289145,7 +289172,7 @@ function accumulateResponseWithContext(event, snapshot, context, rejectInvalidSh
   return assertNever4(dispatchEvent);
 }
 
-// node_modules/.pnpm/openai@7.45.1_zod@4.6.7/node_modules/openai/lib/responses/ResponseStream.mjs
+// node_modules/openai/lib/responses/ResponseStream.mjs
 var _ResponseStream_instances;
 var _ResponseStream_params;
 var _ResponseStream_currentResponseSnapshot;
@@ -289639,7 +289666,7 @@ function finalizeResponse(snapshot, params) {
   return maybeParseResponse(snapshot, params);
 }
 
-// node_modules/.pnpm/openai@7.45.1_zod@4.6.7/node_modules/openai/resources/responses/responses.mjs
+// node_modules/openai/resources/responses/responses.mjs
 function resolveResourceRequestOptions95(options, buildOptions) {
   return Promise.resolve(options).then(buildOptions);
 }
@@ -289787,7 +289814,7 @@ var Responses2 = class extends APIResource {
 Responses2.InputItems = InputItems2;
 Responses2.InputTokens = InputTokens2;
 
-// node_modules/.pnpm/openai@7.45.1_zod@4.6.7/node_modules/openai/resources/safety/alerts.mjs
+// node_modules/openai/resources/safety/alerts.mjs
 function resolveResourceRequestOptions96(options, buildOptions) {
   return Promise.resolve(options).then(buildOptions);
 }
@@ -289800,7 +289827,7 @@ var Alerts = class extends APIResource {
   }
 };
 
-// node_modules/.pnpm/openai@7.45.1_zod@4.6.7/node_modules/openai/resources/safety/cases.mjs
+// node_modules/openai/resources/safety/cases.mjs
 function resolveResourceRequestOptions97(options, buildOptions) {
   return Promise.resolve(options).then(buildOptions);
 }
@@ -289813,7 +289840,7 @@ var Cases = class extends APIResource {
   }
 };
 
-// node_modules/.pnpm/openai@7.45.1_zod@4.6.7/node_modules/openai/resources/safety/safety.mjs
+// node_modules/openai/resources/safety/safety.mjs
 var Safety = class extends APIResource {
   constructor() {
     super(...arguments);
@@ -289824,7 +289851,7 @@ var Safety = class extends APIResource {
 Safety.Cases = Cases;
 Safety.Alerts = Alerts;
 
-// node_modules/.pnpm/openai@7.45.1_zod@4.6.7/node_modules/openai/resources/skills/content.mjs
+// node_modules/openai/resources/skills/content.mjs
 function resolveResourceRequestOptions98(options, buildOptions) {
   return Promise.resolve(options).then(buildOptions);
 }
@@ -289842,7 +289869,7 @@ var Content2 = class extends APIResource {
   }
 };
 
-// node_modules/.pnpm/openai@7.45.1_zod@4.6.7/node_modules/openai/resources/skills/versions/content.mjs
+// node_modules/openai/resources/skills/versions/content.mjs
 function resolveResourceRequestOptions99(options, buildOptions) {
   return Promise.resolve(options).then(buildOptions);
 }
@@ -289861,7 +289888,7 @@ var Content3 = class extends APIResource {
   }
 };
 
-// node_modules/.pnpm/openai@7.45.1_zod@4.6.7/node_modules/openai/resources/skills/versions/versions.mjs
+// node_modules/openai/resources/skills/versions/versions.mjs
 function resolveResourceRequestOptions100(options, buildOptions) {
   return Promise.resolve(options).then(buildOptions);
 }
@@ -289950,7 +289977,7 @@ var Versions = class extends APIResource {
 };
 Versions.Content = Content3;
 
-// node_modules/.pnpm/openai@7.45.1_zod@4.6.7/node_modules/openai/resources/skills/skills.mjs
+// node_modules/openai/resources/skills/skills.mjs
 function resolveResourceRequestOptions101(options, buildOptions) {
   return Promise.resolve(options).then(buildOptions);
 }
@@ -290049,7 +290076,7 @@ var Skills = class extends APIResource {
 Skills.Content = Content2;
 Skills.Versions = Versions;
 
-// node_modules/.pnpm/openai@7.45.1_zod@4.6.7/node_modules/openai/resources/uploads/parts.mjs
+// node_modules/openai/resources/uploads/parts.mjs
 function resolveResourceRequestOptions102(options, buildOptions) {
   return Promise.resolve(options).then(buildOptions);
 }
@@ -290073,7 +290100,7 @@ var Parts = class extends APIResource {
   }
 };
 
-// node_modules/.pnpm/openai@7.45.1_zod@4.6.7/node_modules/openai/resources/uploads/uploads.mjs
+// node_modules/openai/resources/uploads/uploads.mjs
 function resolveResourceRequestOptions103(options, buildOptions) {
   return Promise.resolve(options).then(buildOptions);
 }
@@ -290147,7 +290174,7 @@ var Uploads = class extends APIResource {
 };
 Uploads.Parts = Parts;
 
-// node_modules/.pnpm/openai@7.45.1_zod@4.6.7/node_modules/openai/lib/vector-store-polling.mjs
+// node_modules/openai/lib/vector-store-polling.mjs
 function pollVectorStoreFile(resource, vectorStoreID, fileID, options) {
   return pollWithResponse((headers) => resource.retrieve(fileID, { vector_store_id: vectorStoreID }, { ...options, headers }), ["in_progress"], ["failed", "cancelled", "completed"], options);
 }
@@ -290155,7 +290182,7 @@ function pollVectorStoreFileBatch(resource, vectorStoreID, batchID, options) {
   return pollWithResponse((headers) => resource.retrieve(batchID, { vector_store_id: vectorStoreID }, { ...options, headers }), ["in_progress"], ["failed", "cancelled", "completed"], options);
 }
 
-// node_modules/.pnpm/openai@7.45.1_zod@4.6.7/node_modules/openai/lib/Util.mjs
+// node_modules/openai/lib/Util.mjs
 var allSettledWithThrow = async (promises) => {
   const results = await Promise.allSettled(promises);
   const rejected = results.filter((result) => result.status === "rejected");
@@ -290175,7 +290202,7 @@ var allSettledWithThrow = async (promises) => {
   return values;
 };
 
-// node_modules/.pnpm/openai@7.45.1_zod@4.6.7/node_modules/openai/lib/vector-store-upload.mjs
+// node_modules/openai/lib/vector-store-upload.mjs
 async function uploadAndPollVectorStoreFileBatch(resource, client, vectorStoreId, files, fileIds, options) {
   if (files === null || files === void 0 || files.length === 0) {
     throw new Error("No `files` provided to process. If you've already uploaded files you should use `.createAndPoll()` instead");
@@ -290202,7 +290229,7 @@ async function uploadAndPollVectorStoreFileBatch(resource, client, vectorStoreId
   return await resource.createAndPoll(vectorStoreId, { file_ids: allFileIds }, options);
 }
 
-// node_modules/.pnpm/openai@7.45.1_zod@4.6.7/node_modules/openai/resources/vector-stores/file-batches.mjs
+// node_modules/openai/resources/vector-stores/file-batches.mjs
 function resolveResourceRequestOptions104(options, buildOptions) {
   return Promise.resolve(options).then(buildOptions);
 }
@@ -290279,7 +290306,7 @@ var FileBatches = class extends APIResource {
   }
 };
 
-// node_modules/.pnpm/openai@7.45.1_zod@4.6.7/node_modules/openai/resources/vector-stores/files.mjs
+// node_modules/openai/resources/vector-stores/files.mjs
 function resolveResourceRequestOptions105(options, buildOptions) {
   return Promise.resolve(options).then(buildOptions);
 }
@@ -290435,7 +290462,7 @@ var Files4 = class extends APIResource {
   }
 };
 
-// node_modules/.pnpm/openai@7.45.1_zod@4.6.7/node_modules/openai/resources/vector-stores/vector-stores.mjs
+// node_modules/openai/resources/vector-stores/vector-stores.mjs
 function resolveResourceRequestOptions106(options, buildOptions) {
   return Promise.resolve(options).then(buildOptions);
 }
@@ -290559,7 +290586,7 @@ var VectorStores = class extends APIResource {
 VectorStores.Files = Files4;
 VectorStores.FileBatches = FileBatches;
 
-// node_modules/.pnpm/openai@7.45.1_zod@4.6.7/node_modules/openai/resources/videos.mjs
+// node_modules/openai/resources/videos.mjs
 function resolveResourceRequestOptions107(options, buildOptions) {
   return Promise.resolve(options).then(buildOptions);
 }
@@ -290703,7 +290730,7 @@ var Videos = class extends APIResource {
   }
 };
 
-// node_modules/.pnpm/openai@7.45.1_zod@4.6.7/node_modules/openai/resources/webhooks/event-types.mjs
+// node_modules/openai/resources/webhooks/event-types.mjs
 function resolveResourceRequestOptions108(options, buildOptions) {
   return Promise.resolve(options).then(buildOptions);
 }
@@ -290722,7 +290749,7 @@ var EventTypes = class extends APIResource {
   }
 };
 
-// node_modules/.pnpm/openai@7.45.1_zod@4.6.7/node_modules/openai/lib/webhook-signature.mjs
+// node_modules/openai/lib/webhook-signature.mjs
 var MAX_DIRECT_WEBHOOK_VERIFICATIONS = 32;
 var SHA256_SIGNATURE_LENGTH = 32;
 function webhookSignatureRequiresSigning(signatureHeader) {
@@ -290819,7 +290846,7 @@ async function verifyWebhookSignature(payload, signatureHeader, timestamp, webho
   throw new InvalidWebhookSignatureError("The given webhook signature does not match the expected signature");
 }
 
-// node_modules/.pnpm/openai@7.45.1_zod@4.6.7/node_modules/openai/resources/webhooks/webhooks.mjs
+// node_modules/openai/resources/webhooks/webhooks.mjs
 var _Webhooks_instances;
 var _Webhooks_validateSecret;
 var _Webhooks_getRequiredHeader;
@@ -291029,7 +291056,7 @@ _Webhooks_instances = /* @__PURE__ */ new WeakSet(), _Webhooks_validateSecret = 
 };
 Webhooks.EventTypes = EventTypes;
 
-// node_modules/.pnpm/openai@7.45.1_zod@4.6.7/node_modules/openai/internal/bedrock.mjs
+// node_modules/openai/internal/bedrock.mjs
 var brand_privateBedrockClient = /* @__PURE__ */ Symbol.for("openai.privateBedrockClient");
 function assertValidBedrockBearerCredential(credential) {
   if (/^[\t ]|[\t ]$/.test(credential)) {
@@ -291043,7 +291070,7 @@ function assertValidBedrockBearerCredential(credential) {
   }
 }
 
-// node_modules/.pnpm/openai@7.45.1_zod@4.6.7/node_modules/openai/internal/realtime-credentials.mjs
+// node_modules/openai/internal/realtime-credentials.mjs
 var realtimeCacheContext = /* @__PURE__ */ Symbol.for("openai.realtimeAPIKeyCacheContext");
 var cacheContext;
 function getDeferredRealtimeAPIKeyCache(client) {
@@ -291082,7 +291109,7 @@ async function resolveRealtimeAPIKey(client, deferCache = false) {
   };
 }
 
-// node_modules/.pnpm/openai@7.45.1_zod@4.6.7/node_modules/openai/internal/ws.mjs
+// node_modules/openai/internal/ws.mjs
 function mergeWebSocketAuthHeaders(options, authHeaders, removedHeaders) {
   const headers = new Map(Object.entries(authHeaders).map(([name, value]) => [name.toLowerCase(), value]));
   for (const name of removedHeaders) {
@@ -291095,7 +291122,7 @@ function mergeWebSocketAuthHeaders(options, authHeaders, removedHeaders) {
 }
 var webSocketHeaderRemovals = /* @__PURE__ */ new WeakMap();
 
-// node_modules/.pnpm/openai@7.45.1_zod@4.6.7/node_modules/openai/internal/provider.mjs
+// node_modules/openai/internal/provider.mjs
 var providerTimeoutKey = /* @__PURE__ */ Symbol.for("openai.node.providerTimeout.v1");
 function isProviderTimeoutError(error62) {
   return error62 instanceof APIConnectionTimeoutError || error62 instanceof Error && providerTimeoutKey in error62 && error62[providerTimeoutKey] === true;
@@ -291115,7 +291142,7 @@ function configureProvider(provider) {
   return definition.configure();
 }
 
-// node_modules/.pnpm/openai@7.45.1_zod@4.6.7/node_modules/openai/client.mjs
+// node_modules/openai/client.mjs
 var _OpenAI_instances;
 var _a5;
 var _OpenAI_encoder;
@@ -292679,7 +292706,7 @@ function isUndiciDispatcherVersionMismatchError(error62) {
   return false;
 }
 
-// node_modules/.pnpm/openai@7.45.1_zod@4.6.7/node_modules/openai/bedrock.mjs
+// node_modules/openai/bedrock.mjs
 var _a6;
 _a6 = brand_privateBedrockClient;
 
@@ -292698,6 +292725,13 @@ function assertNoCredentials(text) {
   if (credential) throw new Error("Potential credential literal: use environment references before generating or transmitting source artifacts");
 }
 
+// packages/core/src/diagnostics.ts
+function redactDiagnostics(value) {
+  let text = value.replace(/\x1b\[[0-?]*[ -/]*[@-~]/g, "").replace(/(?:sk|rk)_(?:live|test)_[\w-]+|sk-[\w-]{12,}|gh[pousr]_[\w]+/g, "[REDACTED]").replace(/((?:authorization|api[_-]?key|password|secret|token)\s*[:=]\s*)(?:Bearer\s+)?[^\s,;]+/gi, "$1[REDACTED]");
+  for (const [name, secret] of Object.entries(process.env)) if (secret && secret.length >= 4 && /KEY|TOKEN|SECRET|PASSWORD|CREDENTIAL/i.test(name)) text = text.split(secret).join("[REDACTED]");
+  return text.slice(0, 16384);
+}
+
 // packages/core/src/pipeline.ts
 var baselineSchema = external_exports.object({ schemaVersion: external_exports.literal(1), accepted: external_exports.array(external_exports.string()), sources: external_exports.array(external_exports.object({ url: external_exports.string().url(), sha256: external_exports.string().regex(/^[a-f0-9]{64}$/) })), observedReleases: external_exports.array(external_exports.string()) }).strict();
 function baseline(root) {
@@ -292708,11 +292742,11 @@ async function plan(root, config2, offline = false) {
   const accepted = baseline(root), { inventory, edits } = analyze(root, config2);
   const sources = await collectSources(root, offline, config2);
   const major = Number(inventory.resolved?.split(".")[0]);
-  const findings = inventory.usages.filter((u) => u.kind === "field" && u.replacement).map((u) => ({ changeId: CHANGE_ID, location: { file: u.file, line: u.line, symbol: u.symbol }, outcome: major === 12 ? "confirmed impact" : major === 11 ? "possible impact" : "unsupported analysis", explanation: major === 12 ? "Resolved Stripe 12 removed this constructor alias." : major === 11 ? "Stripe 11 still supports this alias; removing it prepares this usage for v12. No dependency upgrade is performed." : "Recipe applicability cannot be established outside resolved SDK majors 11 and 12." }));
+  const findings = inventory.usages.filter((u) => u.kind === "field" && u.replacement).map((u) => ({ changeId: CHANGE_ID, location: { file: u.file, line: u.line, symbol: u.symbol }, outcome: major === 12 && inventory.moduleMode === "esm" ? "confirmed impact" : major === 11 || major === 12 ? "possible impact" : "unsupported analysis", explanation: major === 12 ? `Stripe 12 ESM removed this constructor alias; CommonJS retains it. Detected module mode: ${inventory.moduleMode}. The source cleanup is compatible with either build; review module-mode evidence.` : major === 11 ? "Stripe 11 still supports this alias; removing it prepares this usage for v12 ESM. No dependency upgrade is performed." : "Recipe applicability cannot be established outside resolved SDK majors 11 and 12." }));
   for (const u of inventory.usages.filter((u2) => u2.kind === "unsupported")) findings.push({ changeId: CHANGE_ID, location: { file: u.file, line: u.line, symbol: u.symbol }, outcome: "unsupported analysis", explanation: u.symbol });
   for (const u of inventory.usages.filter((u2) => u2.kind === "client" && u2.requestApiVersion === "unknown")) findings.push({ changeId: "stripe-node-12-api-default", location: { file: u.file, line: u.line, symbol: u.symbol }, outcome: "possible impact", explanation: "Request API version is unknown; SDK, account and webhook versions are independent." });
   if (!findings.length) findings.push({ changeId: CHANGE_ID, outcome: "no detected impact within supported analysis", explanation: "No supported obsolete constructor aliases found; this does not establish overall Stripe compatibility." });
-  return { id: CHANGE_ID, revision: revision(root), inventory, evidence: sources.evidence, observedReleases: sources.releases, newlyObserved: sources.releases.filter((r) => !accepted.observedReleases.includes(r)), unclassified: sources.unclassified, findings, edits, preconditions: ["Clean Git working tree for migration", "Runtime default Stripe import and direct new expression", "Resolved SDK major 11 or 12; no ambiguous nested installation", "Expected file hashes and canonical source paths match"], manualSteps: ["Review Stripe API compatibility and webhook endpoint versions separately.", "No SDK upgrade is performed. For Stripe 11, update dependencies and lockfile separately after reviewing all v12 changes.", "Review unclassified release changes; accepting this recipe does not accept them."], verification: config2.verification, acceptedBaseline: accepted, llm: { used: false } };
+  return { id: CHANGE_ID, revision: revision(root), inventory, evidence: sources.evidence, observedReleases: sources.releases, newlyObserved: sources.newlyObserved, unclassified: sources.unclassified, findings, edits, preconditions: ["Clean Git working tree for migration", "Runtime default Stripe import and direct new expression", "Resolved SDK major 11 or 12; no ambiguous nested installation", "Expected file hashes and canonical source paths match"], manualSteps: ["Review Stripe API compatibility and webhook endpoint versions separately.", "No SDK upgrade is performed. For Stripe 11, update dependencies and lockfile separately after reviewing all v12 changes.", "Review unclassified release changes; accepting this recipe does not accept them."], verification: config2.verification, acceptedBaseline: accepted, llm: { used: false } };
 }
 function verify(root, commands) {
   const results = [];
@@ -292720,11 +292754,7 @@ function verify(root, commands) {
     const env = {};
     for (const key of ["PATH", "Path", "SystemRoot", "WINDIR", "TEMP", "TMP", "PATHEXT"]) if (process.env[key]) env[key] = process.env[key];
     const result = (0, import_node_child_process2.spawnSync)(c.command, c.args, { cwd: root, env, timeout: c.timeoutMs, encoding: "utf8", maxBuffer: 65536, stdio: ["ignore", "pipe", "pipe"], shell: false, windowsHide: true });
-    const sanitize = (value) => {
-      let text = value.replace(/\x1b\[[0-?]*[ -/]*[@-~]/g, "").replace(/(?:sk|rk)_(?:live|test)_[\w-]+|sk-[\w-]{12,}|gh[pousr]_[\w]+/g, "[REDACTED]").replace(/((?:authorization|api[_-]?key|password|secret|token)\s*[:=]\s*)(?:Bearer\s+)?[^\s,;]+/gi, "$1[REDACTED]");
-      for (const [name, secret] of Object.entries(process.env)) if (secret && secret.length >= 4 && /KEY|TOKEN|SECRET|PASSWORD|CREDENTIAL/i.test(name)) text = text.split(secret).join("[REDACTED]");
-      return text.slice(0, 16384);
-    };
+    const sanitize = redactDiagnostics;
     const stdout = result.stdout ?? "", stderr = result.stderr ?? "";
     const errorCode = result.error?.code;
     results.push({ command: sanitize([c.command, ...c.args].join(" ")), exitCode: result.error ? null : result.status, timedOut: errorCode === "ETIMEDOUT", stdout: sanitize(stdout), stderr: sanitize(stderr + (result.error ? "\nVerification process error: " + errorCode : "")), outputTruncated: stdout.length > 16384 || stderr.length > 16384 || errorCode === "ENOBUFS" });
@@ -292774,7 +292804,7 @@ function saveReport(root, p, verification = { status: "skipped", results: [] }) 
 ` + [r.stdout, r.stderr].filter(Boolean).join("\n").split("\n").map((line) => "    " + line).join("\n")).join("\n");
   (0, import_node_fs5.writeFileSync)(contained(root, ".changelume/report.md"), markdown(p, verification) + (diagnostics ? "\n## Verification output\n" + diagnostics + "\n" : ""));
 }
-function candidate(root, p, runVerification = true) {
+function candidate(root, p, runVerification = true, cleanup = (path2) => (0, import_node_fs5.rmSync)(path2, { recursive: true, force: true })) {
   assertClean(root);
   if (revision(root) !== p.revision) throw new Error("Repository revision changed");
   validateEdits(root, { edits: p.edits }, p.edits.map((e) => e.path));
@@ -292805,7 +292835,11 @@ function candidate(root, p, runVerification = true) {
       if (git(checkout, "diff", "--no-ext-diff", "--no-textconv", "--binary", "--unified=0", "HEAD") + "\n" !== patch) verification = { status: "failed", results: [...verification.results, { command: "Candidate tracked files unchanged by verification", exitCode: 1, timedOut: false }] };
     }
   } finally {
-    (0, import_node_fs5.rmSync)(temp, { recursive: true, force: true });
+    try {
+      cleanup(temp);
+    } catch {
+      p.manualSteps.push(`Temporary checkout cleanup failed: remove ${temp} after inspecting the preserved report and patch.`);
+    }
   }
   const bundle = { schemaVersion: 1, revision: p.revision, plan: p, edits, patchHash: hash2(patch), verification };
   (0, import_node_fs5.mkdirSync)(contained(root, ".changelume"), { recursive: true });
@@ -292814,15 +292848,47 @@ function candidate(root, p, runVerification = true) {
   saveReport(root, p, verification);
   return bundle;
 }
-function applyCandidate(root, b) {
+function applyCandidate(root, b, replace = import_node_fs5.renameSync) {
   assertClean(root);
   if (revision(root) !== b.revision) throw new Error("Repository revision changed");
   if (b.verification.status === "failed") throw new Error("Verification failed; patch and report preserved, source not changed");
   validateEdits(root, { edits: b.edits }, [...b.plan.edits.map((e) => e.path), "changelume.lock.json"], true);
-  for (const e of b.edits) (0, import_node_fs5.writeFileSync)(contained(root, e.path), e.content);
+  const recovery = contained(root, `.changelume/recovery/${(0, import_node_crypto2.randomUUID)()}`);
+  (0, import_node_fs5.mkdirSync)(recovery, { recursive: true });
+  const originals = b.edits.map((e, i) => {
+    const path2 = contained(root, e.path), existed = (0, import_node_fs5.existsSync)(path2);
+    if (existed) (0, import_node_fs5.writeFileSync)((0, import_node_path5.resolve)(recovery, `${i}.original`), (0, import_node_fs5.readFileSync)(path2));
+    (0, import_node_fs5.writeFileSync)((0, import_node_path5.resolve)(recovery, `${i}.candidate`), e.content);
+    return { path: e.path, existed };
+  });
+  (0, import_node_fs5.writeFileSync)((0, import_node_path5.resolve)(recovery, "manifest.json"), JSON.stringify({ revision: b.revision, originals }, null, 2));
+  const applied = [];
+  try {
+    for (const [i, e] of b.edits.entries()) {
+      replace((0, import_node_path5.resolve)(recovery, `${i}.candidate`), contained(root, e.path));
+      applied.push(i);
+    }
+  } catch {
+    let restored = true;
+    for (const i of applied.reverse()) {
+      try {
+        const original = originals[i];
+        const path2 = contained(root, original.path);
+        if (original.existed) (0, import_node_fs5.writeFileSync)(path2, (0, import_node_fs5.readFileSync)((0, import_node_path5.resolve)(recovery, `${i}.original`)));
+        else (0, import_node_fs5.rmSync)(path2);
+      } catch {
+        restored = false;
+      }
+    }
+    throw new Error(`Migration application failed; ${restored ? "original files restored" : "rollback incomplete"}. Recovery copies and manifest: ${recovery}. Report and patch preserved.`);
+  }
+  try {
+    (0, import_node_fs5.rmSync)(recovery, { recursive: true, force: true });
+  } catch {
+  }
 }
 
-// node_modules/.pnpm/universal-user-agent@7.0.3/node_modules/universal-user-agent/index.js
+// node_modules/universal-user-agent/index.js
 function getUserAgent() {
   if (typeof navigator === "object" && "userAgent" in navigator) {
     return navigator.userAgent;
@@ -292833,7 +292899,7 @@ function getUserAgent() {
   return "<environment undetectable>";
 }
 
-// node_modules/.pnpm/before-after-hook@4.0.0/node_modules/before-after-hook/lib/register.js
+// node_modules/before-after-hook/lib/register.js
 function register(state2, name, method, options) {
   if (typeof method !== "function") {
     throw new Error("method for before hook must be a function");
@@ -292856,7 +292922,7 @@ function register(state2, name, method, options) {
   });
 }
 
-// node_modules/.pnpm/before-after-hook@4.0.0/node_modules/before-after-hook/lib/add.js
+// node_modules/before-after-hook/lib/add.js
 function addHook(state2, kind, name, hook2) {
   const orig = hook2;
   if (!state2.registry[name]) {
@@ -292891,7 +292957,7 @@ function addHook(state2, kind, name, hook2) {
   });
 }
 
-// node_modules/.pnpm/before-after-hook@4.0.0/node_modules/before-after-hook/lib/remove.js
+// node_modules/before-after-hook/lib/remove.js
 function removeHook(state2, name, method) {
   if (!state2.registry[name]) {
     return;
@@ -292905,7 +292971,7 @@ function removeHook(state2, name, method) {
   state2.registry[name].splice(index, 1);
 }
 
-// node_modules/.pnpm/before-after-hook@4.0.0/node_modules/before-after-hook/index.js
+// node_modules/before-after-hook/index.js
 var bind = Function.bind;
 var bindable = bind.bind(bind);
 function bindApi(hook2, state2, name) {
@@ -292939,7 +293005,7 @@ function Collection() {
 }
 var before_after_hook_default = { Singular, Collection };
 
-// node_modules/.pnpm/@octokit+endpoint@11.0.5/node_modules/@octokit/endpoint/dist-bundle/index.js
+// node_modules/@octokit/endpoint/dist-bundle/index.js
 var VERSION2 = "0.0.0-development";
 var userAgent = `octokit-endpoint.js/${VERSION2} ${getUserAgent()}`;
 var DEFAULTS = {
@@ -293252,7 +293318,7 @@ function withDefaults(oldDefaults, newDefaults) {
 }
 var endpoint = withDefaults(null, DEFAULTS);
 
-// node_modules/.pnpm/content-type@3.1.1/node_modules/content-type/dist/index.js
+// node_modules/content-type/dist/index.js
 var SP = 32;
 var HTAB = 9;
 var SEMI = 59;
@@ -293436,7 +293502,7 @@ function unescapeQuotedPairs(str, start, end) {
   return result + str.slice(start, end);
 }
 
-// node_modules/.pnpm/json-with-bigint@3.5.12/node_modules/json-with-bigint/json-with-bigint.js
+// node_modules/json-with-bigint/json-with-bigint.js
 var intRegex = /^-?\d+$/;
 var noiseValue = /^-?\d+n+$/;
 var originalStringify = JSON.stringify;
@@ -293771,7 +293837,7 @@ var JSONParse = (text, reviver) => {
   }
 };
 
-// node_modules/.pnpm/@octokit+request-error@7.1.2/node_modules/@octokit/request-error/dist-src/index.js
+// node_modules/@octokit/request-error/dist-src/index.js
 var RequestError = class extends Error {
   name;
   /**
@@ -293810,7 +293876,7 @@ var RequestError = class extends Error {
   }
 };
 
-// node_modules/.pnpm/@octokit+request@10.0.16/node_modules/@octokit/request/dist-bundle/index.js
+// node_modules/@octokit/request/dist-bundle/index.js
 var VERSION3 = "10.0.16";
 var defaults_default = {
   headers: {
@@ -293992,7 +294058,7 @@ function withDefaults2(oldEndpoint, newDefaults) {
 }
 var request = withDefaults2(endpoint, defaults_default);
 
-// node_modules/.pnpm/@octokit+graphql@9.0.5/node_modules/@octokit/graphql/dist-bundle/index.js
+// node_modules/@octokit/graphql/dist-bundle/index.js
 var VERSION4 = "0.0.0-development";
 function _buildMessageForResponseErrors(data) {
   return `Request failed due to following response errors:
@@ -294102,7 +294168,7 @@ function withCustomRequest(customRequest) {
   });
 }
 
-// node_modules/.pnpm/@octokit+auth-token@6.0.0/node_modules/@octokit/auth-token/dist-bundle/index.js
+// node_modules/@octokit/auth-token/dist-bundle/index.js
 var b64url = "(?:[a-zA-Z0-9_-]+)";
 var sep2 = "\\.";
 var jwtRE = new RegExp(`^${b64url}${sep2}${b64url}${sep2}${b64url}$`);
@@ -294147,10 +294213,10 @@ var createTokenAuth = function createTokenAuth2(token) {
   });
 };
 
-// node_modules/.pnpm/@octokit+core@7.0.8/node_modules/@octokit/core/dist-src/version.js
+// node_modules/@octokit/core/dist-src/version.js
 var VERSION5 = "7.0.8";
 
-// node_modules/.pnpm/@octokit+core@7.0.8/node_modules/@octokit/core/dist-src/index.js
+// node_modules/@octokit/core/dist-src/index.js
 var noop3 = () => {
 };
 var consoleWarn = console.warn.bind(console);
@@ -294284,10 +294350,10 @@ var Octokit = class {
   auth;
 };
 
-// node_modules/.pnpm/@octokit+plugin-request-log@6.0.0_@octokit+core@7.0.8/node_modules/@octokit/plugin-request-log/dist-src/version.js
+// node_modules/@octokit/plugin-request-log/dist-src/version.js
 var VERSION6 = "6.0.0";
 
-// node_modules/.pnpm/@octokit+plugin-request-log@6.0.0_@octokit+core@7.0.8/node_modules/@octokit/plugin-request-log/dist-src/index.js
+// node_modules/@octokit/plugin-request-log/dist-src/index.js
 function requestLog(octokit) {
   octokit.hook.wrap("request", (request2, options) => {
     octokit.log.debug("request", options);
@@ -294311,7 +294377,7 @@ function requestLog(octokit) {
 }
 requestLog.VERSION = VERSION6;
 
-// node_modules/.pnpm/@octokit+plugin-paginate-rest@14.0.0_@octokit+core@7.0.8/node_modules/@octokit/plugin-paginate-rest/dist-bundle/index.js
+// node_modules/@octokit/plugin-paginate-rest/dist-bundle/index.js
 var VERSION7 = "0.0.0-development";
 function normalizePaginatedListResponse(response) {
   if (!response.data) {
@@ -294427,10 +294493,10 @@ function paginateRest(octokit) {
 }
 paginateRest.VERSION = VERSION7;
 
-// node_modules/.pnpm/@octokit+plugin-rest-endpoi_b05e717b89cdd67da7764161022795e3/node_modules/@octokit/plugin-rest-endpoint-methods/dist-src/version.js
+// node_modules/@octokit/plugin-rest-endpoint-methods/dist-src/version.js
 var VERSION8 = "17.0.0";
 
-// node_modules/.pnpm/@octokit+plugin-rest-endpoi_b05e717b89cdd67da7764161022795e3/node_modules/@octokit/plugin-rest-endpoint-methods/dist-src/generated/endpoints.js
+// node_modules/@octokit/plugin-rest-endpoint-methods/dist-src/generated/endpoints.js
 var Endpoints = {
   actions: {
     addCustomLabelsToSelfHostedRunnerForOrg: [
@@ -296722,7 +296788,7 @@ var Endpoints = {
 };
 var endpoints_default = Endpoints;
 
-// node_modules/.pnpm/@octokit+plugin-rest-endpoi_b05e717b89cdd67da7764161022795e3/node_modules/@octokit/plugin-rest-endpoint-methods/dist-src/endpoints-to-methods.js
+// node_modules/@octokit/plugin-rest-endpoint-methods/dist-src/endpoints-to-methods.js
 var endpointMethodsMap = /* @__PURE__ */ new Map();
 for (const [scope, endpoints2] of Object.entries(endpoints_default)) {
   for (const [methodName, endpoint2] of Object.entries(endpoints2)) {
@@ -296845,7 +296911,7 @@ function decorate(octokit, scope, methodName, defaults2, decorations) {
   return Object.assign(withDecorations, requestWithDefaults);
 }
 
-// node_modules/.pnpm/@octokit+plugin-rest-endpoi_b05e717b89cdd67da7764161022795e3/node_modules/@octokit/plugin-rest-endpoint-methods/dist-src/index.js
+// node_modules/@octokit/plugin-rest-endpoint-methods/dist-src/index.js
 function restEndpointMethods(octokit) {
   const api = endpointsToMethods(octokit);
   return {
@@ -296862,10 +296928,10 @@ function legacyRestEndpointMethods(octokit) {
 }
 legacyRestEndpointMethods.VERSION = VERSION8;
 
-// node_modules/.pnpm/@octokit+rest@22.0.1/node_modules/@octokit/rest/dist-src/version.js
+// node_modules/@octokit/rest/dist-src/version.js
 var VERSION9 = "22.0.1";
 
-// node_modules/.pnpm/@octokit+rest@22.0.1/node_modules/@octokit/rest/dist-src/index.js
+// node_modules/@octokit/rest/dist-src/index.js
 var Octokit2 = Octokit.plugin(requestLog, legacyRestEndpointMethods, paginateRest).defaults(
   {
     userAgent: `octokit-rest.js/${VERSION9}`
@@ -296950,7 +297016,8 @@ async function main() {
   const pr = await publish(expected, config2, process.env.GITHUB_REPOSITORY ?? "");
   output2("pr-url", pr.url);
 }
-main().catch(() => {
-  console.error("Changelume Action failed: check configuration, artifact provenance, revision, scope, and verification. No provider credentials are logged.");
+main().catch((error62) => {
+  console.error("Changelume Action failed: " + redactDiagnostics(error62 instanceof Error ? error62.message : "Unknown failure").slice(0, 2048));
+  console.error("Inspect the analysis/verification artifacts; confirm revision, digests, configuration, and repository permissions before retrying.");
   process.exitCode = 1;
 });

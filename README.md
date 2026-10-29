@@ -2,7 +2,7 @@
 
 An early, Apache-2.0 MVP that monitors Stripe SDK releases, locates supported TypeScript usages, and prepares reviewable migration patches or GitHub pull requests. It runs locally or in your GitHub Actions runners. There is no service, database, account, or dashboard.
 
-**Coverage is deliberately narrow:** Stripe 11/12 default imports used as `new Stripe.Stripe(...)` or `new Stripe.default(...)` become `new Stripe(...)`. Import aliases are supported. This is the real constructor-alias removal documented in the [Stripe v12 SDK changelog](https://github.com/stripe/stripe-node/blob/v12.0.0/CHANGELOG.md). It is not a general Stripe migration engine. No dependency upgrades, API-version changes, webhook changes, or account modifications are automated.
+**Coverage is deliberately narrow:** Stripe 11/12 default imports used as `new Stripe.Stripe(...)` or `new Stripe.default(...)` become `new Stripe(...)`. Import aliases are supported. The aliases are removed from the Stripe 12 ESM build; CommonJS retains them and historical typings still accept them. This is the constructor-alias removal documented in the [Stripe v12 SDK changelog](https://github.com/stripe/stripe-node/blob/v12.0.0/CHANGELOG.md). It is not a general Stripe migration engine. No dependency upgrades, API-version changes, webhook changes, or account modifications are automated.
 
 ## Install and validate
 

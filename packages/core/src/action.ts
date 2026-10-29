@@ -6,6 +6,7 @@ import { plan, candidate, applyCandidate, verify, saveReport } from './pipeline.
 import { hash, contained } from './safety.js';
 import { publish } from './github/publish.js';
 import { revision, assertClean } from './git.js';
+import { redactDiagnostics } from './diagnostics.js';
 const input=(key:string)=>process.env['INPUT_'+key.toUpperCase().replaceAll('-','_')]??process.env['INPUT_'+key.toUpperCase()]??'';
 function output(key:string,value:string) {if(process.env.GITHUB_OUTPUT) appendFileSync(process.env.GITHUB_OUTPUT,`${key}=${value}\n`);}
 async function main() {
@@ -39,4 +40,4 @@ async function main() {
   if(!config.verification.length) throw new Error('No configured verification');
   const pr=await publish(expected,config,process.env.GITHUB_REPOSITORY??'');output('pr-url',pr.url);
 }
-main().catch(()=>{console.error('Changelume Action failed: check configuration, artifact provenance, revision, scope, and verification. No provider credentials are logged.');process.exitCode=1;});
+main().catch(error=>{console.error('Changelume Action failed: '+redactDiagnostics(error instanceof Error?error.message:'Unknown failure').slice(0,2048));console.error('Inspect the analysis/verification artifacts; confirm revision, digests, configuration, and repository permissions before retrying.');process.exitCode=1;});
