@@ -1,4 +1,5 @@
 const assert = require('node:assert/strict');
+require('./options.cjs');
 const fs = require('node:fs');
 const vm = require('node:vm');
 const ts = require('typescript');

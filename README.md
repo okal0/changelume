@@ -78,6 +78,14 @@ The preview contains selected affected source files, allowed paths, revision, an
 
 See [GitHub Actions setup](docs/github-actions.md), [capabilities](docs/support-matrix.md), [architecture](docs/architecture.md), [recipe contributions](docs/recipes.md), and [security](SECURITY.md).
 
+## Private beta candidate
+
+The next candidate adds `changelume doctor` and `changelume review`. Review items retain upstream evidence and repository locations. Acknowledge with `changelume review --offline --acknowledge ITEM_ID --note 'Reviewed manually'`; commit the separate `changelume.review.json`. Changed evidence invalidates acknowledgement. Review does not accept migrations or hide unresolved upstream changes.
+
+On Windows, `./scripts/demo.ps1` runs the offline demonstration with either Node on PATH or the available bundled Codex runtime. It does not require pnpm. For archive installation, use the instructions in the private beta guide. `node scripts/package-smoke.mjs` packs, installs into a fresh local prefix, and exercises the installed CLI across the controlled beta cases.
+
+Additional deterministic rules rename five legacy request-option spellings removed in Stripe 11. Coverage is limited to inline `customers.create(params, options)` on unescaped const local clients. Runtime default imports and named `Stripe`/`default` imports are traced; namespace imports, arbitrary factories, and cross-file flows remain unsupported. See [private beta setup](docs/private-beta.md) and [candidate release notes](docs/release-notes-0.2.0-rc.1.md).
+
 For real installed-SDK validation, run `node scripts/integration.mjs` after building. This separate test requires npm registry access for explicit dependency installation. It verifies Stripe 11.18.0 and 12.0.0 in native ESM and checks the CommonJS compatibility distinction; no Stripe API requests are made. See the [fixture documentation](fixtures/integration/README.md).
 
 Repeated scans track observed releases in disposable `.changelume/observations/` files, separately for online and offline sources. Unclassified changes remain in reports after observation. Clearing these files resets observation history without accepting any migration. The example Action workflow preserves this history with a trusted default-branch Actions cache.

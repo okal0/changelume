@@ -39,3 +39,16 @@ PR #2 was also checked through the API and contains the same two permitted paths
 ### Remaining limits
 
 Coverage remains the one documented constructor cleanup. Real-SDK tests establish the selected ESM/CommonJS behaviors; they do not establish overall Stripe API compatibility. Observation history is disposable and resets if local state or Actions cache is removed. Output redaction is heuristic. Rollback handles caught replacement errors, while a hard process termination may require using the preserved recovery manifest. Additional vendors, general LLM edits, package publication, and milestone 5 are outside this work.
+
+## 0.2.0-rc.1 product iteration
+
+The prior coverage limits are expanded by five explicit legacy request-option rename rules and inventory-only tracing of simple exported clients/factories. All other unsupported flows still require manual review. See the updated support matrix and private beta guide.
+
+- Strict checking, build, and 57 regression tests passed locally. New coverage includes all five option spellings, ambiguity refusal, acknowledgement/evidence invalidation, closed-unmerged PR refusal, cross-file client/factory discovery, and constructor mutation in another source file.
+- Six separate controlled Git repositories passed the beta harness: affected ESM alias, unaffected CommonJS direct constructor, legacy options, mutated constructor, ambiguous options, and named import. Expected edits matched in all six. Dry-run preserved source, application matched manually specified expected source, verification passed on affected cases, and second plans proposed zero edits. These are synthetic evaluations with zero independent participants, as requested by the user.
+- The installable npm tarball was installed into a clean local prefix and the same scenarios passed through the installed standalone executable. No development dependencies or source workspace imports are required by the installed CLI. Candidate archives include complete offline and real-SDK examples, documentation, license notices, and SHA-256 checksums.
+- Real installed Stripe 11.18.0/12.0.0 tests passed for constructor runtime behavior and legacy/new request-option parsing. No vendor API operations were called.
+- The dependency audit identified the YAML 2.8.1 stack-overflow advisory; YAML was upgraded to 2.8.3. A subsequent pnpm audit reported zero known vulnerabilities at evaluation time. This is a point-in-time advisory check, not a security guarantee.
+- [Live beta consumer run](https://github.com/okal0/changelume-consumer-test/actions/runs/40943958765) passed analysis, real-SDK installation/type checking/verification, and publication. [Draft PR #3](https://github.com/okal0/changelume-consumer-test/pull/3) contains only `src/index.ts`, `src/options.ts`, and the accepted baseline. Its earlier [failed fixture run](https://github.com/okal0/changelume-consumer-test/actions/runs/40943672730) preserved a constructor-configuration compiler error and correctly skipped publication; the fixture was corrected before the successful run.
+
+Human usability feedback and public/package release remain explicit gates. No release or package was published. Closed test PRs are not automatically reopened and no test PR was merged.

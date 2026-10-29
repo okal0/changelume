@@ -5,6 +5,7 @@ import { hash, contained } from '../../safety.js';
 import type { Config } from '../../config.js';
 import type { Evidence } from '../../models.js';
 import snapshot from '../../../../../fixtures/sources/stripe-v12-changelog.md';
+import v11Snapshot from '../../../../../fixtures/sources/stripe-v11-changelog.md';
 export const CHANGE_ID='stripe-node-12-constructor-aliases';
 export const historicalUrl='https://raw.githubusercontent.com/stripe/stripe-node/v12.0.0/CHANGELOG.md';
 export const currentUrl='https://raw.githubusercontent.com/stripe/stripe-node/master/CHANGELOG.md';
@@ -29,7 +30,7 @@ export async function fetchSource(url:string,config:Config['sources'],fetcher:ty
 }
 export async function collectSources(root:string,offline:boolean,config:Config,fetcher:typeof fetch=fetch) {
   if(!config.vendors.stripe.enabled) return {evidence:[],releases:[],newlyObserved:[],unclassified:[]};
-  const evidence:Evidence[]=[{url:historicalUrl,sha256:hash(snapshot),origin:'offline snapshot',release:'12.0.0'}];
+  const evidence:Evidence[]=[{url:historicalUrl,sha256:hash(snapshot),origin:'offline snapshot',release:'12.0.0'},{url:'https://raw.githubusercontent.com/stripe/stripe-node/v11.0.0/CHANGELOG.md',sha256:hash(v11Snapshot),origin:'offline snapshot',release:'11.0.0'}];
   let text=snapshot;
   if(!offline) {
     const path=contained(root,'.changelume/cache/stripe.json');let origin:Evidence['origin']='network';

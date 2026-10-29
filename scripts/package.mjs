@@ -1,0 +1,12 @@
+import {mkdirSync,cpSync,writeFileSync,readFileSync,readdirSync} from 'node:fs';
+import {resolve} from 'node:path';
+import {createHash} from 'node:crypto';
+import {spawnSync} from 'node:child_process';
+const directory=resolve('.demo/release-candidate');mkdirSync(directory,{recursive:true});
+cpSync('dist',resolve(directory,'dist'),{recursive:true});cpSync('LICENSE',resolve(directory,'LICENSE'));cpSync('README.md',resolve(directory,'README.md'));cpSync('action.yml',resolve(directory,'action.yml'));cpSync('docs',resolve(directory,'docs'),{recursive:true});
+cpSync('fixtures/before',resolve(directory,'examples/offline'),{recursive:true});cpSync('fixtures/integration',resolve(directory,'examples/stripe'),{recursive:true,filter:p=>!p.split(/[\\/]/).includes('node_modules')});
+writeFileSync(resolve(directory,'package.json'),JSON.stringify({name:'changelume',version:'0.2.0-rc.1',description:'Local evidence-backed Stripe migration CLI',license:'Apache-2.0',engines:{node:'>=24 <25'},bin:{changelume:'dist/cli.cjs'},files:['dist','docs','examples','action.yml','LICENSE','README.md']},null,2));
+const npm=process.env.CHANGELUME_NPM_CLI;
+if(!npm) throw new Error('Set CHANGELUME_NPM_CLI to npm/bin/npm-cli.js to pack the candidate. This command never publishes.');
+const result=spawnSync(process.execPath,[npm,'pack','--ignore-scripts','--json'],{cwd:directory,encoding:'utf8'});if(result.status!==0)throw new Error(result.stderr);
+const packed=JSON.parse(result.stdout)[0];const archive=resolve(directory,packed.filename);const digest=createHash('sha256').update(readFileSync(archive)).digest('hex');writeFileSync(resolve(directory,'SHA256SUMS'),`${digest}  ${packed.filename}\n`);console.log(JSON.stringify({archive,sha256:digest,files:packed.files.length},null,2));

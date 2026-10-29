@@ -14,7 +14,7 @@ export async function publish(b:Bundle,config:Config,repository:string,client:Gi
   const prs=await client.rest.pulls.list({owner,repo,head:`${owner}:${branch}`,state:'all',per_page:100});
   const existing=prs.data[0];
   // Never force-update an existing migration branch, even if a human has edited it.
-  if(existing) return {url:existing.html_url,reused:true};
+  if(existing) {if(existing.state==='closed'&&!existing.merged_at)throw new Error('Migration PR was closed without merging; inspect it before restarting this revision');return {url:existing.html_url,reused:true};}
   let existingSha:string|undefined;
   try {existingSha=(await client.rest.git.getRef({owner,repo,ref:`heads/${branch}`})).data.object.sha;}
   catch(error) {if((error as {status?:number}).status!==404) throw error;}
@@ -30,6 +30,6 @@ export async function publish(b:Bundle,config:Config,repository:string,client:Gi
     const commit=await client.rest.git.createCommit({owner,repo,message:expectedMarker,tree:tree.data.sha,parents:[b.revision]});
     await client.rest.git.createRef({owner,repo,ref:`refs/heads/${branch}`,sha:commit.data.sha});
   }
-  const pr=await client.rest.pulls.create({owner,repo,head:branch,base:config.pr.base,title:'Migrate supported Stripe constructor aliases',body:markdown(b.plan,b.verification),draft:config.pr.draft||b.verification.status!=='passed'});
+  const pr=await client.rest.pulls.create({owner,repo,head:branch,base:config.pr.base,title:'Migrate supported Stripe usages',body:markdown(b.plan,b.verification),draft:config.pr.draft||b.verification.status!=='passed'});
   return {url:pr.data.html_url,reused:false};
 }

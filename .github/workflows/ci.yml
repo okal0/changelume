@@ -23,3 +23,5 @@ jobs:
       - run: git diff --exit-code -- dist
       - run: pnpm demo > demo-output.txt
       - run: node scripts/integration.mjs
+      - run: node scripts/beta.mjs
+      - run: node scripts/package-smoke.mjs

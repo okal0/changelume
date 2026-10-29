@@ -4,10 +4,12 @@
 | --- | --- | --- |
 | Language | `.ts` and `.tsx` local lexical bindings | Cross-file data flow, JS, generated files, wrappers, exported client propagation |
 | Package evidence | Root npm package.json and package-lock v1/v2/v3; explicit override | Nested Stripe versions, pnpm/yarn customer locks, unverifiable versions |
-| Imports | Runtime default `import S from 'stripe'`, including aliases | Named, namespace, type-only, CommonJS and dynamic imports |
+| Imports | Runtime default `import S from 'stripe'`, and named `Stripe`/`default` imports, including aliases | Namespace, type-only, CommonJS require and dynamic imports |
 | Recipe | `new S.Stripe(...)` / `new S.default(...)` → `new S(...)` for resolved SDK 11/12 | Computed access, non-constructor alias use, missing version, other majors |
 | Module applicability | Stripe 12 native ESM runtime removal; Stripe 11 ESM preparation; compatible CommonJS cleanup | CommonJS retains aliases; historical declarations still accept them. Unknown/nested module settings require review |
+| Request-option recipes | Five legacy option names on inline `customers.create(params, options)` in SDK 10/11/12 | Spreads, collisions, computed keys, escaped/reassigned clients, other operations and variable options |
 | Client inventory | Direct local variable initialized with `new S(...)` or supported alias | Factory wrappers and escapes |
+| Cross-file inventory | Relative named imports of exported const clients and simple single-return factories, reported for manual review | Re-exports, default-exported clients, arbitrary factories, cross-file edits, dynamic routing |
 | Method inventory | customers, paymentIntents, charges, checkout.sessions create/retrieve/list/update/del on traced clients | Other methods explicitly marked unsupported; method inventory is not migration coverage |
 | Field inventory | Constructor aliases, literal request `apiVersion` | Arbitrary response fields and indirect options objects |
 | Versions | SDK resolved version, literal client/request API versions, webhook configuration override | External account and endpoint versions unknown; webhook call locations do not establish endpoint versions |
