@@ -30,8 +30,11 @@ The user-authorized [private test repository](https://github.com/okal0/changelum
 | Duplicate prevention | [Repeat run](https://github.com/okal0/changelume-consumer-test/actions/runs/40940131161) | Succeeded with exactly the same PR and head commit `8ca4b3ec8acc72496b0e0f193019e274c8a6da00`; no duplicate or branch overwrite |
 | Base branch moved after workflow revision capture | [Stale-base run](https://github.com/okal0/changelume-consumer-test/actions/runs/40940342864) | Analysis and verification passed; publication rejected the changed base and created no PR for the stale candidate |
 | Deliberate verification failure | [Failure-gate run](https://github.com/okal0/changelume-consumer-test/actions/runs/40940741407) | npm installation and type checking passed; fixture verifier exited 9; publication was skipped. Downloaded report retained `Intentional verification failure for publication-gate validation` |
+| Restored passing consumer with persistent observations | [Final consumer run](https://github.com/okal0/changelume-consumer-test/actions/runs/40940935328) | All three jobs passed and created [draft PR #2](https://github.com/okal0/changelume-consumer-test/pull/2) for the new analyzed revision. Downloaded analysis report showed zero newly observed releases after cache restoration |
 
 PR #1 was checked through the GitHub API: its only changed paths are `src/index.ts` (one constructor expression) and `changelume.lock.json`. Nothing was merged. Verification runs on a separate runner with no project secrets or write token, stripped child environment, and non-persisted checkout credentials; the real-SDK verifier asserts publishing/LLM credentials are absent. Publication does not run customer scripts.
+
+PR #2 was also checked through the API and contains the same two permitted paths only. It corresponds to a different analyzed revision, not a duplicate of PR #1. The deliberately failing fixture was restored before the final successful run. Latest implementation/test follow-up CI: [45-test cross-platform run](https://github.com/okal0/changelume/actions/runs/40941135354).
 
 ### Remaining limits
 
