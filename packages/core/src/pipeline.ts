@@ -27,8 +27,15 @@ export function verify(root:string,commands:Config['verification']):Verification
   const results:Verification['results']=[];
   for(const c of commands) {
     const env:NodeJS.ProcessEnv={};for(const key of ['PATH','Path','SystemRoot','WINDIR','TEMP','TMP','PATHEXT']) if(process.env[key]) env[key]=process.env[key];
-    const result=spawnSync(c.command,c.args,{cwd:root,env,timeout:c.timeoutMs,stdio:'ignore',shell:false,windowsHide:true});
-    results.push({command:[c.command,...c.args].join(' '),exitCode:result.status,timedOut:result.error?.message.includes('ETIMEDOUT')??false});
+    const result=spawnSync(c.command,c.args,{cwd:root,env,timeout:c.timeoutMs,encoding:'utf8',maxBuffer:65536,stdio:['ignore','pipe','pipe'],shell:false,windowsHide:true});
+    const sanitize=(value:string)=>{
+      let text=value.replace(/\x1b\[[0-?]*[ -/]*[@-~]/g,'').replace(/(?:sk|rk)_(?:live|test)_[\w-]+|sk-[\w-]{12,}|gh[pousr]_[\w]+/g,'[REDACTED]').replace(/((?:authorization|api[_-]?key|password|secret|token)\s*[:=]\s*)(?:Bearer\s+)?[^\s,;]+/gi,'$1[REDACTED]');
+      for(const [name,secret] of Object.entries(process.env)) if(secret&&secret.length>=4&&/KEY|TOKEN|SECRET|PASSWORD|CREDENTIAL/i.test(name)) text=text.split(secret).join('[REDACTED]');
+      return text.slice(0,16384);
+    };
+    const stdout=result.stdout??'', stderr=result.stderr??'';
+    const errorCode=(result.error as NodeJS.ErrnoException|undefined)?.code;
+    results.push({command:sanitize([c.command,...c.args].join(' ')),exitCode:result.error?null:result.status,timedOut:errorCode==='ETIMEDOUT',stdout:sanitize(stdout),stderr:sanitize(stderr+(result.error?'\nVerification process error: '+errorCode:'')),outputTruncated:stdout.length>16384||stderr.length>16384||errorCode==='ENOBUFS'});
     if(result.status!==0) break;
   }
   return {status:results.length===0?'skipped':results.every(r=>r.exitCode===0)?'passed':'failed',results};
@@ -40,7 +47,8 @@ export function publicPlan(p:Plan) {return {...p,edits:p.edits.map(e=>({path:e.p
 export function saveReport(root:string,p:Plan,verification:Verification={status:'skipped',results:[]}) {
   const dir=contained(root,'.changelume');mkdirSync(dir,{recursive:true});
   writeFileSync(contained(root,'.changelume/report.json'),JSON.stringify({plan:publicPlan(p),verification},null,2)+'\n');
-  writeFileSync(contained(root,'.changelume/report.md'),markdown(p,verification));
+  const diagnostics=verification.results.map((r,i)=>`\n### Command ${i+1} diagnostics${r.outputTruncated?' (truncated)':''}\n\n`+[r.stdout,r.stderr].filter(Boolean).join('\n').split('\n').map(line=>'    '+line).join('\n')).join('\n');
+  writeFileSync(contained(root,'.changelume/report.md'),markdown(p,verification)+(diagnostics?'\n## Verification output\n'+diagnostics+'\n':''));
 }
 export function candidate(root:string,p:Plan,runVerification=true):Bundle {
   assertClean(root); if(revision(root)!==p.revision) throw new Error('Repository revision changed');

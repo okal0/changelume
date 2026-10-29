@@ -3,9 +3,18 @@ import { readFileSync } from 'node:fs';
 import type { Config } from '../config.js';
 import type { Plan, Edit } from '../models.js';
 import { contained, hash, outputSchema, validateEdits } from '../safety.js';
+import { Project, Node, SyntaxKind } from 'ts-morph';
 export interface LlmProvider {complete(context:string):Promise<unknown>}
 export function assertNoCredentials(text:string) {
-  if(/(?:sk|rk)_(?:live|test)_[a-zA-Z0-9]+|sk-[a-zA-Z0-9_-]{12,}|gh[pousr]_[a-zA-Z0-9]+|-----BEGIN .*PRIVATE KEY|(?:apiKey|password|secret|token)\s*[:=]\s*['"][^'"]+['"]|new\s+[\w.]+\s*\(\s*['"][^'"]+['"]/i.test(text)) throw new Error('Potential credential literal: use environment references before generating or transmitting source artifacts');
+  let credential=/(?:sk|rk)_(?:live|test)_[a-zA-Z0-9]+|sk-[a-zA-Z0-9_-]{12,}|gh[pousr]_[a-zA-Z0-9]+|-----BEGIN .*PRIVATE KEY|(?:apiKey|password|secret|token)\s*[:=]\s*['"][^'"]+['"]/i.test(text);
+  const source=new Project({useInMemoryFileSystem:true}).createSourceFile('context.ts',text);
+  const imports=new Set(source.getImportDeclarations().filter(i=>i.getModuleSpecifierValue()==='stripe').map(i=>i.getDefaultImport()?.getSymbol()).filter(Boolean));
+  for(const expression of source.getDescendantsOfKind(SyntaxKind.NewExpression)) {
+    let root=expression.getExpression();while(Node.isPropertyAccessExpression(root)) root=root.getExpression();
+    const arg=expression.getArguments()[0];
+    if(Node.isIdentifier(root)&&imports.has(root.getSymbol())&&arg&&(Node.isStringLiteral(arg)||Node.isNoSubstitutionTemplateLiteral(arg))) credential=true;
+  }
+  if(credential) throw new Error('Potential credential literal: use environment references before generating or transmitting source artifacts');
 }
 export function contextFor(root:string,p:Plan) {
   const files=p.edits.map(e=>{const content=readFileSync(contained(root,e.path),'utf8');assertNoCredentials(content);return {path:e.path,beforeHash:e.beforeHash,content};});

@@ -4,10 +4,10 @@ import { resolve } from 'node:path';
 import { tmpdir } from 'node:os';
 import { configSchema, loadConfig } from '../packages/core/src/config.js';
 import { analyze } from '../packages/core/src/languages/typescript/analyze.js';
-import { plan, candidate, applyCandidate, baseline } from '../packages/core/src/pipeline.js';
+import { plan, candidate, applyCandidate, baseline, verify } from '../packages/core/src/pipeline.js';
 import { git } from '../packages/core/src/git.js';
 import { hash, validateEdits } from '../packages/core/src/safety.js';
-import { contextFor, assistedEdits, OpenAIProvider } from '../packages/core/src/llm/provider.js';
+import { contextFor, assistedEdits, OpenAIProvider, assertNoCredentials } from '../packages/core/src/llm/provider.js';
 import { fetchSource, releaseHeadings } from '../packages/core/src/vendors/stripe/sources.js';
 import { publish, type GitHubClient } from '../packages/core/src/github/publish.js';
 const roots:string[]=[];
@@ -42,4 +42,30 @@ describe('sources and publishing',()=>{
   it('bounds retries and validates fetched content',async()=>{const fetcher=vi.fn().mockRejectedValue(new Error('offline'));await expect(fetchSource('https://example.invalid',{timeoutMs:100,retries:2},fetcher)).rejects.toThrow('bounded');expect(fetcher).toHaveBeenCalledTimes(3);const good=vi.fn().mockResolvedValue(new Response('## 12.0.0\n'));expect(await fetchSource('https://example.invalid',{timeoutMs:100,retries:0},good)).toContain('12.0.0');});
   it('returns existing PR without overwriting human changes',async()=>{const root=fixture(),config=loadConfig(root),b=candidate(root,await plan(root,config,true),false);const list=vi.fn().mockResolvedValue({data:[{html_url:'https://github.com/test/repo/pull/1'}]});const createRef=vi.fn();const client={rest:{pulls:{list},git:{createRef}}} as unknown as GitHubClient;expect(await publish(b,config,'test/repo',client)).toEqual({url:'https://github.com/test/repo/pull/1',reused:true});expect(createRef).not.toHaveBeenCalled();});
   it('creates a draft PR from the exact analyzed base, never executes customer code',async()=>{const root=fixture(),config=loadConfig(root),b=candidate(root,await plan(root,config,true),false);const create=vi.fn().mockResolvedValue({data:{html_url:'https://github.com/test/repo/pull/2'}});const client={rest:{pulls:{list:vi.fn().mockResolvedValue({data:[]}),create},repos:{getCommit:vi.fn().mockResolvedValue({data:{sha:b.revision,commit:{tree:{sha:'tree'}}}})},git:{getRef:vi.fn().mockRejectedValue({status:404}),createTree:vi.fn().mockResolvedValue({data:{sha:'newtree'}}),createCommit:vi.fn().mockResolvedValue({data:{sha:'newcommit'}}),createRef:vi.fn().mockResolvedValue({})}}} as unknown as GitHubClient;await publish(b,config,'test/repo',client);expect(create).toHaveBeenCalledWith(expect.objectContaining({draft:true}));b.verification.status='failed';await expect(publish(b,config,'test/repo',client)).rejects.toThrow('failed');});
+});
+
+describe('review regressions',()=>{
+  it.each(['S.Stripe = Custom;', 'S["Stripe"] = Custom;', 'mutate(S);', 'const alias = S;', 'Object.assign(S, options);'])('declines mutated or escaped import: %s',async mutation=>{
+    const root=fixture(`import S from 'stripe'; ${mutation} const client = new S.Stripe(process.env.KEY!);`);
+    const p=await plan(root,loadConfig(root),true);expect(p.edits).toEqual([]);expect(p.findings.some(f=>f.outcome==='confirmed impact')).toBe(false);expect(p.findings.some(f=>f.outcome==='unsupported analysis')).toBe(true);
+  });
+  it('permits ordinary string constructors while rejecting literal Stripe credentials',()=>{
+    expect(()=>assertNoCredentials(`import S from 'stripe'; new Date('2026-01-01'); new Error('message'); new S(process.env.KEY!);`)).not.toThrow();
+    expect(()=>assertNoCredentials(`import Payments from 'stripe'; new Payments.Stripe('arbitrary-key');`)).toThrow('credential');
+  });
+  it('preserves bounded sanitized failure diagnostics',()=>{
+    const root=fixture();const result=verify(root,[{command:process.execPath,args:['-e',`console.log('useful compiler error'); console.error('token=example-secret'); console.log('x'.repeat(20000)); process.exit(1)`],timeoutMs:10000}]);
+    expect(result.status).toBe('failed');expect(result.results[0]?.stdout).toContain('useful compiler error');expect(result.results[0]?.stderr).toContain('[REDACTED]');expect(result.results[0]?.stderr).not.toContain('example-secret');expect(result.results[0]?.stdout!.length).toBeLessThanOrEqual(16384);expect(result.results[0]?.outputTruncated).toBe(true);
+  });
+  it('retries PR creation after failure but rejects human changes',async()=>{
+    const root=fixture(),config=loadConfig(root),b=candidate(root,await plan(root,config,true),false);
+    let branch=false;let generated:any;
+    const create=vi.fn().mockRejectedValueOnce(new Error('temporary API failure')).mockResolvedValue({data:{html_url:'https://github.com/test/repo/pull/3'}});
+    const getCommit=vi.fn(async()=>({data:generated}));
+    const createRef=vi.fn(async()=>{branch=true;return {};});
+    const client={rest:{pulls:{list:vi.fn().mockResolvedValue({data:[]}),create},repos:{getCommit:vi.fn().mockResolvedValue({data:{sha:b.revision,commit:{tree:{sha:'base'}}}})},git:{getRef:vi.fn(async()=>{if(!branch) throw {status:404};return {data:{object:{sha:'generated'}}};}),getCommit,createTree:vi.fn().mockResolvedValue({data:{sha:'expected-tree'}}),createCommit:vi.fn(async(args:any)=>{generated={message:args.message,tree:{sha:args.tree},parents:args.parents.map((sha:string)=>({sha}))};return {data:{sha:'generated'}};}),createRef}}} as unknown as GitHubClient;
+    await expect(publish(b,config,'test/repo',client)).rejects.toThrow('temporary');
+    await expect(publish(b,config,'test/repo',client)).resolves.toEqual({url:'https://github.com/test/repo/pull/3',reused:false});expect(createRef).toHaveBeenCalledTimes(1);
+    generated.tree.sha='human-tree';await expect(publish(b,config,'test/repo',client)).rejects.toThrow('human changes');expect(create).toHaveBeenCalledTimes(2);
+  });
 });

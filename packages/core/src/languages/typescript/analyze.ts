@@ -42,6 +42,14 @@ export function analyze(root:string,config:Config):{inventory:Inventory;edits:Ed
     const clientVersions=new Map<ReturnType<Node['getSymbol']>,string>();
     const add=(node:Node,kind:Usage['kind'],symbol:string,extra:Partial<Usage>={})=>inventory.usages.push({file:name,line:node.getStartLineNumber(),kind,symbol,...extra});
     const isRoot=(node:Node)=>Node.isIdentifier(node)&&roots.has(node.getSymbol());
+    const unsafeRoots=new Set<ReturnType<Node['getSymbol']>>();
+    for(const id of source.getDescendantsOfKind(SyntaxKind.Identifier)) {
+      if(!isRoot(id)) continue;
+      const parent=id.getParent();
+      const safe=Node.isImportClause(parent)||Node.isNewExpression(parent)&&parent.getExpression()===id||
+        Node.isPropertyAccessExpression(parent)&&parent.getExpression()===id&&['Stripe','default'].includes(parent.getName())&&Node.isNewExpression(parent.getParent())&&(parent.getParent() as import('ts-morph').NewExpression).getExpression()===parent;
+      if(!safe) unsafeRoots.add(id.getSymbol());
+    }
     for(const imp of imports) {add(imp,'import',imp.getDefaultImport()?.getText()??'non-default Stripe import');if(!imp.getDefaultImport()||imp.isTypeOnly()) add(imp,'unsupported','Only runtime default imports are supported');}
     const replacements:{start:number;end:number;text:string}[]=[];
     for(const n of source.getDescendantsOfKind(SyntaxKind.NewExpression)) {
@@ -57,6 +65,7 @@ export function analyze(root:string,config:Config):{inventory:Inventory;edits:Ed
       if(Node.isVariableDeclaration(parent)&&Node.isIdentifier(parent.getNameNode())) {clients.add(parent.getNameNode().getSymbol());clientVersions.set(parent.getNameNode().getSymbol(),version);}
       else add(n,'unsupported','Client is not bound to a simple local variable');
       if(alias&&Node.isPropertyAccessExpression(expr)) {
+        if(unsafeRoots.has(expr.getExpression().getSymbol())) {add(expr,'unsupported','Stripe constructor binding is mutated, escaped, or used outside supported constructors');continue;}
         add(expr,'field',expr.getText(),{start:expr.getStart(),end:expr.getEnd(),replacement:expr.getExpression().getText()});
         const major=Number(inventory.resolved?.split('.')[0]);
         if((major===11||major===12)&&!inventory.limitations.some(l=>l.startsWith('Nested'))&&!imports.some(i=>i.isTypeOnly())) replacements.push({start:expr.getStart(),end:expr.getEnd(),text:expr.getExpression().getText()});
