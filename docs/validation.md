@@ -11,4 +11,28 @@ Validated locally on Windows with Node 24.22.1 and pnpm 11.25.0 on 2026-10-29.
 - Official v12 snapshot SHA-256: `bb732797b390c6ee3573d4f317df3d778cc1160f2192824fcbf9e4f99d0762f9`.
 - Third-party Action tag-to-commit pins were checked directly against upstream Git repositories.
 
-GitHub publishing was validated using mocked Octokit calls. The bundled analysis/verification stages were exercised locally as separate processes. No live GitHub workflow run, external PR, package publication, paid LLM call, or Stripe integration test was performed. CI configuration is supplied for Linux, but this local validation used Windows. Do not interpret recipe fixture assertions as proof of vendor API compatibility.
+The original validation above used mocked publication and the synthetic offline fixture. The following follow-up supersedes those original validation limitations. No package, release, paid LLM request, or vendor account/API operation was performed.
+
+## Roadmap milestones 1–4 follow-up
+
+- Local strict type checking, build, and **45 tests passed**. Added coverage for observation history versus acceptance, retained unresolved releases, cache reuse/expiry/corruption, changed source format, disabled vendors, module-mode applicability, alternate constructor mutations, startup errors, timeouts, excessive output, known environment-secret redaction, rollback after a simulated replacement failure, cleanup failure with report preservation, and actionable Action integrity errors.
+- [Linux and Windows CI](https://github.com/okal0/changelume/actions/runs/40940100652) passed on implementation commit `adb8574`. Both jobs ran strict checks, packaged Action tests, bundle reproducibility checking, the offline demo, and the real-SDK integration. A discovered pnpm path-comment difference between Windows and Linux was normalized in the build output.
+- `node scripts/integration.mjs` passed locally with actual `stripe@11.18.0` and `stripe@12.0.0`, TypeScript 5.9.3, and a complete npm lockfile. Native ESM reproduced the original constructor failure and validated the migrated constructor. CommonJS aliases remain functional. Historical declarations permit the removed ESM alias, so before-source type checking passes even when runtime fails. No Stripe requests were made. Dry-run preserved source and the accepted second plan proposed zero edits.
+
+### Live private consumer evidence
+
+The user-authorized [private test repository](https://github.com/okal0/changelume-consumer-test) contains a vendored Action and real-SDK consumer fixture. Run links require repository access.
+
+| Scenario | Evidence | Result |
+| --- | --- | --- |
+| Publication interrupted after branch creation | [First attempt](https://github.com/okal0/changelume-consumer-test/actions/runs/40939023984/attempts/1) | Analysis and verification passed. GitHub rejected PR creation because Actions PR permission was disabled; generated branch remained |
+| Safe retry with intact generated branch | [Second attempt](https://github.com/okal0/changelume-consumer-test/actions/runs/40939023984/attempts/2) | After enabling Actions PR creation in the test repository, retry succeeded and created [draft PR #1](https://github.com/okal0/changelume-consumer-test/pull/1) |
+| Duplicate prevention | [Repeat run](https://github.com/okal0/changelume-consumer-test/actions/runs/40940131161) | Succeeded with exactly the same PR and head commit `8ca4b3ec8acc72496b0e0f193019e274c8a6da00`; no duplicate or branch overwrite |
+| Base branch moved after workflow revision capture | [Stale-base run](https://github.com/okal0/changelume-consumer-test/actions/runs/40940342864) | Analysis and verification passed; publication rejected the changed base and created no PR for the stale candidate |
+| Deliberate verification failure | [Failure-gate run](https://github.com/okal0/changelume-consumer-test/actions/runs/40940741407) | npm installation and type checking passed; fixture verifier exited 9; publication was skipped. Downloaded report retained `Intentional verification failure for publication-gate validation` |
+
+PR #1 was checked through the GitHub API: its only changed paths are `src/index.ts` (one constructor expression) and `changelume.lock.json`. Nothing was merged. Verification runs on a separate runner with no project secrets or write token, stripped child environment, and non-persisted checkout credentials; the real-SDK verifier asserts publishing/LLM credentials are absent. Publication does not run customer scripts.
+
+### Remaining limits
+
+Coverage remains the one documented constructor cleanup. Real-SDK tests establish the selected ESM/CommonJS behaviors; they do not establish overall Stripe API compatibility. Observation history is disposable and resets if local state or Actions cache is removed. Output redaction is heuristic. Rollback handles caught replacement errors, while a hard process termination may require using the preserved recovery manifest. Additional vendors, general LLM edits, package publication, and milestone 5 are outside this work.

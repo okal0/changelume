@@ -45,7 +45,7 @@ describe('sources and publishing',()=>{
 });
 
 describe('review regressions',()=>{
-  it.each(['S.Stripe = Custom;', 'S["Stripe"] = Custom;', 'mutate(S);', 'const alias = S;', 'Object.assign(S, options);'])('declines mutated or escaped import: %s',async mutation=>{
+  it.each(['S.Stripe = Custom;', 'S["Stripe"] = Custom;', 'mutate(S);', 'const alias = S;', 'Object.assign(S, options);', 'const alias = S; alias.Stripe = Custom;', "Object.defineProperty(S, 'Stripe', {value: Custom});", '(S as any).Stripe = Custom;'])('declines mutated or escaped import: %s',async mutation=>{
     const root=fixture(`import S from 'stripe'; ${mutation} const client = new S.Stripe(process.env.KEY!);`);
     const p=await plan(root,loadConfig(root),true);expect(p.edits).toEqual([]);expect(p.findings.some(f=>f.outcome==='confirmed impact')).toBe(false);expect(p.findings.some(f=>f.outcome==='unsupported analysis')).toBe(true);
   });

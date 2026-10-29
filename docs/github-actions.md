@@ -28,4 +28,6 @@ Checked against [official GitHub documentation](https://docs.github.com/en/actio
 
 Third-party Action pins were verified with `git ls-remote` against upstream tags: checkout v4.2.2 (`11bd719...`), setup-node v4.4.0 (`49933ea...`), upload-artifact v4.6.2 (`ea165f8...`), download-artifact v4.3.0 (`d3f86a1...`). Update pins through reviewed changes. The Changelume action itself uses the Node 24 runner runtime; use current GitHub-hosted runners or a self-hosted runner that supports `node24` actions.
 
-No live GitHub PR was created during MVP validation. Mocked API tests cover publication and duplicate prevention; local process tests cover Action stage artifact validation.
+The analysis job also uses verified actions/cache v4.2.3 (`5a3ec84...`) for disposable observation history and source cache. Each trusted default-branch run saves a new cache generation. Accepted migration state stays in the repository baseline, outside this cache. Deleting/evicting the cache resets what counts as newly observed without accepting any migration. Analysis does not restore source-containing candidate bundles from this cache.
+
+Mocked API tests cover publication and duplicate prevention; local process tests cover Action stage artifact validation. Live private-consumer workflow runs, including draft PR creation, safe retry, duplicate prevention, and failure gates, are linked in [the validation record](validation.md).

@@ -2,6 +2,8 @@
 
 Prioritize proving the existing migration in a real consumer repository before expanding coverage.
 
+Milestones 1–4 have been implemented and exercised. See [validation evidence](validation.md) for live private-consumer runs, cross-platform CI, real-SDK results, and explicit limitations. Milestone 5 remains future work; no package or release has been published.
+
 ## 1. Validate the GitHub Action end to end
 
 Use a separate private test repository containing a reproducible affected TypeScript application and a complete npm lockfile. Vendor the reviewed Action distribution and configure explicit installation, type checking, and tests in the unprivileged verification job. Run workflow_dispatch on its default branch.

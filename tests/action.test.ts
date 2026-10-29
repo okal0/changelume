@@ -20,5 +20,5 @@ it('bundled Action generates a revision-bound candidate and verifies it without 
 it('bundled Action rejects tampered artifacts before application',()=>{
   const root=setup(),analysis=invoke(root,{stage:'analyze',offline:'true'});expect(analysis.status).toBe(0);
   writeFileSync(resolve(root,'.changelume/migration.patch'),'tampered');
-  const result=invoke(root,{stage:'verify',revision:analysis.values.revision!,'bundle-hash':analysis.values['bundle-hash']!,'patch-hash':analysis.values['patch-hash']!});expect(result.status).toBe(1);expect(readFileSync(resolve(root,'src/index.ts'),'utf8')).toContain('new Payments.Stripe(');
+  const result=invoke(root,{stage:'verify',revision:analysis.values.revision!,'bundle-hash':analysis.values['bundle-hash']!,'patch-hash':analysis.values['patch-hash']!});expect(result.status).toBe(1);expect(result.stderr).toContain('Patch integrity mismatch');expect(readFileSync(resolve(root,'src/index.ts'),'utf8')).toContain('new Payments.Stripe(');
 });
