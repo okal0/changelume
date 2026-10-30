@@ -272612,8 +272612,10 @@ var pythonAdapter = { id: "python", analyze(root, config2) {
   const inventory = { vendor: "stripe", sdkPackage: "stripe", versionOrigin: "unknown", usages: [], limitations: ["Python preview: top-level import stripe[ as alias], stripe.oauth_error OAuth exception spelling only; scopes and attribute mutations decline edits. Exact requirements.txt pin required."], webhookVersion: "unknown" };
   const requirements = (0, import_node_path6.resolve)(root, "requirements.txt");
   if ((0, import_node_fs6.existsSync)(requirements)) {
-    const versions = [...(0, import_node_fs6.readFileSync)(requirements, "utf8").matchAll(/^stripe==([0-9]+\.[0-9]+\.[0-9]+)\s*$/gm)];
-    if (versions.length === 1) {
+    const text = (0, import_node_fs6.readFileSync)(requirements, "utf8");
+    const directives = text.split(/\r?\n/).filter((line) => /^\s*stripe(?:[=<>!~;\s\[]|$)/i.test(line));
+    const versions = [...text.matchAll(/^stripe==([0-9]+\.[0-9]+\.[0-9]+)\s*$/gm)];
+    if (versions.length === 1 && directives.length === 1 && !/^\s*-(r|c|e|\-)/m.test(text)) {
       inventory.resolved = inventory.declared = versions[0][1];
       inventory.versionOrigin = "requirements.txt exact pin";
     }
@@ -272639,7 +272641,7 @@ var pythonAdapter = { id: "python", analyze(root, config2) {
       if (result.status !== 0) throw new Error("Python AST analysis failed; ensure pythonCommand points to Python 3. No customer code is executed.");
       const parsed = JSON.parse(result.stdout);
       projectUnsafe ||= parsed.unsafe;
-      const applicable = [4, 5].includes(Number(inventory.resolved?.split(".")[0]));
+      const applicable = [5].includes(Number(inventory.resolved?.split(".")[0]));
       for (const u of parsed.usages) inventory.usages.push({ ...u, file: name, kind: applicable ? u.kind : "unsupported", editPlanned: applicable && u.editPlanned });
       if (applicable && parsed.content !== before) edits.push({ path: name, beforeHash: hash2(before), content: parsed.content });
     }
