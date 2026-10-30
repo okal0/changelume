@@ -297366,7 +297366,7 @@ async function plan(root, config2, offline = false, stateRoot = root) {
     }
     const prefix = (path2, file2) => path2 === "." ? file2 : path2 + "/" + file2;
     const first = plans[0];
-    const projects = units.map((unit, index) => ({ path: unit.path, language: unit.language, inventory: plans[index].inventory, upgrade: plans[index].upgrade, verificationCount: plans[index].verification.length, evidence: plans[index].evidence, observedReleases: plans[index].observedReleases, newlyObserved: plans[index].newlyObserved }));
+    const projects = units.map((unit, index) => ({ path: unit.path, language: unit.language, inventory: plans[index].inventory, upgrade: plans[index].upgrade, verificationCount: plans[index].verification.length, editedFiles: plans[index].edits.map((e) => prefix(unit.path, e.path)), evidence: plans[index].evidence, observedReleases: plans[index].observedReleases, newlyObserved: plans[index].newlyObserved }));
     const edits2 = plans.flatMap((p, index) => p.edits.map((e) => ({ ...e, path: prefix(units[index].path, e.path) })));
     if (new Set(edits2.map((e) => process.platform === "win32" ? e.path.toLowerCase() : e.path)).size !== edits2.length) throw new Error("Overlapping project edits; select one adapter or upgrade per file");
     const usages = plans.flatMap((p, index) => p.inventory.usages.map((u) => ({ ...u, file: prefix(units[index].path, u.file) })));
@@ -297561,7 +297561,7 @@ function persistQueue(root, p) {
 }
 function assertVerificationCoverage(p) {
   for (const unit of p.projects ?? []) {
-    const affected = p.edits.some((e) => unit.path === "." ? !p.projects.some((other) => other.path !== "." && e.path.startsWith(other.path + "/")) : e.path.startsWith(unit.path + "/"));
+    const affected = unit.editedFiles ? unit.editedFiles.length > 0 : p.edits.some((e) => unit.path === "." ? !p.projects.some((other) => other.path !== "." && e.path.startsWith(other.path + "/")) : e.path.startsWith(unit.path + "/"));
     if (affected && !unit.verificationCount) throw new Error("Configure trusted verification commands for edited project " + unit.path + " [" + unit.language + "] before migration");
   }
 }

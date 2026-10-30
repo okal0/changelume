@@ -24,7 +24,7 @@ export function baseline(root:string) {const path=contained(root,'changelume.loc
 export async function plan(root:string,config:Config,offline=false,stateRoot=root):Promise<Plan> {
   if(config.projects){const units=projectConfigs(root,config);if(!units.length)throw new Error('No recognized project manifests found');const plans:Plan[]=[];for(const unit of units){const childRoot=unit.path==='.'?root:contained(root,unit.path);plans.push(await plan(childRoot,unit.config,offline,root));}
    const prefix=(path:string,file:string)=>path==='.'?file:path+'/'+file;const first=plans[0]!;
-   const projects=units.map((unit,index)=>({path:unit.path,language:unit.language,inventory:plans[index]!.inventory,upgrade:plans[index]!.upgrade,verificationCount:plans[index]!.verification.length,evidence:plans[index]!.evidence,observedReleases:plans[index]!.observedReleases,newlyObserved:plans[index]!.newlyObserved}));
+   const projects=units.map((unit,index)=>({path:unit.path,language:unit.language,inventory:plans[index]!.inventory,upgrade:plans[index]!.upgrade,verificationCount:plans[index]!.verification.length,editedFiles:plans[index]!.edits.map(e=>prefix(unit.path,e.path)),evidence:plans[index]!.evidence,observedReleases:plans[index]!.observedReleases,newlyObserved:plans[index]!.newlyObserved}));
    const edits=plans.flatMap((p,index)=>p.edits.map(e=>({...e,path:prefix(units[index]!.path,e.path)})));if(new Set(edits.map(e=>process.platform==='win32'?e.path.toLowerCase():e.path)).size!==edits.length)throw new Error('Overlapping project edits; select one adapter or upgrade per file');
    const usages=plans.flatMap((p,index)=>p.inventory.usages.map(u=>({...u,file:prefix(units[index]!.path,u.file)})));
    const findings=plans.flatMap((p,index)=>p.findings.map(f=>({...f,location:f.location?{...f.location,file:prefix(units[index]!.path,f.location.file)}:undefined})));
@@ -134,4 +134,4 @@ function persistQueue(root:string,p:Plan){
  writeFileSync(contained(root,'.changelume/queue.json'),JSON.stringify({schemaVersion:1,revision:p.revision,items},null,2)+'\n');
 }
 
-export function assertVerificationCoverage(p:Plan){for(const unit of p.projects??[]){const affected=p.edits.some(e=>unit.path==='.'?!p.projects!.some(other=>other.path!=='.'&&e.path.startsWith(other.path+'/')):e.path.startsWith(unit.path+'/'));if(affected&&!unit.verificationCount)throw new Error('Configure trusted verification commands for edited project '+unit.path+' ['+unit.language+'] before migration');}}
+export function assertVerificationCoverage(p:Plan){for(const unit of p.projects??[]){const affected=unit.editedFiles?unit.editedFiles.length>0:p.edits.some(e=>unit.path==='.'?!p.projects!.some(other=>other.path!=='.'&&e.path.startsWith(other.path+'/')):e.path.startsWith(unit.path+'/'));if(affected&&!unit.verificationCount)throw new Error('Configure trusted verification commands for edited project '+unit.path+' ['+unit.language+'] before migration');}}
