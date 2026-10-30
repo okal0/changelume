@@ -25,6 +25,7 @@ jobs:
       - run: node scripts/integration.mjs
       - run: node scripts/application.mjs
       - run: node scripts/evaluation.mjs
+      - run: node scripts/polyglot.mjs
       - run: node scripts/beta.mjs
       - run: node scripts/benchmark.mjs
       - run: node scripts/package-smoke.mjs

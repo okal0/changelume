@@ -1,0 +1,60 @@
+{
+  "projects": [
+    {
+      "path": "web",
+      "language": "typescript",
+      "verification": [
+        {
+          "command": "node",
+          "args": [
+            "verify.cjs"
+          ]
+        }
+      ]
+    },
+    {
+      "path": "frontend",
+      "language": "javascript",
+      "verification": [
+        {
+          "command": "node",
+          "args": [
+            "verify.cjs"
+          ]
+        }
+      ]
+    },
+    {
+      "path": "backend",
+      "language": "python",
+      "verification": [
+        {
+          "command": "node",
+          "args": [
+            "verify.cjs"
+          ]
+        }
+      ]
+    },
+    {
+      "path": "worker",
+      "language": "go"
+    },
+    {
+      "path": "payments",
+      "language": "java"
+    },
+    {
+      "path": "billing",
+      "language": "csharp"
+    },
+    {
+      "path": "store",
+      "language": "php"
+    },
+    {
+      "path": "jobs",
+      "language": "ruby"
+    }
+  ]
+}

@@ -1,0 +1,3 @@
+GEM
+  specs:
+    stripe (13.0.0)

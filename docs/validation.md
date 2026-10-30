@@ -67,3 +67,11 @@ Human usability feedback and public/package release remain explicit gates. No re
 See [application repair, explicit upgrade and evaluation guide](preview-0.4.0.md). This supersedes inventory-only linked-option limitations for the selected documented patterns. Other coverage limits remain explicit.
 
 The 0.4 application upgrade passed [live consumer run](https://github.com/okal0/changelume-consumer-test/actions/runs/41081773173), creating [draft PR #5](https://github.com/okal0/changelume-consumer-test/pull/5). API inspection confirmed exactly src/index.ts, package.json, package-lock.json and changelume.lock.json. Installation, strict type checking and four mocked SDK HTTP requests passed. No vendor requests or merges occurred. Additional evaluation and behavioral reports are in evaluation-results-0.4.0.json and application-result-0.4.0.json; warning scoring is explicitly limited.
+
+## Eight-language support
+
+See [language capabilities and multi-project guide](languages.md). TypeScript, JavaScript and Python have selected automatic recipes; Go, Java, C#, PHP and Ruby provide inventory, lexical review and official SDK release monitoring.
+
+The 0.5 controlled repository discovered eight language units and produced exactly three expected edits (TypeScript, JavaScript, Python). Per-unit verification, dry-run preservation, source application and idempotence passed. Installed standalone CLI checks repeated the scenario successfully. New regression coverage includes native inventory/version boundaries, cache/observation reuse, project isolation, failure preservation and refusing repository-owned Python interpreters. Native Go/Java/.NET/PHP/Ruby toolchains were not executed.
+
+Live SDK feed checks on 2026-10-30 succeeded for all seven distinct official Stripe SDK changelogs (TypeScript/JavaScript share Node). Source URLs, SHA-256 hashes and observed counts are in live-language-feeds-0.5.0.json. Controlled multi-project results are in polyglot-results-0.5.0.json. These checks establish discovery/monitoring and the documented recipes, not automatic migration support for the five native inventory adapters.

@@ -1,0 +1,1 @@
+const assert=require('node:assert/strict');const text=require('node:fs').readFileSync('app.py','utf8');assert(text.includes('UnsupportedGrantTypeError'));assert(!text.includes('UnsupportedGrantTypError'));

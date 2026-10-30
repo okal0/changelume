@@ -1,0 +1,1 @@
+const assert=require('node:assert/strict');const text=require('node:fs').readFileSync('src/main.ts','utf8');assert(text.includes('new S('));assert(!text.includes('new S.Stripe('));

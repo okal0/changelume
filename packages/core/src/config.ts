@@ -3,18 +3,24 @@ import { resolve } from 'node:path';
 import { parse } from 'yaml';
 import { z } from 'zod';
 
+export const languageSchema=z.enum(['typescript','javascript','python','go','java','csharp','php','ruby']);
+export const verificationSchema=z.array(z.object({command:z.string().min(1),args:z.array(z.string()).default([]),timeoutMs:z.number().int().min(100).max(600000).default(120000),cwd:z.string().optional()}).strict());
+export const projectSchema=z.object({path:z.string().min(1),language:languageSchema,include:z.array(z.string()).optional(),exclude:z.array(z.string()).optional(),verification:verificationSchema.default([]),sdkVersion:z.string().regex(/^\d+\.\d+\.\d+$/).optional(),upgrade:z.object({from:z.string(),to:z.string()}).strict().optional()}).strict();
+export const defaultIncludes:Record<z.infer<typeof languageSchema>,string[]>={typescript:['**/*.ts','**/*.tsx','**/*.js','**/*.jsx'],javascript:['**/*.js','**/*.jsx','**/*.mjs','**/*.cjs'],python:['**/*.py'],go:['**/*.go'],java:['**/*.java'],csharp:['**/*.cs'],php:['**/*.php'],ruby:['**/*.rb']};
+
 export const configSchema = z.object({
   upgrade: z.object({from:z.string(),to:z.string()}).strict().optional(),
-  language: z.enum(['typescript','python']).default('typescript'),
+  language: languageSchema.default('typescript'),
+  projects: z.union([z.literal('auto'),z.array(projectSchema).min(1).max(50)]).optional(),
   pythonCommand: z.string().default('python'),
   vendors: z.object({stripe: z.object({enabled: z.boolean().default(true), sdkVersion: z.string().regex(/^\d+\.\d+\.\d+$/).optional(), requestApiVersion: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(), webhookVersion: z.string().optional()}).strict().default({enabled:true})}).strict().default({stripe:{enabled:true}}),
-  include: z.array(z.string()).default(['src/**/*.ts', 'src/**/*.tsx']),
+  include: z.array(z.string()).optional(),
   exclude: z.array(z.string()).default(['**/node_modules/**', '**/*.d.ts']),
-  verification: z.array(z.object({command:z.string().min(1), args:z.array(z.string()).default([]), timeoutMs:z.number().int().min(100).max(600000).default(120000)}).strict()).default([]),
+  verification: verificationSchema.default([]),
   sources: z.object({timeoutMs:z.number().int().min(100).max(60000).default(10000), retries:z.number().int().min(0).max(3).default(2)}).strict().default({timeoutMs:10000,retries:2}),
   llm: z.object({enabled:z.boolean().default(false), provider:z.literal('openai'), model:z.string().min(1), apiKeyEnv:z.string().regex(/^[A-Z_][A-Z0-9_]*$/).default('OPENAI_API_KEY'), maxRequests:z.number().int().min(1).max(3).default(1), maxInputTokens:z.number().int().min(100).max(16000).default(4000), maxOutputTokens:z.number().int().min(100).max(8000).default(2000), timeoutMs:z.number().int().min(100).max(60000).default(30000), retries:z.number().int().min(0).max(2).default(0)}).strict().optional(),
   pr: z.object({base:z.string().default('main'), draft:z.boolean().default(true)}).strict().default({base:'main',draft:true})
-}).strict();
+}).strict().transform(config=>({...config,include:config.include??(config.language==='typescript'?['src/**/*.ts','src/**/*.tsx','src/**/*.js','src/**/*.jsx']:defaultIncludes[config.language])}));
 export type Config = z.infer<typeof configSchema>;
 export function loadConfig(root:string, name='changelume.yml'):Config {
   const path = resolve(root,name);

@@ -1,0 +1,130 @@
+{
+  "schemaVersion": 1,
+  "kind": "controlled eight-language repository",
+  "independentParticipants": 0,
+  "languages": [
+    "csharp",
+    "go",
+    "java",
+    "javascript",
+    "php",
+    "python",
+    "ruby",
+    "typescript"
+  ],
+  "units": [
+    {
+      "path": "web",
+      "language": "typescript",
+      "declared": "12.0.0",
+      "resolved": "12.0.0",
+      "versionOrigin": "package-lock.json (root installation)",
+      "referenceCount": 3,
+      "automaticEdits": 1
+    },
+    {
+      "path": "frontend",
+      "language": "javascript",
+      "declared": "12.0.0",
+      "resolved": "12.0.0",
+      "versionOrigin": "package-lock.json (root installation)",
+      "referenceCount": 3,
+      "automaticEdits": 1
+    },
+    {
+      "path": "backend",
+      "language": "python",
+      "declared": "5.0.0",
+      "resolved": "5.0.0",
+      "versionOrigin": "requirements.txt exact pin",
+      "referenceCount": 1,
+      "automaticEdits": 1
+    },
+    {
+      "path": "worker",
+      "language": "go",
+      "declared": "v82.0.0",
+      "versionOrigin": "manifest declaration only; installed version unconfirmed",
+      "referenceCount": 2,
+      "automaticEdits": 0
+    },
+    {
+      "path": "payments",
+      "language": "java",
+      "declared": "22.0.0",
+      "versionOrigin": "manifest declaration only; installed version unconfirmed",
+      "referenceCount": 1,
+      "automaticEdits": 0
+    },
+    {
+      "path": "billing",
+      "language": "csharp",
+      "declared": "45.0.0",
+      "resolved": "45.0.0",
+      "versionOrigin": "ecosystem lockfile",
+      "referenceCount": 2,
+      "automaticEdits": 0
+    },
+    {
+      "path": "store",
+      "language": "php",
+      "declared": "^16.0",
+      "resolved": "16.0.0",
+      "versionOrigin": "ecosystem lockfile",
+      "referenceCount": 1,
+      "automaticEdits": 0
+    },
+    {
+      "path": "jobs",
+      "language": "ruby",
+      "declared": "~> 13.0",
+      "resolved": "13.0.0",
+      "versionOrigin": "ecosystem lockfile",
+      "referenceCount": 2,
+      "automaticEdits": 0
+    }
+  ],
+  "editedFiles": [
+    "backend/app.py",
+    "frontend/src/main.js",
+    "web/src/main.ts"
+  ],
+  "verification": {
+    "status": "passed",
+    "results": [
+      {
+        "cwd": "web",
+        "command": "node verify.cjs",
+        "exitCode": 0,
+        "timedOut": false,
+        "stdout": "",
+        "stderr": "",
+        "outputTruncated": false
+      },
+      {
+        "cwd": "frontend",
+        "command": "node verify.cjs",
+        "exitCode": 0,
+        "timedOut": false,
+        "stdout": "",
+        "stderr": "",
+        "outputTruncated": false
+      },
+      {
+        "cwd": "backend",
+        "command": "node verify.cjs",
+        "exitCode": 0,
+        "timedOut": false,
+        "stdout": "",
+        "stderr": "",
+        "outputTruncated": false
+      }
+    ]
+  },
+  "dryRunPreservedSource": true,
+  "secondPlanEdits": 0,
+  "limitations": [
+    "Native Go/Java/C#/PHP/Ruby toolchains and SDKs were not executed; inventory and lexical reference review only.",
+    "JavaScript, TypeScript and Python verifier commands check expected source. Prior real SDK application integration remains a separate CI check."
+  ]
+}

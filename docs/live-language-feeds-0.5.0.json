@@ -1,0 +1,147 @@
+{
+  "kind": "live official SDK feed smoke check",
+  "units": [
+    {
+      "path": "web",
+      "language": "typescript",
+      "evidence": [
+        {
+          "url": "https://raw.githubusercontent.com/stripe/stripe-node/v12.0.0/CHANGELOG.md",
+          "sha256": "bb732797b390c6ee3573d4f317df3d778cc1160f2192824fcbf9e4f99d0762f9",
+          "origin": "offline snapshot",
+          "release": "12.0.0"
+        },
+        {
+          "url": "https://raw.githubusercontent.com/stripe/stripe-node/v11.0.0/CHANGELOG.md",
+          "sha256": "75deea034d4904e57af81949b54b6dabb62a6feec268cf01812d793d912af09b",
+          "origin": "offline snapshot",
+          "release": "11.0.0"
+        },
+        {
+          "url": "https://raw.githubusercontent.com/stripe/stripe-node/master/CHANGELOG.md",
+          "sha256": "03b5396395cde5bbab51a7c102a235e2bf304cb14e6e7a6da805e3cb226b2f04",
+          "origin": "cache",
+          "release": "observed changelog"
+        }
+      ],
+      "observedReleases": 605,
+      "newlyObserved": 0
+    },
+    {
+      "path": "frontend",
+      "language": "javascript",
+      "evidence": [
+        {
+          "url": "https://raw.githubusercontent.com/stripe/stripe-node/v12.0.0/CHANGELOG.md",
+          "sha256": "bb732797b390c6ee3573d4f317df3d778cc1160f2192824fcbf9e4f99d0762f9",
+          "origin": "offline snapshot",
+          "release": "12.0.0"
+        },
+        {
+          "url": "https://raw.githubusercontent.com/stripe/stripe-node/v11.0.0/CHANGELOG.md",
+          "sha256": "75deea034d4904e57af81949b54b6dabb62a6feec268cf01812d793d912af09b",
+          "origin": "offline snapshot",
+          "release": "11.0.0"
+        },
+        {
+          "url": "https://raw.githubusercontent.com/stripe/stripe-node/master/CHANGELOG.md",
+          "sha256": "03b5396395cde5bbab51a7c102a235e2bf304cb14e6e7a6da805e3cb226b2f04",
+          "origin": "cache",
+          "release": "observed changelog"
+        }
+      ],
+      "observedReleases": 605,
+      "newlyObserved": 0
+    },
+    {
+      "path": "backend",
+      "language": "python",
+      "evidence": [
+        {
+          "url": "https://raw.githubusercontent.com/stripe/stripe-python/v5.0.0/CHANGELOG.md",
+          "sha256": "b24d1e5e005843181b3b699fd928673f517e6f8e6b040d9957fc43bf5fe20d0a",
+          "origin": "offline snapshot",
+          "release": "5.0.0"
+        },
+        {
+          "url": "https://raw.githubusercontent.com/stripe/stripe-python/master/CHANGELOG.md",
+          "sha256": "3202ab22fd8394165fc01b1d0e20da9fd297909cb0102bcc0b8bd12967cd0b66",
+          "origin": "network",
+          "release": "observed python SDK changelog"
+        }
+      ],
+      "observedReleases": 402,
+      "newlyObserved": 402
+    },
+    {
+      "path": "worker",
+      "language": "go",
+      "evidence": [
+        {
+          "url": "https://raw.githubusercontent.com/stripe/stripe-go/master/CHANGELOG.md",
+          "sha256": "28ee41ef5a235b3184b6af12c52bcc77b6b202d2e80a7000663a7c7488039178",
+          "origin": "network",
+          "release": "observed go SDK changelog"
+        }
+      ],
+      "observedReleases": 804,
+      "newlyObserved": 804
+    },
+    {
+      "path": "payments",
+      "language": "java",
+      "evidence": [
+        {
+          "url": "https://raw.githubusercontent.com/stripe/stripe-java/master/CHANGELOG.md",
+          "sha256": "61e2d481f86124ba1d7e5dfa38e2f663ba1ecb55633669ab5a3ec712d6603a0f",
+          "origin": "network",
+          "release": "observed java SDK changelog"
+        }
+      ],
+      "observedReleases": 720,
+      "newlyObserved": 720
+    },
+    {
+      "path": "billing",
+      "language": "csharp",
+      "evidence": [
+        {
+          "url": "https://raw.githubusercontent.com/stripe/stripe-dotnet/master/CHANGELOG.md",
+          "sha256": "24e22ea4736d3d980c3f2d42a337df989bbaaa707e660e076678f334895474d6",
+          "origin": "network",
+          "release": "observed csharp SDK changelog"
+        }
+      ],
+      "observedReleases": 719,
+      "newlyObserved": 719
+    },
+    {
+      "path": "store",
+      "language": "php",
+      "evidence": [
+        {
+          "url": "https://raw.githubusercontent.com/stripe/stripe-php/master/CHANGELOG.md",
+          "sha256": "710619c4e483bc899a808029af5b5b24b2613942148345530c33ece6451ce642",
+          "origin": "network",
+          "release": "observed php SDK changelog"
+        }
+      ],
+      "observedReleases": 544,
+      "newlyObserved": 544
+    },
+    {
+      "path": "jobs",
+      "language": "ruby",
+      "evidence": [
+        {
+          "url": "https://raw.githubusercontent.com/stripe/stripe-ruby/master/CHANGELOG.md",
+          "sha256": "fc352d9dede6d1c20275e8245fe55d483ecb76f9ba257f512aa724d9d5fee694",
+          "origin": "network",
+          "release": "observed ruby SDK changelog"
+        }
+      ],
+      "observedReleases": 406,
+      "newlyObserved": 406
+    }
+  ]
+}

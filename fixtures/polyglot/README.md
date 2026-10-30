@@ -1,0 +1,1 @@
+Controlled eight-language repository. Only TypeScript, JavaScript and Python have expected automatic edits. Other ecosystems use synthetic manifest/source fixtures; their SDKs and native toolchains are not executed.

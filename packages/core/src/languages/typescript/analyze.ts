@@ -5,6 +5,7 @@ import { z } from 'zod';
 import type { Config } from '../../config.js';
 import type { Inventory, Usage, Edit } from '../../models.js';
 import { hash } from '../../safety.js';
+import {ignoredDirectories} from '../ecosystems.js';
 import {discoverLinks} from './links.js';
 
 function constructorRoots(source:import('ts-morph').SourceFile){return new Set(source.getImportDeclarations().filter(d=>d.getModuleSpecifierValue()==='stripe').filter(d=>!d.isTypeOnly()).flatMap(d=>[d.getDefaultImport(),...d.getNamedImports().filter(n=>!n.isTypeOnly()&&['Stripe','default'].includes(n.getName())).map(n=>n.getAliasNode()??n.getNameNode())]).map(n=>n?.getSymbol()).filter(Boolean));}
@@ -14,10 +15,10 @@ const lockSchema=z.object({lockfileVersion:z.number(),packages:z.record(z.string
 export function sourceFiles(root:string,config:Config):string[] {
   const paths:string[]=[];
   function walk(dir:string) {for(const entry of readdirSync(dir,{withFileTypes:true})) {
-    if(['node_modules','.git','.changelume'].includes(entry.name)||entry.isSymbolicLink()) continue;
+    if(ignoredDirectories.has(entry.name)||entry.isSymbolicLink()) continue;
     const full=resolve(dir,entry.name), rel=relative(root,full).replaceAll('\\','/');
     if(entry.isDirectory()) walk(full);
-    else if(/\.tsx?$/.test(rel)&&config.include.some(g=>matchesGlob(rel,g))&&!config.exclude.some(g=>matchesGlob(rel,g))) {
+    else if(/\.(tsx?|jsx?|mjs|cjs)$/.test(rel)&&config.include.some(g=>matchesGlob(rel,g))&&!config.exclude.some(g=>matchesGlob(rel,g))) {
       if(lstatSync(full).size>200000) throw new Error('Source file size limit exceeded: '+rel);
       paths.push(full); if(paths.length>5000) throw new Error('Source file count limit exceeded');
     }
@@ -42,7 +43,7 @@ export function analyze(root:string,config:Config):{inventory:Inventory;edits:Ed
   } else inventory.limitations.push('Missing package-lock.json; resolved SDK version is unknown');
   if(config.vendors.stripe.sdkVersion) {inventory.resolved=config.vendors.stripe.sdkVersion;inventory.versionOrigin='explicit configuration override';}
   if(!existsSync(resolve(root,'node_modules/stripe'))) inventory.limitations.push('Stripe dependencies absent: lexical symbol binding available, SDK type checking unavailable; no dependencies installed');
-  const project=new Project({skipAddingFilesFromTsConfig:true,skipFileDependencyResolution:true,compilerOptions:{target:ts.ScriptTarget.ESNext,jsx:ts.JsxEmit.Preserve,noResolve:true}});
+  const project=new Project({skipAddingFilesFromTsConfig:true,skipFileDependencyResolution:true,compilerOptions:{allowJs:true,target:ts.ScriptTarget.ESNext,jsx:ts.JsxEmit.Preserve,noResolve:true}});
   const sources=sourceFiles(root,config).map(file=>project.addSourceFileAtPath(file));
   const projectUnsafe=sources.some(unsafeConstructorReferences);
   if(projectUnsafe) inventory.limitations.push('A Stripe constructor binding escapes supported analysis in this repository; constructor and request-option edits are conservatively declined.');

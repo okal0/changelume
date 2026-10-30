@@ -43,3 +43,7 @@ Benchmark, three adjacent-literal setter migrations, persistent review snapshots
 ## 0.4 application repair iteration
 
 See [application repair, explicit upgrade and evaluation guide](preview-0.4.0.md). This supersedes inventory-only linked-option limitations for the selected documented patterns. Other coverage limits remain explicit.
+
+## Eight-language support
+
+See [language capabilities and multi-project guide](languages.md). TypeScript, JavaScript and Python have selected automatic recipes; Go, Java, C#, PHP and Ruby provide inventory, lexical review and official SDK release monitoring.

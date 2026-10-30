@@ -2,7 +2,7 @@ import {Octokit} from '@octokit/rest';
 import {readFileSync,writeFileSync,existsSync,mkdirSync} from 'node:fs';
 import {contained,hash} from './safety.js';import {reviewQueue} from './review.js';import type {Plan,Verification} from './models.js';
 export function saveProposal(root:string,p:Plan,v:Verification={status:'skipped',results:[]},pr?:{url:string;reused?:boolean}){
- const files=p.edits.map(e=>({path:e.path,beforeHash:e.beforeHash,afterHash:hash(e.content)}));const id=hash(JSON.stringify({language:p.id,upgrade:p.upgrade,files,verification:p.verification}));
+ const files=p.edits.map(e=>({path:e.path,beforeHash:e.beforeHash,afterHash:hash(e.content)}));const id=hash(JSON.stringify({language:p.id,upgrade:p.upgrade,projects:p.projects?.map(({path,language,inventory,upgrade,evidence})=>({path,language,inventory,upgrade,evidence:evidence?.map(({url,sha256})=>({url,sha256}))})),inventory:p.inventory,files,verification:p.verification}));
  const path=contained(root,'.changelume/proposal.json');let previous:any;try{previous=JSON.parse(readFileSync(existsSync(path)?path:contained(root,'.changelume/monitor/proposal.json'),'utf8'));}catch{/* Disposable state. */}
  const same=previous?.id===id;const queue=reviewQueue(root,p);const current=p.upgrade?(p.inventory.declared===p.upgrade.to?p.upgrade.to:p.upgrade.from):p.inventory.resolved;
  const newer=p.observedReleases.filter(version=>{if(!current)return false;const a=version.split('.').map(Number),b=(current??'0.0.0').split('.').map(Number);return a[0]!>b[0]!||a[0]===b[0]&&a[1]!>b[1]!||a[0]===b[0]&&a[1]===b[1]&&a[2]!>b[2]!;});
