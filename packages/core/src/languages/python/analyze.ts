@@ -1,14 +1,13 @@
 import {readFileSync,existsSync,readdirSync,realpathSync,statSync} from 'node:fs';
-import {resolve,relative,matchesGlob,delimiter,isAbsolute,sep} from 'node:path';
+import {resolve,relative,matchesGlob,delimiter,isAbsolute,sep,dirname} from 'node:path';
 import {spawnSync} from 'node:child_process';
 import script from './analyze.py';
 import type {LanguageAdapter,Inventory,Edit} from '../../models.js';
-import {git} from '../../git.js';
 import {ignoredDirectories} from '../ecosystems.js';
 import {hash} from '../../safety.js';
 function interpreter(root:string,command:string){
  const names=process.platform==='win32'&&!/\.exe$/i.test(command)?[command+'.exe',command]:[command];const paths=isAbsolute(command)||/[\\/]/.test(command)?[resolve(root,command)]:(process.env.PATH??process.env.Path??'').split(delimiter).filter(Boolean).flatMap(dir=>names.map(name=>resolve(dir,name)));const path=paths.find(path=>existsSync(path)&&statSync(path).isFile());if(!path)throw new Error('Python interpreter unavailable; configure pythonCommand with an installed Python 3.10+ executable');
- let repository=root;try{repository=git(root,'rev-parse','--show-toplevel');}catch{/* Standalone adapter analysis. */}const executable=realpathSync(path),rel=relative(realpathSync(repository),executable);if(!isAbsolute(rel)&&rel!=='..'&&!rel.startsWith('..'+sep))throw new Error('Python analysis requires a trusted interpreter outside the repository');return executable;
+ let repository=realpathSync(root),directory=repository;while(true){if(existsSync(resolve(directory,'.git')))repository=directory;const parent=dirname(directory);if(parent===directory)break;directory=parent;}const executable=realpathSync(path),rel=relative(repository,executable);if(!isAbsolute(rel)&&rel!=='..'&&!rel.startsWith('..'+sep))throw new Error('Python analysis requires a trusted interpreter outside the repository');return executable;
 }
 export const pythonAdapter:LanguageAdapter={id:'python',analyze(root,config){
  const inventory:Inventory={vendor:'stripe',sdkPackage:'stripe',versionOrigin:'unknown',usages:[],limitations:['Python preview: top-level import stripe[ as alias], stripe.oauth_error OAuth exception spelling only; shadowed imports, module escapes and attribute mutations decline edits. Exact requirements.txt pin required.'],webhookVersion:'unknown'};

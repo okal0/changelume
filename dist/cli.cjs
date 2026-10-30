@@ -221026,7 +221026,7 @@ var require_path_browserify = __commonJS({
       _makeLong: function _makeLong(path3) {
         return path3;
       },
-      dirname: function dirname4(path3) {
+      dirname: function dirname5(path3) {
         assertPath(path3);
         if (path3.length === 0) return ".";
         var code = path3.charCodeAt(0);
@@ -269408,23 +269408,10 @@ function analyze(root, config2) {
 // packages/core/src/languages/python/analyze.ts
 var import_node_fs6 = require("node:fs");
 var import_node_path7 = require("node:path");
-var import_node_child_process2 = require("node:child_process");
+var import_node_child_process = require("node:child_process");
 
 // packages/core/src/languages/python/analyze.py
 var analyze_default = 'import ast, json, sys\ntext=sys.stdin.buffer.read().decode("utf8")\ntree=ast.parse(text)\nroots={n.asname or "stripe" for n in tree.body if isinstance(n,ast.Import) for n in n.names if n.name=="stripe"}\nmapping={"UnsupportedGrantTypError":"UnsupportedGrantTypeError","UnsupportedResponseTypError":"UnsupportedResponseTypeError"}\n# Scope changes and module mutation require human review.\nunsafe=any(isinstance(n,ast.ExceptHandler) and n.name in roots or isinstance(n,(ast.MatchAs,ast.MatchStar)) and n.name in roots or isinstance(n,ast.arg) and n.arg in roots or isinstance(n,(ast.FunctionDef,ast.AsyncFunctionDef,ast.ClassDef)) and n.name in roots or isinstance(n,ast.Name) and n.id in roots and isinstance(n.ctx,ast.Store) or isinstance(n,ast.Attribute) and isinstance(n.ctx,(ast.Store,ast.Del)) for n in ast.walk(tree))\nparents={child:node for node in ast.walk(tree) for child in ast.iter_child_nodes(node)}\nfor node in ast.walk(tree):\n if isinstance(node,ast.Name) and node.id in roots:\n  parent=parents.get(node); grand=parents.get(parent)\n  if not (isinstance(parent,ast.Attribute)):unsafe=True\n if isinstance(node,(ast.Import,ast.ImportFrom)):\n  for alias in node.names:\n   if (alias.asname or alias.name) in roots and not (isinstance(node,ast.Import) and alias.name=="stripe"):unsafe=True\nlines=text.splitlines(keepends=True); offsets=[0]\nfor line in lines: offsets.append(offsets[-1]+len(line.encode("utf8")))\nedits=[]; usages=[]\nfor n in ast.walk(tree):\n if isinstance(n,ast.Attribute) and n.attr in mapping and isinstance(n.value,ast.Attribute) and n.value.attr=="oauth_error" and isinstance(n.value.value,ast.Name) and n.value.value.id in roots:\n  end=offsets[n.end_lineno-1]+n.end_col_offset\n  usages.append({"line":n.lineno,"symbol":n.attr,"kind":"unsupported" if unsafe else "field","changeId":"stripe-python-5-oauth-exceptions","editPlanned":not unsafe,"replacement":mapping[n.attr]})\n  if not unsafe: edits.append((end-len(n.attr),end,mapping[n.attr]))\ndata=text.encode("utf8")\nfor start,end,value in sorted(edits,reverse=True):data=data[:start]+value.encode()+data[end:]\nprint(json.dumps({"content":data.decode(),"usages":usages,"unsafe":unsafe}))\n';
-
-// packages/core/src/git.ts
-var import_node_child_process = require("node:child_process");
-function git(root, ...args) {
-  return (0, import_node_child_process.execFileSync)("git", ["-c", "core.hooksPath=/dev/null", ...args], { cwd: root, encoding: "utf8", maxBuffer: 5e6, stdio: ["ignore", "pipe", "pipe"], env: { ...process.env, GIT_CONFIG_COUNT: "0", GIT_CONFIG_NOSYSTEM: "1", GIT_TERMINAL_PROMPT: "0" } }).trimEnd();
-}
-function revision(root) {
-  return git(root, "rev-parse", "HEAD");
-}
-function assertClean(root) {
-  if (git(root, "ls-files", ".changelume")) throw new Error(".changelume must not contain tracked files");
-  if (git(root, "status", "--porcelain", "--untracked-files=all", "--", ".", ":(exclude).changelume")) throw new Error("Dirty working tree: commit or stash changes before migration");
-}
 
 // packages/core/src/languages/python/analyze.ts
 function interpreter(root, command) {
@@ -269432,12 +269419,14 @@ function interpreter(root, command) {
   const paths = (0, import_node_path7.isAbsolute)(command) || /[\\/]/.test(command) ? [(0, import_node_path7.resolve)(root, command)] : (process.env.PATH ?? process.env.Path ?? "").split(import_node_path7.delimiter).filter(Boolean).flatMap((dir) => names.map((name) => (0, import_node_path7.resolve)(dir, name)));
   const path3 = paths.find((path4) => (0, import_node_fs6.existsSync)(path4) && (0, import_node_fs6.statSync)(path4).isFile());
   if (!path3) throw new Error("Python interpreter unavailable; configure pythonCommand with an installed Python 3.10+ executable");
-  let repository = root;
-  try {
-    repository = git(root, "rev-parse", "--show-toplevel");
-  } catch {
+  let repository = (0, import_node_fs6.realpathSync)(root), directory = repository;
+  while (true) {
+    if ((0, import_node_fs6.existsSync)((0, import_node_path7.resolve)(directory, ".git"))) repository = directory;
+    const parent = (0, import_node_path7.dirname)(directory);
+    if (parent === directory) break;
+    directory = parent;
   }
-  const executable = (0, import_node_fs6.realpathSync)(path3), rel = (0, import_node_path7.relative)((0, import_node_fs6.realpathSync)(repository), executable);
+  const executable = (0, import_node_fs6.realpathSync)(path3), rel = (0, import_node_path7.relative)(repository, executable);
   if (!(0, import_node_path7.isAbsolute)(rel) && rel !== ".." && !rel.startsWith(".." + import_node_path7.sep)) throw new Error("Python analysis requires a trusted interpreter outside the repository");
   return executable;
 }
@@ -269479,7 +269468,7 @@ var pythonAdapter = { id: "python", analyze(root, config2) {
       if (++count > 5e3) throw new Error("Python source count limit exceeded");
       const before = (0, import_node_fs6.readFileSync)(path3, "utf8");
       if (Buffer.byteLength(before) > 2e5) throw new Error("Python source size limit exceeded");
-      const result = (0, import_node_child_process2.spawnSync)(executable ??= interpreter(root, config2.pythonCommand), ["-I", "-c", analyze_default], { env, input: before, encoding: "utf8", timeout: 1e4, maxBuffer: 1e6, windowsHide: true });
+      const result = (0, import_node_child_process.spawnSync)(executable ??= interpreter(root, config2.pythonCommand), ["-I", "-c", analyze_default], { env, input: before, encoding: "utf8", timeout: 1e4, maxBuffer: 1e6, windowsHide: true });
       if (result.status !== 0) throw new Error("Python AST analysis failed; ensure pythonCommand points to Python 3. No customer code is executed.");
       const parsed = JSON.parse(result.stdout);
       projectUnsafe ||= parsed.unsafe;
@@ -273779,7 +273768,7 @@ function humanReadableArgName(arg) {
 
 // node_modules/commander/lib/command.js
 var import_node_events = require("node:events");
-var import_node_child_process3 = __toESM(require("node:child_process"), 1);
+var import_node_child_process2 = __toESM(require("node:child_process"), 1);
 var import_node_path8 = __toESM(require("node:path"), 1);
 var import_node_fs9 = __toESM(require("node:fs"), 1);
 var import_node_process = __toESM(require("node:process"), 1);
@@ -275813,9 +275802,9 @@ Expecting one of '${allowedValues.join("', '")}'`);
       if (launchWithNode) {
         args.unshift(executableFile);
         args = incrementNodeInspectorPort(import_node_process.default.execArgv).concat(args);
-        proc = import_node_child_process3.default.spawn(import_node_process.default.argv[0], args, { stdio: "inherit" });
+        proc = import_node_child_process2.default.spawn(import_node_process.default.argv[0], args, { stdio: "inherit" });
       } else {
-        proc = import_node_child_process3.default.spawn(executableFile, args, { stdio: "inherit" });
+        proc = import_node_child_process2.default.spawn(executableFile, args, { stdio: "inherit" });
       }
     } else {
       this._checkForMissingExecutable(
@@ -275825,7 +275814,7 @@ Expecting one of '${allowedValues.join("', '")}'`);
       );
       args.unshift(executableFile);
       args = incrementNodeInspectorPort(import_node_process.default.execArgv).concat(args);
-      proc = import_node_child_process3.default.spawn(import_node_process.default.execPath, args, { stdio: "inherit" });
+      proc = import_node_child_process2.default.spawn(import_node_process.default.execPath, args, { stdio: "inherit" });
     }
     if (!proc.killed) {
       const signals = ["SIGUSR1", "SIGUSR2", "SIGTERM", "SIGINT", "SIGHUP"];
@@ -277155,6 +277144,19 @@ function upgradeEdits(root, config2) {
   lock.packages[""][group].stripe = to;
   lock.packages["node_modules/stripe"] = targetEntry;
   return [{ path: "package.json", beforeHash: hash2(manifestText), content: JSON.stringify(manifest2, null, 2) + "\n" }, { path: "package-lock.json", beforeHash: hash2(lockText), content: JSON.stringify(lock, null, 2) + "\n" }];
+}
+
+// packages/core/src/git.ts
+var import_node_child_process3 = require("node:child_process");
+function git(root, ...args) {
+  return (0, import_node_child_process3.execFileSync)("git", ["-c", "core.hooksPath=/dev/null", ...args], { cwd: root, encoding: "utf8", maxBuffer: 5e6, stdio: ["ignore", "pipe", "pipe"], env: { ...process.env, GIT_CONFIG_COUNT: "0", GIT_CONFIG_NOSYSTEM: "1", GIT_TERMINAL_PROMPT: "0" } }).trimEnd();
+}
+function revision(root) {
+  return git(root, "rev-parse", "HEAD");
+}
+function assertClean(root) {
+  if (git(root, "ls-files", ".changelume")) throw new Error(".changelume must not contain tracked files");
+  if (git(root, "status", "--porcelain", "--untracked-files=all", "--", ".", ":(exclude).changelume")) throw new Error("Dirty working tree: commit or stash changes before migration");
 }
 
 // node_modules/openai/internal/tslib.mjs
