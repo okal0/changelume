@@ -1,5 +1,5 @@
 import ast, json, sys
-text=sys.stdin.read()
+text=sys.stdin.buffer.read().decode("utf8")
 tree=ast.parse(text)
 roots={n.asname or "stripe" for n in tree.body if isinstance(n,ast.Import) for n in n.names if n.name=="stripe"}
 mapping={"UnsupportedGrantTypError":"UnsupportedGrantTypeError","UnsupportedResponseTypError":"UnsupportedResponseTypeError"}
