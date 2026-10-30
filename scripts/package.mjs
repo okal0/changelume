@@ -8,7 +8,7 @@ cpSync('fixtures/polyglot',resolve(directory,'examples/polyglot'),{recursive:tru
 cpSync('fixtures/application',resolve(directory,'examples/application'),{recursive:true});
 cpSync('fixtures/python',resolve(directory,'examples/python'),{recursive:true});
 cpSync('fixtures/before',resolve(directory,'examples/offline'),{recursive:true});cpSync('fixtures/integration',resolve(directory,'examples/stripe'),{recursive:true,filter:p=>!p.split(/[\\/]/).includes('node_modules')});
-writeFileSync(resolve(directory,'package.json'),JSON.stringify({name:'changelume',version:'0.5.0-rc.1',description:'Local evidence-backed Stripe migration CLI',license:'Apache-2.0',engines:{node:'>=24 <25'},bin:{changelume:'dist/cli.cjs'},files:['dist','docs','examples','action.yml','LICENSE','README.md']},null,2));
+writeFileSync(resolve(directory,'package.json'),JSON.stringify({name:'changelume',version:'0.5.0-rc.2',description:'Local evidence-backed Stripe migration CLI',license:'Apache-2.0',engines:{node:'>=24 <25'},bin:{changelume:'dist/cli.cjs'},files:['dist','docs','examples','action.yml','LICENSE','README.md']},null,2));
 const npm=process.env.CHANGELUME_NPM_CLI;
 if(!npm) throw new Error('Set CHANGELUME_NPM_CLI to npm/bin/npm-cli.js to pack the candidate. This command never publishes.');
 const result=spawnSync(process.execPath,[npm,'pack','--ignore-scripts','--json'],{cwd:directory,encoding:'utf8'});if(result.status!==0)throw new Error(result.stderr);

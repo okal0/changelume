@@ -70,8 +70,14 @@ The 0.4 application upgrade passed [live consumer run](https://github.com/okal0/
 
 ## Eight-language support
 
-See [language capabilities and multi-project guide](languages.md). TypeScript, JavaScript and Python have selected automatic recipes; Go, Java, C#, PHP and Ruby provide inventory, lexical review and official SDK release monitoring.
+See [language capabilities and multi-project guide](languages.md). This section records the earlier 0.5.0-rc.1 inventory-only result.
 
 The 0.5 controlled repository discovered eight language units and produced exactly three expected edits (TypeScript, JavaScript, Python). Per-unit verification, dry-run preservation, source application and idempotence passed. Installed standalone CLI checks repeated the scenario successfully. New regression coverage includes native inventory/version boundaries, cache/observation reuse, project isolation, failure preservation and refusing repository-owned Python interpreters. Native Go/Java/.NET/PHP/Ruby toolchains were not executed.
 
-Live SDK feed checks on 2026-10-30 succeeded for all seven distinct official Stripe SDK changelogs (TypeScript/JavaScript share Node). Source URLs, SHA-256 hashes and observed counts are in live-language-feeds-0.5.0.json. Controlled multi-project results are in polyglot-results-0.5.0.json. These checks establish discovery/monitoring and the documented recipes, not automatic migration support for the five native inventory adapters.
+Live SDK feed checks on 2026-10-30 succeeded for all seven distinct official Stripe SDK changelogs (TypeScript/JavaScript share Node). Source URLs, SHA-256 hashes and observed counts are in live-language-feeds-0.5.0.json. The original controlled multi-project results are in polyglot-results-0.5.0.json.
+
+## Five native-language recipe preview
+
+The follow-up working tree adds one conservative recipe for each Go, Java, C#, PHP and Ruby adapter. The controlled fixture planned and applied eight total edits across the eight language units. All eight configured fixture checks passed, the dry run preserved source, and the second plan was empty. The installed archive repeated the beta, benchmark and polyglot scenarios successfully. Results are recorded in [polyglot-results-0.5.0-languages-preview.json](polyglot-results-0.5.0-languages-preview.json).
+
+This validates Changelume's plan, verification, application and idempotence wiring over controlled source fixtures. The five new-language verifier scripts assert expected text using Node; no Go/Java/.NET/PHP/Ruby compiler or Stripe SDK was run. These recipes use bounded lexical matching and version assertions, not compiler binding analysis. There are zero independent participants. Native toolchain and real-SDK tests remain required before broad compatibility claims.

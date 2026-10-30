@@ -39,22 +39,32 @@
     {
       "path": "worker",
       "language": "go"
+      ,"sdkVersion": "82.0.0",
+      "verification": [{"command": "node", "args": ["verify.cjs"]}]
     },
     {
       "path": "payments",
       "language": "java"
+      ,"sdkVersion": "22.0.0",
+      "verification": [{"command": "node", "args": ["verify.cjs"]}]
     },
     {
       "path": "billing",
       "language": "csharp"
+      ,"sdkVersion": "45.0.0",
+      "verification": [{"command": "node", "args": ["verify.cjs"]}]
     },
     {
       "path": "store",
       "language": "php"
+      ,"sdkVersion": "16.0.0",
+      "verification": [{"command": "node", "args": ["verify.cjs"]}]
     },
     {
       "path": "jobs",
       "language": "ruby"
+      ,"sdkVersion": "13.0.0",
+      "verification": [{"command": "node", "args": ["verify.cjs"]}]
     }
   ]
 }

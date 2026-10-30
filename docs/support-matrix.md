@@ -32,4 +32,4 @@ See [application repair, explicit upgrade and evaluation guide](preview-0.4.0.md
 
 ## Eight-language support
 
-See [language capabilities and multi-project guide](languages.md). TypeScript, JavaScript and Python have selected automatic recipes; Go, Java, C#, PHP and Ruby provide inventory, lexical review and official SDK release monitoring.
+See [language capabilities and multi-project guide](languages.md). Go, Java, C#, PHP and Ruby each have one pinned-version-gated lexical recipe. Their scanner does not resolve types, scopes or user-defined shadowing; configure and run the language's compiler/tests before accepting the patch. The controlled polyglot fixture checks expected text, not native SDK behavior.

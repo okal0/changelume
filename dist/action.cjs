@@ -16738,11 +16738,11 @@ ${lanes.join("\n")}
           return toComponents;
         }
         const components = toComponents.slice(start);
-        const relative7 = [];
+        const relative8 = [];
         for (; start < fromComponents.length; start++) {
-          relative7.push("..");
+          relative8.push("..");
         }
-        return ["", ...relative7, ...components];
+        return ["", ...relative8, ...components];
       }
       function getRelativePathFromDirectory(fromDirectory, to, getCanonicalFileNameOrIgnoreCase) {
         Debug.assert(getRootLength(fromDirectory) > 0 === getRootLength(to) > 0, "Paths must either both be absolute or both be relative");
@@ -61285,9 +61285,9 @@ ${lanes.join("\n")}
               if (!startsWithDirectory(target, realPathDirectory, getCanonicalFileName)) {
                 return;
               }
-              const relative7 = getRelativePathFromDirectory(realPathDirectory, target, getCanonicalFileName);
+              const relative8 = getRelativePathFromDirectory(realPathDirectory, target, getCanonicalFileName);
               for (const symlinkDirectory of symlinkDirectories) {
-                const option = resolvePath(symlinkDirectory, relative7);
+                const option = resolvePath(symlinkDirectory, relative8);
                 const result2 = cb(option, target === referenceRedirect);
                 shouldFilterIgnoredPaths = true;
                 if (result2) return result2;
@@ -220956,7 +220956,7 @@ var require_path_browserify = __commonJS({
           return ".";
         return posix.normalize(joined);
       },
-      relative: function relative7(from, to) {
+      relative: function relative8(from, to) {
         assertPath(from);
         assertPath(to);
         if (from === to) return "";
@@ -223813,12 +223813,12 @@ var require_dist3 = __commonJS({
       return patterns.length > 0 ? buildCrawler(options, patterns) : [];
     }
     async function glob(globInput, options) {
-      const [crawler, relative7] = getCrawler(globInput, options);
-      return crawler ? formatPaths(await crawler.withPromise(), relative7) : [];
+      const [crawler, relative8] = getCrawler(globInput, options);
+      return crawler ? formatPaths(await crawler.withPromise(), relative8) : [];
     }
     function globSync(globInput, options) {
-      const [crawler, relative7] = getCrawler(globInput, options);
-      return crawler ? formatPaths(crawler.sync(), relative7) : [];
+      const [crawler, relative8] = getCrawler(globInput, options);
+      return crawler ? formatPaths(crawler.sync(), relative8) : [];
     }
     exports2.convertPathToPattern = convertPathToPattern;
     exports2.escapePath = escapePath;
@@ -272920,7 +272920,7 @@ function validateEdits(root, raw, allowed, baseline2 = false, manifests = false)
     const key = process.platform === "win32" ? e.path.toLowerCase() : e.path;
     if (seen.has(key)) throw new Error("Duplicate edit");
     seen.add(key);
-    if (!allowed.includes(e.path) || (e.path !== "changelume.lock.json" || !baseline2) && !(manifests && /(^|\/)(package|package-lock)\.json$/.test(e.path)) && (!/\.(tsx?|jsx?|mjs|cjs|py)$/.test(e.path) || e.path.startsWith(".") || e.path.split("/").some((p) => ["node_modules", ".github", ".git"].includes(p)) || /(^|\/)(vitest|vite|webpack|eslint|next)\.config\./.test(e.path))) throw new Error("Edit outside permitted source paths");
+    if (!allowed.includes(e.path) || (e.path !== "changelume.lock.json" || !baseline2) && !(manifests && /(^|\/)(package|package-lock)\.json$/.test(e.path)) && (!/\.(tsx?|jsx?|mjs|cjs|py|go|java|cs|php|rb)$/.test(e.path) || e.path.startsWith(".") || e.path.split("/").some((p) => ["node_modules", ".github", ".git"].includes(p)) || /(^|\/)(vitest|vite|webpack|eslint|next)\.config\./.test(e.path))) throw new Error("Edit outside permitted source paths");
     const file2 = contained(root, e.path);
     const before = (0, import_node_fs.existsSync)(file2) ? (0, import_node_fs.readFileSync)(file2) : Buffer.alloc(0);
     if (before.length > 2e5 || hash2(before) !== e.beforeHash) throw new Error("Edit does not match expected revision");
@@ -272978,8 +272978,8 @@ function saveProposal(root, p, v = { status: "skipped", results: [] }, pr) {
 }
 
 // packages/core/src/action.ts
-var import_node_path10 = require("node:path");
-var import_node_fs13 = require("node:fs");
+var import_node_path11 = require("node:path");
+var import_node_fs14 = require("node:fs");
 
 // packages/core/src/config.ts
 var import_node_fs4 = require("node:fs");
@@ -273008,9 +273008,9 @@ function loadConfig(root, name = "changelume.yml") {
 }
 
 // packages/core/src/pipeline.ts
-var import_node_fs12 = require("node:fs");
+var import_node_fs13 = require("node:fs");
 var import_node_crypto2 = require("node:crypto");
-var import_node_path9 = require("node:path");
+var import_node_path10 = require("node:path");
 var import_node_os = require("node:os");
 var import_node_child_process3 = require("node:child_process");
 
@@ -273143,24 +273143,122 @@ async function collectSDKSource(root, language, offline, config2, fetcher = fetc
 }
 
 // packages/core/src/projects.ts
+var import_node_fs9 = require("node:fs");
+var import_node_path6 = require("node:path");
+
+// packages/core/src/languages/ecosystems.ts
 var import_node_fs8 = require("node:fs");
 var import_node_path5 = require("node:path");
 
-// packages/core/src/languages/ecosystems.ts
+// packages/core/src/languages/recipes.ts
 var import_node_fs7 = require("node:fs");
 var import_node_path4 = require("node:path");
+var recipes = [
+  { language: "go", minimumMajor: 75, from: "ErrorCodeInvoicePamentIntentRequiresAction", to: "ErrorCodeInvoicePaymentIntentRequiresAction", changeId: "stripe-go-75-invoice-payment-intent-error-code", source: "https://github.com/stripe/stripe-go/blob/master/CHANGELOG.md#7500---2023-08-16", match: (file2, code, source) => {
+    if (!file2.endsWith(".go")) return null;
+    const sourceLines = source.split(/\r?\n/), codeLines = code.split(/\r?\n/), aliases = [];
+    sourceLines.forEach((line, index) => {
+      const visible = codeLines[index] ?? "";
+      const shape = /^\s*(?:import\s+)?(?:(\w+)\s*)?$/.exec(visible);
+      if (shape && /"github\.com\/stripe\/stripe-go(?:\/v\d+)?"/.test(line)) {
+        const alias = shape[1] ?? "stripe";
+        if (alias !== "_" && alias !== ".") aliases.push(alias);
+      }
+    });
+    if (!aliases.length) return null;
+    return new RegExp(`\\b(?:${aliases.join("|")})\\.${"ErrorCodeInvoicePamentIntentRequiresAction"}\\b`, "g");
+  }, explanation: "Stripe Go v75 removed this misspelled error-code constant and documents the corrected identifier." },
+  { language: "java", minimumMajor: 21, from: "retrieveCashBalance", to: "retrieve", changeId: "stripe-java-21-cash-balance-retrieve", source: "https://github.com/stripe/stripe-java/wiki/Migration-guide-for-v21", match: (file2, code) => file2.endsWith(".java") && /import\s+com\.stripe\.model\.CashBalance\s*;/.test(code) ? /\bCashBalance\s*\.\s*retrieveCashBalance\s*\(/g : null, explanation: "Stripe Java v21 made CashBalance.retrieve static and removed retrieveCashBalance in favor of retrieve." },
+  { language: "csharp", minimumMajor: 44, from: "SubscriptionProrate", to: "SubscriptionProrationBehavior", changeId: "stripe-dotnet-44-subscription-proration", source: "https://github.com/stripe/stripe-dotnet/blob/master/CHANGELOG.md#4400---2024-04-10", match: (file2, code) => file2.endsWith(".cs") && /using\s+Stripe(?:\.[\w.]+)?\s*;/.test(code) && /new\s+UpcomingInvoiceListLineItemsOptions\s*\{[^}]*\bSubscriptionProrate\s*=/.test(code) ? /\bSubscriptionProrate(?=\s*=)/g : null, explanation: "Stripe.net v44 removed UpcomingInvoiceListLineItemsOptions.SubscriptionProrate; use SubscriptionProrationBehavior." },
+  { language: "php", minimumMajor: 9, from: "allTransactions", to: "allSourceTransactions", changeId: "stripe-php-9-source-transactions", source: "https://github.com/stripe/stripe-php/blob/v9.0.0/CHANGELOG.md#900---2022-08-02", match: (file2, code) => {
+    if (!file2.endsWith(".php")) return null;
+    const variables = [...code.matchAll(/\$(\w+)\s*=\s*new\s+\\?Stripe\\StripeClient\b/g)].map((m) => m[1]);
+    if (!variables.length) return null;
+    return new RegExp(`\\$(?:${variables.join("|")})\\s*->\\s*sources\\s*->\\s*allTransactions\\s*\\(`, "g");
+  }, explanation: "Stripe PHP v9 removed SourceService::allTransactions and documents allSourceTransactions as its replacement." },
+  { language: "ruby", minimumMajor: 8, from: "delete", to: "cancel", changeId: "stripe-ruby-8-subscription-cancel", source: "https://github.com/stripe/stripe-ruby/wiki/Migration-guide-for-v8", match: (file2, code, source) => {
+    if (!file2.endsWith(".rb")) return null;
+    const sourceLines = source.split(/\r?\n/), codeLines = code.split(/\r?\n/), hasRequire = sourceLines.some((line, index) => /^\s*require\b/.test(codeLines[index] ?? "") && /require\s*['"]stripe['"]/.test(line));
+    return hasRequire ? /\bStripe\s*::\s*Subscription\s*::\s*delete\s*(?=\()/g : null;
+  }, explanation: "Stripe Ruby v8 removed Subscription.delete and documents Subscription.cancel as its replacement." }
+];
+function codeOnly(source, language) {
+  const out = [...source];
+  let i = 0;
+  while (i < source.length) {
+    if (source.startsWith("/*", i)) {
+      const end = source.indexOf("*/", i + 2);
+      const stop = end < 0 ? source.length : end + 2;
+      for (let j = i; j < stop; j++) if (source[j] !== "\n" && source[j] !== "\r") out[j] = " ";
+      i = stop;
+      continue;
+    }
+    if ((language === "go" || language === "java" || language === "csharp" || language === "php" || language === "ruby") && (source.startsWith("//", i) || (language === "php" || language === "ruby") && source[i] === "#")) {
+      const end = source.indexOf("\n", i);
+      const stop = end < 0 ? source.length : end;
+      for (let j = i; j < stop; j++) out[j] = " ";
+      i = stop;
+      continue;
+    }
+    if (source[i] === "'" || source[i] === '"' || source[i] === "`") {
+      const quote = source[i];
+      let j = i + 1;
+      while (j < source.length) {
+        if (source[j] === "\\") {
+          j += 2;
+          continue;
+        }
+        if (source[j] === quote) {
+          j++;
+          break;
+        }
+        j++;
+      }
+      for (let k = i; k < Math.min(j, source.length); k++) if (source[k] !== "\n" && source[k] !== "\r") out[k] = " ";
+      i = Math.min(j, source.length);
+      continue;
+    }
+    i++;
+  }
+  return out.join("");
+}
+function applyEcosystemRecipe(root, language, inventory, version2, include, exclude) {
+  const major = Number(version2?.split(".")[0]);
+  const recipe = recipes.find((r) => r.language === language && Number.isInteger(major) && major >= r.minimumMajor);
+  if (!recipe) return { edits: [], usages: [], limitation: language + ": no supported deterministic recipe for the asserted SDK version; changelog findings remain manual." };
+  const edits = [], usages = [];
+  for (const file2 of walkFiles(root, (path2) => /\.(go|java|cs|php|rb)$/.test(path2))) {
+    const name = (0, import_node_path4.relative)(root, file2).replaceAll("\\", "/");
+    if (!include.some((g) => (0, import_node_path4.matchesGlob)(name, g)) || exclude.some((g) => (0, import_node_path4.matchesGlob)(name, g))) continue;
+    const source = (0, import_node_fs7.readFileSync)(file2, "utf8");
+    if (Buffer.byteLength(source) > 2e5) throw new Error("Source size limit exceeded");
+    const visible = codeOnly(source, language), pattern = recipe.match(file2, visible, source);
+    if (!pattern) continue;
+    const positions = [...visible.matchAll(pattern)].map((m) => ({ index: m.index, text: m[0] }));
+    if (!positions.length) continue;
+    let content = source;
+    for (const p of positions.reverse()) content = content.slice(0, p.index) + p.text.replace(recipe.from, recipe.to) + content.slice(p.index + p.text.length);
+    edits.push({ path: name, beforeHash: hash2(source), content });
+    for (const p of positions.reverse()) usages.push({ file: name, line: source.slice(0, p.index).split(/\r?\n/).length, kind: "call", symbol: recipe.from, replacement: recipe.to, changeId: recipe.changeId, sourceUrl: recipe.source, editPlanned: true });
+  }
+  inventory.limitations = inventory.limitations.filter((item) => !item.includes("No semantic binding, migration recipes, or automatic edits"));
+  inventory.limitations.push(language + ": recipe matching is conservative lexical recognition, not semantic binding. Verify configured native checks; unmatched forms remain manual.");
+  return { edits, usages, limitation: recipe.explanation + " Upstream: " + recipe.source, recipe };
+}
+
+// packages/core/src/languages/ecosystems.ts
 var ignoredDirectories = /* @__PURE__ */ new Set([".git", ".github", ".codex", ".agents", ".changelume", "node_modules", ".venv", "venv", "vendor", "target", "build", "dist", "bin", "obj", ".demo", "__pycache__"]);
 function walkFiles(root, accept = () => true, limitSize = true) {
   const files = [];
   let count = 0;
   function walk(dir) {
-    for (const entry of (0, import_node_fs7.readdirSync)(dir, { withFileTypes: true })) {
+    for (const entry of (0, import_node_fs8.readdirSync)(dir, { withFileTypes: true })) {
       if (entry.isSymbolicLink() || ignoredDirectories.has(entry.name)) continue;
-      const path2 = (0, import_node_path4.resolve)(dir, entry.name);
+      const path2 = (0, import_node_path5.resolve)(dir, entry.name);
       if (++count > 3e4) throw new Error("Project discovery file limit exceeded");
       if (entry.isDirectory()) walk(path2);
       else if (accept(path2)) {
-        if (limitSize && (0, import_node_fs7.lstatSync)(path2).size > 2e6) throw new Error("Manifest/source size limit exceeded");
+        if (limitSize && (0, import_node_fs8.lstatSync)(path2).size > 2e6) throw new Error("Manifest/source size limit exceeded");
         files.push(path2);
       }
     }
@@ -273170,13 +273268,13 @@ function walkFiles(root, accept = () => true, limitSize = true) {
 }
 var text = (root, path2) => {
   const file2 = contained(root, path2);
-  if ((0, import_node_fs7.lstatSync)(file2).size > 2e6) throw new Error("Manifest size limit exceeded");
-  return (0, import_node_fs7.readFileSync)(file2, "utf8");
+  if ((0, import_node_fs8.lstatSync)(file2).size > 2e6) throw new Error("Manifest size limit exceeded");
+  return (0, import_node_fs8.readFileSync)(file2, "utf8");
 };
 var exact = (version2) => version2 && /^v?\d+\.\d+\.\d+$/.test(version2) ? version2.replace(/^v/, "") : void 0;
 function dependency(root, language) {
   let sdkPackage = "stripe", declared, resolved, manifest2;
-  if (language === "go" && (0, import_node_fs7.existsSync)((0, import_node_path4.resolve)(root, "go.mod"))) {
+  if (language === "go" && (0, import_node_fs8.existsSync)((0, import_node_path5.resolve)(root, "go.mod"))) {
     manifest2 = "go.mod";
     const source = text(root, manifest2);
     const m = /^\s*(github\.com\/stripe\/stripe-go(?:\/v\d+)?)\s+(v[^\s)]+)/m.exec(source.replace(/^require\s+/gm, ""));
@@ -273185,44 +273283,44 @@ function dependency(root, language) {
     resolved = void 0;
     if (/(?:^|\n)\s*replace\s|=>/.test(source)) resolved = void 0;
   }
-  if (language === "php" && (0, import_node_fs7.existsSync)((0, import_node_path4.resolve)(root, "composer.json"))) {
+  if (language === "php" && (0, import_node_fs8.existsSync)((0, import_node_path5.resolve)(root, "composer.json"))) {
     manifest2 = "composer.json";
     sdkPackage = "stripe/stripe-php";
     const data = JSON.parse(text(root, manifest2));
     declared = data.require?.[sdkPackage] ?? data["require-dev"]?.[sdkPackage];
-    if ((0, import_node_fs7.existsSync)((0, import_node_path4.resolve)(root, "composer.lock"))) {
+    if ((0, import_node_fs8.existsSync)((0, import_node_path5.resolve)(root, "composer.lock"))) {
       const lock = JSON.parse(text(root, "composer.lock"));
       const matches = [...lock.packages ?? [], ...lock["packages-dev"] ?? []].filter((p) => p.name === sdkPackage);
       if (matches.length === 1) resolved = exact(matches[0].version);
     }
   }
-  if (language === "ruby" && (0, import_node_fs7.existsSync)((0, import_node_path4.resolve)(root, "Gemfile"))) {
+  if (language === "ruby" && (0, import_node_fs8.existsSync)((0, import_node_path5.resolve)(root, "Gemfile"))) {
     manifest2 = "Gemfile";
     const source = text(root, manifest2);
     declared = /^\s*gem\s+['"]stripe['"]\s*,\s*['"]([^'"]+)['"]/m.exec(source)?.[1];
-    if ((0, import_node_fs7.existsSync)((0, import_node_path4.resolve)(root, "Gemfile.lock"))) resolved = exact(/^    stripe \(([^)]+)\)/m.exec(text(root, "Gemfile.lock"))?.[1]);
+    if ((0, import_node_fs8.existsSync)((0, import_node_path5.resolve)(root, "Gemfile.lock"))) resolved = exact(/^    stripe \(([^)]+)\)/m.exec(text(root, "Gemfile.lock"))?.[1]);
   }
   if (language === "java") {
     sdkPackage = "com.stripe:stripe-java";
-    if ((0, import_node_fs7.existsSync)((0, import_node_path4.resolve)(root, "pom.xml"))) {
+    if ((0, import_node_fs8.existsSync)((0, import_node_path5.resolve)(root, "pom.xml"))) {
       manifest2 = "pom.xml";
       const blocks = text(root, manifest2).replace(/<!--[\s\S]*?-->/g, "").match(/<dependency(?:\s[^>]*)?>[\s\S]*?<\/dependency>/g) ?? [];
       const block = blocks.find((b) => /<groupId>\s*com\.stripe\s*<\/groupId>/.test(b) && /<artifactId>\s*stripe-java\s*<\/artifactId>/.test(b));
       declared = block ? /<version>\s*([^<]+?)\s*<\/version>/.exec(block)?.[1] : void 0;
-    } else for (const file2 of ["build.gradle", "build.gradle.kts"]) if ((0, import_node_fs7.existsSync)((0, import_node_path4.resolve)(root, file2))) {
+    } else for (const file2 of ["build.gradle", "build.gradle.kts"]) if ((0, import_node_fs8.existsSync)((0, import_node_path5.resolve)(root, file2))) {
       manifest2 = file2;
       declared = /['"]com\.stripe:stripe-java:([^'"]+)['"]/.exec(text(root, file2))?.[1];
     }
   }
   if (language === "csharp") {
     sdkPackage = "Stripe.net";
-    const project = (0, import_node_fs7.readdirSync)(root).filter((n) => n.endsWith(".csproj"));
+    const project = (0, import_node_fs8.readdirSync)(root).filter((n) => n.endsWith(".csproj"));
     if (project.length === 1) {
       manifest2 = project[0];
       const source = text(root, manifest2).replace(/<!--[\s\S]*?-->/g, "");
       const tag = /<PackageReference\b[^>]*(?:Include|Update)=["']Stripe\.net["'][^>]*(?:\/>|>[\s\S]*?<\/PackageReference>)/i.exec(source)?.[0];
       declared = tag ? /(?:Version=["']([^"']+)["']|<Version>([^<]+)<\/Version>)/i.exec(tag)?.slice(1).find(Boolean) : void 0;
-      if ((0, import_node_fs7.existsSync)((0, import_node_path4.resolve)(root, "packages.lock.json"))) {
+      if ((0, import_node_fs8.existsSync)((0, import_node_path5.resolve)(root, "packages.lock.json"))) {
         const lock = JSON.parse(text(root, "packages.lock.json"));
         const versions = /* @__PURE__ */ new Set();
         for (const framework of Object.values(lock.dependencies ?? {})) if (framework["Stripe.net"]?.resolved) versions.add(framework["Stripe.net"].resolved);
@@ -273237,18 +273335,27 @@ var markers = { go: /github\.com\/stripe\/stripe-go|\bstripe\./, java: /\bcom\.s
 function ecosystemAdapter(language) {
   return { id: language, analyze(root, config2) {
     const dep = dependency(root, language);
-    const inventory = { vendor: "stripe", language, ...dep, usages: [], limitations: ["Dependency inventory and conservative lexical SDK-reference review only. No semantic binding, migration recipes, or automatic edits for " + language + ". Manifest declarations do not establish installed versions."], webhookVersion: "unknown; endpoint configuration is external" };
+    const assertedVersion = config2.vendors.stripe.sdkVersion;
+    const versionConflict = Boolean(assertedVersion && dep.resolved && assertedVersion !== dep.resolved);
+    const recipeVersion = versionConflict ? void 0 : dep.resolved ?? assertedVersion;
+    const inventory = { vendor: "stripe", language, ...dep, ...assertedVersion && !dep.resolved ? { resolved: assertedVersion, versionOrigin: "user-configured SDK version assertion" } : {}, usages: [], limitations: ["Dependency inventory and conservative lexical SDK-reference review only. Manifest declarations do not establish installed versions."], webhookVersion: "unknown; endpoint configuration is external" };
+    if (versionConflict) inventory.limitations.push(`Configured SDK version assertion ${assertedVersion} conflicts with lockfile-selected version ${dep.resolved}; automatic recipes are disabled.`);
     if (!config2.vendors.stripe.enabled) return { inventory, edits: [] };
     for (const file2 of walkFiles(root, (path2) => extensions[language].test(path2))) {
-      const name = (0, import_node_path4.relative)(root, file2).replaceAll("\\", "/");
-      if (!config2.include.some((g) => (0, import_node_path4.matchesGlob)(name, g)) || config2.exclude.some((g) => (0, import_node_path4.matchesGlob)(name, g))) continue;
-      const source = (0, import_node_fs7.readFileSync)(file2, "utf8");
+      const name = (0, import_node_path5.relative)(root, file2).replaceAll("\\", "/");
+      if (!config2.include.some((g) => (0, import_node_path5.matchesGlob)(name, g)) || config2.exclude.some((g) => (0, import_node_path5.matchesGlob)(name, g))) continue;
+      const source = (0, import_node_fs8.readFileSync)(file2, "utf8");
       if (Buffer.byteLength(source) > 2e5) throw new Error("Source size limit exceeded");
       source.split(/\r?\n/).forEach((line, index) => {
         if (!/^\s*(?:\/\/|#|\*|\/\*)/.test(line) && markers[language].test(line)) inventory.usages.push({ file: name, line: index + 1, kind: "unsupported", symbol: language + " Stripe reference: semantic review required" });
       });
     }
-    return { inventory, edits: [] };
+    const recipe = applyEcosystemRecipe(root, language, inventory, recipeVersion, config2.include, config2.exclude);
+    const planned = new Set(recipe.usages.map((u) => u.file + ":" + u.line));
+    inventory.usages = inventory.usages.filter((u) => u.kind !== "unsupported" || !planned.has(u.file + ":" + u.line));
+    inventory.usages.push(...recipe.usages);
+    if (recipe.limitation) inventory.limitations.push(recipe.limitation);
+    return { inventory, edits: recipe.edits };
   } };
 }
 
@@ -273257,18 +273364,18 @@ function discoverProjects(root) {
   const units = /* @__PURE__ */ new Map();
   const files = walkFiles(root, void 0, false);
   const add = (directory, language, manifest2) => {
-    const path2 = (0, import_node_path5.relative)(root, directory).replaceAll("\\", "/") || ".";
+    const path2 = (0, import_node_path6.relative)(root, directory).replaceAll("\\", "/") || ".";
     const key = path2 + ":" + language;
     const unit = units.get(key) ?? { path: path2, language, manifests: [] };
-    unit.manifests.push((0, import_node_path5.relative)(root, manifest2).replaceAll("\\", "/"));
+    unit.manifests.push((0, import_node_path6.relative)(root, manifest2).replaceAll("\\", "/"));
     units.set(key, unit);
   };
   for (const file2 of files) {
     const name = file2.slice(file2.lastIndexOf("/") + 1).split("\\").at(-1);
-    const dir = (0, import_node_path5.dirname)(file2);
-    if ((["package.json", "requirements.txt", "pyproject.toml", "Pipfile", "setup.py", "go.mod", "pom.xml", "build.gradle", "build.gradle.kts", "composer.json", "Gemfile"].includes(name) || name.endsWith(".csproj")) && (0, import_node_fs8.lstatSync)(file2).size > 2e6) throw new Error("Manifest size limit exceeded");
+    const dir = (0, import_node_path6.dirname)(file2);
+    if ((["package.json", "requirements.txt", "pyproject.toml", "Pipfile", "setup.py", "go.mod", "pom.xml", "build.gradle", "build.gradle.kts", "composer.json", "Gemfile"].includes(name) || name.endsWith(".csproj")) && (0, import_node_fs9.lstatSync)(file2).size > 2e6) throw new Error("Manifest size limit exceeded");
     if (name === "package.json") {
-      const pkg = JSON.parse((0, import_node_fs8.readFileSync)(file2, "utf8"));
+      const pkg = JSON.parse((0, import_node_fs9.readFileSync)(file2, "utf8"));
       const descendants = files.filter((f) => f.startsWith(dir + "/") || f.startsWith(dir + "\\"));
       const typed = Boolean(pkg.dependencies?.typescript || pkg.devDependencies?.typescript) || descendants.some((f) => /\.tsx?$/.test(f));
       add(dir, typed ? "typescript" : "javascript", file2);
@@ -273296,7 +273403,7 @@ function projectConfigs(root, config2) {
       contained(root, path2);
       if (path2.split("/").some((part) => part.startsWith("."))) throw new Error("Hidden project directories are not supported");
     }
-    if (!(0, import_node_fs8.existsSync)(path2 === "." ? root : (0, import_node_path5.resolve)(root, path2))) throw new Error("Project directory does not exist: " + path2);
+    if (!(0, import_node_fs9.existsSync)(path2 === "." ? root : (0, import_node_path6.resolve)(root, path2))) throw new Error("Project directory does not exist: " + path2);
     const key = (process.platform === "win32" ? path2.toLowerCase() : path2) + ":" + entry.language;
     if (keys.has(key)) throw new Error("Duplicate project unit");
     keys.add(key);
@@ -273308,14 +273415,14 @@ function projectConfigs(root, config2) {
 }
 
 // packages/core/src/upgrade.ts
-var import_node_fs9 = require("node:fs");
+var import_node_fs10 = require("node:fs");
 var targetEntry = { "version": "12.0.0", "resolved": "https://registry.npmjs.org/stripe/-/stripe-12.0.0.tgz", "integrity": "sha512-9zdcWApF4Yg2WG4GVv1qnvAv+h5KD103gKwbTsTyk5G3lf9h4vN0FXGQ5d5eWKP9itAjt0D5gZtWG7cLPzyLxw==", "license": "MIT", "dependencies": { "@types/node": ">=8.1.0", "qs": "^6.11.0" }, "engines": { "node": ">=12.*" } };
 function upgradeEdits(root, config2) {
   if (!config2.upgrade) return [];
   if (!config2.vendors.stripe.enabled) throw new Error("Enable Stripe before requesting an upgrade");
   const { from, to } = config2.upgrade;
   if (!["typescript", "javascript"].includes(config2.language) || from !== "11.18.0" || to !== "12.0.0") throw new Error("Supported upgrade: Node SDK Stripe 11.18.0 -> 12.0.0 only; other transitions require manual planning");
-  const manifestText = (0, import_node_fs9.readFileSync)(contained(root, "package.json"), "utf8"), lockText = (0, import_node_fs9.readFileSync)(contained(root, "package-lock.json"), "utf8");
+  const manifestText = (0, import_node_fs10.readFileSync)(contained(root, "package.json"), "utf8"), lockText = (0, import_node_fs10.readFileSync)(contained(root, "package-lock.json"), "utf8");
   const manifest2 = JSON.parse(manifestText), lock = JSON.parse(lockText);
   const group = manifest2.dependencies?.stripe ? "dependencies" : "devDependencies";
   if (manifest2[group]?.stripe === to && lock.packages?.["node_modules/stripe"]?.version === to && lock.packages?.[""]?.[group]?.stripe === to) return [];
@@ -273332,12 +273439,12 @@ function upgradeEdits(root, config2) {
 
 // packages/core/src/languages/typescript/analyze.ts
 var import_ts_morph2 = __toESM(require_ts_morph(), 1);
-var import_node_fs10 = require("node:fs");
-var import_node_path7 = require("node:path");
+var import_node_fs11 = require("node:fs");
+var import_node_path8 = require("node:path");
 
 // packages/core/src/languages/typescript/links.ts
 var import_ts_morph = __toESM(require_ts_morph(), 1);
-var import_node_path6 = require("node:path");
+var import_node_path7 = require("node:path");
 function discoverLinks(root, files, inventory) {
   const project = new import_ts_morph.Project({ skipAddingFilesFromTsConfig: true, skipFileDependencyResolution: true });
   const sources = files.map((file2) => project.addSourceFileAtPath(file2));
@@ -273389,8 +273496,8 @@ function discoverLinks(root, files, inventory) {
     for (const imp of source.getImportDeclarations()) {
       const specifier = imp.getModuleSpecifierValue();
       if (!specifier.startsWith(".") || imp.isTypeOnly()) continue;
-      const path2 = (0, import_node_path6.resolve)((0, import_node_path6.dirname)(source.getFilePath()), specifier).replace(/\.js$/, ".ts").replaceAll("\\", "/");
-      const names = exports2.get(path2) ?? exports2.get(path2 + ".ts") ?? exports2.get((0, import_node_path6.resolve)(path2, "index.ts").replaceAll("\\", "/"));
+      const path2 = (0, import_node_path7.resolve)((0, import_node_path7.dirname)(source.getFilePath()), specifier).replace(/\.js$/, ".ts").replaceAll("\\", "/");
+      const names = exports2.get(path2) ?? exports2.get(path2 + ".ts") ?? exports2.get((0, import_node_path7.resolve)(path2, "index.ts").replaceAll("\\", "/"));
       if (!names) continue;
       for (const imported of imp.getNamedImports().filter((n) => !n.isTypeOnly())) {
         const local = imported.getAliasNode() ?? imported.getNameNode();
@@ -273431,7 +273538,7 @@ function discoverLinks(root, files, inventory) {
         segments.unshift(base.getName());
         base = base.getExpression();
       }
-      if (import_ts_morph.Node.isIdentifier(base) && clients.has(base.getSymbol())) inventory.usages.push({ file: (0, import_node_path6.relative)(root, source.getFilePath()).replaceAll("\\", "/"), line: call.getStartLineNumber(), kind: "unsupported", symbol: `Traced cross-file Stripe client: ${segments.join(".")}; inventory only, verify wrappers and versions manually`, requestApiVersion: "unknown" });
+      if (import_ts_morph.Node.isIdentifier(base) && clients.has(base.getSymbol())) inventory.usages.push({ file: (0, import_node_path7.relative)(root, source.getFilePath()).replaceAll("\\", "/"), line: call.getStartLineNumber(), kind: "unsupported", symbol: `Traced cross-file Stripe client: ${segments.join(".")}; inventory only, verify wrappers and versions manually`, requestApiVersion: "unknown" });
     }
   }
   return safe ? bindings : /* @__PURE__ */ new Map();
@@ -273454,12 +273561,12 @@ var lockSchema = external_exports.object({ lockfileVersion: external_exports.num
 function sourceFiles(root, config2) {
   const paths = [];
   function walk(dir) {
-    for (const entry of (0, import_node_fs10.readdirSync)(dir, { withFileTypes: true })) {
+    for (const entry of (0, import_node_fs11.readdirSync)(dir, { withFileTypes: true })) {
       if (ignoredDirectories.has(entry.name) || entry.isSymbolicLink()) continue;
-      const full = (0, import_node_path7.resolve)(dir, entry.name), rel = (0, import_node_path7.relative)(root, full).replaceAll("\\", "/");
+      const full = (0, import_node_path8.resolve)(dir, entry.name), rel = (0, import_node_path8.relative)(root, full).replaceAll("\\", "/");
       if (entry.isDirectory()) walk(full);
-      else if (/\.(tsx?|jsx?|mjs|cjs)$/.test(rel) && config2.include.some((g) => (0, import_node_path7.matchesGlob)(rel, g)) && !config2.exclude.some((g) => (0, import_node_path7.matchesGlob)(rel, g))) {
-        if ((0, import_node_fs10.lstatSync)(full).size > 2e5) throw new Error("Source file size limit exceeded: " + rel);
+      else if (/\.(tsx?|jsx?|mjs|cjs)$/.test(rel) && config2.include.some((g) => (0, import_node_path8.matchesGlob)(rel, g)) && !config2.exclude.some((g) => (0, import_node_path8.matchesGlob)(rel, g))) {
+        if ((0, import_node_fs11.lstatSync)(full).size > 2e5) throw new Error("Source file size limit exceeded: " + rel);
         paths.push(full);
         if (paths.length > 5e3) throw new Error("Source file count limit exceeded");
       }
@@ -273475,13 +273582,13 @@ function analyze(root, config2) {
     return { inventory, edits: [] };
   }
   inventory.moduleMode = "unknown";
-  if ((0, import_node_fs10.existsSync)((0, import_node_path7.resolve)(root, "package.json"))) {
-    const p = manifest.parse(JSON.parse((0, import_node_fs10.readFileSync)((0, import_node_path7.resolve)(root, "package.json"), "utf8")));
+  if ((0, import_node_fs11.existsSync)((0, import_node_path8.resolve)(root, "package.json"))) {
+    const p = manifest.parse(JSON.parse((0, import_node_fs11.readFileSync)((0, import_node_path8.resolve)(root, "package.json"), "utf8")));
     inventory.declared = p.dependencies?.stripe ?? p.devDependencies?.stripe;
     inventory.moduleMode = p.type === "module" ? "esm" : p.type === "commonjs" ? "commonjs" : "unknown";
   }
-  if ((0, import_node_fs10.existsSync)((0, import_node_path7.resolve)(root, "tsconfig.json"))) {
-    const result = import_ts_morph2.ts.readConfigFile((0, import_node_path7.resolve)(root, "tsconfig.json"), import_ts_morph2.ts.sys.readFile);
+  if ((0, import_node_fs11.existsSync)((0, import_node_path8.resolve)(root, "tsconfig.json"))) {
+    const result = import_ts_morph2.ts.readConfigFile((0, import_node_path8.resolve)(root, "tsconfig.json"), import_ts_morph2.ts.sys.readFile);
     if (result.error || result.config.extends) inventory.moduleMode = "unknown";
     else {
       const mode = String(result.config.compilerOptions?.module ?? "").toLowerCase();
@@ -273490,8 +273597,8 @@ function analyze(root, config2) {
     }
   }
   inventory.limitations.push("Constructor aliases are removed in Stripe 12 ESM; CommonJS retains them. Module-mode inference uses root package/tsconfig only; nested settings and bundler rewrites require manual review.");
-  if ((0, import_node_fs10.existsSync)((0, import_node_path7.resolve)(root, "package-lock.json"))) {
-    const lock = lockSchema.parse(JSON.parse((0, import_node_fs10.readFileSync)((0, import_node_path7.resolve)(root, "package-lock.json"), "utf8")));
+  if ((0, import_node_fs11.existsSync)((0, import_node_path8.resolve)(root, "package-lock.json"))) {
+    const lock = lockSchema.parse(JSON.parse((0, import_node_fs11.readFileSync)((0, import_node_path8.resolve)(root, "package-lock.json"), "utf8")));
     inventory.resolved = lock.packages?.["node_modules/stripe"]?.version ?? lock.dependencies?.stripe?.version;
     inventory.versionOrigin = "package-lock.json (root installation)";
     if (Object.keys(lock.packages ?? {}).some((k) => k.endsWith("/node_modules/stripe") && k !== "node_modules/stripe")) inventory.limitations.push("Nested Stripe installations are unsupported; root version cannot establish their applicability");
@@ -273500,7 +273607,7 @@ function analyze(root, config2) {
     inventory.resolved = config2.vendors.stripe.sdkVersion;
     inventory.versionOrigin = "explicit configuration override";
   }
-  if (!(0, import_node_fs10.existsSync)((0, import_node_path7.resolve)(root, "node_modules/stripe"))) inventory.limitations.push("Stripe dependencies absent: lexical symbol binding available, SDK type checking unavailable; no dependencies installed");
+  if (!(0, import_node_fs11.existsSync)((0, import_node_path8.resolve)(root, "node_modules/stripe"))) inventory.limitations.push("Stripe dependencies absent: lexical symbol binding available, SDK type checking unavailable; no dependencies installed");
   const project = new import_ts_morph2.Project({ skipAddingFilesFromTsConfig: true, skipFileDependencyResolution: true, compilerOptions: { allowJs: true, target: import_ts_morph2.ts.ScriptTarget.ESNext, jsx: import_ts_morph2.ts.JsxEmit.Preserve, noResolve: true } });
   const sources = sourceFiles(root, config2).map((file2) => project.addSourceFileAtPath(file2));
   const projectUnsafe = sources.some(unsafeConstructorReferences);
@@ -273508,7 +273615,7 @@ function analyze(root, config2) {
   const linked = discoverLinks(root, sourceFiles(root, config2), inventory);
   const edits = [];
   for (const file2 of sourceFiles(root, config2)) {
-    const source = project.addSourceFileAtPath(file2), name = (0, import_node_path7.relative)(root, file2).replaceAll("\\", "/"), before = source.getFullText();
+    const source = project.addSourceFileAtPath(file2), name = (0, import_node_path8.relative)(root, file2).replaceAll("\\", "/"), before = source.getFullText();
     const imports = source.getImportDeclarations().filter((d) => d.getModuleSpecifierValue() === "stripe");
     const roots = new Set(imports.filter((d) => !d.isTypeOnly()).flatMap((d) => [d.getDefaultImport(), ...d.getNamedImports().filter((n) => !n.isTypeOnly() && ["Stripe", "default"].includes(n.getName())).map((n) => n.getAliasNode() ?? n.getNameNode())]).map((n) => n?.getSymbol()).filter(Boolean));
     const clients = /* @__PURE__ */ new Set();
@@ -273649,8 +273756,8 @@ function analyze(root, config2) {
 }
 
 // packages/core/src/languages/python/analyze.ts
-var import_node_fs11 = require("node:fs");
-var import_node_path8 = require("node:path");
+var import_node_fs12 = require("node:fs");
+var import_node_path9 = require("node:path");
 var import_node_child_process = require("node:child_process");
 
 // packages/core/src/languages/python/analyze.py
@@ -273659,25 +273766,25 @@ var analyze_default = 'import ast, json, sys\ntext=sys.stdin.buffer.read().decod
 // packages/core/src/languages/python/analyze.ts
 function interpreter(root, command) {
   const names = process.platform === "win32" && !/\.exe$/i.test(command) ? [command + ".exe", command] : [command];
-  const paths = (0, import_node_path8.isAbsolute)(command) || /[\\/]/.test(command) ? [(0, import_node_path8.resolve)(root, command)] : (process.env.PATH ?? process.env.Path ?? "").split(import_node_path8.delimiter).filter(Boolean).flatMap((dir) => names.map((name) => (0, import_node_path8.resolve)(dir, name)));
-  const path2 = paths.find((path3) => (0, import_node_fs11.existsSync)(path3) && (0, import_node_fs11.statSync)(path3).isFile());
+  const paths = (0, import_node_path9.isAbsolute)(command) || /[\\/]/.test(command) ? [(0, import_node_path9.resolve)(root, command)] : (process.env.PATH ?? process.env.Path ?? "").split(import_node_path9.delimiter).filter(Boolean).flatMap((dir) => names.map((name) => (0, import_node_path9.resolve)(dir, name)));
+  const path2 = paths.find((path3) => (0, import_node_fs12.existsSync)(path3) && (0, import_node_fs12.statSync)(path3).isFile());
   if (!path2) throw new Error("Python interpreter unavailable; configure pythonCommand with an installed Python 3.10+ executable");
-  let repository = (0, import_node_fs11.realpathSync)(root), directory = repository;
+  let repository = (0, import_node_fs12.realpathSync)(root), directory = repository;
   while (true) {
-    if ((0, import_node_fs11.existsSync)((0, import_node_path8.resolve)(directory, ".git"))) repository = directory;
-    const parent = (0, import_node_path8.dirname)(directory);
+    if ((0, import_node_fs12.existsSync)((0, import_node_path9.resolve)(directory, ".git"))) repository = directory;
+    const parent = (0, import_node_path9.dirname)(directory);
     if (parent === directory) break;
     directory = parent;
   }
-  const executable = (0, import_node_fs11.realpathSync)(path2), rel = (0, import_node_path8.relative)(repository, executable);
-  if (!(0, import_node_path8.isAbsolute)(rel) && rel !== ".." && !rel.startsWith(".." + import_node_path8.sep)) throw new Error("Python analysis requires a trusted interpreter outside the repository");
+  const executable = (0, import_node_fs12.realpathSync)(path2), rel = (0, import_node_path9.relative)(repository, executable);
+  if (!(0, import_node_path9.isAbsolute)(rel) && rel !== ".." && !rel.startsWith(".." + import_node_path9.sep)) throw new Error("Python analysis requires a trusted interpreter outside the repository");
   return executable;
 }
 var pythonAdapter = { id: "python", analyze(root, config2) {
   const inventory = { vendor: "stripe", sdkPackage: "stripe", versionOrigin: "unknown", usages: [], limitations: ["Python preview: top-level import stripe[ as alias], stripe.oauth_error OAuth exception spelling only; shadowed imports, module escapes and attribute mutations decline edits. Exact requirements.txt pin required."], webhookVersion: "unknown" };
-  const requirements = (0, import_node_path8.resolve)(root, "requirements.txt");
-  if ((0, import_node_fs11.existsSync)(requirements)) {
-    const text2 = (0, import_node_fs11.readFileSync)(requirements, "utf8");
+  const requirements = (0, import_node_path9.resolve)(root, "requirements.txt");
+  if ((0, import_node_fs12.existsSync)(requirements)) {
+    const text2 = (0, import_node_fs12.readFileSync)(requirements, "utf8");
     const directives = text2.split(/\r?\n/).filter((line) => /^\s*stripe(?:[=<>!~;\s\[]|$)/i.test(line));
     const versions = [...text2.matchAll(/^stripe==([0-9]+\.[0-9]+\.[0-9]+)\s*$/gm)];
     if (versions.length === 1 && directives.length === 1 && !/^\s*-(r|c|e|\-)/m.test(text2)) {
@@ -273685,9 +273792,9 @@ var pythonAdapter = { id: "python", analyze(root, config2) {
       inventory.versionOrigin = "requirements.txt exact pin";
     }
   }
-  if (!(0, import_node_fs11.existsSync)(requirements) && (0, import_node_fs11.existsSync)((0, import_node_path8.resolve)(root, "pyproject.toml"))) {
+  if (!(0, import_node_fs12.existsSync)(requirements) && (0, import_node_fs12.existsSync)((0, import_node_path9.resolve)(root, "pyproject.toml"))) {
     inventory.manifest = "pyproject.toml";
-    const metadata = (0, import_node_fs11.readFileSync)((0, import_node_path8.resolve)(root, "pyproject.toml"), "utf8");
+    const metadata = (0, import_node_fs12.readFileSync)((0, import_node_path9.resolve)(root, "pyproject.toml"), "utf8");
     inventory.declared = metadata.match(/["'](stripe(?:\[[^\]]+\])?\s*[<>=!~][^"']*)["']/i)?.[1] ?? metadata.match(/^stripe\s*=\s*["']([^"']+)["']/m)?.[1];
     inventory.limitations.push("pyproject.toml literal declarations only; lockfile resolution and automatic edits require an exact requirements.txt pin.");
   }
@@ -273699,17 +273806,17 @@ var pythonAdapter = { id: "python", analyze(root, config2) {
   let count = 0;
   if (!config2.vendors.stripe.enabled) return { inventory, edits };
   function walk(dir) {
-    for (const entry of (0, import_node_fs11.readdirSync)(dir, { withFileTypes: true })) {
+    for (const entry of (0, import_node_fs12.readdirSync)(dir, { withFileTypes: true })) {
       if (entry.isSymbolicLink() || ignoredDirectories.has(entry.name)) continue;
-      const path2 = (0, import_node_path8.resolve)(dir, entry.name);
+      const path2 = (0, import_node_path9.resolve)(dir, entry.name);
       if (entry.isDirectory()) {
         walk(path2);
         continue;
       }
-      const name = (0, import_node_path8.relative)(root, path2).replaceAll("\\", "/");
-      if (!name.endsWith(".py") || !config2.include.some((g) => (0, import_node_path8.matchesGlob)(name, g)) || config2.exclude.some((g) => (0, import_node_path8.matchesGlob)(name, g))) continue;
+      const name = (0, import_node_path9.relative)(root, path2).replaceAll("\\", "/");
+      if (!name.endsWith(".py") || !config2.include.some((g) => (0, import_node_path9.matchesGlob)(name, g)) || config2.exclude.some((g) => (0, import_node_path9.matchesGlob)(name, g))) continue;
       if (++count > 5e3) throw new Error("Python source count limit exceeded");
-      const before = (0, import_node_fs11.readFileSync)(path2, "utf8");
+      const before = (0, import_node_fs12.readFileSync)(path2, "utf8");
       if (Buffer.byteLength(before) > 2e5) throw new Error("Python source size limit exceeded");
       const result = (0, import_node_child_process.spawnSync)(executable ??= interpreter(root, config2.pythonCommand), ["-I", "-c", analyze_default], { env, input: before, encoding: "utf8", timeout: 1e4, maxBuffer: 1e6, windowsHide: true });
       if (result.status !== 0) throw new Error("Python AST analysis failed; ensure pythonCommand points to Python 3. No customer code is executed.");
@@ -273733,7 +273840,7 @@ var pythonAdapter = { id: "python", analyze(root, config2) {
 
 // packages/core/src/languages/index.ts
 var adapters = { typescript: { id: "typescript", analyze }, javascript: { id: "javascript", analyze }, python: pythonAdapter, ...Object.fromEntries(["go", "java", "csharp", "php", "ruby"].map((language) => [language, ecosystemAdapter(language)])) };
-for (const adapter of Object.values(adapters)) adapter.capabilities = { dependencies: true, references: ["typescript", "javascript", "python"].includes(adapter.id) ? "semantic" : "lexical", automaticMigrations: ["typescript", "javascript", "python"].includes(adapter.id) };
+for (const adapter of Object.values(adapters)) adapter.capabilities = { dependencies: true, references: ["typescript", "javascript", "python"].includes(adapter.id) ? "semantic" : "lexical", automaticMigrations: ["typescript", "javascript", "python", "go", "java", "csharp", "php", "ruby"].includes(adapter.id) };
 
 // packages/core/src/git.ts
 var import_node_child_process2 = require("node:child_process");
@@ -297353,7 +297460,7 @@ function redactDiagnostics(value) {
 var baselineSchema = external_exports.object({ schemaVersion: external_exports.literal(1), accepted: external_exports.array(external_exports.string()), sources: external_exports.array(external_exports.object({ url: external_exports.string().url(), sha256: external_exports.string().regex(/^[a-f0-9]{64}$/) })), observedReleases: external_exports.array(external_exports.string()) }).strict();
 function baseline(root) {
   const path2 = contained(root, "changelume.lock.json");
-  return (0, import_node_fs12.existsSync)(path2) ? baselineSchema.parse(JSON.parse((0, import_node_fs12.readFileSync)(path2, "utf8"))) : { schemaVersion: 1, accepted: [], sources: [], observedReleases: [] };
+  return (0, import_node_fs13.existsSync)(path2) ? baselineSchema.parse(JSON.parse((0, import_node_fs13.readFileSync)(path2, "utf8"))) : { schemaVersion: 1, accepted: [], sources: [], observedReleases: [] };
 }
 async function plan(root, config2, offline = false, stateRoot = root) {
   if (config2.projects) {
@@ -297392,10 +297499,10 @@ async function plan(root, config2, offline = false, stateRoot = root) {
     sources.unclassified.push(...sdk.unclassified);
   }
   inventory.language = config2.language;
-  if (!["typescript", "javascript", "python"].includes(config2.language)) sources.unclassified.unshift(config2.language + ": no versioned automatic migration recipe; review official SDK changes manually.");
+  if (!["typescript", "javascript", "python"].includes(config2.language) && !inventory.usages.some((u) => u.changeId)) sources.unclassified.unshift(config2.language + ": no matching versioned recipe was found; review official SDK changes manually.");
   const major = Number(inventory.resolved?.split(".")[0]);
   const findings = inventory.usages.filter((u) => u.kind === "field" && u.replacement && !u.changeId).map((u) => ({ changeId: CHANGE_ID, location: { file: u.file, line: u.line, symbol: u.symbol }, outcome: major === 12 && inventory.moduleMode === "esm" ? "confirmed impact" : major === 11 || major === 12 ? "possible impact" : "unsupported analysis", explanation: major === 12 ? `Stripe 12 ESM removed this constructor alias; CommonJS retains it. Detected module mode: ${inventory.moduleMode}. The source cleanup is compatible with either build; review module-mode evidence.` : major === 11 ? "Stripe 11 still supports this alias; removing it prepares this usage for v12 ESM. No dependency upgrade is performed." : "Recipe applicability cannot be established outside resolved SDK majors 11 and 12." }));
-  for (const u of inventory.usages.filter((u2) => u2.changeId)) findings.push({ changeId: u.changeId, location: { file: u.file, line: u.line, symbol: u.symbol }, outcome: u.kind === "unsupported" ? "unsupported analysis" : major >= 11 || config2.language === "python" && major === 5 ? "confirmed impact" : "possible impact", explanation: u.kind === "unsupported" ? "Recipe preconditions are not satisfied; manual review required." : u.changeId.startsWith("stripe-python") ? "Stripe Python 5 corrected the OAuth exception spelling. No SDK upgrade is performed." : u.changeId.includes("setter") ? "Stripe Node 11 removed configuration setters; move the adjacent literal option into construction." : "Stripe 11 removed legacy request option names; rename the explicit inline option." });
+  for (const u of inventory.usages.filter((u2) => u2.changeId)) findings.push({ changeId: u.changeId, location: { file: u.file, line: u.line, symbol: u.symbol }, outcome: u.kind === "unsupported" ? "unsupported analysis" : major >= 11 || config2.language === "python" && major === 5 ? "confirmed impact" : "possible impact", explanation: u.kind === "unsupported" ? "Recipe preconditions are not satisfied; manual review required." : u.sourceUrl ? `The supported ${config2.language} recipe changes ${u.symbol} to ${u.replacement}. No SDK upgrade is performed. Official changelog: ${u.sourceUrl}` : u.changeId.startsWith("stripe-python") ? "Stripe Python 5 corrected the OAuth exception spelling. No SDK upgrade is performed." : u.changeId.includes("setter") ? "Stripe Node 11 removed configuration setters; move the adjacent literal option into construction." : "Stripe Node removed a legacy identifier; apply the documented source rename." });
   for (const u of inventory.usages.filter((u2) => u2.kind === "unsupported" && !u2.changeId)) findings.push({ changeId: ["typescript", "javascript"].includes(config2.language) ? CHANGE_ID : config2.language + "-stripe-review", location: { file: u.file, line: u.line, symbol: u.symbol }, outcome: "unsupported analysis", explanation: u.symbol });
   for (const u of inventory.usages.filter((u2) => u2.kind === "client" && u2.requestApiVersion === "unknown")) findings.push({ changeId: "stripe-node-12-api-default", location: { file: u.file, line: u.line, symbol: u.symbol }, outcome: "possible impact", explanation: "Request API version is unknown; SDK, account and webhook versions are independent." });
   if (!findings.length) findings.push({ changeId: config2.language + "-stripe-review", outcome: ["typescript", "javascript", "python"].includes(config2.language) ? "no detected impact within supported analysis" : "unsupported analysis", explanation: ["typescript", "javascript", "python"].includes(config2.language) ? "No documented obsolete patterns found within this adapter; overall compatibility remains unverified." : "Dependency inventory only; semantic impact and migration require manual review." });
@@ -297450,17 +297557,17 @@ function publicPlan(p) {
 }
 function saveReport(root, p, verification = { status: "skipped", results: [] }) {
   const dir = contained(root, ".changelume");
-  (0, import_node_fs12.mkdirSync)(dir, { recursive: true });
+  (0, import_node_fs13.mkdirSync)(dir, { recursive: true });
   persistQueue(root, p);
   saveProposal(root, p, verification);
-  (0, import_node_fs12.writeFileSync)(contained(root, ".changelume/report.json"), JSON.stringify({ plan: publicPlan(p), verification }, null, 2) + "\n");
+  (0, import_node_fs13.writeFileSync)(contained(root, ".changelume/report.json"), JSON.stringify({ plan: publicPlan(p), verification }, null, 2) + "\n");
   const diagnostics = verification.results.map((r, i) => `
 ### Command ${i + 1} diagnostics${r.outputTruncated ? " (truncated)" : ""}
 
 ` + [r.stdout, r.stderr].filter(Boolean).join("\n").split("\n").map((line) => "    " + line).join("\n")).join("\n");
-  (0, import_node_fs12.writeFileSync)(contained(root, ".changelume/report.md"), markdown(p, verification) + (diagnostics ? "\n## Verification output\n" + diagnostics + "\n" : ""));
+  (0, import_node_fs13.writeFileSync)(contained(root, ".changelume/report.md"), markdown(p, verification) + (diagnostics ? "\n## Verification output\n" + diagnostics + "\n" : ""));
 }
-function candidate(root, p, runVerification = true, cleanup = (path2) => (0, import_node_fs12.rmSync)(path2, { recursive: true, force: true })) {
+function candidate(root, p, runVerification = true, cleanup = (path2) => (0, import_node_fs13.rmSync)(path2, { recursive: true, force: true })) {
   if (runVerification) assertVerificationCoverage(p);
   if (p.upgrade && runVerification && !p.verification.length) throw new Error("SDK upgrades require configured installation and behavioral verification");
   assertClean(root);
@@ -297472,18 +297579,18 @@ function candidate(root, p, runVerification = true, cleanup = (path2) => (0, imp
   if (edits.length) {
     const previous = baseline(root), path2 = contained(root, "changelume.lock.json");
     const next = { schemaVersion: 1, accepted: [.../* @__PURE__ */ new Set([...previous.accepted, ...p.inventory.usages.filter((u) => u.editPlanned && p.edits.some((e) => e.path === u.file)).map((u) => u.changeId ?? CHANGE_ID), p.id])], sources: p.evidence.filter((e) => e.origin === "offline snapshot").map(({ url: url2, sha256 }) => ({ url: url2, sha256 })), observedReleases: previous.observedReleases };
-    edits.push({ path: "changelume.lock.json", beforeHash: hash2((0, import_node_fs12.existsSync)(path2) ? (0, import_node_fs12.readFileSync)(path2) : ""), content: JSON.stringify(next, null, 2) + "\n" });
+    edits.push({ path: "changelume.lock.json", beforeHash: hash2((0, import_node_fs13.existsSync)(path2) ? (0, import_node_fs13.readFileSync)(path2) : ""), content: JSON.stringify(next, null, 2) + "\n" });
   }
-  const temp = (0, import_node_fs12.mkdtempSync)((0, import_node_path9.resolve)((0, import_node_os.tmpdir)(), "changelume-"));
+  const temp = (0, import_node_fs13.mkdtempSync)((0, import_node_path10.resolve)((0, import_node_os.tmpdir)(), "changelume-"));
   let patch = "", verification = { status: "skipped", results: [] };
   try {
     git(temp, "clone", "--quiet", "--no-hardlinks", "--", root, "candidate");
-    const checkout = (0, import_node_path9.resolve)(temp, "candidate");
+    const checkout = (0, import_node_path10.resolve)(temp, "candidate");
     git(checkout, "checkout", "--quiet", "--detach", p.revision);
     for (const e of edits) {
       const path2 = contained(checkout, e.path);
-      (0, import_node_fs12.mkdirSync)((0, import_node_path9.dirname)(path2), { recursive: true });
-      (0, import_node_fs12.writeFileSync)(path2, e.content);
+      (0, import_node_fs13.mkdirSync)((0, import_node_path10.dirname)(path2), { recursive: true });
+      (0, import_node_fs13.writeFileSync)(path2, e.content);
     }
     if (edits.length) git(checkout, "add", "--intent-to-add", "--", ...edits.map((e) => e.path));
     patch = git(checkout, "diff", "--no-ext-diff", "--no-textconv", "--binary", "--unified=0", "HEAD") + "\n";
@@ -297500,30 +297607,30 @@ function candidate(root, p, runVerification = true, cleanup = (path2) => (0, imp
     }
   }
   const bundle = { schemaVersion: 1, revision: p.revision, plan: p, edits, patchHash: hash2(patch), verification };
-  (0, import_node_fs12.mkdirSync)(contained(root, ".changelume"), { recursive: true });
-  (0, import_node_fs12.writeFileSync)(contained(root, ".changelume/migration.patch"), patch);
-  (0, import_node_fs12.writeFileSync)(contained(root, ".changelume/bundle.json"), JSON.stringify(bundle, null, 2) + "\n");
+  (0, import_node_fs13.mkdirSync)(contained(root, ".changelume"), { recursive: true });
+  (0, import_node_fs13.writeFileSync)(contained(root, ".changelume/migration.patch"), patch);
+  (0, import_node_fs13.writeFileSync)(contained(root, ".changelume/bundle.json"), JSON.stringify(bundle, null, 2) + "\n");
   saveReport(root, p, verification);
   return bundle;
 }
-function applyCandidate(root, b, replace = import_node_fs12.renameSync) {
+function applyCandidate(root, b, replace = import_node_fs13.renameSync) {
   assertClean(root);
   if (revision(root) !== b.revision) throw new Error("Repository revision changed");
   if (b.verification.status === "failed") throw new Error("Verification failed; patch and report preserved, source not changed");
   validateEdits(root, { edits: b.edits }, [...b.plan.edits.map((e) => e.path), "changelume.lock.json"], true, Boolean(b.plan.upgrade || b.plan.projects?.some((unit) => unit.upgrade)));
   const recovery = contained(root, `.changelume/recovery/${(0, import_node_crypto2.randomUUID)()}`);
-  (0, import_node_fs12.mkdirSync)(recovery, { recursive: true });
+  (0, import_node_fs13.mkdirSync)(recovery, { recursive: true });
   const originals = b.edits.map((e, i) => {
-    const path2 = contained(root, e.path), existed = (0, import_node_fs12.existsSync)(path2);
-    if (existed) (0, import_node_fs12.writeFileSync)((0, import_node_path9.resolve)(recovery, `${i}.original`), (0, import_node_fs12.readFileSync)(path2));
-    (0, import_node_fs12.writeFileSync)((0, import_node_path9.resolve)(recovery, `${i}.candidate`), e.content);
+    const path2 = contained(root, e.path), existed = (0, import_node_fs13.existsSync)(path2);
+    if (existed) (0, import_node_fs13.writeFileSync)((0, import_node_path10.resolve)(recovery, `${i}.original`), (0, import_node_fs13.readFileSync)(path2));
+    (0, import_node_fs13.writeFileSync)((0, import_node_path10.resolve)(recovery, `${i}.candidate`), e.content);
     return { path: e.path, existed };
   });
-  (0, import_node_fs12.writeFileSync)((0, import_node_path9.resolve)(recovery, "manifest.json"), JSON.stringify({ revision: b.revision, originals }, null, 2));
+  (0, import_node_fs13.writeFileSync)((0, import_node_path10.resolve)(recovery, "manifest.json"), JSON.stringify({ revision: b.revision, originals }, null, 2));
   const applied = [];
   try {
     for (const [i, e] of b.edits.entries()) {
-      replace((0, import_node_path9.resolve)(recovery, `${i}.candidate`), contained(root, e.path));
+      replace((0, import_node_path10.resolve)(recovery, `${i}.candidate`), contained(root, e.path));
       applied.push(i);
     }
   } catch {
@@ -297532,8 +297639,8 @@ function applyCandidate(root, b, replace = import_node_fs12.renameSync) {
       try {
         const original = originals[i];
         const path2 = contained(root, original.path);
-        if (original.existed) (0, import_node_fs12.writeFileSync)(path2, (0, import_node_fs12.readFileSync)((0, import_node_path9.resolve)(recovery, `${i}.original`)));
-        else (0, import_node_fs12.rmSync)(path2);
+        if (original.existed) (0, import_node_fs13.writeFileSync)(path2, (0, import_node_fs13.readFileSync)((0, import_node_path10.resolve)(recovery, `${i}.original`)));
+        else (0, import_node_fs13.rmSync)(path2);
       } catch {
         restored = false;
       }
@@ -297541,23 +297648,23 @@ function applyCandidate(root, b, replace = import_node_fs12.renameSync) {
     throw new Error(`Migration application failed; ${restored ? "original files restored" : "rollback incomplete"}. Recovery copies and manifest: ${recovery}. Report and patch preserved.`);
   }
   try {
-    (0, import_node_fs12.rmSync)(recovery, { recursive: true, force: true });
+    (0, import_node_fs13.rmSync)(recovery, { recursive: true, force: true });
   } catch {
   }
 }
 function persistQueue(root, p) {
   const path2 = contained(root, ".changelume/monitor/queue.json");
-  (0, import_node_fs12.mkdirSync)((0, import_node_path9.dirname)(path2), { recursive: true });
+  (0, import_node_fs13.mkdirSync)((0, import_node_path10.dirname)(path2), { recursive: true });
   let previous = {};
   try {
-    previous = JSON.parse((0, import_node_fs12.readFileSync)(path2, "utf8")).history ?? {};
+    previous = JSON.parse((0, import_node_fs13.readFileSync)(path2, "utf8")).history ?? {};
   } catch {
   }
   const now = (/* @__PURE__ */ new Date()).toISOString();
   const items = reviewQueue(root, p).map((item) => ({ ...item, firstSeen: previous[item.id]?.firstSeen ?? now, lastSeen: now }));
   const history = { ...previous, ...Object.fromEntries(items.map((item) => [item.id, { firstSeen: item.firstSeen }])) };
-  (0, import_node_fs12.writeFileSync)(path2, JSON.stringify({ schemaVersion: 1, revision: p.revision, items, history }, null, 2) + "\n");
-  (0, import_node_fs12.writeFileSync)(contained(root, ".changelume/queue.json"), JSON.stringify({ schemaVersion: 1, revision: p.revision, items }, null, 2) + "\n");
+  (0, import_node_fs13.writeFileSync)(path2, JSON.stringify({ schemaVersion: 1, revision: p.revision, items, history }, null, 2) + "\n");
+  (0, import_node_fs13.writeFileSync)(contained(root, ".changelume/queue.json"), JSON.stringify({ schemaVersion: 1, revision: p.revision, items }, null, 2) + "\n");
 }
 function assertVerificationCoverage(p) {
   for (const unit of p.projects ?? []) {
@@ -297621,31 +297728,31 @@ async function publish(b, config2, repository, client = new Octokit2({ auth: pro
 // packages/core/src/action.ts
 var input2 = (key) => process.env["INPUT_" + key.toUpperCase().replaceAll("-", "_")] ?? process.env["INPUT_" + key.toUpperCase()] ?? "";
 function output2(key, value) {
-  if (process.env.GITHUB_OUTPUT) (0, import_node_fs13.appendFileSync)(process.env.GITHUB_OUTPUT, `${key}=${value}
+  if (process.env.GITHUB_OUTPUT) (0, import_node_fs14.appendFileSync)(process.env.GITHUB_OUTPUT, `${key}=${value}
 `);
 }
 async function main() {
   const stage = external_exports.enum(["analyze", "verify", "publish"]).parse(input2("stage") || "analyze");
-  const root = (0, import_node_path10.resolve)(input2("cwd") || process.env.GITHUB_WORKSPACE || ".");
+  const root = (0, import_node_path11.resolve)(input2("cwd") || process.env.GITHUB_WORKSPACE || ".");
   const config2 = loadConfig(root, input2("config") || "changelume.yml");
   assertClean(root);
   if (stage === "analyze") {
     const p2 = await plan(root, config2, input2("offline") === "true");
     const b = candidate(root, p2, false);
-    if (process.env.GITHUB_STEP_SUMMARY) (0, import_node_fs13.appendFileSync)(process.env.GITHUB_STEP_SUMMARY, `Changelume: ${p2.newlyObserved.length} newly observed releases; ${reviewQueue(root, p2).filter((i) => !i.acknowledged).length} pending review items; ${p2.edits.length} proposed files. Download changelume-candidate for queue.json and report.md.
+    if (process.env.GITHUB_STEP_SUMMARY) (0, import_node_fs14.appendFileSync)(process.env.GITHUB_STEP_SUMMARY, `Changelume: ${p2.newlyObserved.length} newly observed releases; ${reviewQueue(root, p2).filter((i) => !i.acknowledged).length} pending review items; ${p2.edits.length} proposed files. Download changelume-candidate for queue.json and report.md.
 `);
     output2("revision", b.revision);
     output2("patch-hash", b.patchHash);
-    output2("bundle-hash", hash2((0, import_node_fs13.readFileSync)(contained(root, ".changelume/bundle.json"))));
+    output2("bundle-hash", hash2((0, import_node_fs14.readFileSync)(contained(root, ".changelume/bundle.json"))));
     output2("has-edits", String(b.edits.length > 0));
     return;
   }
-  const data = (0, import_node_fs13.readFileSync)(contained(root, ".changelume/bundle.json"));
+  const data = (0, import_node_fs14.readFileSync)(contained(root, ".changelume/bundle.json"));
   if (data.length > 2e6 || hash2(data) !== input2("bundle-hash")) throw new Error("Artifact digest does not match trusted analysis job output");
   const raw = JSON.parse(data.toString("utf8"));
   const envelope = external_exports.object({ schemaVersion: external_exports.literal(1), revision: external_exports.string().regex(/^[a-f0-9]{40}$/), patchHash: external_exports.string().regex(/^[a-f0-9]{64}$/), edits: external_exports.array(external_exports.unknown()) }).parse(raw);
   if (envelope.revision !== revision(root) || envelope.revision !== input2("revision")) throw new Error("Artifact analyzed revision mismatch");
-  if (envelope.patchHash !== input2("patch-hash") || hash2((0, import_node_fs13.readFileSync)(contained(root, ".changelume/migration.patch"))) !== envelope.patchHash) throw new Error("Patch integrity mismatch");
+  if (envelope.patchHash !== input2("patch-hash") || hash2((0, import_node_fs14.readFileSync)(contained(root, ".changelume/migration.patch"))) !== envelope.patchHash) throw new Error("Patch integrity mismatch");
   const p = await plan(root, config2, true), expected = candidate(root, p, false);
   if (JSON.stringify(envelope.edits) !== JSON.stringify(expected.edits) || envelope.patchHash !== expected.patchHash) throw new Error("Artifact exceeds deterministic recipe scope");
   assertVerificationCoverage(p);
@@ -297654,7 +297761,7 @@ async function main() {
     const trackedBefore = git(root, "diff", "--no-ext-diff", "--no-textconv", "--binary", "HEAD");
     const result = verify(root, p.verification);
     if (git(root, "diff", "--no-ext-diff", "--no-textconv", "--binary", "HEAD") !== trackedBefore) result.status = "failed";
-    if (expected.edits.some((e) => (0, import_node_fs13.readFileSync)(contained(root, e.path), "utf8") !== e.content)) result.status = "failed";
+    if (expected.edits.some((e) => (0, import_node_fs14.readFileSync)(contained(root, e.path), "utf8") !== e.content)) result.status = "failed";
     saveReport(root, p, result);
     output2("verification", result.status);
     output2("verified-patch-hash", expected.patchHash);

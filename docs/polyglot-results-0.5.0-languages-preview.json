@@ -1,0 +1,183 @@
+{
+  "schemaVersion": 1,
+  "kind": "controlled eight-language repository",
+  "independentParticipants": 0,
+  "languages": [
+    "csharp",
+    "go",
+    "java",
+    "javascript",
+    "php",
+    "python",
+    "ruby",
+    "typescript"
+  ],
+  "units": [
+    {
+      "path": "web",
+      "language": "typescript",
+      "declared": "12.0.0",
+      "resolved": "12.0.0",
+      "versionOrigin": "package-lock.json (root installation)",
+      "referenceCount": 3,
+      "automaticEdits": 1
+    },
+    {
+      "path": "frontend",
+      "language": "javascript",
+      "declared": "12.0.0",
+      "resolved": "12.0.0",
+      "versionOrigin": "package-lock.json (root installation)",
+      "referenceCount": 3,
+      "automaticEdits": 1
+    },
+    {
+      "path": "backend",
+      "language": "python",
+      "declared": "5.0.0",
+      "resolved": "5.0.0",
+      "versionOrigin": "requirements.txt exact pin",
+      "referenceCount": 1,
+      "automaticEdits": 1
+    },
+    {
+      "path": "worker",
+      "language": "go",
+      "declared": "v82.0.0",
+      "resolved": "82.0.0",
+      "versionOrigin": "user-configured SDK version assertion",
+      "referenceCount": 2,
+      "automaticEdits": 1
+    },
+    {
+      "path": "payments",
+      "language": "java",
+      "declared": "22.0.0",
+      "resolved": "22.0.0",
+      "versionOrigin": "user-configured SDK version assertion",
+      "referenceCount": 3,
+      "automaticEdits": 1
+    },
+    {
+      "path": "billing",
+      "language": "csharp",
+      "declared": "45.0.0",
+      "resolved": "45.0.0",
+      "versionOrigin": "ecosystem lockfile",
+      "referenceCount": 2,
+      "automaticEdits": 1
+    },
+    {
+      "path": "store",
+      "language": "php",
+      "declared": "^16.0",
+      "resolved": "16.0.0",
+      "versionOrigin": "ecosystem lockfile",
+      "referenceCount": 2,
+      "automaticEdits": 1
+    },
+    {
+      "path": "jobs",
+      "language": "ruby",
+      "declared": "~> 13.0",
+      "resolved": "13.0.0",
+      "versionOrigin": "ecosystem lockfile",
+      "referenceCount": 3,
+      "automaticEdits": 1
+    }
+  ],
+  "editedFiles": [
+    "backend/app.py",
+    "billing/Checkout.cs",
+    "frontend/src/main.js",
+    "jobs/checkout.rb",
+    "payments/src/Checkout.java",
+    "store/checkout.php",
+    "web/src/main.ts",
+    "worker/main.go"
+  ],
+  "verification": {
+    "status": "passed",
+    "results": [
+      {
+        "cwd": "web",
+        "command": "node verify.cjs",
+        "exitCode": 0,
+        "timedOut": false,
+        "stdout": "",
+        "stderr": "",
+        "outputTruncated": false
+      },
+      {
+        "cwd": "frontend",
+        "command": "node verify.cjs",
+        "exitCode": 0,
+        "timedOut": false,
+        "stdout": "",
+        "stderr": "",
+        "outputTruncated": false
+      },
+      {
+        "cwd": "backend",
+        "command": "node verify.cjs",
+        "exitCode": 0,
+        "timedOut": false,
+        "stdout": "",
+        "stderr": "",
+        "outputTruncated": false
+      },
+      {
+        "cwd": "worker",
+        "command": "node verify.cjs",
+        "exitCode": 0,
+        "timedOut": false,
+        "stdout": "",
+        "stderr": "",
+        "outputTruncated": false
+      },
+      {
+        "cwd": "payments",
+        "command": "node verify.cjs",
+        "exitCode": 0,
+        "timedOut": false,
+        "stdout": "",
+        "stderr": "",
+        "outputTruncated": false
+      },
+      {
+        "cwd": "billing",
+        "command": "node verify.cjs",
+        "exitCode": 0,
+        "timedOut": false,
+        "stdout": "",
+        "stderr": "",
+        "outputTruncated": false
+      },
+      {
+        "cwd": "store",
+        "command": "node verify.cjs",
+        "exitCode": 0,
+        "timedOut": false,
+        "stdout": "",
+        "stderr": "",
+        "outputTruncated": false
+      },
+      {
+        "cwd": "jobs",
+        "command": "node verify.cjs",
+        "exitCode": 0,
+        "timedOut": false,
+        "stdout": "",
+        "stderr": "",
+        "outputTruncated": false
+      }
+    ]
+  },
+  "dryRunPreservedSource": true,
+  "secondPlanEdits": 0,
+  "limitations": [
+    "Go, Java, C#, PHP and Ruby use bounded lexical recipes, not full compiler AST or semantic binding.",
+    "Polyglot verification uses Node assertions over expected source because those native toolchains and SDK installations are not provisioned in this harness. This demonstrates Changelume plan/verify/apply wiring, not runtime compatibility.",
+    "JavaScript, TypeScript and Python source assertions run here; the real Stripe application integration remains a separate CI check."
+  ]
+}

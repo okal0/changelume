@@ -15,7 +15,7 @@ import {git} from '../../core/src/git.js';
 import {reviewQueue,acknowledge} from '../../core/src/review.js';
 import {redactDiagnostics} from '../../core/src/diagnostics.js';
 
-const cli=new Command().name('changelume').description('Local, evidence-backed Stripe migration MVP').version('0.5.0-rc.1');
+const cli=new Command().name('changelume').description('Local, evidence-backed Stripe migration MVP').version('0.5.0-rc.2');
 for(const name of ['languages','discover','init','doctor','proposal','review','scan','plan','migrate']) {
   const command=cli.command(name).option('--cwd <path>','Customer repository',process.cwd()).option('--config <path>','Configuration file','changelume.yml').option('--json','Machine-readable output').option('--offline','Use bundled official historical snapshot');
   if(name==='init')command.option('--workspace','Discover multiple project units').option('--language <name>','Select a language for a single project');

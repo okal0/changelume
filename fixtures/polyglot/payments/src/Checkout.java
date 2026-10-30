@@ -1,2 +1,3 @@
 import com.stripe.model.Customer;
-class Checkout {}
+import com.stripe.model.CashBalance;
+class Checkout { Object balance = CashBalance.retrieveCashBalance("cus_example"); }

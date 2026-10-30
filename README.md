@@ -100,4 +100,4 @@ See [application repair, explicit upgrade and evaluation guide](docs/preview-0.4
 
 ## Eight-language support
 
-See [language capabilities and multi-project guide](docs/languages.md). TypeScript, JavaScript and Python have selected automatic recipes; Go, Java, C#, PHP and Ruby provide inventory, lexical review and official SDK release monitoring.
+See [language capabilities and multi-project guide](docs/languages.md). Go, Java, C#, PHP and Ruby each have one conservative, version-gated lexical recipe; they require configured native verification and are not full compiler-aware analyzers.
