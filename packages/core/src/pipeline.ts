@@ -6,7 +6,9 @@ import { spawnSync } from 'node:child_process';
 import { z } from 'zod';
 import type { Config } from './config.js';
 import type { Plan, Bundle, Verification } from './models.js';
-import { analyze } from './languages/typescript/analyze.js';
+import pythonSnapshot from '../../../fixtures/sources/stripe-python-v5-changelog.md';
+import {reviewQueue} from './review.js';
+import { adapters } from './languages/index.js';
 import { collectSources, CHANGE_ID } from './vendors/stripe/sources.js';
 import { hash, contained, validateEdits } from './safety.js';
 import { git, revision, assertClean } from './git.js';
@@ -16,15 +18,16 @@ import { redactDiagnostics } from './diagnostics.js';
 export const baselineSchema=z.object({schemaVersion:z.literal(1),accepted:z.array(z.string()),sources:z.array(z.object({url:z.string().url(),sha256:z.string().regex(/^[a-f0-9]{64}$/)})),observedReleases:z.array(z.string())}).strict();
 export function baseline(root:string) {const path=contained(root,'changelume.lock.json');return existsSync(path)?baselineSchema.parse(JSON.parse(readFileSync(path,'utf8'))):{schemaVersion:1 as const,accepted:[],sources:[],observedReleases:[]};}
 export async function plan(root:string,config:Config,offline=false):Promise<Plan> {
-  const accepted=baseline(root), {inventory,edits}=analyze(root,config);
-  const sources=await collectSources(root,offline,config);
+  const accepted=baseline(root), {inventory,edits}=adapters[config.language]!.analyze(root,config);
+  const sources=config.language==='python'?{evidence:[] as Plan['evidence'],releases:[] as string[],newlyObserved:[] as string[],unclassified:[] as string[]}:await collectSources(root,offline,config);
+  if(config.language==='python') {sources.evidence=[{url:'https://raw.githubusercontent.com/stripe/stripe-python/v5.0.0/CHANGELOG.md',sha256:hash(pythonSnapshot),origin:'offline snapshot',release:'5.0.0'}];sources.unclassified=['Python preview classifies only the two OAuth exception spelling corrections; all other changes require manual review.'];sources.releases=[];sources.newlyObserved=[];}
   const major=Number(inventory.resolved?.split('.')[0]);
   const findings:Plan['findings']=inventory.usages.filter(u=>u.kind==='field'&&u.replacement&&!u.changeId).map(u=>({changeId:CHANGE_ID,location:{file:u.file,line:u.line,symbol:u.symbol},outcome:major===12&&inventory.moduleMode==='esm'?'confirmed impact':major===11||major===12?'possible impact':'unsupported analysis',explanation:major===12?`Stripe 12 ESM removed this constructor alias; CommonJS retains it. Detected module mode: ${inventory.moduleMode}. The source cleanup is compatible with either build; review module-mode evidence.`:major===11?'Stripe 11 still supports this alias; removing it prepares this usage for v12 ESM. No dependency upgrade is performed.':'Recipe applicability cannot be established outside resolved SDK majors 11 and 12.'}));
-  for(const u of inventory.usages.filter(u=>u.changeId)) findings.push({changeId:u.changeId!,location:{file:u.file,line:u.line,symbol:u.symbol},outcome:major>=11?'confirmed impact':'possible impact',explanation:'Stripe 11 removed legacy request option names. Rename the explicit inline request option; no dependency or API-version upgrade is performed.'});
-  for(const u of inventory.usages.filter(u=>u.kind==='unsupported')) findings.push({changeId:CHANGE_ID,location:{file:u.file,line:u.line,symbol:u.symbol},outcome:'unsupported analysis',explanation:u.symbol});
+  for(const u of inventory.usages.filter(u=>u.changeId)) findings.push({changeId:u.changeId!,location:{file:u.file,line:u.line,symbol:u.symbol},outcome:u.kind==='unsupported'?'unsupported analysis':major>=11||config.language==='python'&&major===5?'confirmed impact':'possible impact',explanation:u.kind==='unsupported'?'Recipe preconditions are not satisfied; manual review required.':u.changeId!.startsWith('stripe-python')?'Stripe Python 5 corrected the OAuth exception spelling. No SDK upgrade is performed.':u.changeId!.includes('setter')?'Stripe Node 11 removed configuration setters; move the adjacent literal option into construction.':'Stripe 11 removed legacy request option names; rename the explicit inline option.'});
+  for(const u of inventory.usages.filter(u=>u.kind==='unsupported'&&!u.changeId)) findings.push({changeId:CHANGE_ID,location:{file:u.file,line:u.line,symbol:u.symbol},outcome:'unsupported analysis',explanation:u.symbol});
   for(const u of inventory.usages.filter(u=>u.kind==='client'&&u.requestApiVersion==='unknown')) findings.push({changeId:'stripe-node-12-api-default',location:{file:u.file,line:u.line,symbol:u.symbol},outcome:'possible impact',explanation:'Request API version is unknown; SDK, account and webhook versions are independent.'});
   if(!findings.length) findings.push({changeId:CHANGE_ID,outcome:'no detected impact within supported analysis',explanation:'No supported obsolete constructor aliases found; this does not establish overall Stripe compatibility.'});
-  return {id:inventory.usages.some(u=>u.changeId)?'stripe-supported-recipes-v1':CHANGE_ID,revision:revision(root),inventory,evidence:sources.evidence,observedReleases:sources.releases,newlyObserved:sources.newlyObserved,unclassified:sources.unclassified,findings,edits,preconditions:['Clean Git working tree for migration','Runtime default or named Stripe constructor import; recipe-specific usage pattern','Recipe-specific SDK versions: aliases 11/12, request options 10/11/12; no ambiguous nested installation','Expected file hashes and canonical source paths match'],manualSteps:['Review Stripe API compatibility and webhook endpoint versions separately.','No SDK upgrade is performed. For Stripe 11, update dependencies and lockfile separately after reviewing all v12 changes.','Review unclassified release changes; accepting this recipe does not accept them.'],verification:config.verification,acceptedBaseline:accepted,llm:{used:false}};
+  return {id:config.language==='python'?'stripe-python-5-oauth-exceptions':inventory.usages.some(u=>u.changeId)?'stripe-supported-recipes-v1':CHANGE_ID,revision:revision(root),inventory,evidence:sources.evidence,observedReleases:sources.releases,newlyObserved:sources.newlyObserved,unclassified:sources.unclassified,findings,edits,preconditions:['Clean Git working tree for migration','Selected language adapter and recipe-specific import/usage pattern','Recipe-specific SDK versions and unambiguous package resolution; see preview support matrix','Expected file hashes and canonical source paths match'],manualSteps:['Review Stripe API compatibility and webhook endpoint versions separately.','No SDK upgrade is performed. For Stripe 11, update dependencies and lockfile separately after reviewing all v12 changes.','Review unclassified release changes; accepting this recipe does not accept them.'],verification:config.verification,acceptedBaseline:accepted,llm:{used:false}};
 }
 export function verify(root:string,commands:Config['verification']):Verification {
   const results:Verification['results']=[];
@@ -45,6 +48,7 @@ export function markdown(p:Plan,verification:Verification={status:'skipped',resu
 export function publicPlan(p:Plan) {return {...p,edits:p.edits.map(e=>({path:e.path,beforeHash:e.beforeHash,afterHash:hash(e.content)}))};}
 export function saveReport(root:string,p:Plan,verification:Verification={status:'skipped',results:[]}) {
   const dir=contained(root,'.changelume');mkdirSync(dir,{recursive:true});
+  persistQueue(root,p);
   writeFileSync(contained(root,'.changelume/report.json'),JSON.stringify({plan:publicPlan(p),verification},null,2)+'\n');
   const diagnostics=verification.results.map((r,i)=>`\n### Command ${i+1} diagnostics${r.outputTruncated?' (truncated)':''}\n\n`+[r.stdout,r.stderr].filter(Boolean).join('\n').split('\n').map(line=>'    '+line).join('\n')).join('\n');
   writeFileSync(contained(root,'.changelume/report.md'),markdown(p,verification)+(diagnostics?'\n## Verification output\n'+diagnostics+'\n':''));
@@ -98,4 +102,13 @@ export function applyCandidate(root:string,b:Bundle,replace:typeof renameSync=re
     throw new Error(`Migration application failed; ${restored?'original files restored':'rollback incomplete'}. Recovery copies and manifest: ${recovery}. Report and patch preserved.`);
   }
   try {rmSync(recovery,{recursive:true,force:true});}catch {/* Successful application; recovery copies remain available. */}
+}
+
+function persistQueue(root:string,p:Plan){
+ const path=contained(root,'.changelume/monitor/queue.json');mkdirSync(dirname(path),{recursive:true});
+ let previous:Record<string,{firstSeen:string}>={};try{previous=JSON.parse(readFileSync(path,'utf8')).history??{};}catch{/* Cache is disposable. */}
+ const now=new Date().toISOString();const items=reviewQueue(root,p).map(item=>({...item,firstSeen:previous[item.id]?.firstSeen??now,lastSeen:now}));
+ const history={...previous,...Object.fromEntries(items.map(item=>[item.id,{firstSeen:item.firstSeen}]))};
+ writeFileSync(path,JSON.stringify({schemaVersion:1,revision:p.revision,items,history},null,2)+'\n');
+ writeFileSync(contained(root,'.changelume/queue.json'),JSON.stringify({schemaVersion:1,revision:p.revision,items},null,2)+'\n');
 }

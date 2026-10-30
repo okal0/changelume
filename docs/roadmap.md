@@ -35,3 +35,7 @@ Acceptance: documented setup works from a fresh consumer checkout; failed comman
 After the preceding gates pass, update the support matrix and validation record with live evidence, provide a minimal consumer example, and document a reviewed commit pin for remote Action installation. Add a reproducible distribution check to CI and review dependency/security updates. Package publication and release creation require their own explicit request.
 
 Defer additional vendors, broad LLM-generated migrations, and new migration recipes until the existing vertical slice passes these gates. Select the next Stripe recipe only after researching an official change with a deterministic transformation and realistic before/after fixtures.
+
+## 0.3 preview iteration
+
+Benchmark, three adjacent-literal setter migrations, persistent review snapshots, Python adapter and preview packaging: see [preview guide](preview-0.3.0.md). Independent feedback and public publication remain release gates.

@@ -89,3 +89,7 @@ Additional deterministic rules rename five legacy request-option spellings remov
 For real installed-SDK validation, run `node scripts/integration.mjs` after building. This separate test requires npm registry access for explicit dependency installation. It verifies Stripe 11.18.0 and 12.0.0 in native ESM and checks the CommonJS compatibility distinction; no Stripe API requests are made. See the [fixture documentation](fixtures/integration/README.md).
 
 Repeated scans track observed releases in disposable `.changelume/observations/` files, separately for online and offline sources. Unclassified changes remain in reports after observation. Clearing these files resets observation history without accepting any migration. The example Action workflow preserves this history with a trusted default-branch Actions cache.
+
+## 0.3 preview
+
+[Install, benchmark, monitoring and Python guide](docs/preview-0.3.0.md). Private controlled evaluation; no npm package published.

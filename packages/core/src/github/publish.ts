@@ -15,6 +15,10 @@ export async function publish(b:Bundle,config:Config,repository:string,client:Gi
   const existing=prs.data[0];
   // Never force-update an existing migration branch, even if a human has edited it.
   if(existing) {if(existing.state==='closed'&&!existing.merged_at)throw new Error('Migration PR was closed without merging; inspect it before restarting this revision');return {url:existing.html_url,reused:true};}
+  const open=await client.rest.pulls.list({owner,repo,base:config.pr.base,state:'open',per_page:100});
+  if(open.data.length===100) throw new Error('Too many open PRs to establish duplicate safety; review manually');
+  const related=open.data.find(pr=>pr.head?.repo?.full_name===repository&&pr.head.ref.startsWith(`changelume/${b.plan.id}/`));
+  if(related)return {url:related.html_url,reused:true};
   let existingSha:string|undefined;
   try {existingSha=(await client.rest.git.getRef({owner,repo,ref:`heads/${branch}`})).data.object.sha;}
   catch(error) {if((error as {status?:number}).status!==404) throw error;}

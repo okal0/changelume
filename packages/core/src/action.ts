@@ -6,6 +6,7 @@ import { plan, candidate, applyCandidate, verify, saveReport } from './pipeline.
 import { hash, contained } from './safety.js';
 import { publish } from './github/publish.js';
 import { revision, assertClean } from './git.js';
+import {reviewQueue} from './review.js';
 import { redactDiagnostics } from './diagnostics.js';
 const input=(key:string)=>process.env['INPUT_'+key.toUpperCase().replaceAll('-','_')]??process.env['INPUT_'+key.toUpperCase()]??'';
 function output(key:string,value:string) {if(process.env.GITHUB_OUTPUT) appendFileSync(process.env.GITHUB_OUTPUT,`${key}=${value}\n`);}
@@ -16,6 +17,7 @@ async function main() {
   assertClean(root);
   if(stage==='analyze') {
     const p=await plan(root,config,input('offline')==='true');const b=candidate(root,p,false);
+    if(process.env.GITHUB_STEP_SUMMARY) appendFileSync(process.env.GITHUB_STEP_SUMMARY,`Changelume: ${p.newlyObserved.length} newly observed releases; ${reviewQueue(root,p).filter(i=>!i.acknowledged).length} pending review items; ${p.edits.length} proposed files. Download changelume-candidate for queue.json and report.md.\n`);
     output('revision',b.revision);output('patch-hash',b.patchHash);output('bundle-hash',hash(readFileSync(contained(root,'.changelume/bundle.json'))));output('has-edits',String(b.edits.length>0));return;
   }
   const data=readFileSync(contained(root,'.changelume/bundle.json'));

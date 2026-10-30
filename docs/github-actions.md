@@ -31,3 +31,7 @@ Third-party Action pins were verified with `git ls-remote` against upstream tags
 The analysis job also uses verified actions/cache v4.2.3 (`5a3ec84...`) for disposable observation history and source cache. Each trusted default-branch run saves a new cache generation. Accepted migration state stays in the repository baseline, outside this cache. Deleting/evicting the cache resets what counts as newly observed without accepting any migration. Analysis does not restore source-containing candidate bundles from this cache.
 
 Mocked API tests cover publication and duplicate prevention; local process tests cover Action stage artifact validation. Live private-consumer workflow runs, including draft PR creation, safe retry, duplicate prevention, and failure gates, are linked in [the validation record](validation.md).
+
+## Persistent queue
+
+Cache .changelume/monitor/ alongside observations and sources. Download changelume-candidate for queue.json and report.md; summaries show pending items even without a patch. Commit changelume.review.json for persistent acknowledgements. See [monitoring semantics](preview-0.3.0.md).

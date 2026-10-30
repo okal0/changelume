@@ -2,3 +2,5 @@
 dist/*.cjs text eol=lf
 fixtures/sources/stripe-v12-changelog.md -text
 fixtures/sources/stripe-v11-changelog.md -text
+
+fixtures/sources/stripe-python-v5-changelog.md -text

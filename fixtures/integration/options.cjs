@@ -11,3 +11,11 @@ for(const name of ['stripe','stripe11']) {
   }
 }
 console.log('Legacy request option removal and replacement parsing verified against SDK 11.18.0 and 12.0.0.');
+
+for(const name of ['stripe','stripe11']) {
+ const Stripe=require(name);const sdk=new Stripe(['sk','test','synthetic'].join('_'),{timeout:250,maxNetworkRetries:2,telemetry:false});
+ assert.equal(sdk.getApiField('timeout'),250);
+ assert.equal(sdk.getApiField('maxNetworkRetries'),2);
+ assert.equal(sdk.getTelemetryEnabled(),false);
+ for(const method of ['setTimeout','setMaxNetworkRetries','setTelemetryEnabled']) assert.equal(sdk[method],undefined);
+}

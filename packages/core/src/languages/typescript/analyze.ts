@@ -84,11 +84,27 @@ export function analyze(root:string,config:Config):{inventory:Inventory;edits:Ed
         if((major===11||major===12)&&!inventory.limitations.some(l=>l.startsWith('Nested'))&&!imports.some(i=>i.isTypeOnly())) { replacements.push({start:expr.getStart(),end:expr.getEnd(),text:expr.getExpression().getText()}); inventory.usages[inventory.usages.length-1]!.editPlanned=true; }
       }
     }
+    // Move only an immediately adjacent literal setter; avoid changing evaluation order.
+    for(const statement of source.getVariableStatements()) {
+      const declarations=statement.getDeclarations();if(declarations.length!==1||statement.getDeclarationKind()!=='const')continue;
+      const declaration=declarations[0]!, init=declaration.getInitializer();if(!init||!Node.isNewExpression(init)||!isRoot(init.getExpression())||init.getArguments().length!==1)continue;
+      const next=statement.getNextSibling();if(!next||!Node.isExpressionStatement(next))continue;
+      const call=next.getExpression();if(!Node.isCallExpression(call))continue;const expr=call.getExpression();if(!Node.isPropertyAccessExpression(expr)||expr.getExpression().getSymbol()!==declaration.getNameNode().getSymbol())continue;
+      const options:Record<string,string>={setTimeout:'timeout',setMaxNetworkRetries:'maxNetworkRetries',setTelemetryEnabled:'telemetry'};const option=options[expr.getName()], value=call.getArguments()[0];
+      if(!option||call.getArguments().length!==1||!value||!(Node.isNumericLiteral(value)||value.getKind()===SyntaxKind.TrueKeyword||value.getKind()===SyntaxKind.FalseKeyword))continue;
+      const refs=source.getDescendantsOfKind(SyntaxKind.Identifier).filter(id=>id.getSymbol()===declaration.getNameNode().getSymbol());
+      const safe=refs.every(id=>id===declaration.getNameNode()||Node.isPropertyAccessExpression(id.getParent())&&id.getParent()!.getChildAtIndex(0)===id);
+      if(!safe||projectUnsafe||![10,11,12].includes(Number(inventory.resolved?.split('.')[0]))||inventory.limitations.some(l=>l.startsWith('Nested')))continue;
+      if(option==='telemetry'?!['true','false'].includes(value.getText()):!Node.isNumericLiteral(value))continue;
+      replacements.push({start:init.getEnd()-1,end:init.getEnd()-1,text:', {'+option+': '+value.getText()+'}'},{start:next.getStart(),end:next.getEnd(),text:''});
+      add(call,'field',expr.getText(),{changeId:'stripe-node-11-setter-'+option,editPlanned:true,replacement:option});
+    }
     for(const call of source.getDescendantsOfKind(SyntaxKind.CallExpression)) {
       let base:Node=call.getExpression(); const segments:string[]=[];
       while(Node.isPropertyAccessExpression(base)) {segments.unshift(base.getName());base=base.getExpression();}
       if(Node.isIdentifier(base)&&clients.has(base.getSymbol())) {
         const operation=segments.join('.');
+        if(['setTimeout','setMaxNetworkRetries','setTelemetryEnabled'].includes(operation)&&!inventory.usages.some(u=>u.line===call.getStartLineNumber()&&u.changeId?.includes('setter')))add(call,'unsupported','Removed Stripe configuration setter requires adjacent literal construction for automatic migration');
         const option=call.getArguments()[1];
         if(operation==='customers.create'&&call.getArguments().length===2&&option&&Node.isObjectLiteralExpression(option)) {
           const references=source.getDescendantsOfKind(SyntaxKind.Identifier).filter(id=>id.getSymbol()===base.getSymbol());
@@ -104,7 +120,7 @@ export function analyze(root:string,config:Config):{inventory:Inventory;edits:Ed
             add(property,'field',`customers.create options.${key}`,{replacement,editPlanned:true,changeId:`stripe-node-11-option-${key}`});
           }}
         }
-        const known=/^(customers|paymentIntents|charges|checkout.sessions)\.(create|retrieve|list|update|del)$/.test(operation);
+        const known=/^(customers|paymentIntents|charges|checkout.sessions)\.(create|retrieve|list|update|del)$/.test(operation)||inventory.usages.some(u=>u.line===call.getStartLineNumber()&&u.symbol===call.getExpression().getText()&&u.changeId?.includes('setter'));
         add(call,operation.startsWith('webhooks.')||operation.startsWith('webhookEndpoints.')?'webhook':known?'call':'unsupported',operation||'indirect client call',{requestApiVersion:clientVersions.get(base.getSymbol())});
         for(const arg of call.getArguments()) if(Node.isObjectLiteralExpression(arg)) {const v=arg.getProperty('apiVersion');if(v) add(v,'field','per-request apiVersion',{requestApiVersion:Node.isPropertyAssignment(v)&&Node.isStringLiteral(v.getInitializer())?v.getInitializer()!.getText().slice(1,-1):'unknown'});}
       }

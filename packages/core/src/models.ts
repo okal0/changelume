@@ -9,4 +9,4 @@ export interface Plan {id:string; revision:string; inventory:Inventory; evidence
 export interface Verification {status:'passed'|'failed'|'skipped'; results:{command:string;exitCode:number|null;timedOut:boolean;stdout?:string;stderr?:string;outputTruncated?:boolean}[]}
 export interface Bundle {schemaVersion:1; revision:string; plan:Plan; edits:Edit[]; patchHash:string; verification:Verification}
 export interface VendorAdapter {id:string; collect(root:string, offline:boolean):Promise<{evidence:Evidence[]; releases:string[]; unclassified:string[]}>}
-export interface LanguageAdapter {id:string; inventory(root:string):Inventory}
+export interface LanguageAdapter {id:string; analyze(root:string,config:import('./config.js').Config):{inventory:Inventory;edits:Edit[]}}

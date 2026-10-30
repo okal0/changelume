@@ -785,7 +785,7 @@ var require_createNode = __commonJS({
       if (value instanceof String || value instanceof Number || value instanceof Boolean || typeof BigInt !== "undefined" && value instanceof BigInt) {
         value = value.valueOf();
       }
-      const { aliasDuplicateObjects, onAnchor, onTagObj, schema, sourceObjects } = ctx;
+      const { aliasDuplicateObjects, onAnchor, onTagObj, schema: schema2, sourceObjects } = ctx;
       let ref = void 0;
       if (aliasDuplicateObjects && value && typeof value === "object") {
         ref = sourceObjects.get(value);
@@ -799,7 +799,7 @@ var require_createNode = __commonJS({
       }
       if (tagName?.startsWith("!!"))
         tagName = defaultTagPrefix + tagName.slice(2);
-      let tagObj = findTagObject(value, tagName, schema.tags);
+      let tagObj = findTagObject(value, tagName, schema2.tags);
       if (!tagObj) {
         if (value && typeof value.toJSON === "function") {
           value = value.toJSON();
@@ -810,7 +810,7 @@ var require_createNode = __commonJS({
             ref.node = node3;
           return node3;
         }
-        tagObj = value instanceof Map ? schema[identity.MAP] : Symbol.iterator in Object(value) ? schema[identity.SEQ] : schema[identity.MAP];
+        tagObj = value instanceof Map ? schema2[identity.MAP] : Symbol.iterator in Object(value) ? schema2[identity.SEQ] : schema2[identity.MAP];
       }
       if (onTagObj) {
         onTagObj(tagObj);
@@ -836,7 +836,7 @@ var require_Collection = __commonJS({
     var createNode = require_createNode();
     var identity = require_identity();
     var Node4 = require_Node();
-    function collectionFromPath(schema, path2, value) {
+    function collectionFromPath(schema2, path2, value) {
       let v = value;
       for (let i = path2.length - 1; i >= 0; --i) {
         const k = path2[i];
@@ -854,16 +854,16 @@ var require_Collection = __commonJS({
         onAnchor: () => {
           throw new Error("This should not happen, please report a bug.");
         },
-        schema,
+        schema: schema2,
         sourceObjects: /* @__PURE__ */ new Map()
       });
     }
     var isEmptyPath = (path2) => path2 == null || typeof path2 === "object" && !!path2[Symbol.iterator]().next().done;
     var Collection2 = class extends Node4.NodeBase {
-      constructor(type, schema) {
+      constructor(type, schema2) {
         super(type);
         Object.defineProperty(this, "schema", {
-          value: schema,
+          value: schema2,
           configurable: true,
           enumerable: false,
           writable: true
@@ -874,11 +874,11 @@ var require_Collection = __commonJS({
        *
        * @param schema - If defined, overwrites the original's schema
        */
-      clone(schema) {
+      clone(schema2) {
         const copy = Object.create(Object.getPrototypeOf(this), Object.getOwnPropertyDescriptors(this));
-        if (schema)
-          copy.schema = schema;
-        copy.items = copy.items.map((it) => identity.isNode(it) || identity.isPair(it) ? it.clone(schema) : it);
+        if (schema2)
+          copy.schema = schema2;
+        copy.items = copy.items.map((it) => identity.isNode(it) || identity.isPair(it) ? it.clone(schema2) : it);
         if (this.range)
           copy.range = this.range.slice();
         return copy;
@@ -1827,12 +1827,12 @@ var require_Pair = __commonJS({
         this.key = key;
         this.value = value;
       }
-      clone(schema) {
+      clone(schema2) {
         let { key, value } = this;
         if (identity.isNode(key))
-          key = key.clone(schema);
+          key = key.clone(schema2);
         if (identity.isNode(value))
-          value = value.clone(schema);
+          value = value.clone(schema2);
         return new _Pair(key, value);
       }
       toJSON(_, ctx) {
@@ -2025,17 +2025,17 @@ var require_YAMLMap = __commonJS({
       static get tagName() {
         return "tag:yaml.org,2002:map";
       }
-      constructor(schema) {
-        super(identity.MAP, schema);
+      constructor(schema2) {
+        super(identity.MAP, schema2);
         this.items = [];
       }
       /**
        * A generic collection parsing method that can be extended
        * to other node classes that inherit from YAMLMap
        */
-      static from(schema, obj, ctx) {
+      static from(schema2, obj, ctx) {
         const { keepUndefined, replacer } = ctx;
-        const map2 = new this(schema);
+        const map2 = new this(schema2);
         const add = (key, value) => {
           if (typeof replacer === "function")
             value = replacer.call(obj, key, value);
@@ -2051,8 +2051,8 @@ var require_YAMLMap = __commonJS({
           for (const key of Object.keys(obj))
             add(key, obj[key]);
         }
-        if (typeof schema.sortMapEntries === "function") {
-          map2.items.sort(schema.sortMapEntries);
+        if (typeof schema2.sortMapEntries === "function") {
+          map2.items.sort(schema2.sortMapEntries);
         }
         return map2;
       }
@@ -2159,7 +2159,7 @@ var require_map = __commonJS({
           onError("Expected a mapping for this tag");
         return map3;
       },
-      createNode: (schema, obj, ctx) => YAMLMap.YAMLMap.from(schema, obj, ctx)
+      createNode: (schema2, obj, ctx) => YAMLMap.YAMLMap.from(schema2, obj, ctx)
     };
     exports2.map = map2;
   }
@@ -2179,8 +2179,8 @@ var require_YAMLSeq = __commonJS({
       static get tagName() {
         return "tag:yaml.org,2002:seq";
       }
-      constructor(schema) {
-        super(identity.SEQ, schema);
+      constructor(schema2) {
+        super(identity.SEQ, schema2);
         this.items = [];
       }
       add(value) {
@@ -2255,9 +2255,9 @@ var require_YAMLSeq = __commonJS({
           onComment
         });
       }
-      static from(schema, obj, ctx) {
+      static from(schema2, obj, ctx) {
         const { replacer } = ctx;
-        const seq = new this(schema);
+        const seq = new this(schema2);
         if (obj && Symbol.iterator in Object(obj)) {
           let i = 0;
           for (let it of obj) {
@@ -2297,7 +2297,7 @@ var require_seq = __commonJS({
           onError("Expected a sequence for this tag");
         return seq2;
       },
-      createNode: (schema, obj, ctx) => YAMLSeq.YAMLSeq.from(schema, obj, ctx)
+      createNode: (schema2, obj, ctx) => YAMLSeq.YAMLSeq.from(schema2, obj, ctx)
     };
     exports2.seq = seq;
   }
@@ -2493,7 +2493,7 @@ var require_schema = __commonJS({
     var bool = require_bool();
     var float = require_float();
     var int2 = require_int();
-    var schema = [
+    var schema2 = [
       map2.map,
       seq.seq,
       string4.string,
@@ -2506,7 +2506,7 @@ var require_schema = __commonJS({
       float.floatExp,
       float.float
     ];
-    exports2.schema = schema;
+    exports2.schema = schema2;
   }
 });
 
@@ -2572,8 +2572,8 @@ var require_schema2 = __commonJS({
         return str;
       }
     };
-    var schema = [map2.map, seq.seq].concat(jsonScalars, jsonError);
-    exports2.schema = schema;
+    var schema2 = [map2.map, seq.seq].concat(jsonScalars, jsonError);
+    exports2.schema = schema2;
   }
 });
 
@@ -2677,9 +2677,9 @@ ${cn.comment}` : item.comment;
         onError("Expected a sequence for this tag");
       return seq;
     }
-    function createPairs(schema, iterable, ctx) {
+    function createPairs(schema2, iterable, ctx) {
       const { replacer } = ctx;
-      const pairs2 = new YAMLSeq.YAMLSeq(schema);
+      const pairs2 = new YAMLSeq.YAMLSeq(schema2);
       pairs2.tag = "tag:yaml.org,2002:pairs";
       let i = 0;
       if (iterable && Symbol.iterator in Object(iterable))
@@ -2764,8 +2764,8 @@ var require_omap = __commonJS({
         }
         return map2;
       }
-      static from(schema, iterable, ctx) {
-        const pairs$1 = pairs.createPairs(schema, iterable, ctx);
+      static from(schema2, iterable, ctx) {
+        const pairs$1 = pairs.createPairs(schema2, iterable, ctx);
         const omap2 = new this();
         omap2.items = pairs$1.items;
         return omap2;
@@ -2792,7 +2792,7 @@ var require_omap = __commonJS({
         }
         return Object.assign(new YAMLOMap(), pairs$1);
       },
-      createNode: (schema, iterable, ctx) => YAMLOMap.from(schema, iterable, ctx)
+      createNode: (schema2, iterable, ctx) => YAMLOMap.from(schema2, iterable, ctx)
     };
     exports2.YAMLOMap = YAMLOMap;
     exports2.omap = omap;
@@ -2967,8 +2967,8 @@ var require_set = __commonJS({
     var Pair = require_Pair();
     var YAMLMap = require_YAMLMap();
     var YAMLSet = class _YAMLSet extends YAMLMap.YAMLMap {
-      constructor(schema) {
-        super(schema);
+      constructor(schema2) {
+        super(schema2);
         this.tag = _YAMLSet.tag;
       }
       add(key) {
@@ -3012,9 +3012,9 @@ var require_set = __commonJS({
         else
           throw new Error("Set items must all have null values");
       }
-      static from(schema, iterable, ctx) {
+      static from(schema2, iterable, ctx) {
         const { replacer } = ctx;
-        const set3 = new this(schema);
+        const set3 = new this(schema2);
         if (iterable && Symbol.iterator in Object(iterable))
           for (let value of iterable) {
             if (typeof replacer === "function")
@@ -3031,7 +3031,7 @@ var require_set = __commonJS({
       nodeClass: YAMLSet,
       default: false,
       tag: "tag:yaml.org,2002:set",
-      createNode: (schema, iterable, ctx) => YAMLSet.from(schema, iterable, ctx),
+      createNode: (schema2, iterable, ctx) => YAMLSet.from(schema2, iterable, ctx),
       resolve(map2, onError) {
         if (identity.isMap(map2)) {
           if (map2.hasAllNullValues(true))
@@ -3153,7 +3153,7 @@ var require_schema3 = __commonJS({
     var pairs = require_pairs();
     var set2 = require_set();
     var timestamp = require_timestamp();
-    var schema = [
+    var schema2 = [
       map2.map,
       seq.seq,
       string4.string,
@@ -3176,7 +3176,7 @@ var require_schema3 = __commonJS({
       timestamp.floatTime,
       timestamp.timestamp
     ];
-    exports2.schema = schema;
+    exports2.schema = schema2;
   }
 });
 
@@ -3191,7 +3191,7 @@ var require_tags = __commonJS({
     var bool = require_bool();
     var float = require_float();
     var int2 = require_int();
-    var schema = require_schema();
+    var schema2 = require_schema();
     var schema$1 = require_schema2();
     var binary = require_binary();
     var merge3 = require_merge();
@@ -3201,7 +3201,7 @@ var require_tags = __commonJS({
     var set2 = require_set();
     var timestamp = require_timestamp();
     var schemas = /* @__PURE__ */ new Map([
-      ["core", schema.schema],
+      ["core", schema2.schema],
       ["failsafe", [map2.map, seq.seq, string4.string]],
       ["json", schema$1.schema],
       ["yaml11", schema$2.schema],
@@ -3285,9 +3285,9 @@ var require_Schema = __commonJS({
     var tags = require_tags();
     var sortMapEntriesByKey = (a, b) => a.key < b.key ? -1 : a.key > b.key ? 1 : 0;
     var Schema = class _Schema {
-      constructor({ compat, customTags, merge: merge3, resolveKnownTags, schema, sortMapEntries, toStringDefaults }) {
+      constructor({ compat, customTags, merge: merge3, resolveKnownTags, schema: schema2, sortMapEntries, toStringDefaults }) {
         this.compat = Array.isArray(compat) ? tags.getTags(compat, "compat") : compat ? tags.getTags(null, compat) : null;
-        this.name = typeof schema === "string" && schema || "core";
+        this.name = typeof schema2 === "string" && schema2 || "core";
         this.knownTags = resolveKnownTags ? tags.coreKnownTags : {};
         this.tags = tags.getTags(customTags, this.name, merge3);
         this.toStringOptions = toStringDefaults ?? null;
@@ -4874,11 +4874,11 @@ var require_compose_scalar = __commonJS({
         scalar.comment = comment;
       return scalar;
     }
-    function findScalarTagByName(schema, value, tagName, tagToken, onError) {
+    function findScalarTagByName(schema2, value, tagName, tagToken, onError) {
       if (tagName === "!")
-        return schema[identity.SCALAR];
+        return schema2[identity.SCALAR];
       const matchWithTest = [];
-      for (const tag of schema.tags) {
+      for (const tag of schema2.tags) {
         if (!tag.collection && tag.tag === tagName) {
           if (tag.default && tag.test)
             matchWithTest.push(tag);
@@ -4889,18 +4889,18 @@ var require_compose_scalar = __commonJS({
       for (const tag of matchWithTest)
         if (tag.test?.test(value))
           return tag;
-      const kt = schema.knownTags[tagName];
+      const kt = schema2.knownTags[tagName];
       if (kt && !kt.collection) {
-        schema.tags.push(Object.assign({}, kt, { default: false, test: void 0 }));
+        schema2.tags.push(Object.assign({}, kt, { default: false, test: void 0 }));
         return kt;
       }
       onError(tagToken, "TAG_RESOLVE_FAILED", `Unresolved tag: ${tagName}`, tagName !== "tag:yaml.org,2002:str");
-      return schema[identity.SCALAR];
+      return schema2[identity.SCALAR];
     }
-    function findScalarTagByTest({ atKey, directives, schema }, value, token, onError) {
-      const tag = schema.tags.find((tag2) => (tag2.default === true || atKey && tag2.default === "key") && tag2.test?.test(value)) || schema[identity.SCALAR];
-      if (schema.compat) {
-        const compat = schema.compat.find((tag2) => tag2.default && tag2.test?.test(value)) ?? schema[identity.SCALAR];
+    function findScalarTagByTest({ atKey, directives, schema: schema2 }, value, token, onError) {
+      const tag = schema2.tags.find((tag2) => (tag2.default === true || atKey && tag2.default === "key") && tag2.test?.test(value)) || schema2[identity.SCALAR];
+      if (schema2.compat) {
+        const compat = schema2.compat.find((tag2) => tag2.default && tag2.test?.test(value)) ?? schema2[identity.SCALAR];
         if (tag.tag !== compat.tag) {
           const ts2 = directives.tagString(tag.tag);
           const cs = directives.tagString(compat.tag);
@@ -16738,11 +16738,11 @@ ${lanes.join("\n")}
           return toComponents;
         }
         const components = toComponents.slice(start);
-        const relative4 = [];
+        const relative5 = [];
         for (; start < fromComponents.length; start++) {
-          relative4.push("..");
+          relative5.push("..");
         }
-        return ["", ...relative4, ...components];
+        return ["", ...relative5, ...components];
       }
       function getRelativePathFromDirectory(fromDirectory, to, getCanonicalFileNameOrIgnoreCase) {
         Debug.assert(getRootLength(fromDirectory) > 0 === getRootLength(to) > 0, "Paths must either both be absolute or both be relative");
@@ -61285,9 +61285,9 @@ ${lanes.join("\n")}
               if (!startsWithDirectory(target, realPathDirectory, getCanonicalFileName)) {
                 return;
               }
-              const relative4 = getRelativePathFromDirectory(realPathDirectory, target, getCanonicalFileName);
+              const relative5 = getRelativePathFromDirectory(realPathDirectory, target, getCanonicalFileName);
               for (const symlinkDirectory of symlinkDirectories) {
-                const option = resolvePath(symlinkDirectory, relative4);
+                const option = resolvePath(symlinkDirectory, relative5);
                 const result2 = cb(option, target === referenceRedirect);
                 shouldFilterIgnoredPaths = true;
                 if (result2) return result2;
@@ -131625,7 +131625,7 @@ ${lanes.join("\n")}
           }
         }
         function createImportCallExpressionAMD(arg, containsLexicalThis) {
-          const resolve8 = factory2.createUniqueName("resolve");
+          const resolve9 = factory2.createUniqueName("resolve");
           const reject = factory2.createUniqueName("reject");
           const parameters = [
             factory2.createParameterDeclaration(
@@ -131634,7 +131634,7 @@ ${lanes.join("\n")}
               /*dotDotDotToken*/
               void 0,
               /*name*/
-              resolve8
+              resolve9
             ),
             factory2.createParameterDeclaration(
               /*modifiers*/
@@ -131651,7 +131651,7 @@ ${lanes.join("\n")}
                 factory2.createIdentifier("require"),
                 /*typeArguments*/
                 void 0,
-                [factory2.createArrayLiteralExpression([arg || factory2.createOmittedExpression()]), resolve8, reject]
+                [factory2.createArrayLiteralExpression([arg || factory2.createOmittedExpression()]), resolve9, reject]
               )
             )
           ]);
@@ -218562,8 +218562,8 @@ Additional information: BADCLIENT: Bad error code, ${badCode} not found in range
         installPackage(options) {
           this.packageInstallId++;
           const request2 = { kind: "installPackage", ...options, id: this.packageInstallId };
-          const promise2 = new Promise((resolve8, reject) => {
-            (this.packageInstalledPromise ?? (this.packageInstalledPromise = /* @__PURE__ */ new Map())).set(this.packageInstallId, { resolve: resolve8, reject });
+          const promise2 = new Promise((resolve9, reject) => {
+            (this.packageInstalledPromise ?? (this.packageInstalledPromise = /* @__PURE__ */ new Map())).set(this.packageInstallId, { resolve: resolve9, reject });
           });
           this.installer.send(request2);
           return promise2;
@@ -220891,7 +220891,7 @@ var require_path_browserify = __commonJS({
     }
     var posix = {
       // path.resolve([from ...], to)
-      resolve: function resolve8() {
+      resolve: function resolve9() {
         var resolvedPath = "";
         var resolvedAbsolute = false;
         var cwd;
@@ -220956,7 +220956,7 @@ var require_path_browserify = __commonJS({
           return ".";
         return posix.normalize(joined);
       },
-      relative: function relative4(from, to) {
+      relative: function relative5(from, to) {
         assertPath(from);
         assertPath(to);
         if (from === to) return "";
@@ -223813,12 +223813,12 @@ var require_dist3 = __commonJS({
       return patterns.length > 0 ? buildCrawler(options, patterns) : [];
     }
     async function glob(globInput, options) {
-      const [crawler, relative4] = getCrawler(globInput, options);
-      return crawler ? formatPaths(await crawler.withPromise(), relative4) : [];
+      const [crawler, relative5] = getCrawler(globInput, options);
+      return crawler ? formatPaths(await crawler.withPromise(), relative5) : [];
     }
     function globSync(globInput, options) {
-      const [crawler, relative4] = getCrawler(globInput, options);
-      return crawler ? formatPaths(crawler.sync(), relative4) : [];
+      const [crawler, relative5] = getCrawler(globInput, options);
+      return crawler ? formatPaths(crawler.sync(), relative5) : [];
     }
     exports2.convertPathToPattern = convertPathToPattern;
     exports2.escapePath = escapePath;
@@ -225109,12 +225109,12 @@ ${nodeLocation}` : message;
     };
     var NodeRuntimeFileSystem = class {
       delete(path3) {
-        return new Promise((resolve8, reject) => {
+        return new Promise((resolve9, reject) => {
           fs__namespace.rm(path3, { recursive: true }, (err) => {
             if (err)
               reject(err);
             else
-              resolve8();
+              resolve9();
           });
         });
       }
@@ -225133,12 +225133,12 @@ ${nodeLocation}` : message;
         }));
       }
       readFile(filePath, encoding = "utf-8") {
-        return new Promise((resolve8, reject) => {
+        return new Promise((resolve9, reject) => {
           fs__namespace.readFile(filePath, encoding, (err, data) => {
             if (err)
               reject(err);
             else
-              resolve8(data);
+              resolve9(data);
           });
         });
       }
@@ -225146,12 +225146,12 @@ ${nodeLocation}` : message;
         return fs__namespace.readFileSync(filePath, encoding);
       }
       async writeFile(filePath, fileText) {
-        await new Promise((resolve8, reject) => {
+        await new Promise((resolve9, reject) => {
           fs__namespace.writeFile(filePath, fileText, (err) => {
             if (err)
               reject(err);
             else
-              resolve8();
+              resolve9();
           });
         });
       }
@@ -225165,12 +225165,12 @@ ${nodeLocation}` : message;
         fs__namespace.mkdirSync(dirPath, { recursive: true });
       }
       move(srcPath, destPath) {
-        return new Promise((resolve8, reject) => {
+        return new Promise((resolve9, reject) => {
           fs__namespace.rename(srcPath, destPath, (err) => {
             if (err)
               reject(err);
             else
-              resolve8();
+              resolve9();
           });
         });
       }
@@ -225178,12 +225178,12 @@ ${nodeLocation}` : message;
         fs__namespace.renameSync(srcPath, destPath);
       }
       copy(srcPath, destPath) {
-        return new Promise((resolve8, reject) => {
+        return new Promise((resolve9, reject) => {
           fs__namespace.copyFile(srcPath, destPath, (err) => {
             if (err)
               reject(err);
             else
-              resolve8();
+              resolve9();
           });
         });
       }
@@ -225191,15 +225191,15 @@ ${nodeLocation}` : message;
         fs__namespace.copyFileSync(srcPath, destPath);
       }
       stat(path3) {
-        return new Promise((resolve8, reject) => {
+        return new Promise((resolve9, reject) => {
           fs__namespace.stat(path3, (err, stat) => {
             if (err) {
               if (err.code === "ENOENT" || err.code === "ENOTDIR")
-                resolve8(void 0);
+                resolve9(void 0);
               else
                 reject(err);
             } else {
-              resolve8(stat);
+              resolve9(stat);
             }
           });
         });
@@ -249122,8 +249122,8 @@ var require_x509_transport_state = __commonJS({
 });
 
 // packages/core/src/action.ts
-var import_node_path7 = require("node:path");
-var import_node_fs6 = require("node:fs");
+var import_node_path8 = require("node:path");
+var import_node_fs8 = require("node:fs");
 
 // node_modules/zod/v4/classic/external.js
 var external_exports = {};
@@ -249792,7 +249792,7 @@ function assertNotEqual(val) {
   return val;
 }
 function toZod() {
-  return (schema) => schema;
+  return (schema2) => schema2;
 }
 function assertIs(_arg) {
 }
@@ -249885,8 +249885,8 @@ function rawShape(def) {
   const desc = Object.getOwnPropertyDescriptor(def, "shape");
   return desc?.get ? desc.get.raw : desc?.value;
 }
-function sourceShape(schema) {
-  return rawShape(schema._zod.def) ?? schema._zod.def.shape;
+function sourceShape(schema2) {
+  return rawShape(schema2._zod.def) ?? schema2._zod.def.shape;
 }
 function deferProp(target, key, getter) {
   Object.defineProperty(target, key, {
@@ -249939,8 +249939,8 @@ function mergeDefs(...defs) {
   }
   return Object.defineProperties({}, mergedDescriptors);
 }
-function cloneDef(schema) {
-  return mergeDefs(schema._zod.def);
+function cloneDef(schema2) {
+  return mergeDefs(schema2._zod.def);
 }
 function getElementAtPath(obj, path2) {
   if (!path2)
@@ -250162,19 +250162,19 @@ var BIGINT_FORMAT_RANGES = {
   int64: [/* @__PURE__ */ BigInt("-9223372036854775808"), /* @__PURE__ */ BigInt("9223372036854775807")],
   uint64: [/* @__PURE__ */ BigInt(0), /* @__PURE__ */ BigInt("18446744073709551615")]
 };
-function pick(schema, mask) {
-  const currDef = schema._zod.def;
+function pick(schema2, mask) {
+  const currDef = schema2._zod.def;
   const checks = currDef.checks;
   const hasChecks = checks && checks.length > 0;
   if (hasChecks) {
     throw new Error(".pick() cannot be used on object schemas containing refinements");
   }
   const newShape = {};
-  mirrorShape(newShape, schema, maskedKeys(schema, mask));
-  return clone(schema, mergeDefs(currDef, { shape: newShape, checks: [] }));
+  mirrorShape(newShape, schema2, maskedKeys(schema2, mask));
+  return clone(schema2, mergeDefs(currDef, { shape: newShape, checks: [] }));
 }
-function maskedKeys(schema, mask) {
-  const raw = sourceShape(schema);
+function maskedKeys(schema2, mask) {
+  const raw = sourceShape(schema2);
   const keys = [];
   for (const key of Reflect.ownKeys(mask)) {
     if (!Object.getOwnPropertyDescriptor(raw, key)?.enumerable) {
@@ -250185,45 +250185,45 @@ function maskedKeys(schema, mask) {
   }
   return keys;
 }
-function omit(schema, mask) {
-  const currDef = schema._zod.def;
+function omit(schema2, mask) {
+  const currDef = schema2._zod.def;
   const checks = currDef.checks;
   const hasChecks = checks && checks.length > 0;
   if (hasChecks) {
     throw new Error(".omit() cannot be used on object schemas containing refinements");
   }
-  const omitted = new Set(maskedKeys(schema, mask));
+  const omitted = new Set(maskedKeys(schema2, mask));
   const newShape = {};
-  mirrorShape(newShape, schema, Reflect.ownKeys(sourceShape(schema)).filter((key) => !omitted.has(key)));
-  return clone(schema, mergeDefs(currDef, { shape: newShape, checks: [] }));
+  mirrorShape(newShape, schema2, Reflect.ownKeys(sourceShape(schema2)).filter((key) => !omitted.has(key)));
+  return clone(schema2, mergeDefs(currDef, { shape: newShape, checks: [] }));
 }
-function extend(schema, shape) {
+function extend(schema2, shape) {
   if (!isPlainObject(shape)) {
     throw new Error("Invalid input to extend: expected a plain object");
   }
-  const checks = schema._zod.def.checks;
+  const checks = schema2._zod.def.checks;
   const hasChecks = checks && checks.length > 0;
   if (hasChecks) {
-    const existingShape = sourceShape(schema);
+    const existingShape = sourceShape(schema2);
     for (const key of Reflect.ownKeys(shape)) {
       if (Object.getOwnPropertyDescriptor(existingShape, key) !== void 0) {
         throw new Error("Cannot overwrite keys on object schemas containing refinements. Use `.safeExtend()` instead.");
       }
     }
   }
-  return clone(schema, mergeDefs(schema._zod.def, { shape: extended(schema, shape) }));
+  return clone(schema2, mergeDefs(schema2._zod.def, { shape: extended(schema2, shape) }));
 }
-function extended(schema, shape) {
+function extended(schema2, shape) {
   const newShape = {};
-  mirrorShape(newShape, schema, Reflect.ownKeys(sourceShape(schema)));
+  mirrorShape(newShape, schema2, Reflect.ownKeys(sourceShape(schema2)));
   mirrorProps(newShape, shape);
   return newShape;
 }
-function safeExtend(schema, shape) {
+function safeExtend(schema2, shape) {
   if (!isPlainObject(shape)) {
     throw new Error("Invalid input to safeExtend: expected a plain object");
   }
-  return clone(schema, mergeDefs(schema._zod.def, { shape: extended(schema, shape) }));
+  return clone(schema2, mergeDefs(schema2._zod.def, { shape: extended(schema2, shape) }));
 }
 function merge(a, b) {
   if (!b?._zod?.def) {
@@ -250244,26 +250244,26 @@ function merge(a, b) {
   });
   return clone(a, def);
 }
-function partial(Class2, schema, mask, name = "partial") {
-  const currDef = schema._zod.def;
+function partial(Class2, schema2, mask, name = "partial") {
+  const currDef = schema2._zod.def;
   const checks = currDef.checks;
   const hasChecks = checks && checks.length > 0;
   if (hasChecks) {
     throw new Error(`.${name}() cannot be used on object schemas containing refinements`);
   }
-  const selected = mask ? new Set(maskedKeys(schema, mask)) : void 0;
+  const selected = mask ? new Set(maskedKeys(schema2, mask)) : void 0;
   const newShape = {};
-  mirrorShape(newShape, schema, Reflect.ownKeys(sourceShape(schema)), Class2 && ((value, key) => selected && !selected.has(key) ? value : new Class2({ type: "optional", innerType: value })));
-  return clone(schema, mergeDefs(schema._zod.def, { shape: newShape, checks: [] }));
+  mirrorShape(newShape, schema2, Reflect.ownKeys(sourceShape(schema2)), Class2 && ((value, key) => selected && !selected.has(key) ? value : new Class2({ type: "optional", innerType: value })));
+  return clone(schema2, mergeDefs(schema2._zod.def, { shape: newShape, checks: [] }));
 }
-function required(Class2, schema, mask) {
-  const selected = mask ? new Set(maskedKeys(schema, mask)) : void 0;
+function required(Class2, schema2, mask) {
+  const selected = mask ? new Set(maskedKeys(schema2, mask)) : void 0;
   const newShape = {};
-  mirrorShape(newShape, schema, Reflect.ownKeys(sourceShape(schema)), (value, key) => (
+  mirrorShape(newShape, schema2, Reflect.ownKeys(sourceShape(schema2)), (value, key) => (
     // overwrite with non-optional
     selected && !selected.has(key) ? value : new Class2({ type: "nonoptional", innerType: value })
   ));
-  return clone(schema, mergeDefs(schema._zod.def, { shape: newShape }));
+  return clone(schema2, mergeDefs(schema2._zod.def, { shape: newShape }));
 }
 function aborted(x, startIndex = 0) {
   if (x.aborted === true)
@@ -250880,9 +250880,9 @@ function finalizeParams(callee, params) {
   return { callee: params?.callee ?? callee, Err: params?.Err };
 }
 var _parse = (_Err) => {
-  const fn = (schema, value, _ctx, _params) => {
+  const fn = (schema2, value, _ctx, _params) => {
     const ctx = _ctx ? { ..._ctx, async: false } : { async: false };
-    const result = schema._zod.run({ value, issues: [] }, ctx);
+    const result = schema2._zod.run({ value, issues: [] }, ctx);
     if (result instanceof Promise) {
       throw new $ZodAsyncError();
     }
@@ -250897,9 +250897,9 @@ var _parse = (_Err) => {
 };
 var parse = /* @__PURE__ */ _parse($ZodRealError);
 var _parseAsync = (_Err) => {
-  const fn = async (schema, value, _ctx, params) => {
+  const fn = async (schema2, value, _ctx, params) => {
     const ctx = _ctx ? { ..._ctx, async: true } : { async: true };
-    let result = schema._zod.run({ value, issues: [] }, ctx);
+    let result = schema2._zod.run({ value, issues: [] }, ctx);
     if (result instanceof Promise)
       result = await result;
     if (result.issues.length) {
@@ -250912,9 +250912,9 @@ var _parseAsync = (_Err) => {
   return fn;
 };
 var parseAsync = /* @__PURE__ */ _parseAsync($ZodRealError);
-var _safeParse = (_Err) => (schema, value, _ctx) => {
+var _safeParse = (_Err) => (schema2, value, _ctx) => {
   const ctx = _ctx ? { ..._ctx, async: false } : { async: false };
-  const result = schema._zod.run({ value, issues: [] }, ctx);
+  const result = schema2._zod.run({ value, issues: [] }, ctx);
   if (result instanceof Promise) {
     throw new $ZodAsyncError();
   }
@@ -250940,9 +250940,9 @@ function failure(Err, issues, ctx) {
     }
   };
 }
-var _safeParseAsync = (_Err) => async (schema, value, _ctx) => {
+var _safeParseAsync = (_Err) => async (schema2, value, _ctx) => {
   const ctx = _ctx ? { ..._ctx, async: true } : { async: true };
-  let result = schema._zod.run({ value, issues: [] }, ctx);
+  let result = schema2._zod.run({ value, issues: [] }, ctx);
   if (result instanceof Promise)
     result = await result;
   return result.issues.length ? failure(_Err, result.issues, ctx) : { success: true, data: result.value };
@@ -250950,88 +250950,88 @@ var _safeParseAsync = (_Err) => async (schema, value, _ctx) => {
 var safeParseAsync = /* @__PURE__ */ _safeParseAsync($ZodRealError);
 var COMPILE_INVALID = /* @__PURE__ */ Symbol.for("zod.compile.invalid");
 var COMPILE_FALLBACK = /* @__PURE__ */ Symbol.for("zod.compile.fallback");
-var validate = ((schema, value, _ctx) => {
-  const validator = schema._zod.bag.validator;
+var validate = ((schema2, value, _ctx) => {
+  const validator = schema2._zod.bag.validator;
   if (validator !== void 0) {
     if (validator(value) !== COMPILE_INVALID)
       return true;
     if (validator.definite === true && _ctx === void 0)
       return false;
   }
-  return validateFallback(schema, value, _ctx);
+  return validateFallback(schema2, value, _ctx);
 });
-function validateFallback(schema, value, _ctx) {
+function validateFallback(schema2, value, _ctx) {
   const ctx = _ctx ? { ..._ctx, async: false, abortEarly: true } : { async: false, abortEarly: true };
-  const fallbackRun = schema._zod.bag.fallbackRun;
+  const fallbackRun = schema2._zod.bag.fallbackRun;
   let result;
   if (fallbackRun) {
     ctx[COMPILE_FALLBACK] = true;
     result = fallbackRun({ value, issues: [] }, ctx);
   } else {
-    result = schema._zod.run({ value, issues: [] }, ctx);
+    result = schema2._zod.run({ value, issues: [] }, ctx);
   }
   if (result instanceof Promise) {
     throw new $ZodAsyncError();
   }
   return result.issues.length === 0;
 }
-var validateAsync = async (schema, value, _ctx) => {
+var validateAsync = async (schema2, value, _ctx) => {
   const ctx = _ctx ? { ..._ctx, async: true, abortEarly: true } : { async: true, abortEarly: true };
-  let result = schema._zod.run({ value, issues: [] }, ctx);
+  let result = schema2._zod.run({ value, issues: [] }, ctx);
   if (result instanceof Promise)
     result = await result;
   return result.issues.length === 0;
 };
 var _encode = (_Err) => {
   const parse6 = _parse(_Err);
-  const fn = (schema, value, _ctx, _params) => {
+  const fn = (schema2, value, _ctx, _params) => {
     const ctx = _ctx ? { ..._ctx, direction: "backward" } : { direction: "backward" };
-    return parse6(schema, value, ctx, finalizeParams(fn, _params));
+    return parse6(schema2, value, ctx, finalizeParams(fn, _params));
   };
   return fn;
 };
 var encode = /* @__PURE__ */ _encode($ZodRealError);
 var _decode = (_Err) => {
   const parse6 = _parse(_Err);
-  const fn = (schema, value, _ctx, _params) => {
-    return parse6(schema, value, _ctx, finalizeParams(fn, _params));
+  const fn = (schema2, value, _ctx, _params) => {
+    return parse6(schema2, value, _ctx, finalizeParams(fn, _params));
   };
   return fn;
 };
 var decode = /* @__PURE__ */ _decode($ZodRealError);
 var _encodeAsync = (_Err) => {
   const parseAsync3 = _parseAsync(_Err);
-  const fn = async (schema, value, _ctx, _params) => {
+  const fn = async (schema2, value, _ctx, _params) => {
     const ctx = _ctx ? { ..._ctx, direction: "backward" } : { direction: "backward" };
-    return await parseAsync3(schema, value, ctx, finalizeParams(fn, _params));
+    return await parseAsync3(schema2, value, ctx, finalizeParams(fn, _params));
   };
   return fn;
 };
 var encodeAsync = /* @__PURE__ */ _encodeAsync($ZodRealError);
 var _decodeAsync = (_Err) => {
   const parseAsync3 = _parseAsync(_Err);
-  const fn = async (schema, value, _ctx, _params) => {
-    return await parseAsync3(schema, value, _ctx, finalizeParams(fn, _params));
+  const fn = async (schema2, value, _ctx, _params) => {
+    return await parseAsync3(schema2, value, _ctx, finalizeParams(fn, _params));
   };
   return fn;
 };
 var decodeAsync = /* @__PURE__ */ _decodeAsync($ZodRealError);
-var _safeEncode = (_Err) => (schema, value, _ctx) => {
+var _safeEncode = (_Err) => (schema2, value, _ctx) => {
   const ctx = _ctx ? { ..._ctx, direction: "backward" } : { direction: "backward" };
-  return _safeParse(_Err)(schema, value, ctx);
+  return _safeParse(_Err)(schema2, value, ctx);
 };
 var safeEncode = /* @__PURE__ */ _safeEncode($ZodRealError);
-var _safeDecode = (_Err) => (schema, value, _ctx) => {
-  return _safeParse(_Err)(schema, value, _ctx);
+var _safeDecode = (_Err) => (schema2, value, _ctx) => {
+  return _safeParse(_Err)(schema2, value, _ctx);
 };
 var safeDecode = /* @__PURE__ */ _safeDecode($ZodRealError);
-var _safeEncodeAsync = (_Err) => async (schema, value, _ctx) => {
+var _safeEncodeAsync = (_Err) => async (schema2, value, _ctx) => {
   const ctx = _ctx ? { ..._ctx, direction: "backward" } : { direction: "backward" };
-  return _safeParseAsync(_Err)(schema, value, ctx);
+  return _safeParseAsync(_Err)(schema2, value, ctx);
 };
 var safeEncodeAsync = /* @__PURE__ */ _safeEncodeAsync($ZodRealError);
-var _safeDecodeAsync = (_Err) => async (schema, value, _ctx) => {
-  return _safeParseAsync(_Err)(schema, value, _ctx);
+var _safeDecodeAsync = (_Err) => async (schema2, value, _ctx) => {
+  return _safeParseAsync(_Err)(schema2, value, _ctx);
 };
 var safeDecodeAsync = /* @__PURE__ */ _safeDecodeAsync($ZodRealError);
 
@@ -251647,8 +251647,8 @@ var $ZodCheckProperties = /* @__PURE__ */ $constructor("$ZodCheckProperties", (i
     entries ?? (entries = Reflect.ownKeys(def.shape).map((key) => [key, def.shape[key]]));
     const input3 = payload.value;
     let proms;
-    for (const [key, schema] of entries) {
-      const result = schema._zod.run({ value: input3[key], issues: [] }, {});
+    for (const [key, schema2] of entries) {
+      const result = schema2._zod.run({ value: input3[key], issues: [] }, {});
       if (result instanceof Promise) {
         proms ?? (proms = []);
         proms.push(result.then((result2) => handleCheckPropertyResult(result2, payload, key)));
@@ -252768,10 +252768,10 @@ var $ZodObjectJIT = /* @__PURE__ */ $constructor("$ZodObjectJIT", (inst, def) =>
       const id = ids[key];
       const k = typeof key === "symbol" ? `syms[${syms.indexOf(key)}]` : esc(key);
       const isPresent = `${k} in input`;
-      const schema = shape[key];
-      const optin = schema?._zod?.optin;
+      const schema2 = shape[key];
+      const optin = schema2?._zod?.optin;
       const isOptionalIn = optin !== void 0;
-      const isOptionalOut = schema?._zod?.optout === "optional";
+      const isOptionalOut = schema2?._zod?.optout === "optional";
       doc.write(`const ${id} = ${parseStr(k)};`);
       if (isOptionalIn && isOptionalOut) {
         const assign = optin === "optional" ? `${id}_present` : `${id}.value !== undefined || ${id}_present`;
@@ -253952,8 +253952,8 @@ function handleReadonlyResult(payload) {
     payload.value = Object.freeze(payload.value);
   return payload;
 }
-function leafPattern(schema) {
-  const def = schema._zod.def;
+function leafPattern(schema2) {
+  const def = schema2._zod.def;
   let pattern = def.pattern;
   let isInt = !!def.format?.includes("int");
   let minimum;
@@ -253976,13 +253976,13 @@ function leafPattern(schema) {
     return "(?!)";
   if (minimum !== void 0 || maximum !== void 0)
     return string({ minimum, maximum }).source;
-  const own2 = schema._zod.pattern;
+  const own2 = schema2._zod.pattern;
   return (isInt && own2 === number ? integer : own2)?.source;
 }
-function partPattern(schema) {
-  const def = schema._zod.def;
-  const own2 = schema._zod.pattern?.source;
-  const inner = def.innerType ?? schema._zod.innerType;
+function partPattern(schema2) {
+  const def = schema2._zod.def;
+  const own2 = schema2._zod.pattern?.source;
+  const inner = def.innerType ?? schema2._zod.innerType;
   if (inner) {
     const before = inner._zod.pattern?.source;
     const after = partPattern(inner);
@@ -253996,7 +253996,7 @@ function partPattern(schema) {
     if (sources.every(Boolean))
       return `^(${sources.map((s) => cleanRegex(s)).join("|")})$`;
   }
-  return leafPattern(schema);
+  return leafPattern(schema2);
 }
 var $ZodTemplateLiteral = /* @__PURE__ */ $constructor("$ZodTemplateLiteral", (inst, def) => {
   $ZodType.init(inst, def);
@@ -254192,7 +254192,7 @@ var recursive = /* @__PURE__ */ new WeakMap();
 var NONE = 0;
 var ASSUMED = 1;
 var PROVEN = 2;
-function isRecursive(inst, stack, resolve8) {
+function isRecursive(inst, stack, resolve9) {
   const cached2 = recursive.get(inst);
   if (cached2 !== void 0)
     return cached2 ? PROVEN : NONE;
@@ -254202,7 +254202,7 @@ function isRecursive(inst, stack, resolve8) {
   let result = NONE;
   const check2 = (child) => {
     if (result !== PROVEN && child?._zod) {
-      const answer = isRecursive(child, stack, resolve8);
+      const answer = isRecursive(child, stack, resolve9);
       if (answer > result)
         result = answer;
     }
@@ -254213,7 +254213,7 @@ function isRecursive(inst, stack, resolve8) {
       const desc = Object.getOwnPropertyDescriptor(sh, key);
       if (spread && !desc.enumerable)
         continue;
-      const child = desc.get ? ASSUMED : desc.value?._zod ? isRecursive(desc.value, stack, resolve8) : NONE;
+      const child = desc.get ? ASSUMED : desc.value?._zod ? isRecursive(desc.value, stack, resolve9) : NONE;
       if (child > answer)
         answer = child;
     }
@@ -254277,7 +254277,7 @@ function isRecursive(inst, stack, resolve8) {
       break;
     // `$ZodLazy` caches its inner on the def, so a resolved edge is followed exactly
     case "lazy": {
-      const inner = def._cachedInner ?? (resolve8 ? inst._zod.innerType : void 0);
+      const inner = def._cachedInner ?? (resolve9 ? inst._zod.innerType : void 0);
       merge3(inner ? isRecursive(inner, stack, false) : ASSUMED);
       break;
     }
@@ -262026,11 +262026,11 @@ var $ZodRegistry = class {
     this._map = /* @__PURE__ */ new WeakMap();
     this._idmap = /* @__PURE__ */ new Map();
   }
-  add(schema, ..._meta) {
+  add(schema2, ..._meta) {
     const meta3 = _meta[0];
-    this._map.set(schema, meta3);
+    this._map.set(schema2, meta3);
     if (meta3 && typeof meta3 === "object" && "id" in meta3) {
-      this._idmap.set(meta3.id, schema);
+      this._idmap.set(meta3.id, schema2);
     }
     return this;
   }
@@ -262039,26 +262039,26 @@ var $ZodRegistry = class {
     this._idmap = /* @__PURE__ */ new Map();
     return this;
   }
-  remove(schema) {
-    const meta3 = this._map.get(schema);
+  remove(schema2) {
+    const meta3 = this._map.get(schema2);
     if (meta3 && typeof meta3 === "object" && "id" in meta3) {
       this._idmap.delete(meta3.id);
     }
-    this._map.delete(schema);
+    this._map.delete(schema2);
     return this;
   }
-  get(schema) {
-    const p = schema._zod.parent;
+  get(schema2) {
+    const p = schema2._zod.parent;
     if (p) {
       const pm = { ...this.get(p) ?? {} };
       delete pm.id;
-      const f = { ...pm, ...this._map.get(schema) };
+      const f = { ...pm, ...this._map.get(schema2) };
       return Object.keys(f).length ? f : void 0;
     }
-    return this._map.get(schema);
+    return this._map.get(schema2);
   }
-  has(schema) {
-    return this._map.has(schema);
+  has(schema2) {
+    return this._map.has(schema2);
   }
 };
 function registry() {
@@ -262083,31 +262083,31 @@ var ZodCompileUnsupportedError = class extends Error {
     this.islandable = islandable;
   }
 };
-function compileValidator(schema, parser) {
+function compileValidator(schema2, parser) {
   try {
-    return compileFn(schema, { assertOnly: true });
+    return compileFn(schema2, { assertOnly: true });
   } catch {
     return parser;
   }
 }
-function compile(schema, options) {
+function compile(schema2, options) {
   try {
-    const parser = compileFn(schema);
-    const clone2 = withParser(schema, parser);
-    clone2._zod.bag.validator = compileValidator(schema, parser);
+    const parser = compileFn(schema2);
+    const clone2 = withParser(schema2, parser);
+    clone2._zod.bag.validator = compileValidator(schema2, parser);
     return clone2;
   } catch (err) {
     if (options?.strict)
       throw err;
-    return schema;
+    return schema2;
   }
 }
-function withParser(schema, parser) {
-  if (isRecursiveSchema(schema)) {
+function withParser(schema2, parser) {
+  if (isRecursiveSchema(schema2)) {
     throw new ZodCompileUnsupportedError("a schema whose subtree contains a reference cycle");
   }
-  const clone2 = clone(schema);
-  const liveRun = schema._zod.run;
+  const clone2 = clone(schema2);
+  const liveRun = schema2._zod.run;
   const originalRun = liveRun.__originalRun ?? liveRun;
   const wrapped = (payload, ctx) => {
     if (ctx?.async || ctx?.direction === "backward" || ctx?.skipChecks || ctx?.[FALLBACK_FLAG]) {
@@ -262130,7 +262130,7 @@ function withParser(schema, parser) {
   clone2._zod.bag.validator = parser;
   clone2._zod.run = wrapped;
   if (!liveRun.__originalRun)
-    installCompiledUserMethods(clone2, schema, parser);
+    installCompiledUserMethods(clone2, schema2, parser);
   return clone2;
 }
 function installCompiledUserMethods(target, source, parser) {
@@ -262157,10 +262157,10 @@ function installCompiledUserMethods(target, source, parser) {
     };
   }
 }
-function compileFn(schema, options) {
+function compileFn(schema2, options) {
   let recursive2 = true;
   try {
-    recursive2 = isRecursiveSchema(schema);
+    recursive2 = isRecursiveSchema(schema2);
   } catch {
   }
   if (recursive2) {
@@ -262173,7 +262173,7 @@ function compileFn(schema, options) {
     definite: true
   };
   const doc = new Doc(["input"]);
-  const outputAccessor = generateCheck(doc, ctx, schema, "input", !options?.assertOnly);
+  const outputAccessor = generateCheck(doc, ctx, schema2, "input", !options?.assertOnly);
   doc.write(outputAccessor === null ? `return true;` : `return ${outputAccessor};`);
   const constantNames = ["INVALID", ...ctx.constants.keys()];
   const constantValues = [INVALID, ...ctx.constants.values()];
@@ -262213,20 +262213,20 @@ function addUserConstant(ctx, fn) {
 function newVar(ctx) {
   return `v${ctx.varCounter++}`;
 }
-function runtimeRun(schema, value) {
-  const result = schema._zod.run({ value, issues: [] }, {});
+function runtimeRun(schema2, value) {
+  const result = schema2._zod.run({ value, issues: [] }, {});
   if (result && typeof result.then === "function")
     return INVALID;
   const r = result;
   return r.issues.length === 0 ? r.value : INVALID;
 }
-function compileChild(doc, ctx, schema, accessor, needsValue = true) {
+function compileChild(doc, ctx, schema2, accessor, needsValue = true) {
   const contentLen = doc.content.length;
   const constantCount = ctx.constants.size;
   const constantCounter = ctx.constantCounter;
   const varCounter = ctx.varCounter;
   try {
-    return generateCheck(doc, ctx, schema, accessor, needsValue);
+    return generateCheck(doc, ctx, schema2, accessor, needsValue);
   } catch (err) {
     if (!(err instanceof ZodCompileUnsupportedError) || !err.islandable)
       throw err;
@@ -262238,12 +262238,12 @@ function compileChild(doc, ctx, schema, accessor, needsValue = true) {
     }
     ctx.constantCounter = constantCounter;
     ctx.varCounter = varCounter;
-    return emitRuntimeIsland(doc, ctx, schema, accessor);
+    return emitRuntimeIsland(doc, ctx, schema2, accessor);
   }
 }
-function emitRuntimeIsland(doc, ctx, schema, accessor) {
+function emitRuntimeIsland(doc, ctx, schema2, accessor) {
   ctx.definite = false;
-  const schemaConst = addConstant(ctx, schema);
+  const schemaConst = addConstant(ctx, schema2);
   const runConst = addConstant(ctx, runtimeRun);
   const outVar = newVar(ctx);
   doc.write(`const ${outVar} = ${runConst}(${schemaConst}, ${accessor});`);
@@ -262258,8 +262258,8 @@ var WHEN_DEFAULTED_CHECKS = /* @__PURE__ */ new Set([
   "min_length",
   "length_equals"
 ]);
-function generateChecks(doc, ctx, schema, accessor) {
-  const schemaChecks = schema._zod.def.checks;
+function generateChecks(doc, ctx, schema2, accessor) {
+  const schemaChecks = schema2._zod.def.checks;
   if (!schemaChecks || schemaChecks.length === 0)
     return accessor;
   let currentAccessor = accessor;
@@ -262634,8 +262634,8 @@ function generateStringFormatCheck(doc, ctx, def, accessor, needsValue = true) {
   }
   return accessor;
 }
-function generateCheck(doc, ctx, schema, accessor, needsValue = true) {
-  const def = schema._zod.def;
+function generateCheck(doc, ctx, schema2, accessor, needsValue = true) {
+  const def = schema2._zod.def;
   const type = def.type;
   if (def.coerce) {
     throw new ZodCompileUnsupportedError(`coercion (z.coerce.${type}())`);
@@ -262644,16 +262644,16 @@ function generateCheck(doc, ctx, schema, accessor, needsValue = true) {
   let typeAccessor;
   switch (type) {
     case "string":
-      typeAccessor = generateStringCheck(doc, ctx, schema, accessor, buildsValue);
+      typeAccessor = generateStringCheck(doc, ctx, schema2, accessor, buildsValue);
       break;
     case "number":
-      typeAccessor = generateNumberCheck(doc, schema, accessor);
+      typeAccessor = generateNumberCheck(doc, schema2, accessor);
       break;
     case "boolean":
       typeAccessor = generateBooleanCheck(doc, accessor);
       break;
     case "bigint":
-      typeAccessor = generateBigIntCheck(doc, schema, accessor);
+      typeAccessor = generateBigIntCheck(doc, schema2, accessor);
       break;
     case "symbol":
       typeAccessor = generateSymbolCheck(doc, accessor);
@@ -262682,79 +262682,79 @@ function generateCheck(doc, ctx, schema, accessor, needsValue = true) {
       typeAccessor = generateDateCheck(doc, accessor);
       break;
     case "object":
-      typeAccessor = generateObjectCheck(doc, ctx, schema, accessor, buildsValue);
+      typeAccessor = generateObjectCheck(doc, ctx, schema2, accessor, buildsValue);
       break;
     case "optional":
-      typeAccessor = generateOptionalCheck(doc, ctx, schema, accessor, buildsValue);
+      typeAccessor = generateOptionalCheck(doc, ctx, schema2, accessor, buildsValue);
       break;
     case "nullable":
-      typeAccessor = generateNullableCheck(doc, ctx, schema, accessor, buildsValue);
+      typeAccessor = generateNullableCheck(doc, ctx, schema2, accessor, buildsValue);
       break;
     case "array":
-      typeAccessor = generateArrayCheck(doc, ctx, schema, accessor, buildsValue);
+      typeAccessor = generateArrayCheck(doc, ctx, schema2, accessor, buildsValue);
       break;
     case "literal":
-      typeAccessor = generateLiteralCheck(doc, ctx, schema, accessor);
+      typeAccessor = generateLiteralCheck(doc, ctx, schema2, accessor);
       break;
     case "enum":
-      typeAccessor = generateEnumCheck(doc, ctx, schema, accessor);
+      typeAccessor = generateEnumCheck(doc, ctx, schema2, accessor);
       break;
     case "readonly": {
-      const innerOut = generateWrapperCheck(doc, ctx, schema, accessor);
+      const innerOut = generateWrapperCheck(doc, ctx, schema2, accessor);
       const frozenVar = newVar(ctx);
       doc.write(`const ${frozenVar} = Object.freeze(${innerOut});`);
       typeAccessor = frozenVar;
       break;
     }
     case "success":
-      generateWrapperCheck(doc, ctx, schema, accessor);
+      generateWrapperCheck(doc, ctx, schema2, accessor);
       typeAccessor = "true";
       break;
     case "default":
     case "prefault":
-      typeAccessor = generateDefaultCheck(doc, ctx, schema, accessor);
+      typeAccessor = generateDefaultCheck(doc, ctx, schema2, accessor);
       break;
     case "nonoptional":
-      typeAccessor = generateNonOptionalCheck(doc, ctx, schema, accessor);
+      typeAccessor = generateNonOptionalCheck(doc, ctx, schema2, accessor);
       break;
     case "tuple":
-      typeAccessor = generateTupleCheck(doc, ctx, schema, accessor);
+      typeAccessor = generateTupleCheck(doc, ctx, schema2, accessor);
       break;
     case "union":
-      typeAccessor = generateUnionCheck(doc, ctx, schema, accessor);
+      typeAccessor = generateUnionCheck(doc, ctx, schema2, accessor);
       break;
     case "intersection":
-      typeAccessor = generateIntersectionCheck(doc, ctx, schema, accessor);
+      typeAccessor = generateIntersectionCheck(doc, ctx, schema2, accessor);
       break;
     case "record":
-      typeAccessor = generateRecordCheck(doc, ctx, schema, accessor);
+      typeAccessor = generateRecordCheck(doc, ctx, schema2, accessor);
       break;
     case "map":
-      typeAccessor = generateMapCheck(doc, ctx, schema, accessor);
+      typeAccessor = generateMapCheck(doc, ctx, schema2, accessor);
       break;
     case "set":
-      typeAccessor = generateSetCheck(doc, ctx, schema, accessor);
+      typeAccessor = generateSetCheck(doc, ctx, schema2, accessor);
       break;
     case "file":
       typeAccessor = generateFileCheck(doc, accessor);
       break;
     case "template_literal":
-      typeAccessor = generateTemplateLiteralCheck(doc, ctx, schema, accessor);
+      typeAccessor = generateTemplateLiteralCheck(doc, ctx, schema2, accessor);
       break;
     case "lazy":
-      typeAccessor = generateLazyCheck(doc, ctx, schema, accessor);
+      typeAccessor = generateLazyCheck(doc, ctx, schema2, accessor);
       break;
     case "pipe":
-      typeAccessor = generatePipeCheck(doc, ctx, schema, accessor);
+      typeAccessor = generatePipeCheck(doc, ctx, schema2, accessor);
       break;
     case "custom":
-      typeAccessor = generateCustomCheck(doc, ctx, schema, accessor);
+      typeAccessor = generateCustomCheck(doc, ctx, schema2, accessor);
       break;
     case "transform":
-      typeAccessor = generateTransformCheck(doc, ctx, schema, accessor);
+      typeAccessor = generateTransformCheck(doc, ctx, schema2, accessor);
       break;
     case "catch":
-      typeAccessor = generateCatchCheck(doc, ctx, schema, accessor);
+      typeAccessor = generateCatchCheck(doc, ctx, schema2, accessor);
       break;
     default: {
       void type;
@@ -262763,18 +262763,18 @@ function generateCheck(doc, ctx, schema, accessor, needsValue = true) {
   }
   if (typeAccessor === null)
     return null;
-  return generateChecks(doc, ctx, schema, typeAccessor);
+  return generateChecks(doc, ctx, schema2, typeAccessor);
 }
-function generateStringCheck(doc, ctx, schema, accessor, needsValue = true) {
+function generateStringCheck(doc, ctx, schema2, accessor, needsValue = true) {
   doc.write(`if (typeof ${accessor} !== "string") return INVALID;`);
-  const def = schema._zod.def;
+  const def = schema2._zod.def;
   if (def.format === void 0)
     return accessor;
   return generateStringFormatCheck(doc, ctx, def, accessor, needsValue);
 }
-function generateNumberCheck(doc, schema, accessor) {
+function generateNumberCheck(doc, schema2, accessor) {
   doc.write(`if (typeof ${accessor} !== "number" || !Number.isFinite(${accessor})) return INVALID;`);
-  const def = schema._zod.def;
+  const def = schema2._zod.def;
   if (def.check === "number_format" && def.format) {
     generateNumberFormatCheck(doc, { format: def.format }, accessor);
   }
@@ -262784,9 +262784,9 @@ function generateBooleanCheck(doc, accessor) {
   doc.write(`if (typeof ${accessor} !== "boolean") return INVALID;`);
   return accessor;
 }
-function generateBigIntCheck(doc, schema, accessor) {
+function generateBigIntCheck(doc, schema2, accessor) {
   doc.write(`if (typeof ${accessor} !== "bigint") return INVALID;`);
-  const def = schema._zod.def;
+  const def = schema2._zod.def;
   if (def.format) {
     switch (def.format) {
       case "int64":
@@ -262823,8 +262823,8 @@ function generateDateCheck(doc, accessor) {
   doc.write(`if (!(${accessor} instanceof Date) || Number.isNaN(${accessor}.getTime())) return INVALID;`);
   return accessor;
 }
-function generateObjectCheck(doc, ctx, schema, accessor, buildsValue = true) {
-  const def = schema._zod.def;
+function generateObjectCheck(doc, ctx, schema2, accessor, buildsValue = true) {
+  const def = schema2._zod.def;
   doc.write(`if (typeof ${accessor} !== "object" || ${accessor} === null || Array.isArray(${accessor})) return INVALID;`);
   const shape = def.shape;
   const keys = Object.keys(shape);
@@ -262942,9 +262942,9 @@ function generateObjectCheck(doc, ctx, schema, accessor, buildsValue = true) {
   }
   return outputVar;
 }
-function generateOptionalCheck(doc, ctx, schema, accessor, buildsValue = true) {
-  const def = schema._zod.def;
-  if (isExactOptional(schema)) {
+function generateOptionalCheck(doc, ctx, schema2, accessor, buildsValue = true) {
+  const def = schema2._zod.def;
+  if (isExactOptional(schema2)) {
     return generateCheck(doc, ctx, def.innerType, accessor, buildsValue);
   }
   if (def.innerType._zod.optin === "defaulted") {
@@ -262981,16 +262981,16 @@ function generateOptionalCheck(doc, ctx, schema, accessor, buildsValue = true) {
   doc.write(`}`);
   return outputVar;
 }
-function isExactOptional(schema) {
-  return schema._zod.traits?.has("$ZodExactOptional") === true;
+function isExactOptional(schema2) {
+  return schema2._zod.traits?.has("$ZodExactOptional") === true;
 }
-function requiresPresenceCheck(schema) {
-  return schema._zod.optin === void 0 && fastPathAcceptsAbsence(schema);
+function requiresPresenceCheck(schema2) {
+  return schema2._zod.optin === void 0 && fastPathAcceptsAbsence(schema2);
 }
-function fastPathAcceptsAbsence(schema) {
-  if (schema._zod.def.coerce)
+function fastPathAcceptsAbsence(schema2) {
+  if (schema2._zod.def.coerce)
     return true;
-  const def = schema._zod.def;
+  const def = schema2._zod.def;
   switch (def.type) {
     case "any":
     case "unknown":
@@ -263025,7 +263025,7 @@ function fastPathAcceptsAbsence(schema) {
     case "literal":
       return !!def.values?.includes(void 0);
     case "enum":
-      return !!schema._zod.values?.has(void 0);
+      return !!schema2._zod.values?.has(void 0);
     case "optional":
     case "nullable":
     case "readonly":
@@ -263045,14 +263045,14 @@ function fastPathAcceptsAbsence(schema) {
       return true;
   }
 }
-function dropsWhenAbsent(schema) {
-  return schema._zod.optin === "optional" && schema._zod.optout === "optional";
+function dropsWhenAbsent(schema2) {
+  return schema2._zod.optin === "optional" && schema2._zod.optout === "optional";
 }
-function mayOmitUndefined(schema) {
-  return (schema._zod.optin !== "defaulted" || schema._zod.optout === "optional") && mayOutputUndefined(schema);
+function mayOmitUndefined(schema2) {
+  return (schema2._zod.optin !== "defaulted" || schema2._zod.optout === "optional") && mayOutputUndefined(schema2);
 }
-function mayOutputUndefined(schema) {
-  const def = schema._zod.def;
+function mayOutputUndefined(schema2) {
+  const def = schema2._zod.def;
   switch (def.type) {
     case "string":
     case "number":
@@ -263076,7 +263076,7 @@ function mayOutputUndefined(schema) {
     case "literal":
       return !!def.values?.includes(void 0);
     case "enum":
-      return !!schema._zod.values?.has(void 0);
+      return !!schema2._zod.values?.has(void 0);
     case "optional":
       return true;
     case "nullable":
@@ -263093,8 +263093,8 @@ function mayOutputUndefined(schema) {
       return true;
   }
 }
-function generateNullableCheck(doc, ctx, schema, accessor, buildsValue = true) {
-  const def = schema._zod.def;
+function generateNullableCheck(doc, ctx, schema2, accessor, buildsValue = true) {
+  const def = schema2._zod.def;
   const outputVar = buildsValue ? newVar(ctx) : null;
   if (outputVar)
     doc.write(`let ${outputVar} = null;`);
@@ -263107,15 +263107,15 @@ function generateNullableCheck(doc, ctx, schema, accessor, buildsValue = true) {
   doc.write(`}`);
   return outputVar;
 }
-function generateSizeGate(doc, schema, size) {
-  for (const [max, check2] of sizeCaps(schema._zod.def.checks)) {
+function generateSizeGate(doc, schema2, size) {
+  for (const [max, check2] of sizeCaps(schema2._zod.def.checks)) {
     doc.write(`if (${size} > ${numericOperand(max, check2._zod.def.check)}) return INVALID;`);
   }
 }
-function generateArrayCheck(doc, ctx, schema, accessor, buildsValue = true) {
-  const def = schema._zod.def;
+function generateArrayCheck(doc, ctx, schema2, accessor, buildsValue = true) {
+  const def = schema2._zod.def;
   doc.write(`if (!Array.isArray(${accessor})) return INVALID;`);
-  generateSizeGate(doc, schema, `${accessor}.length`);
+  generateSizeGate(doc, schema2, `${accessor}.length`);
   const outputVar = buildsValue ? newVar(ctx) : null;
   const iVar = newVar(ctx);
   const elemVar = newVar(ctx);
@@ -263131,8 +263131,8 @@ function generateArrayCheck(doc, ctx, schema, accessor, buildsValue = true) {
   doc.write(`}`);
   return outputVar;
 }
-function generateLiteralCheck(doc, ctx, schema, accessor) {
-  const def = schema._zod.def;
+function generateLiteralCheck(doc, ctx, schema2, accessor) {
+  const def = schema2._zod.def;
   const values = def.values;
   if (values.length !== 1) {
     const literalSet = addConstant(ctx, new Set(values));
@@ -263160,8 +263160,8 @@ function generateLiteralCheck(doc, ctx, schema, accessor) {
   }
   return accessor;
 }
-function generateEnumCheck(doc, ctx, schema, accessor) {
-  const values = schema._zod.values;
+function generateEnumCheck(doc, ctx, schema2, accessor) {
+  const values = schema2._zod.values;
   if (!values) {
     throw new ZodCompileUnsupportedError("enum schema without enumerated values");
   }
@@ -263169,15 +263169,15 @@ function generateEnumCheck(doc, ctx, schema, accessor) {
   doc.write(`if (!${enumSet}.has(${accessor})) return INVALID;`);
   return accessor;
 }
-function generateWrapperCheck(doc, ctx, schema, accessor) {
-  const def = schema._zod.def;
+function generateWrapperCheck(doc, ctx, schema2, accessor) {
+  const def = schema2._zod.def;
   return generateCheck(doc, ctx, def.innerType, accessor);
 }
-function generateDefaultCheck(doc, ctx, schema, accessor) {
-  const def = schema._zod.def;
-  const descriptor = Object.getOwnPropertyDescriptor(schema._zod.def, "defaultValue");
-  const defaultGetter = descriptor ? () => schema._zod.def.defaultValue : void 0;
-  if (schema._zod.def.type === "prefault") {
+function generateDefaultCheck(doc, ctx, schema2, accessor) {
+  const def = schema2._zod.def;
+  const descriptor = Object.getOwnPropertyDescriptor(schema2._zod.def, "defaultValue");
+  const defaultGetter = descriptor ? () => schema2._zod.def.defaultValue : void 0;
+  if (schema2._zod.def.type === "prefault") {
     if (!defaultGetter) {
       return generateCheck(doc, ctx, def.innerType, accessor);
     }
@@ -263213,16 +263213,16 @@ function generateDefaultCheck(doc, ctx, schema, accessor) {
   }
   return outputVar;
 }
-function generateNonOptionalCheck(doc, ctx, schema, accessor) {
-  const def = schema._zod.def;
+function generateNonOptionalCheck(doc, ctx, schema2, accessor) {
+  const def = schema2._zod.def;
   const innerOutput = generateCheck(doc, ctx, def.innerType, accessor);
   const outputVar = newVar(ctx);
   doc.write(`const ${outputVar} = ${innerOutput};`);
   doc.write(`if (${outputVar} === undefined) return INVALID;`);
   return outputVar;
 }
-function generateTupleCheck(doc, ctx, schema, accessor) {
-  const def = schema._zod.def;
+function generateTupleCheck(doc, ctx, schema2, accessor) {
+  const def = schema2._zod.def;
   const items = def.items;
   const rest = def.rest;
   doc.write(`if (!Array.isArray(${accessor})) return INVALID;`);
@@ -263296,8 +263296,8 @@ function getTupleOptStart2(items, key) {
   }
   return 0;
 }
-function generateUnionCheck(doc, ctx, schema, accessor) {
-  const def = schema._zod.def;
+function generateUnionCheck(doc, ctx, schema2, accessor) {
+  const def = schema2._zod.def;
   const options = def.options;
   if (def.discriminator) {
     return generateDiscriminatedUnionCheck(doc, ctx, def, accessor);
@@ -263397,8 +263397,8 @@ function literalEquality(ctx, accessor, value) {
   }
   throw new ZodCompileUnsupportedError(`literal discriminator value ${String(value)}`);
 }
-function generateIntersectionCheck(doc, ctx, schema, accessor) {
-  const def = schema._zod.def;
+function generateIntersectionCheck(doc, ctx, schema2, accessor) {
+  const def = schema2._zod.def;
   ctx.definite = false;
   const leftOutput = compileChild(doc, ctx, def.left, accessor);
   const rightOutput = compileChild(doc, ctx, def.right, accessor);
@@ -263408,8 +263408,8 @@ function generateIntersectionCheck(doc, ctx, schema, accessor) {
   doc.write(`if (!${mergedVar}.valid) return INVALID;`);
   return `${mergedVar}.data`;
 }
-function generateRecordCheck(doc, ctx, schema, accessor) {
-  const def = schema._zod.def;
+function generateRecordCheck(doc, ctx, schema2, accessor) {
+  const def = schema2._zod.def;
   const isPlainObjectConst = addConstant(ctx, isPlainObject);
   doc.write(`if (!${isPlainObjectConst}(${accessor})) return INVALID;`);
   const outputVar = newVar(ctx);
@@ -263512,10 +263512,10 @@ function literalPropertyKey(ctx, key) {
     return esc(key);
   return addConstant(ctx, key);
 }
-function generateMapCheck(doc, ctx, schema, accessor) {
-  const def = schema._zod.def;
+function generateMapCheck(doc, ctx, schema2, accessor) {
+  const def = schema2._zod.def;
   doc.write(`if (!(${accessor} instanceof Map)) return INVALID;`);
-  generateSizeGate(doc, schema, `${accessor}.size`);
+  generateSizeGate(doc, schema2, `${accessor}.size`);
   const outputVar = newVar(ctx);
   const kVar = newVar(ctx);
   const valVar = newVar(ctx);
@@ -263529,10 +263529,10 @@ function generateMapCheck(doc, ctx, schema, accessor) {
   doc.write(`}`);
   return outputVar;
 }
-function generateSetCheck(doc, ctx, schema, accessor) {
-  const def = schema._zod.def;
+function generateSetCheck(doc, ctx, schema2, accessor) {
+  const def = schema2._zod.def;
   doc.write(`if (!(${accessor} instanceof Set)) return INVALID;`);
-  generateSizeGate(doc, schema, `${accessor}.size`);
+  generateSizeGate(doc, schema2, `${accessor}.size`);
   const outputVar = newVar(ctx);
   const valVar = newVar(ctx);
   doc.write(`const ${outputVar} = new Set();`);
@@ -263548,9 +263548,9 @@ function generateFileCheck(doc, accessor) {
   doc.write(`if (!(${accessor} instanceof File)) return INVALID;`);
   return accessor;
 }
-function generateTemplateLiteralCheck(doc, ctx, schema, accessor) {
+function generateTemplateLiteralCheck(doc, ctx, schema2, accessor) {
   doc.write(`if (typeof ${accessor} !== "string") return INVALID;`);
-  const pattern = schema._zod.pattern;
+  const pattern = schema2._zod.pattern;
   if (pattern) {
     const patternConst = addConstant(ctx, pattern);
     doc.write(`${patternConst}.lastIndex = 0;`);
@@ -263558,8 +263558,8 @@ function generateTemplateLiteralCheck(doc, ctx, schema, accessor) {
   }
   return accessor;
 }
-function generateLazyCheck(doc, ctx, schema, accessor) {
-  const def = schema._zod.def;
+function generateLazyCheck(doc, ctx, schema2, accessor) {
+  const def = schema2._zod.def;
   const getterConst = addUserConstant(ctx, def.getter);
   const cacheConst = addConstant(ctx, { parser: null });
   doc.write(`if (!${cacheConst}.parser) {`);
@@ -263578,8 +263578,8 @@ function generateLazyCheck(doc, ctx, schema, accessor) {
   doc.write(`if (${outputVar} === INVALID) return INVALID;`);
   return outputVar;
 }
-function generatePipeCheck(doc, ctx, schema, accessor) {
-  const def = schema._zod.def;
+function generatePipeCheck(doc, ctx, schema2, accessor) {
+  const def = schema2._zod.def;
   const inputOutput = generateCheck(doc, ctx, def.in, accessor);
   if (def.transform) {
     if (isAsyncFunction(def.transform)) {
@@ -263605,8 +263605,8 @@ function generatePipeCheck(doc, ctx, schema, accessor) {
 function isAsyncFunction(fn) {
   return typeof fn === "function" && (fn.constructor.name === "AsyncFunction" || fn[Symbol.toStringTag] === "AsyncFunction");
 }
-function generateCustomCheck(doc, ctx, schema, accessor) {
-  const def = schema._zod.def;
+function generateCustomCheck(doc, ctx, schema2, accessor) {
+  const def = schema2._zod.def;
   if (def.fn) {
     if (isAsyncFunction(def.fn)) {
       throw new ZodCompileAsyncError("z.compile: async custom predicates are not supported");
@@ -263631,8 +263631,8 @@ function runtimeCatch(innerSchema, catchValue, value) {
     return r.value;
   return catchValue();
 }
-function generateCatchCheck(doc, ctx, schema, accessor) {
-  const def = schema._zod.def;
+function generateCatchCheck(doc, ctx, schema2, accessor) {
+  const def = schema2._zod.def;
   if (!def.catchValue[CONSTANT_CATCH]) {
     throw new ZodCompileUnsupportedError("catch with a callback (only a constant catch value compiles)", false);
   }
@@ -263654,8 +263654,8 @@ function generateCatchCheck(doc, ctx, schema, accessor) {
   doc.write(`}`);
   return outputVar;
 }
-function generateTransformCheck(doc, ctx, schema, accessor) {
-  const def = schema._zod.def;
+function generateTransformCheck(doc, ctx, schema2, accessor) {
+  const def = schema2._zod.def;
   if (def.transform) {
     if (isAsyncFunction(def.transform)) {
       throw new ZodCompileAsyncError("z.compile: async transforms are not supported");
@@ -264330,11 +264330,11 @@ function _endsWith(suffix, params) {
   });
 }
 // @__NO_SIDE_EFFECTS__
-function _property(property, schema, params) {
+function _property(property, schema2, params) {
   return new $ZodCheckProperty({
     check: "property",
     property,
-    schema,
+    schema: schema2,
     ...normalizeParams(params)
   });
 }
@@ -264590,23 +264590,23 @@ function _promise(Class2, innerType) {
 function _custom(Class2, fn, _params) {
   const norm = normalizeParams(_params);
   norm.abort ?? (norm.abort = true);
-  const schema = new Class2({
+  const schema2 = new Class2({
     type: "custom",
     check: "custom",
     fn,
     ...norm
   });
-  return schema;
+  return schema2;
 }
 // @__NO_SIDE_EFFECTS__
 function _refine(Class2, fn, _params) {
-  const schema = new Class2({
+  const schema2 = new Class2({
     type: "custom",
     check: "custom",
     fn,
     ...normalizeParams(_params)
   });
-  return schema;
+  return schema2;
 }
 // @__NO_SIDE_EFFECTS__
 function _superRefine(fn, params) {
@@ -264772,8 +264772,8 @@ function initializeContext(params) {
     external: params?.external ?? void 0
   };
 }
-function handleUnrepresentable(schema, ctx, json2, params, message) {
-  const result = typeof ctx.unrepresentable === "function" ? ctx.unrepresentable({ zodSchema: schema, path: params.path, message }) : ctx.unrepresentable;
+function handleUnrepresentable(schema2, ctx, json2, params, message) {
+  const result = typeof ctx.unrepresentable === "function" ? ctx.unrepresentable({ zodSchema: schema2, path: params.path, message }) : ctx.unrepresentable;
   if (result === "any")
     return false;
   if (result === void 0 || result === "throw")
@@ -264781,42 +264781,42 @@ function handleUnrepresentable(schema, ctx, json2, params, message) {
   Object.assign(json2, result);
   return true;
 }
-function processSchema(schema, ctx, _params = { path: [], schemaPath: [] }) {
+function processSchema(schema2, ctx, _params = { path: [], schemaPath: [] }) {
   var _a7;
-  const def = schema._zod.def;
-  const seen = ctx.seen.get(schema);
+  const def = schema2._zod.def;
+  const seen = ctx.seen.get(schema2);
   if (seen) {
     seen.count++;
-    const isCycle = _params.schemaPath.includes(schema);
+    const isCycle = _params.schemaPath.includes(schema2);
     if (isCycle) {
       seen.cycle = _params.path;
     }
     return seen.schema;
   }
   const result = { schema: {}, count: 1, cycle: void 0, path: _params.path };
-  ctx.seen.set(schema, result);
+  ctx.seen.set(schema2, result);
   ctx.sharedDefsExtractedFor = void 0;
   ctx.sharedEmitDoneFor = void 0;
-  const overrideSchema = schema._zod.toJSONSchema?.();
+  const overrideSchema = schema2._zod.toJSONSchema?.();
   if (overrideSchema) {
     result.schema = overrideSchema;
   } else {
     const params = {
       ..._params,
-      schemaPath: [..._params.schemaPath, schema],
+      schemaPath: [..._params.schemaPath, schema2],
       path: _params.path
     };
-    if (schema._zod.processJSONSchema) {
-      schema._zod.processJSONSchema(ctx, result.schema, params);
+    if (schema2._zod.processJSONSchema) {
+      schema2._zod.processJSONSchema(ctx, result.schema, params);
     } else {
       const _json = result.schema;
       const processor = ctx.processors[def.type];
       if (!processor) {
         throw new Error(`[toJSONSchema]: Non-representable type encountered: ${def.type}`);
       }
-      processor(schema, ctx, _json, params);
+      processor(schema2, ctx, _json, params);
     }
-    const parent = schema._zod.parent;
+    const parent = schema2._zod.parent;
     if (parent) {
       if (!result.ref)
         result.ref = parent;
@@ -264824,24 +264824,24 @@ function processSchema(schema, ctx, _params = { path: [], schemaPath: [] }) {
       ctx.seen.get(parent).isParent = true;
     }
   }
-  const meta3 = ctx.metadataRegistry.get(schema);
+  const meta3 = ctx.metadataRegistry.get(schema2);
   if (meta3)
     assignProps(result.schema, meta3);
-  if (ctx.io === "input" && isTransforming(schema)) {
+  if (ctx.io === "input" && isTransforming(schema2)) {
     delete result.schema.examples;
     delete result.schema.default;
   }
   if (ctx.io === "input" && "_prefault" in result.schema)
     (_a7 = result.schema).default ?? (_a7.default = result.schema._prefault);
   delete result.schema._prefault;
-  const _result = ctx.seen.get(schema);
+  const _result = ctx.seen.get(schema2);
   return _result.schema;
 }
 function encodeJSONPointerSegment(segment) {
   return segment.replace(/~/g, "~0").replace(/\//g, "~1");
 }
-function extractDefs(ctx, schema) {
-  const root = ctx.seen.get(schema);
+function extractDefs(ctx, schema2) {
+  const root = ctx.seen.get(schema2);
   if (!root)
     throw new Error("Unprocessed schema. This is a bug in Zod.");
   if (ctx.external && ctx.sharedDefsExtractedFor === ctx.external)
@@ -264886,11 +264886,11 @@ function extractDefs(ctx, schema) {
     seen.def = { ...seen.schema };
     if (defId)
       seen.defId = defId;
-    const schema2 = seen.schema;
-    for (const key in schema2) {
-      delete schema2[key];
+    const schema3 = seen.schema;
+    for (const key in schema3) {
+      delete schema3[key];
     }
-    schema2.$ref = ref;
+    schema3.$ref = ref;
   };
   if (ctx.cycles === "throw") {
     for (const entry of ctx.seen.entries()) {
@@ -264904,13 +264904,13 @@ Set the \`cycles\` parameter to \`"ref"\` to resolve cyclical schemas with defs.
   }
   for (const entry of ctx.seen.entries()) {
     const seen = entry[1];
-    if (schema === entry[0]) {
+    if (schema2 === entry[0]) {
       extractToDef(entry);
       continue;
     }
     if (ctx.external) {
       const ext = ctx.external.registry.get(entry[0])?.id;
-      if (schema !== entry[0] && ext) {
+      if (schema2 !== entry[0] && ext) {
         extractToDef(entry);
         continue;
       }
@@ -264933,9 +264933,9 @@ Set the \`cycles\` parameter to \`"ref"\` to resolve cyclical schemas with defs.
   if (ctx.external)
     ctx.sharedDefsExtractedFor = ctx.external;
 }
-function compactTypeUnion(schema) {
-  const options = schema.anyOf;
-  if (!Array.isArray(options) || options.length === 0 || schema.type !== void 0)
+function compactTypeUnion(schema2) {
+  const options = schema2.anyOf;
+  if (!Array.isArray(options) || options.length === 0 || schema2.type !== void 0)
     return;
   const types = [];
   for (const option of options) {
@@ -264953,8 +264953,8 @@ function compactTypeUnion(schema) {
         types.push(member);
     }
   }
-  delete schema.anyOf;
-  schema.type = types.length === 1 ? types[0] : types;
+  delete schema2.anyOf;
+  schema2.type = types.length === 1 ? types[0] : types;
 }
 var FOLDABLE_KEYS = /* @__PURE__ */ new Set(["type", "properties", "required", "additionalProperties"]);
 var UNION_KEYS = ["oneOf", "anyOf"];
@@ -265041,16 +265041,16 @@ function foldIntersection(json2) {
   delete json2.allOf;
   assignProps(json2, folded);
 }
-function finalize(ctx, schema) {
-  const root = ctx.seen.get(schema);
+function finalize(ctx, schema2) {
+  const root = ctx.seen.get(schema2);
   if (!root)
     throw new Error("Unprocessed schema. This is a bug in Zod.");
   const flattenRef = (zodSchema) => {
     const seen = ctx.seen.get(zodSchema);
     if (seen.ref === null)
       return;
-    const schema2 = seen.def ?? seen.schema;
-    const _cached = { ...schema2 };
+    const schema3 = seen.def ?? seen.schema;
+    const _cached = { ...schema3 };
     const ref = seen.ref;
     seen.ref = null;
     if (ref) {
@@ -265058,28 +265058,28 @@ function finalize(ctx, schema) {
       const refSeen = ctx.seen.get(ref);
       const refSchema = refSeen.schema;
       if (refSchema.$ref && (ctx.target === "draft-07" || ctx.target === "draft-04" || ctx.target === "openapi-3.0")) {
-        schema2.allOf = schema2.allOf ?? [];
-        schema2.allOf.push(refSchema);
+        schema3.allOf = schema3.allOf ?? [];
+        schema3.allOf.push(refSchema);
       } else {
-        assignProps(schema2, refSchema);
+        assignProps(schema3, refSchema);
       }
-      assignProps(schema2, _cached);
+      assignProps(schema3, _cached);
       const isParentRef = zodSchema._zod.parent === ref;
       if (isParentRef) {
-        for (const key in schema2) {
+        for (const key in schema3) {
           if (key === "$ref" || key === "allOf")
             continue;
           if (!(key in _cached)) {
-            delete schema2[key];
+            delete schema3[key];
           }
         }
       }
       if (refSchema.$ref && refSeen.def) {
-        for (const key in schema2) {
+        for (const key in schema3) {
           if (key === "$ref" || key === "allOf")
             continue;
-          if (key in refSeen.def && JSON.stringify(schema2[key]) === JSON.stringify(refSeen.def[key])) {
-            delete schema2[key];
+          if (key in refSeen.def && JSON.stringify(schema3[key]) === JSON.stringify(refSeen.def[key])) {
+            delete schema3[key];
           }
         }
       }
@@ -265089,13 +265089,13 @@ function finalize(ctx, schema) {
       flattenRef(parent);
       const parentSeen = ctx.seen.get(parent);
       if (parentSeen?.schema.$ref) {
-        schema2.$ref = parentSeen.schema.$ref;
+        schema3.$ref = parentSeen.schema.$ref;
         if (parentSeen.def) {
-          for (const key in schema2) {
+          for (const key in schema3) {
             if (key === "$ref" || key === "allOf")
               continue;
-            if (key in parentSeen.def && JSON.stringify(schema2[key]) === JSON.stringify(parentSeen.def[key])) {
-              delete schema2[key];
+            if (key in parentSeen.def && JSON.stringify(schema3[key]) === JSON.stringify(parentSeen.def[key])) {
+              delete schema3[key];
             }
           }
         }
@@ -265103,7 +265103,7 @@ function finalize(ctx, schema) {
     }
     ctx.override({
       zodSchema,
-      jsonSchema: schema2,
+      jsonSchema: schema3,
       path: seen.path ?? []
     });
   };
@@ -265149,13 +265149,13 @@ function finalize(ctx, schema) {
   } else {
   }
   if (ctx.external?.uri) {
-    const id = ctx.external.registry.get(schema)?.id;
+    const id = ctx.external.registry.get(schema2)?.id;
     if (!id)
       throw new Error("Schema is missing an `id` property");
     result.$id = ctx.external.uri(id);
   }
   assignProps(result, root.defId ? root.schema : root.def ?? root.schema);
-  const rootMetaId = ctx.metadataRegistry.get(schema)?.id;
+  const rootMetaId = ctx.metadataRegistry.get(schema2)?.id;
   if (rootMetaId !== void 0 && result.id === rootMetaId)
     delete result.id;
   const defs = ctx.external?.defs ?? {};
@@ -265185,10 +265185,10 @@ function finalize(ctx, schema) {
     const finalized = JSON.parse(JSON.stringify(result));
     Object.defineProperty(finalized, "~standard", {
       value: {
-        ...schema["~standard"],
+        ...schema2["~standard"],
         jsonSchema: {
-          input: createStandardJSONSchemaMethod(schema, "input", ctx.processors),
-          output: createStandardJSONSchemaMethod(schema, "output", ctx.processors)
+          input: createStandardJSONSchemaMethod(schema2, "input", ctx.processors),
+          output: createStandardJSONSchemaMethod(schema2, "output", ctx.processors)
         }
       },
       enumerable: false,
@@ -265252,18 +265252,18 @@ function isTransforming(_schema, _ctx) {
   }
   return false;
 }
-var createToJSONSchemaMethod = (schema, processors = {}) => (params) => {
+var createToJSONSchemaMethod = (schema2, processors = {}) => (params) => {
   const ctx = initializeContext({ ...params, processors });
-  processSchema(schema, ctx);
-  extractDefs(ctx, schema);
-  return finalize(ctx, schema);
+  processSchema(schema2, ctx);
+  extractDefs(ctx, schema2);
+  return finalize(ctx, schema2);
 };
-var createStandardJSONSchemaMethod = (schema, io, processors = {}) => (params) => {
+var createStandardJSONSchemaMethod = (schema2, io, processors = {}) => (params) => {
   const { libraryOptions, target } = params ?? {};
   const ctx = initializeContext({ ...libraryOptions ?? {}, target, io, processors });
-  processSchema(schema, ctx);
-  extractDefs(ctx, schema);
-  return finalize(ctx, schema);
+  processSchema(schema2, ctx);
+  extractDefs(ctx, schema2);
+  return finalize(ctx, schema2);
 };
 
 // node_modules/zod/v4/core/json-schema-processors.js
@@ -265327,13 +265327,13 @@ var contributors = {
   },
   mime_type: (agg, def) => intersectMime(agg, def.mime)
 };
-function aggregateChecks(schema) {
+function aggregateChecks(schema2) {
   const agg = {};
-  const def = schema._zod.def;
-  const list = schema._zod.traits.has("$ZodCheck") ? [schema, ...def.checks ?? []] : def.checks ?? [];
+  const def = schema2._zod.def;
+  const list = schema2._zod.traits.has("$ZodCheck") ? [schema2, ...def.checks ?? []] : def.checks ?? [];
   for (const ch of list)
     contributors[ch._zod.def.check]?.(agg, ch._zod.def);
-  const bag = schema._zod.bag;
+  const bag = schema2._zod.bag;
   if (bag.minimum !== void 0)
     narrowMin(agg, "minimum", bag.minimum);
   if (bag.exclusiveMinimum !== void 0)
@@ -265368,10 +265368,10 @@ var exactPatterns = /* @__PURE__ */ new Map([
   [base64urlCharset, base64url]
 ]);
 var exactPattern = (p) => exactPatterns.get(p) ?? p;
-var stringProcessor = (schema, ctx, _json, _params) => {
+var stringProcessor = (schema2, ctx, _json, _params) => {
   const json2 = _json;
   json2.type = "string";
-  const { minimum, maximum, format, patterns, contentEncoding, laxFormat } = aggregateChecks(schema);
+  const { minimum, maximum, format, patterns, contentEncoding, laxFormat } = aggregateChecks(schema2);
   if (typeof minimum === "number")
     json2.minLength = minimum;
   if (typeof maximum === "number")
@@ -265400,9 +265400,9 @@ var stringProcessor = (schema, ctx, _json, _params) => {
     }
   }
 };
-var numberProcessor = (schema, ctx, _json, params) => {
+var numberProcessor = (schema2, ctx, _json, params) => {
   const json2 = _json;
-  const { minimum, maximum, multipleOf, exclusiveMaximum, exclusiveMinimum, isInt } = aggregateChecks(schema);
+  const { minimum, maximum, multipleOf, exclusiveMaximum, exclusiveMinimum, isInt } = aggregateChecks(schema2);
   json2.type = isInt ? "integer" : "number";
   const exMin = typeof exclusiveMinimum === "number" && exclusiveMinimum >= (minimum ?? Number.NEGATIVE_INFINITY);
   const exMax = typeof exclusiveMaximum === "number" && exclusiveMaximum <= (maximum ?? Number.POSITIVE_INFINITY);
@@ -265433,7 +265433,7 @@ var numberProcessor = (schema, ctx, _json, params) => {
       if (Number.isFinite(divisor) && divisor !== 0)
         divisors.add(Math.abs(divisor));
       else
-        handleUnrepresentable(schema, ctx, json2, params, `A multipleOf divisor of ${divisor} cannot be represented in JSON Schema`);
+        handleUnrepresentable(schema2, ctx, json2, params, `A multipleOf divisor of ${divisor} cannot be represented in JSON Schema`);
     }
     const [first, ...rest] = divisors;
     if (first !== void 0)
@@ -265445,11 +265445,11 @@ var numberProcessor = (schema, ctx, _json, params) => {
 var booleanProcessor = (_schema, _ctx, json2, _params) => {
   json2.type = "boolean";
 };
-var bigintProcessor = (schema, ctx, json2, params) => {
-  handleUnrepresentable(schema, ctx, json2, params, "BigInt cannot be represented in JSON Schema");
+var bigintProcessor = (schema2, ctx, json2, params) => {
+  handleUnrepresentable(schema2, ctx, json2, params, "BigInt cannot be represented in JSON Schema");
 };
-var symbolProcessor = (schema, ctx, json2, params) => {
-  handleUnrepresentable(schema, ctx, json2, params, "Symbols cannot be represented in JSON Schema");
+var symbolProcessor = (schema2, ctx, json2, params) => {
+  handleUnrepresentable(schema2, ctx, json2, params, "Symbols cannot be represented in JSON Schema");
 };
 var nullProcessor = (_schema, ctx, json2, _params) => {
   if (ctx.target === "openapi-3.0") {
@@ -265460,11 +265460,11 @@ var nullProcessor = (_schema, ctx, json2, _params) => {
     json2.type = "null";
   }
 };
-var undefinedProcessor = (schema, ctx, json2, params) => {
-  handleUnrepresentable(schema, ctx, json2, params, "Undefined cannot be represented in JSON Schema");
+var undefinedProcessor = (schema2, ctx, json2, params) => {
+  handleUnrepresentable(schema2, ctx, json2, params, "Undefined cannot be represented in JSON Schema");
 };
-var voidProcessor = (schema, ctx, json2, params) => {
-  handleUnrepresentable(schema, ctx, json2, params, "Void cannot be represented in JSON Schema");
+var voidProcessor = (schema2, ctx, json2, params) => {
+  handleUnrepresentable(schema2, ctx, json2, params, "Void cannot be represented in JSON Schema");
 };
 var neverProcessor = (_schema, _ctx, json2, _params) => {
   json2.not = {};
@@ -265473,11 +265473,11 @@ var anyProcessor = (_schema, _ctx, _json, _params) => {
 };
 var unknownProcessor = (_schema, _ctx, _json, _params) => {
 };
-var dateProcessor = (schema, ctx, json2, params) => {
-  handleUnrepresentable(schema, ctx, json2, params, "Date cannot be represented in JSON Schema");
+var dateProcessor = (schema2, ctx, json2, params) => {
+  handleUnrepresentable(schema2, ctx, json2, params, "Date cannot be represented in JSON Schema");
 };
-var enumProcessor = (schema, _ctx, json2, _params) => {
-  const def = schema._zod.def;
+var enumProcessor = (schema2, _ctx, json2, _params) => {
+  const def = schema2._zod.def;
   const values = getEnumValues(def.entries);
   if (values.length === 0) {
     json2.not = {};
@@ -265489,8 +265489,8 @@ var enumProcessor = (schema, _ctx, json2, _params) => {
     json2.type = "string";
   json2.enum = values;
 };
-var literalProcessor = (schema, ctx, json2, params) => {
-  const def = schema._zod.def;
+var literalProcessor = (schema2, ctx, json2, params) => {
+  const def = schema2._zod.def;
   if (def.values.length === 0) {
     json2.not = {};
     return;
@@ -265498,10 +265498,10 @@ var literalProcessor = (schema, ctx, json2, params) => {
   const vals = [];
   for (const val of def.values) {
     if (val === void 0) {
-      if (handleUnrepresentable(schema, ctx, json2, params, "Literal `undefined` cannot be represented in JSON Schema"))
+      if (handleUnrepresentable(schema2, ctx, json2, params, "Literal `undefined` cannot be represented in JSON Schema"))
         return;
     } else if (typeof val === "bigint") {
-      if (handleUnrepresentable(schema, ctx, json2, params, "BigInt literals cannot be represented in JSON Schema"))
+      if (handleUnrepresentable(schema2, ctx, json2, params, "BigInt literals cannot be represented in JSON Schema"))
         return;
       vals.push(Number(val));
     } else {
@@ -265529,23 +265529,23 @@ var literalProcessor = (schema, ctx, json2, params) => {
     json2.enum = vals;
   }
 };
-var nanProcessor = (schema, ctx, json2, params) => {
-  handleUnrepresentable(schema, ctx, json2, params, "NaN cannot be represented in JSON Schema");
+var nanProcessor = (schema2, ctx, json2, params) => {
+  handleUnrepresentable(schema2, ctx, json2, params, "NaN cannot be represented in JSON Schema");
 };
-var templateLiteralProcessor = (schema, _ctx, json2, _params) => {
+var templateLiteralProcessor = (schema2, _ctx, json2, _params) => {
   const _json = json2;
-  const pattern = schema._zod.pattern;
+  const pattern = schema2._zod.pattern;
   if (!pattern)
     throw new Error("Pattern not found in template literal");
   _json.type = "string";
   _json.pattern = pattern.source;
 };
-var fileProcessor = (schema, _ctx, json2, _params) => {
+var fileProcessor = (schema2, _ctx, json2, _params) => {
   const _json = json2;
   _json.type = "string";
   _json.format = "binary";
   _json.contentEncoding = "binary";
-  const { minimum, maximum, mime } = aggregateChecks(schema);
+  const { minimum, maximum, mime } = aggregateChecks(schema2);
   if (minimum !== void 0)
     _json.minLength = minimum;
   if (maximum !== void 0)
@@ -265562,25 +265562,25 @@ var fileProcessor = (schema, _ctx, json2, _params) => {
 var successProcessor = (_schema, _ctx, json2, _params) => {
   json2.type = "boolean";
 };
-var customProcessor = (schema, ctx, json2, params) => {
-  handleUnrepresentable(schema, ctx, json2, params, "Custom types cannot be represented in JSON Schema");
+var customProcessor = (schema2, ctx, json2, params) => {
+  handleUnrepresentable(schema2, ctx, json2, params, "Custom types cannot be represented in JSON Schema");
 };
-var functionProcessor = (schema, ctx, json2, params) => {
-  handleUnrepresentable(schema, ctx, json2, params, "Function types cannot be represented in JSON Schema");
+var functionProcessor = (schema2, ctx, json2, params) => {
+  handleUnrepresentable(schema2, ctx, json2, params, "Function types cannot be represented in JSON Schema");
 };
-var transformProcessor = (schema, ctx, json2, params) => {
-  handleUnrepresentable(schema, ctx, json2, params, "Transforms cannot be represented in JSON Schema");
+var transformProcessor = (schema2, ctx, json2, params) => {
+  handleUnrepresentable(schema2, ctx, json2, params, "Transforms cannot be represented in JSON Schema");
 };
-var mapProcessor = (schema, ctx, json2, params) => {
-  handleUnrepresentable(schema, ctx, json2, params, "Map cannot be represented in JSON Schema");
+var mapProcessor = (schema2, ctx, json2, params) => {
+  handleUnrepresentable(schema2, ctx, json2, params, "Map cannot be represented in JSON Schema");
 };
-var setProcessor = (schema, ctx, json2, params) => {
-  handleUnrepresentable(schema, ctx, json2, params, "Set cannot be represented in JSON Schema");
+var setProcessor = (schema2, ctx, json2, params) => {
+  handleUnrepresentable(schema2, ctx, json2, params, "Set cannot be represented in JSON Schema");
 };
-var arrayProcessor = (schema, ctx, _json, params) => {
+var arrayProcessor = (schema2, ctx, _json, params) => {
   const json2 = _json;
-  const def = schema._zod.def;
-  const { minimum, maximum } = aggregateChecks(schema);
+  const def = schema2._zod.def;
+  const { minimum, maximum } = aggregateChecks(schema2);
   if (typeof minimum === "number")
     json2.minItems = minimum;
   if (typeof maximum === "number")
@@ -265591,22 +265591,22 @@ var arrayProcessor = (schema, ctx, _json, params) => {
     path: [...params.path, "items"]
   });
 };
-function inputOptin(schema) {
-  const def = schema._zod.def;
+function inputOptin(schema2) {
+  const def = schema2._zod.def;
   if (def.type === "pipe" && def.in._zod.traits.has("$ZodTransform")) {
     return inputOptin(def.out);
   }
   if (def.type === "catch") {
     return inputOptin(def.innerType);
   }
-  return schema._zod.optin;
+  return schema2._zod.optin;
 }
-var objectProcessor = (schema, ctx, _json, params) => {
+var objectProcessor = (schema2, ctx, _json, params) => {
   const json2 = _json;
-  const def = schema._zod.def;
+  const def = schema2._zod.def;
   const shape = def.shape;
   const symbolKeys = Object.getOwnPropertySymbols(shape);
-  if (symbolKeys.length && handleUnrepresentable(schema, ctx, json2, params, "Symbol keys cannot be represented in JSON Schema")) {
+  if (symbolKeys.length && handleUnrepresentable(schema2, ctx, json2, params, "Symbol keys cannot be represented in JSON Schema")) {
     return;
   }
   json2.type = "object";
@@ -265639,8 +265639,8 @@ var objectProcessor = (schema, ctx, _json, params) => {
     });
   }
 };
-var unionProcessor = (schema, ctx, json2, params) => {
-  const def = schema._zod.def;
+var unionProcessor = (schema2, ctx, json2, params) => {
+  const def = schema2._zod.def;
   const isExclusive = def.inclusive === false;
   const options = def.options.map((x, i) => processSchema(x, ctx, {
     ...params,
@@ -265652,8 +265652,8 @@ var unionProcessor = (schema, ctx, json2, params) => {
     json2.anyOf = options;
   }
 };
-var intersectionProcessor = (schema, ctx, json2, params) => {
-  const def = schema._zod.def;
+var intersectionProcessor = (schema2, ctx, json2, params) => {
+  const def = schema2._zod.def;
   const a = processSchema(def.left, ctx, {
     ...params,
     path: [...params.path, "allOf", 0]
@@ -265670,9 +265670,9 @@ var intersectionProcessor = (schema, ctx, json2, params) => {
   json2.allOf = allOf;
   ctx.intersections.push(allOf);
 };
-var tupleProcessor = (schema, ctx, _json, params) => {
+var tupleProcessor = (schema2, ctx, _json, params) => {
   const json2 = _json;
-  const def = schema._zod.def;
+  const def = schema2._zod.def;
   json2.type = "array";
   const prefixPath = ctx.target === "draft-2020-12" ? "prefixItems" : "items";
   const restPath = ctx.target === "draft-2020-12" ? "items" : ctx.target === "openapi-3.0" ? "items" : "additionalItems";
@@ -265728,7 +265728,7 @@ var tupleProcessor = (schema, ctx, _json, params) => {
     if (isClosed)
       json2.maxItems = maxItems;
   }
-  const { minimum, maximum } = aggregateChecks(schema);
+  const { minimum, maximum } = aggregateChecks(schema2);
   if (typeof minimum === "number")
     json2.minItems = minimum;
   if (typeof maximum === "number")
@@ -265797,9 +265797,9 @@ function rewriteKeyNames(ctx) {
     }
   }
 }
-var recordProcessor = (schema, ctx, _json, params) => {
+var recordProcessor = (schema2, ctx, _json, params) => {
   const json2 = _json;
-  const def = schema._zod.def;
+  const def = schema2._zod.def;
   json2.type = "object";
   const keyType = def.keyType;
   const patterns = aggregateChecks(keyType).patterns;
@@ -265824,7 +265824,7 @@ var recordProcessor = (schema, ctx, _json, params) => {
         pendingRecords.set(ctx, pending);
         ctx.deferred.push(() => rewriteKeyNames(ctx));
       }
-      pending.push(schema);
+      pending.push(schema2);
     }
     json2.additionalProperties = processSchema(def.valueType, ctx, {
       ...params,
@@ -265840,10 +265840,10 @@ var recordProcessor = (schema, ctx, _json, params) => {
     }
   }
 };
-var nullableProcessor = (schema, ctx, json2, params) => {
-  const def = schema._zod.def;
+var nullableProcessor = (schema2, ctx, json2, params) => {
+  const def = schema2._zod.def;
   const inner = processSchema(def.innerType, ctx, params);
-  const seen = ctx.seen.get(schema);
+  const seen = ctx.seen.get(schema2);
   if (ctx.target === "openapi-3.0") {
     seen.ref = def.innerType;
     json2.nullable = true;
@@ -265851,14 +265851,14 @@ var nullableProcessor = (schema, ctx, json2, params) => {
     json2.anyOf = [inner, { type: "null" }];
   }
 };
-var nonoptionalProcessor = (schema, ctx, _json, params) => {
-  const def = schema._zod.def;
+var nonoptionalProcessor = (schema2, ctx, _json, params) => {
+  const def = schema2._zod.def;
   processSchema(def.innerType, ctx, params);
-  const seen = ctx.seen.get(schema);
+  const seen = ctx.seen.get(schema2);
   seen.ref = def.innerType;
 };
 var UNREPRESENTABLE_DEFAULT = /* @__PURE__ */ Symbol();
-function serializeDefaultValue(value, schema, ctx, json2, params) {
+function serializeDefaultValue(value, schema2, ctx, json2, params) {
   let unrepresentable = false;
   const serialized = JSON.stringify(value, (_, val) => {
     if (typeof val !== "bigint")
@@ -265868,74 +265868,74 @@ function serializeDefaultValue(value, schema, ctx, json2, params) {
   });
   if (!unrepresentable)
     return JSON.parse(serialized);
-  handleUnrepresentable(schema, ctx, json2, params, "BigInt defaults cannot be represented in JSON Schema");
+  handleUnrepresentable(schema2, ctx, json2, params, "BigInt defaults cannot be represented in JSON Schema");
   return UNREPRESENTABLE_DEFAULT;
 }
-var defaultProcessor = (schema, ctx, json2, params) => {
-  const def = schema._zod.def;
+var defaultProcessor = (schema2, ctx, json2, params) => {
+  const def = schema2._zod.def;
   processSchema(def.innerType, ctx, params);
-  const seen = ctx.seen.get(schema);
+  const seen = ctx.seen.get(schema2);
   seen.ref = def.innerType;
-  const value = serializeDefaultValue(def.defaultValue, schema, ctx, json2, params);
+  const value = serializeDefaultValue(def.defaultValue, schema2, ctx, json2, params);
   if (value !== UNREPRESENTABLE_DEFAULT)
     json2.default = value;
 };
-var prefaultProcessor = (schema, ctx, json2, params) => {
-  const def = schema._zod.def;
+var prefaultProcessor = (schema2, ctx, json2, params) => {
+  const def = schema2._zod.def;
   processSchema(def.innerType, ctx, params);
-  const seen = ctx.seen.get(schema);
+  const seen = ctx.seen.get(schema2);
   seen.ref = def.innerType;
   if (ctx.io !== "input")
     return;
-  const value = serializeDefaultValue(def.defaultValue, schema, ctx, json2, params);
+  const value = serializeDefaultValue(def.defaultValue, schema2, ctx, json2, params);
   if (value !== UNREPRESENTABLE_DEFAULT)
     json2._prefault = value;
 };
-var catchProcessor = (schema, ctx, json2, params) => {
-  const def = schema._zod.def;
+var catchProcessor = (schema2, ctx, json2, params) => {
+  const def = schema2._zod.def;
   processSchema(def.innerType, ctx, params);
-  const seen = ctx.seen.get(schema);
+  const seen = ctx.seen.get(schema2);
   seen.ref = def.innerType;
   let catchValue;
   try {
     catchValue = def.catchValue(void 0);
   } catch {
-    handleUnrepresentable(schema, ctx, json2, params, "Dynamic catch values are not supported in JSON Schema");
+    handleUnrepresentable(schema2, ctx, json2, params, "Dynamic catch values are not supported in JSON Schema");
     return;
   }
   json2.default = catchValue;
 };
-var pipeProcessor = (schema, ctx, _json, params) => {
-  const def = schema._zod.def;
+var pipeProcessor = (schema2, ctx, _json, params) => {
+  const def = schema2._zod.def;
   const inIsTransform = def.in._zod.traits.has("$ZodTransform");
   const innerType = ctx.io === "input" ? inIsTransform ? def.out : def.in : def.out;
   processSchema(innerType, ctx, params);
-  const seen = ctx.seen.get(schema);
+  const seen = ctx.seen.get(schema2);
   seen.ref = innerType;
 };
-var readonlyProcessor = (schema, ctx, json2, params) => {
-  const def = schema._zod.def;
+var readonlyProcessor = (schema2, ctx, json2, params) => {
+  const def = schema2._zod.def;
   processSchema(def.innerType, ctx, params);
-  const seen = ctx.seen.get(schema);
+  const seen = ctx.seen.get(schema2);
   seen.ref = def.innerType;
   json2.readOnly = true;
 };
-var promiseProcessor = (schema, ctx, _json, params) => {
-  const def = schema._zod.def;
+var promiseProcessor = (schema2, ctx, _json, params) => {
+  const def = schema2._zod.def;
   processSchema(def.innerType, ctx, params);
-  const seen = ctx.seen.get(schema);
+  const seen = ctx.seen.get(schema2);
   seen.ref = def.innerType;
 };
-var optionalProcessor = (schema, ctx, _json, params) => {
-  const def = schema._zod.def;
+var optionalProcessor = (schema2, ctx, _json, params) => {
+  const def = schema2._zod.def;
   processSchema(def.innerType, ctx, params);
-  const seen = ctx.seen.get(schema);
+  const seen = ctx.seen.get(schema2);
   seen.ref = def.innerType;
 };
-var lazyProcessor = (schema, ctx, _json, params) => {
-  const innerType = schema._zod.innerType;
+var lazyProcessor = (schema2, ctx, _json, params) => {
+  const innerType = schema2._zod.innerType;
   processSchema(innerType, ctx, params);
-  const seen = ctx.seen.get(schema);
+  const seen = ctx.seen.get(schema2);
   seen.ref = innerType;
 };
 var allProcessors = {
@@ -265985,8 +265985,8 @@ function toJSONSchema(input3, params) {
     const ctx2 = initializeContext({ ...params, processors: allProcessors });
     const defs = {};
     for (const entry of registry2._idmap.entries()) {
-      const [_, schema] = entry;
-      processSchema(schema, ctx2);
+      const [_, schema2] = entry;
+      processSchema(schema2, ctx2);
     }
     const schemas = {};
     const external = {
@@ -265996,9 +265996,9 @@ function toJSONSchema(input3, params) {
     };
     ctx2.external = external;
     for (const entry of registry2._idmap.entries()) {
-      const [key, schema] = entry;
-      extractDefs(ctx2, schema);
-      assignProp(schemas, key, finalize(ctx2, schema));
+      const [key, schema2] = entry;
+      extractDefs(ctx2, schema2);
+      assignProp(schemas, key, finalize(ctx2, schema2));
     }
     if (Object.keys(defs).length > 0) {
       const defsSegment = ctx2.target === "draft-2020-12" ? "$defs" : "definitions";
@@ -266067,14 +266067,14 @@ var JSONSchemaGenerator = class {
    * Process a schema to prepare it for JSON Schema generation.
    * This must be called before emit().
    */
-  process(schema, _params = { path: [], schemaPath: [] }) {
-    return processSchema(schema, this.ctx, _params);
+  process(schema2, _params = { path: [], schemaPath: [] }) {
+    return processSchema(schema2, this.ctx, _params);
   }
   /**
    * Emit the final JSON Schema after processing.
    * Must call process() first.
    */
-  emit(schema, _params) {
+  emit(schema2, _params) {
     if (_params) {
       if (_params.cycles)
         this.ctx.cycles = _params.cycles;
@@ -266085,8 +266085,8 @@ var JSONSchemaGenerator = class {
     }
     this.ctx.sharedDefsExtractedFor = void 0;
     this.ctx.sharedEmitDoneFor = void 0;
-    extractDefs(this.ctx, schema);
-    const result = finalize(this.ctx, schema);
+    extractDefs(this.ctx, schema2);
+    const result = finalize(this.ctx, schema2);
     const { "~standard": _, ...plainResult } = result;
     return plainResult;
   }
@@ -267179,8 +267179,8 @@ var ZodArray = /* @__PURE__ */ $constructor("ZodArray", (inst, def) => {
 function array(element, params) {
   return _array(ZodArray, element, params);
 }
-function keyof(schema) {
-  const shape = schema._zod.def.shape;
+function keyof(schema2) {
+  const shape = schema2._zod.def.shape;
   return _enum2(Object.keys(shape));
 }
 var ZodObject = /* @__PURE__ */ $constructor("ZodObject", (inst, def) => {
@@ -267828,11 +267828,11 @@ function json(params) {
   });
   return jsonSchema;
 }
-function preprocess(fn, schema) {
+function preprocess(fn, schema2) {
   return new ZodPreprocess({
     type: "pipe",
     in: transform(fn),
-    out: schema
+    out: schema2
   });
 }
 
@@ -267964,8 +267964,8 @@ var RECOGNIZED_KEYS = /* @__PURE__ */ new Set([
   "nullable",
   "readOnly"
 ]);
-function detectVersion(schema, defaultTarget) {
-  const $schema = schema.$schema;
+function detectVersion(schema2, defaultTarget) {
+  const $schema = schema2.$schema;
   if ($schema === "https://json-schema.org/draft/2020-12/schema") {
     return "draft-2020-12";
   }
@@ -268193,27 +268193,27 @@ function getTupleRest(restSchema, ctx) {
   return convertSchema(restSchema, ctx);
 }
 var fullTime = /^(?:[01]\d|2[0-3]):[0-5]\d:[0-5]\d(?:\.\d+)?(?:Z|[+-](?:[01]\d|2[0-3]):[0-5]\d)$/;
-function convertBaseSchema(schema, ctx) {
-  if (schema.not !== void 0) {
-    if (typeof schema.not === "object" && Object.keys(schema.not).length === 0) {
+function convertBaseSchema(schema2, ctx) {
+  if (schema2.not !== void 0) {
+    if (typeof schema2.not === "object" && Object.keys(schema2.not).length === 0) {
       return z.never();
     }
     throw new Error("not is not supported in Zod (except { not: {} } for never)");
   }
-  if (schema.unevaluatedItems !== void 0) {
+  if (schema2.unevaluatedItems !== void 0) {
     throw new Error("unevaluatedItems is not supported");
   }
-  if (schema.unevaluatedProperties !== void 0) {
+  if (schema2.unevaluatedProperties !== void 0) {
     throw new Error("unevaluatedProperties is not supported");
   }
-  if (schema.if !== void 0 || schema.then !== void 0 || schema.else !== void 0) {
+  if (schema2.if !== void 0 || schema2.then !== void 0 || schema2.else !== void 0) {
     throw new Error("Conditional schemas (if/then/else) are not supported");
   }
-  if (schema.dependentSchemas !== void 0 || schema.dependentRequired !== void 0) {
+  if (schema2.dependentSchemas !== void 0 || schema2.dependentRequired !== void 0) {
     throw new Error("dependentSchemas and dependentRequired are not supported");
   }
-  if (schema.$ref) {
-    const refPath = schema.$ref;
+  if (schema2.$ref) {
+    const refPath = schema2.$ref;
     if (ctx.refs.has(refPath)) {
       return ctx.refs.get(refPath);
     }
@@ -268232,9 +268232,9 @@ function convertBaseSchema(schema, ctx) {
     ctx.processing.delete(refPath);
     return zodSchema2;
   }
-  if (schema.enum !== void 0) {
-    const enumValues = schema.enum;
-    if (ctx.version === "openapi-3.0" && schema.nullable === true && enumValues.length === 1 && enumValues[0] === null) {
+  if (schema2.enum !== void 0) {
+    const enumValues = schema2.enum;
+    if (ctx.version === "openapi-3.0" && schema2.nullable === true && enumValues.length === 1 && enumValues[0] === null) {
       return z.null();
     }
     if (enumValues.length === 0) {
@@ -268252,13 +268252,13 @@ function convertBaseSchema(schema, ctx) {
     }
     return z.union([literalSchemas[0], literalSchemas[1], ...literalSchemas.slice(2)]);
   }
-  if (schema.const !== void 0) {
-    return z.literal(schema.const);
+  if (schema2.const !== void 0) {
+    return z.literal(schema2.const);
   }
-  const type = schema.type;
+  const type = schema2.type;
   if (Array.isArray(type)) {
     const typeSchemas = type.map((t) => {
-      const typeSchema = { ...schema, type: t };
+      const typeSchema = { ...schema2, type: t };
       return convertBaseSchema(typeSchema, ctx);
     });
     if (typeSchemas.length === 0) {
@@ -268276,8 +268276,8 @@ function convertBaseSchema(schema, ctx) {
   switch (type) {
     case "string": {
       let stringSchema = z.string();
-      if (schema.format) {
-        const format = schema.format;
+      if (schema2.format) {
+        const format = schema2.format;
         if (format === "email") {
           stringSchema = stringSchema.check(z.email());
         } else if (format === "uri" || format === "uri-reference") {
@@ -268332,14 +268332,14 @@ function convertBaseSchema(schema, ctx) {
           stringSchema = stringSchema.check(z.ksuid());
         }
       }
-      if (typeof schema.minLength === "number") {
-        stringSchema = stringSchema.min(schema.minLength);
+      if (typeof schema2.minLength === "number") {
+        stringSchema = stringSchema.min(schema2.minLength);
       }
-      if (typeof schema.maxLength === "number") {
-        stringSchema = stringSchema.max(schema.maxLength);
+      if (typeof schema2.maxLength === "number") {
+        stringSchema = stringSchema.max(schema2.maxLength);
       }
-      if (schema.pattern) {
-        stringSchema = stringSchema.regex(new RegExp(schema.pattern));
+      if (schema2.pattern) {
+        stringSchema = stringSchema.regex(new RegExp(schema2.pattern));
       }
       zodSchema = stringSchema;
       break;
@@ -268347,24 +268347,24 @@ function convertBaseSchema(schema, ctx) {
     case "number":
     case "integer": {
       let numberSchema = type === "integer" ? z.number().int() : z.number();
-      if (typeof schema.minimum === "number" && schema.exclusiveMinimum !== true) {
-        numberSchema = numberSchema.min(schema.minimum);
+      if (typeof schema2.minimum === "number" && schema2.exclusiveMinimum !== true) {
+        numberSchema = numberSchema.min(schema2.minimum);
       }
-      if (typeof schema.maximum === "number" && schema.exclusiveMaximum !== true) {
-        numberSchema = numberSchema.max(schema.maximum);
+      if (typeof schema2.maximum === "number" && schema2.exclusiveMaximum !== true) {
+        numberSchema = numberSchema.max(schema2.maximum);
       }
-      if (typeof schema.exclusiveMinimum === "number") {
-        numberSchema = numberSchema.gt(schema.exclusiveMinimum);
-      } else if (schema.exclusiveMinimum === true && typeof schema.minimum === "number") {
-        numberSchema = numberSchema.gt(schema.minimum);
+      if (typeof schema2.exclusiveMinimum === "number") {
+        numberSchema = numberSchema.gt(schema2.exclusiveMinimum);
+      } else if (schema2.exclusiveMinimum === true && typeof schema2.minimum === "number") {
+        numberSchema = numberSchema.gt(schema2.minimum);
       }
-      if (typeof schema.exclusiveMaximum === "number") {
-        numberSchema = numberSchema.lt(schema.exclusiveMaximum);
-      } else if (schema.exclusiveMaximum === true && typeof schema.maximum === "number") {
-        numberSchema = numberSchema.lt(schema.maximum);
+      if (typeof schema2.exclusiveMaximum === "number") {
+        numberSchema = numberSchema.lt(schema2.exclusiveMaximum);
+      } else if (schema2.exclusiveMaximum === true && typeof schema2.maximum === "number") {
+        numberSchema = numberSchema.lt(schema2.maximum);
       }
-      if (typeof schema.multipleOf === "number") {
-        numberSchema = numberSchema.multipleOf(schema.multipleOf);
+      if (typeof schema2.multipleOf === "number") {
+        numberSchema = numberSchema.multipleOf(schema2.multipleOf);
       }
       zodSchema = numberSchema;
       break;
@@ -268379,15 +268379,15 @@ function convertBaseSchema(schema, ctx) {
     }
     case "object": {
       const shape = {};
-      const properties = schema.properties || {};
-      const requiredSet = new Set(schema.required || []);
-      const additionalSchema = typeof schema.additionalProperties === "object" ? convertSchema(schema.additionalProperties, ctx) : void 0;
+      const properties = schema2.properties || {};
+      const requiredSet = new Set(schema2.required || []);
+      const additionalSchema = typeof schema2.additionalProperties === "object" ? convertSchema(schema2.additionalProperties, ctx) : void 0;
       for (const [key, propSchema] of Object.entries(properties)) {
         const propZodSchema = convertSchema(propSchema, ctx);
         assignProp(shape, key, requiredSet.has(key) ? propZodSchema : propZodSchema.optional());
       }
-      if (schema.patternProperties) {
-        const patternProps = schema.patternProperties;
+      if (schema2.patternProperties) {
+        const patternProps = schema2.patternProperties;
         const patternKeys = Object.keys(patternProps);
         const looseRecords = [];
         for (const pattern of patternKeys) {
@@ -268411,7 +268411,7 @@ function convertBaseSchema(schema, ctx) {
           }
           zodSchema = result;
         }
-        if (schema.additionalProperties === false) {
+        if (schema2.additionalProperties === false) {
           const propertyKeys = Object.keys(shape);
           const patterns = patternKeys.map((p) => new RegExp(p));
           const basePatternSchema = zodSchema;
@@ -268438,7 +268438,7 @@ function convertBaseSchema(schema, ctx) {
         }
       } else {
         const objectSchema = z.object(shape);
-        if (schema.additionalProperties === false) {
+        if (schema2.additionalProperties === false) {
           zodSchema = objectSchema.strict();
         } else if (additionalSchema) {
           zodSchema = objectSchema.catchall(additionalSchema);
@@ -268446,13 +268446,13 @@ function convertBaseSchema(schema, ctx) {
           zodSchema = objectSchema.passthrough();
         }
       }
-      const hasKeyGuard = schema.propertyNames !== void 0 && schema.propertyNames !== true;
-      const minProperties = typeof schema.minProperties === "number" ? schema.minProperties : void 0;
-      const maxProperties = typeof schema.maxProperties === "number" ? schema.maxProperties : void 0;
+      const hasKeyGuard = schema2.propertyNames !== void 0 && schema2.propertyNames !== true;
+      const minProperties = typeof schema2.minProperties === "number" ? schema2.minProperties : void 0;
+      const maxProperties = typeof schema2.maxProperties === "number" ? schema2.maxProperties : void 0;
       if (hasKeyGuard || minProperties !== void 0 || maxProperties !== void 0) {
         let keySchema;
         if (hasKeyGuard) {
-          const keyJSONSchema = typeof schema.propertyNames === "object" && schema.propertyNames.type === void 0 ? { type: "string", ...schema.propertyNames } : schema.propertyNames;
+          const keyJSONSchema = typeof schema2.propertyNames === "object" && schema2.propertyNames.type === void 0 ? { type: "string", ...schema2.propertyNames } : schema2.propertyNames;
           keySchema = convertSchema(keyJSONSchema, ctx);
         }
         zodSchema = checkObjectGuards(zodSchema, { keySchema, minProperties, maxProperties });
@@ -268460,53 +268460,53 @@ function convertBaseSchema(schema, ctx) {
       break;
     }
     case "array": {
-      const prefixItems = schema.prefixItems;
-      const items = schema.items;
+      const prefixItems = schema2.prefixItems;
+      const items = schema2.items;
       if (prefixItems && Array.isArray(prefixItems)) {
-        const minItems = typeof schema.minItems === "number" ? schema.minItems : 0;
+        const minItems = typeof schema2.minItems === "number" ? schema2.minItems : 0;
         const tupleItems = prefixItems.map((item) => convertSchema(item, ctx));
         const positionalItems = applyMinItems(tupleItems, minItems);
         const rest = !Array.isArray(items) ? getTupleRest(items, ctx) : void 0;
         const tupleSchema = z.tuple(positionalItems);
         zodSchema = rest ? tupleSchema.rest(rest) : tupleSchema;
-        if (typeof schema.minItems === "number") {
-          zodSchema = zodSchema.check(z.minLength(schema.minItems));
+        if (typeof schema2.minItems === "number") {
+          zodSchema = zodSchema.check(z.minLength(schema2.minItems));
         }
-        if (typeof schema.maxItems === "number") {
-          zodSchema = zodSchema.check(z.maxLength(schema.maxItems));
+        if (typeof schema2.maxItems === "number") {
+          zodSchema = zodSchema.check(z.maxLength(schema2.maxItems));
         }
       } else if (Array.isArray(items)) {
-        const minItems = typeof schema.minItems === "number" ? schema.minItems : 0;
+        const minItems = typeof schema2.minItems === "number" ? schema2.minItems : 0;
         const tupleItems = items.map((item) => convertSchema(item, ctx));
         const positionalItems = applyMinItems(tupleItems, minItems);
-        const rest = getTupleRest(schema.additionalItems, ctx);
+        const rest = getTupleRest(schema2.additionalItems, ctx);
         const tupleSchema = z.tuple(positionalItems);
         zodSchema = rest ? tupleSchema.rest(rest) : tupleSchema;
-        if (typeof schema.minItems === "number") {
-          zodSchema = zodSchema.check(z.minLength(schema.minItems));
+        if (typeof schema2.minItems === "number") {
+          zodSchema = zodSchema.check(z.minLength(schema2.minItems));
         }
-        if (typeof schema.maxItems === "number") {
-          zodSchema = zodSchema.check(z.maxLength(schema.maxItems));
+        if (typeof schema2.maxItems === "number") {
+          zodSchema = zodSchema.check(z.maxLength(schema2.maxItems));
         }
       } else if (items !== void 0) {
         const element = convertSchema(items, ctx);
         let arraySchema = z.array(element);
-        if (typeof schema.minItems === "number") {
-          arraySchema = arraySchema.min(schema.minItems);
+        if (typeof schema2.minItems === "number") {
+          arraySchema = arraySchema.min(schema2.minItems);
         }
-        if (typeof schema.maxItems === "number") {
-          arraySchema = arraySchema.max(schema.maxItems);
+        if (typeof schema2.maxItems === "number") {
+          arraySchema = arraySchema.max(schema2.maxItems);
         }
         zodSchema = arraySchema;
       } else {
         zodSchema = z.array(z.any());
       }
-      if (schema.uniqueItems === true || schema.contains !== void 0) {
+      if (schema2.uniqueItems === true || schema2.contains !== void 0) {
         zodSchema = checkArrayGuards(zodSchema, {
-          uniqueItems: schema.uniqueItems === true,
-          containsSchema: schema.contains !== void 0 ? convertSchema(schema.contains, ctx) : void 0,
-          minContains: typeof schema.minContains === "number" ? schema.minContains : void 0,
-          maxContains: typeof schema.maxContains === "number" ? schema.maxContains : void 0
+          uniqueItems: schema2.uniqueItems === true,
+          containsSchema: schema2.contains !== void 0 ? convertSchema(schema2.contains, ctx) : void 0,
+          minContains: typeof schema2.minContains === "number" ? schema2.minContains : void 0,
+          maxContains: typeof schema2.maxContains === "number" ? schema2.maxContains : void 0
         });
       }
       break;
@@ -268516,94 +268516,94 @@ function convertBaseSchema(schema, ctx) {
   }
   return zodSchema;
 }
-function convertSchema(schema, ctx) {
-  if (typeof schema === "boolean") {
-    return schema ? z.any() : z.never();
+function convertSchema(schema2, ctx) {
+  if (typeof schema2 === "boolean") {
+    return schema2 ? z.any() : z.never();
   }
-  let baseSchema = convertBaseSchema(schema, ctx);
-  const hasExplicitType = schema.type || schema.enum !== void 0 || schema.const !== void 0;
-  if (schema.anyOf && Array.isArray(schema.anyOf)) {
-    const options = schema.anyOf.map((s) => convertSchema(s, ctx));
+  let baseSchema = convertBaseSchema(schema2, ctx);
+  const hasExplicitType = schema2.type || schema2.enum !== void 0 || schema2.const !== void 0;
+  if (schema2.anyOf && Array.isArray(schema2.anyOf)) {
+    const options = schema2.anyOf.map((s) => convertSchema(s, ctx));
     const anyOfUnion = z.union(options);
     baseSchema = hasExplicitType ? z.intersection(baseSchema, anyOfUnion) : anyOfUnion;
   }
-  if (schema.oneOf && Array.isArray(schema.oneOf)) {
-    const options = schema.oneOf.map((s) => convertSchema(s, ctx));
+  if (schema2.oneOf && Array.isArray(schema2.oneOf)) {
+    const options = schema2.oneOf.map((s) => convertSchema(s, ctx));
     const oneOfUnion = z.xor(options);
     baseSchema = hasExplicitType ? z.intersection(baseSchema, oneOfUnion) : oneOfUnion;
   }
-  if (schema.allOf && Array.isArray(schema.allOf)) {
-    if (schema.allOf.length === 0) {
+  if (schema2.allOf && Array.isArray(schema2.allOf)) {
+    if (schema2.allOf.length === 0) {
       baseSchema = hasExplicitType ? baseSchema : z.any();
     } else {
-      let result = hasExplicitType ? baseSchema : convertSchema(schema.allOf[0], ctx);
+      let result = hasExplicitType ? baseSchema : convertSchema(schema2.allOf[0], ctx);
       const startIdx = hasExplicitType ? 0 : 1;
-      for (let i = startIdx; i < schema.allOf.length; i++) {
-        result = z.intersection(result, convertSchema(schema.allOf[i], ctx));
+      for (let i = startIdx; i < schema2.allOf.length; i++) {
+        result = z.intersection(result, convertSchema(schema2.allOf[i], ctx));
       }
       baseSchema = result;
     }
   }
-  if (schema.nullable === true && ctx.version === "openapi-3.0") {
+  if (schema2.nullable === true && ctx.version === "openapi-3.0") {
     baseSchema = z.nullable(baseSchema);
   }
-  if (schema.readOnly === true) {
+  if (schema2.readOnly === true) {
     baseSchema = z.readonly(baseSchema);
   }
-  if (schema.default !== void 0) {
-    baseSchema = baseSchema.default(schema.default);
+  if (schema2.default !== void 0) {
+    baseSchema = baseSchema.default(schema2.default);
   }
   const extraMeta = {};
   const coreMetadataKeys = ["$id", "id", "$comment", "$anchor", "$vocabulary", "$dynamicRef", "$dynamicAnchor"];
   for (const key of coreMetadataKeys) {
-    if (key in schema) {
-      extraMeta[key] = schema[key];
+    if (key in schema2) {
+      extraMeta[key] = schema2[key];
     }
   }
   const contentMetadataKeys = ["contentEncoding", "contentMediaType", "contentSchema"];
   for (const key of contentMetadataKeys) {
-    if (key in schema) {
-      extraMeta[key] = schema[key];
+    if (key in schema2) {
+      extraMeta[key] = schema2[key];
     }
   }
-  if (schema.type === "object" && schema.$ref === void 0) {
-    if (schema.propertyNames !== void 0 && !containsRef(schema.propertyNames)) {
-      extraMeta.propertyNames = schema.propertyNames;
+  if (schema2.type === "object" && schema2.$ref === void 0) {
+    if (schema2.propertyNames !== void 0 && !containsRef(schema2.propertyNames)) {
+      extraMeta.propertyNames = schema2.propertyNames;
     }
     for (const key of ["minProperties", "maxProperties"]) {
-      if (schema[key] !== void 0)
-        extraMeta[key] = schema[key];
+      if (schema2[key] !== void 0)
+        extraMeta[key] = schema2[key];
     }
   }
-  if (schema.type === "array" && schema.$ref === void 0) {
-    if (schema.contains !== void 0 && !containsRef(schema.contains)) {
-      extraMeta.contains = schema.contains;
+  if (schema2.type === "array" && schema2.$ref === void 0) {
+    if (schema2.contains !== void 0 && !containsRef(schema2.contains)) {
+      extraMeta.contains = schema2.contains;
     }
     for (const key of ["uniqueItems", "minContains", "maxContains"]) {
-      if (schema[key] !== void 0)
-        extraMeta[key] = schema[key];
+      if (schema2[key] !== void 0)
+        extraMeta[key] = schema2[key];
     }
   }
-  for (const key of Object.keys(schema)) {
+  for (const key of Object.keys(schema2)) {
     if (!RECOGNIZED_KEYS.has(key)) {
-      assignProp(extraMeta, key, schema[key]);
+      assignProp(extraMeta, key, schema2[key]);
     }
   }
   if (Object.keys(extraMeta).length > 0) {
     ctx.registry.add(baseSchema, extraMeta);
   }
-  if (schema.description) {
-    baseSchema = baseSchema.describe(schema.description);
+  if (schema2.description) {
+    baseSchema = baseSchema.describe(schema2.description);
   }
   return baseSchema;
 }
-function fromJSONSchema(schema, params) {
-  if (typeof schema === "boolean") {
-    return schema ? z.any() : z.never();
+function fromJSONSchema(schema2, params) {
+  if (typeof schema2 === "boolean") {
+    return schema2 ? z.any() : z.never();
   }
   let normalized;
   try {
-    normalized = JSON.parse(JSON.stringify(schema));
+    normalized = JSON.parse(JSON.stringify(schema2));
   } catch {
     throw new Error("fromJSONSchema input is not valid JSON (possibly cyclic); use $defs/$ref for recursive schemas");
   }
@@ -268622,7 +268622,7 @@ function fromJSONSchema(schema, params) {
 
 // node_modules/zod/v4/core/visit.js
 var RESOLVING = /* @__PURE__ */ Symbol("z.visit/resolving");
-function visit(schema, fnOrHandlers) {
+function visit(schema2, fnOrHandlers) {
   const fn = typeof fnOrHandlers === "function" ? fnOrHandlers : (node2, rewritten) => {
     const h = fnOrHandlers[node2._zod.def.type];
     return h ? h(node2, rewritten) : node2;
@@ -268772,12 +268772,12 @@ function visit(schema, fnOrHandlers) {
       }
     }
   }
-  return run(schema);
+  return run(schema2);
 }
 
 // node_modules/zod/v4/classic/deep-partial.js
-function deepPartial(schema) {
-  return visit(schema, {
+function deepPartial(schema2) {
+  return visit(schema2, {
     object: (s) => s.partial(),
     // Every partialed option now admits `undefined`, which the constructor rejects as a duplicate.
     union: (s) => {
@@ -268800,8 +268800,8 @@ function outSide(def) {
 function inSide(def) {
   return def.in._zod.traits.has("$ZodTransform") ? outSide(def) : def.in;
 }
-function input(schema) {
-  return visit(schema, {
+function input(schema2) {
+  return visit(schema2, {
     pipe: (s) => inSide(s._zod.def),
     // A default value belongs to the output side, so a rewritten inner type leaves it stranded. `.default()` widens the declared input type with `undefined`, and `optional` is what carries that across.
     default: (s, rewritten) => rewritten ? optional(s._zod.def.innerType) : s,
@@ -268809,8 +268809,8 @@ function input(schema) {
     catch: (s, rewritten) => rewritten ? s._zod.def.innerType : s
   });
 }
-function output(schema) {
-  return visit(schema, {
+function output(schema2) {
+  return visit(schema2, {
     pipe: (s) => outSide(s._zod.def),
     // A prefault value is fed through the schema, which makes it input-side, so a rewritten inner type leaves it stranded.
     prefault: (s, rewritten) => rewritten ? s._zod.def.innerType : s
@@ -268847,6 +268847,8 @@ var import_node_fs = require("node:fs");
 var import_node_path = require("node:path");
 var import_yaml = __toESM(require_dist(), 1);
 var configSchema = external_exports.object({
+  language: external_exports.enum(["typescript", "python"]).default("typescript"),
+  pythonCommand: external_exports.string().default("python"),
   vendors: external_exports.object({ stripe: external_exports.object({ enabled: external_exports.boolean().default(true), sdkVersion: external_exports.string().regex(/^\d+\.\d+\.\d+$/).optional(), requestApiVersion: external_exports.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(), webhookVersion: external_exports.string().optional() }).strict().default({ enabled: true }) }).strict().default({ stripe: { enabled: true } }),
   include: external_exports.array(external_exports.string()).default(["src/**/*.ts", "src/**/*.tsx"]),
   exclude: external_exports.array(external_exports.string()).default(["**/node_modules/**", "**/*.d.ts"]),
@@ -268861,16 +268863,17 @@ function loadConfig(root, name = "changelume.yml") {
 }
 
 // packages/core/src/pipeline.ts
-var import_node_fs5 = require("node:fs");
+var import_node_fs7 = require("node:fs");
 var import_node_crypto2 = require("node:crypto");
-var import_node_path6 = require("node:path");
+var import_node_path7 = require("node:path");
 var import_node_os = require("node:os");
-var import_node_child_process2 = require("node:child_process");
+var import_node_child_process3 = require("node:child_process");
 
-// packages/core/src/languages/typescript/analyze.ts
-var import_ts_morph2 = __toESM(require_ts_morph(), 1);
+// fixtures/sources/stripe-python-v5-changelog.md
+var stripe_python_v5_changelog_default = "# Changelog\n\n## 5.0.0 - 2022-11-16\n\nBreaking changes that arose during code generation of the library that we postponed for the next major version. For changes to the Stripe products, read more at https://stripe.com/docs/upgrades#2022-11-15.\n\n\"\u26A0\uFE0F\" symbol highlights breaking changes.\n\n* [#895](https://github.com/stripe/stripe-python/pull/895) Next major release changes\n* [#889](https://github.com/stripe/stripe-python/pull/889) API Updates\n\n* [#888](https://github.com/stripe/stripe-python/pull/888) Do not run Coveralls if secret token is not available\n* [#875](https://github.com/stripe/stripe-python/pull/875) hide misleading ssl security warning in python>=2.7.9\n\n### \u26A0\uFE0F Changed\n- Dropped support for Python version 3.4 and 3.5 (#881). We now support Python 2.7 or 3.6+.\n- Fixed mixtyped names for two OAuth exceptions: `UnsupportedGrantTypError`->`UnsupportedGrantTypeError` and `UnsupportedResponseTypError`->`UnsupportedResponseTypeError` (#872).\n\n### Deprecated\n- Deprecate `save` method on resources (#887). Use `modify` instead.\n   ```python\n  # Before\n  customer = stripe.Customer.retrieve(\"cus_123\")\n  customer.email = \"example@test.com\"\n  customer.save()\n\n  # After\n  stripe.Customer.modify(\"cus_123\", email=\"example@test.com\")\n   ```\n\n### \u26A0\uFE0F Removed\n- Removed `Orders` resource (#882).\n- Removed `SKU` resource (#883).\n\n## 4.2.0 - 2022-09-23\n* [#877](https://github.com/stripe/stripe-python/pull/877) API Updates\n  * Add `upcoming_lines` method to the `Invoice` resource.\n* [#873](https://github.com/stripe/stripe-python/pull/873) Add abstract methods for SearchableAPIResource\n* [#867](https://github.com/stripe/stripe-python/pull/867) API Updates\n  * Update links in documentation to be absolute.\n\n## 4.1.0 - 2022-08-19\n* [#861](https://github.com/stripe/stripe-python/pull/861) API Updates\n  * Add support for new resource `CustomerCashBalanceTransaction`\n* [#860](https://github.com/stripe/stripe-python/pull/860) Add a support section to the readme\n* [#717](https://github.com/stripe/stripe-python/pull/717) Fix test TestCharge.test_is_saveable().\n\n## 4.0.2 - 2022-08-03\n* [#855](https://github.com/stripe/stripe-python/pull/855) Fix issue where auto_paging_iter failed on nested list objects.\n\n## 4.0.1 - 2022-08-02\n* [#850](https://github.com/stripe/stripe-python/pull/850) Fix incorrect handling of additional request parameters\n  * Fixes issue where using special parameter like `api_key`, `idempotency_key`, `stripe_version`, `stripe_account`, `headers` can cause a `Received unknown parameter error`.\n\n## 4.0.0 - 2022-08-02\n\nBreaking changes that arose during code generation of the library that we postponed for the next major version. For changes to the SDK, read more detailed description at https://github.com/stripe/stripe-python/wiki/Migration-guide-for-v4. For changes to the Stripe products, read more at https://stripe.com/docs/upgrades#2022-08-01.\n\n\"\u26A0\uFE0F\" symbol highlights breaking changes.\n\n* [#847](https://github.com/stripe/stripe-python/pull/847) API Updates\n* [#845](https://github.com/stripe/stripe-python/pull/845) Next major release changes\n* [#836](https://github.com/stripe/stripe-python/pull/836) API Updates. Add Price.create tests.\n* [#835](https://github.com/stripe/stripe-python/pull/835) API Updates. Use auto-generation for credit_note and invoice methods.\n\n### \u26A0\uFE0F Removed\n- Removed deprecated `AlipayAccount`, `BitcoinReceiver`, `BitcoinTransaction`, `IssuerFraudRecord`, `Recipient`, `RecipientTransfer`, and  `ThreeDSecure` classes.\n- Removed deprecated `Charge.update_dispute` and `Charge.close_dispute` methods that were using legacy REST API endpoint. Prefer [Dispute.modify](https://stripe.com/docs/api/disputes/update?lang=python) and [Dispute.close](https://stripe.com/docs/api/disputes/close?lang=python)\n- Removed deprecated `Card.details` method and `CardDetails` resource. The REST API endpoint is not longer supported.\n- Removed the deprecated `Source.source_transactions` method. Prefer `SubscriptionItem.list_source_transactions`\n- Removed the deprecated `SubscriptionItem.usage_record_summaries` method. Prefer `SubscriptionItem.list_usage_record_summaries`\n- Removed the deprecated `Charge.refund` method. Prefer [Refund.create](https://stripe.com/docs/api/refunds/create)\n\n### \u26A0\uFE0F Changed\n- To be consistent with other resource methods, `ApplicationFee.refund` returns an instance of `ApplicationFee` and doesn't mutate the instance of `ApplicationFee`.\n- To be consistent with other resource methods, the `Customer.delete_discount` no longer resets the `discount` property to `None` and returns the deleted discount instead. If you were relying on this behavior, reset the discount property manually:\n- The `LineItem` resource now inherits from `StripeObject` as it has no methods of it's own.\n- To be consistent with other resource methods, the `Subscription.delete_discount` returns an instance of deleted discount and doesn't mutate the instance of `Subscription`.\n- Update the CA certificate bundle.\n- Request sending logic unified across standard and custom methods (https://github.com/stripe/stripe-python/pull/832)\n\n## 3.5.0 - 2022-06-30\n* [#831](https://github.com/stripe/stripe-python/pull/831) API Updates\n  * Add support for `deliver_card`, `fail_card`, `return_card`, and `ship_card` test helper methods on resource `Issuing.Card`\n  * Switch from using `instance_url` to computing method path in place for custom methods.\n  * Switch from using explicit class methods for test helpers instead of using meta-programming.\n\n## 3.4.0 - 2022-06-17\n* [#824](https://github.com/stripe/stripe-python/pull/824) API Updates\n  * Add support for `fund_cash_balance` test helper method on resource `Customer`\n* [#823](https://github.com/stripe/stripe-python/pull/823) Trigger workflows on beta branches\n\n## 3.3.0 - 2022-06-08\n* [#818](https://github.com/stripe/stripe-python/pull/818) fix: Update cash balance methods to no longer require nested ID.\n\n## 3.2.0 - 2022-05-23\n* [#812](https://github.com/stripe/stripe-python/pull/812) API Updates\n  * Add support for new resource `Apps.Secret`\n\n## 3.1.0 - 2022-05-19\n* [#810](https://github.com/stripe/stripe-python/pull/810) API Updates\n  * Add support for new resources `Treasury.CreditReversal`, `Treasury.DebitReversal`, `Treasury.FinancialAccountFeatures`, `Treasury.FinancialAccount`, `Treasury.FlowDetails`, `Treasury.InboundTransfer`, `Treasury.OutboundPayment`, `Treasury.OutboundTransfer`, `Treasury.ReceivedCredit`, `Treasury.ReceivedDebit`, `Treasury.TransactionEntry`, and `Treasury.Transaction`\n  * Add support for `retrieve_payment_method` method on resource `Customer`\n  * Add support for `list_owners` and `list` methods on resource `FinancialConnections.Account`\n* [#719](https://github.com/stripe/stripe-python/pull/719) Set daemon attribute instead of using setDaemon method that was deprecated in Python 3.10\n* [#767](https://github.com/stripe/stripe-python/pull/767) Bump vendored six to 1.16.0\n* [#806](https://github.com/stripe/stripe-python/pull/806) Start testing on pypy-3.8\n* [#811](https://github.com/stripe/stripe-python/pull/811) Add sanitize_id method\n\n\n## 3.0.0 - 2022-05-09\n* [#809](https://github.com/stripe/stripe-python/pull/809) Release of major version v3.0.0. The [migration guide](https://github.com/stripe/stripe-python/wiki/Migration-Guide-for-v3) contains more information.\n  (\u26A0\uFE0F = breaking changes):\n  * \u26A0\uFE0F Replace the legacy `Order` API with the new `Order` API.\n    * New methods: `cancel`, `list_line_items`, `reopen`, and `submit`\n    * Removed methods: `pay` and `return_order`\n    * Removed resources: `OrderItem` and `OrderReturn`\n  * \u26A0\uFE0F Rename `financial_connections.account.refresh` to `financial_connections.refresh_account`\n  * Add support for `amount_discount`, `amount_tax`, and `product` on `LineItem`\n\n## 2.76.0 - 2022-05-05\n* [#808](https://github.com/stripe/stripe-python/pull/808) API Updates\n  * Add support for new resources `FinancialConnections.AccountOwner`, `FinancialConnections.AccountOwnership`, `FinancialConnections.Account`, and `FinancialConnections.Session`\n\n## 2.75.0 - 2022-05-03\n* [#805](https://github.com/stripe/stripe-python/pull/805) API Updates\n  * Add support for new resource `CashBalance`\n\n## 2.74.0 - 2022-04-21\n* [#796](https://github.com/stripe/stripe-python/pull/796) API Updates\n  * Add support for `expire` test helper method on resource `Refund`\n\n## 2.73.0 - 2022-04-18\n* [#792](https://github.com/stripe/stripe-python/pull/792) [#794](https://github.com/stripe/stripe-python/pull/794) [#795](https://github.com/stripe/stripe-python/pull/795) API Updates\n  * Add support for new resources `FundingInstructions` and `Terminal.Configuration`\n\n## 2.72.0 - 2022-04-13\n* [#791](https://github.com/stripe/stripe-python/pull/791) API Updates\n  * Add support for `increment_authorization` method on resource `PaymentIntent`\n\n## 2.71.0 - 2022-04-08\n* [#788](https://github.com/stripe/stripe-python/pull/788) API Updates\n  * Add support for `apply_customer_balance` method on resource `PaymentIntent`\n\n## 2.70.0 - 2022-03-30\n* [#785](https://github.com/stripe/stripe-python/pull/785) API Updates\n  * Add support for `cancel_action`, `process_payment_intent`, `process_setup_intent`, and `set_reader_display` methods on resource `Terminal.Reader`\n\n## 2.69.0 - 2022-03-29\n* [#783](https://github.com/stripe/stripe-python/pull/783) API Updates\n  * Add support for Search API\n    * Add support for `search` method on resources `Charge`, `Customer`, `Invoice`, `PaymentIntent`, `Price`, `Product`, and `Subscription`\n* [#784](https://github.com/stripe/stripe-python/pull/784) Pin click dependency to 8.0.4 to avoid breakage in black\n* [#773](https://github.com/stripe/stripe-python/pull/773) Add infrastructure for test-helper methods\n* [#782](https://github.com/stripe/stripe-python/pull/782) Revert Orders to use qualified name for upload_api_base\n\n## 2.68.0 - 2022-03-23\n* [#781](https://github.com/stripe/stripe-python/pull/781) API Updates\n  * Add support for `cancel` method on resource `Refund`\n* [#777](https://github.com/stripe/stripe-python/pull/777) Add support for SearchResult.\n\n## 2.67.0 - 2022-03-01\n* [#774](https://github.com/stripe/stripe-python/pull/774) API Updates\n  * Add support for new resource `TestHelpers.TestClock`\n\n## 2.66.0 - 2022-02-16\n* [#771](https://github.com/stripe/stripe-python/pull/771) API Updates\n  * Add support for `verify_microdeposits` method on resources `PaymentIntent` and `SetupIntent`\n\n## 2.65.0 - 2022-01-20\n* [#766](https://github.com/stripe/stripe-python/pull/766) API Updates\n  * Add support for new resource `PaymentLink`\n* [#763](https://github.com/stripe/stripe-python/pull/763) Start testing Python 3.10\n\n## 2.64.0 - 2021-12-21\n* [#757](https://github.com/stripe/stripe-python/pull/757) Update class custom methods to save list object parameters.\n* [#756](https://github.com/stripe/stripe-python/pull/756) Introduce custom listing methods on objects.\n* [#754](https://github.com/stripe/stripe-python/pull/754) Clarify metadata deletion message.\n\n## 2.63.0 - 2021-11-16\n* [#748](https://github.com/stripe/stripe-python/pull/748) API Updates\n  * Add support for new resource `ShippingRate`\n\n## 2.62.0 - 2021-11-11\n* [#745](https://github.com/stripe/stripe-python/pull/745) API Updates\n  * Add support for `expire` method on resource `Checkout.Session`\n\n## 2.61.0 - 2021-10-11\n* [#738](https://github.com/stripe/stripe-python/pull/738) API Updates\n  * Add support for `list_payment_methods` method on resource `Customer`\n* [#736](https://github.com/stripe/stripe-python/pull/736) Stop sending raw exception message as part of Stripe user agent.\n\n## 2.60.0 - 2021-07-14\n* [#728](https://github.com/stripe/stripe-python/pull/728) API Updates\n  * Add support for `list_computed_upfront_line_items` method on resource `Quote`\n\n## 2.59.0 - 2021-07-09\n* [#727](https://github.com/stripe/stripe-python/pull/727) [#725](https://github.com/stripe/stripe-python/pull/725) Add support for new `Quote` API.\n\n## 2.58.0 - 2021-06-04\n* [#722](https://github.com/stripe/stripe-python/pull/722) API Updates\n  * Add support for new `TaxCode` API.\n\n## 2.57.0 - 2021-05-19\n* [#720](https://github.com/stripe/stripe-python/pull/720) Add support for Identity VerificationSession and VerificationReport APIs\n\n## 2.56.0 - 2021-02-22\n* [#713](https://github.com/stripe/stripe-python/pull/713) Add support for the Billing Portal Configuration API\n\n## 2.55.2 - 2021-02-05\n* [#704](https://github.com/stripe/stripe-python/pull/704) Fix CA bundle path issue\n\n## 2.55.1 - 2020-12-01\n* [#698](https://github.com/stripe/stripe-python/pull/698) Fix issue where StripeObjects in lists would not be converted to dicts\n* [#699](https://github.com/stripe/stripe-python/pull/699) Start testing Python 3.9\n* [#691](https://github.com/stripe/stripe-python/pull/691) Include the examples in the built sources\n\n## 2.55.0 - 2020-10-14\n* [#684](https://github.com/stripe/stripe-python/pull/684) Add support for the Payout Reverse API\n\n## 2.54.0 - 2020-09-29\n* [#681](https://github.com/stripe/stripe-python/pull/681) Add support for the `SetupAttempt` resource and List API\n* 2.52.0 and 2.53.0 were empty releases that contained no additional changes.\n\n## 2.51.0 - 2020-09-02\n* [#676](https://github.com/stripe/stripe-python/pull/676) Add support for the Issuing Dispute Submit API\n\n## 2.50.0 - 2020-08-05\n* [#669](https://github.com/stripe/stripe-python/pull/669) Add support for the `PromotionCode` resource and APIs\n\n## 2.49.0 - 2020-07-17\n* [#665](https://github.com/stripe/stripe-python/pull/665) Support stripe.File.create(stripe_version='...')\n\n## 2.48.0 - 2020-05-11\n* [#655](https://github.com/stripe/stripe-python/pull/655) Add support for the `LineItem` resource and APIs\n\n## 2.47.0 - 2020-04-29\n* [#652](https://github.com/stripe/stripe-python/pull/652) Add support for the `Price` resource and APIs\n\n## 2.46.0 - 2020-04-22\n* [#651](https://github.com/stripe/stripe-python/pull/651) Add support for `billing_portal` namespace and `Session` resource and APIs\n\n## 2.45.0 - 2020-04-06\n* [#648](https://github.com/stripe/stripe-python/pull/648) Add support for Express links in `authorize_url` for `OAuth`\n\n## 2.44.0 - 2020-03-23\n* [#646](https://github.com/stripe/stripe-python/pull/646) Allow overriding API key in OAuth methods\n\n## 2.43.0 - 2020-02-26\n* [#644](https://github.com/stripe/stripe-python/pull/644) Add support for listing Checkout `Session`\n\n## 2.42.0 - 2020-01-14\n* [#640](https://github.com/stripe/stripe-python/pull/640) Add support for `CreditNoteLineItem`\n* [#639](https://github.com/stripe/stripe-python/pull/639) Pin black version\n* [#637](https://github.com/stripe/stripe-python/pull/637) Start testing Python 3.8\n\n## 2.41.1 - 2019-12-30\n* [#636](https://github.com/stripe/stripe-python/pull/636) Fix uploading files with Unicode names (Python 2.7)\n* [#635](https://github.com/stripe/stripe-python/pull/635) Update Python API docs inline link\n* [#631](https://github.com/stripe/stripe-python/pull/631) Update `proxy.py`\n\n## 2.41.0 - 2019-11-26\n* [#630](https://github.com/stripe/stripe-python/pull/630) Add support for `CreditNote` preview\n\n## 2.40.0 - 2019-11-08\n* [#627](https://github.com/stripe/stripe-python/pull/627) Add list_usage_record_summaries and list_source_transactions\n\n## 2.39.0 - 2019-11-06\n* [#625](https://github.com/stripe/stripe-python/pull/625) Add support for `Mandate`\n\n## 2.38.0 - 2019-10-29\n* [#623](https://github.com/stripe/stripe-python/pull/623) Add support for reverse pagination\n* [#624](https://github.com/stripe/stripe-python/pull/624) Contributor Convenant\n\n## 2.37.2 - 2019-10-04\n* [#621](https://github.com/stripe/stripe-python/pull/621) Implement support for stripe-should-retry and retry-after headers\n\n## 2.37.1 - 2019-09-26\n* [#620](https://github.com/stripe/stripe-python/pull/620) Check that `error` is a dict before trying to use it to create a `StripeError`\n\n## 2.37.0 - 2019-09-26\n* [#619](https://github.com/stripe/stripe-python/pull/619) Add `ErrorObject` to `StripeError` exceptions\n* [#616](https://github.com/stripe/stripe-python/pull/616) Pass `CFLAGS` and `LDFLAGS` when running tests\n\n## 2.36.2 - 2019-09-12\n* [#614](https://github.com/stripe/stripe-python/pull/614) Use `OrderedDict` to maintain key order in API requests and responses\n\n## 2.36.1 - 2019-09-11\n* [#612](https://github.com/stripe/stripe-python/pull/612) Use `ListObject` properties as default values in request methods\n\n## 2.36.0 - 2019-09-10\n* [#610](https://github.com/stripe/stripe-python/pull/610) Add support for header parameters in `ListObject` request methods\n\n## 2.35.1 - 2019-08-20\n* [#605](https://github.com/stripe/stripe-python/pull/605) Fix automatic retries of failed requests\n* [#606](https://github.com/stripe/stripe-python/pull/606) Clarify what `max_network_retries` does\n\n## 2.35.0 - 2019-08-12\n* [#607](https://github.com/stripe/stripe-python/pull/607) Add `SubscriptionItem.create_usage_record` method\n\n## 2.34.0 - 2019-08-09\n* [#604](https://github.com/stripe/stripe-python/pull/604) Remove subscription schedule revisions\n  - This is technically a breaking change. We've chosen to release it as a minor vesion bump because the associated API is unused.\n\n## 2.33.2 - 2019-08-06\n* [#601](https://github.com/stripe/stripe-python/pull/601) Add support for passing full objects instead of IDs to custom methods\n* [#603](https://github.com/stripe/stripe-python/pull/603) Bump vendored six to latest version\n\n## 2.33.1 - 2019-08-06\n* [#599](https://github.com/stripe/stripe-python/pull/599) Fix `del` statement to not raise `KeyError`\n\n## 2.33.0 - 2019-07-30\n* [#595](https://github.com/stripe/stripe-python/pull/595) Listing `BalanceTransaction` objects now uses `/v1/balance_transactions` instead of `/v1/balance/history`\n\n## 2.32.1 - 2019-07-08\n* [#592](https://github.com/stripe/stripe-python/pull/592) Fix argument name conflict\n\n## 2.32.0 - 2019-06-27\n* [#590](https://github.com/stripe/stripe-python/pull/590) Add support for the `SetupIntent` resource and APIs\n\n## 2.31.0 - 2019-06-24\n* [#587](https://github.com/stripe/stripe-python/pull/587) Enable request latency telemetry by default\n\n## 2.30.1 - 2019-06-20\n* [#589](https://github.com/stripe/stripe-python/pull/589) Fix support for `CustomerBalanceTransaction`\n\n## 2.30.0 - 2019-06-17\n* [#564](https://github.com/stripe/stripe-python/pull/564) Add support for `CustomerBalanceTransaction` resource and APIs\n\n## 2.29.4 - 2019-06-03\n* [#583](https://github.com/stripe/stripe-python/pull/583) Remove Poetry and reinstate `setup.py`\n\n## 2.29.3 - 2019-05-31\nVersion 2.29.2 was non-functional due to a bugged `version.py` file. This release is identical to 2.29.2 save for the version number.\n\n## 2.29.2 - 2019-05-31\n* [#561](https://github.com/stripe/stripe-python/pull/561) Replace pipenv with poetry\n\n## 2.29.1 - 2019-05-31\n* [#578](https://github.com/stripe/stripe-python/pull/578) Verify signatures before deserializing events\n\n## 2.29.0 - 2019-05-23\n* [#575](https://github.com/stripe/stripe-python/pull/575) Add support for `radar.early_fraud_warning` resource\n\n## 2.28.2 - 2019-05-23\n* [#574](https://github.com/stripe/stripe-python/pull/574) Fix a few more code quality issues\n\n## 2.28.1 - 2019-05-20\n* [#572](https://github.com/stripe/stripe-python/pull/572) Fix a few code quality issues\n\n## 2.28.0 - 2019-05-14\n* [#566](https://github.com/stripe/stripe-python/pull/566) Add support for the `Capability` resource and APIs\n\n## 2.27.0 - 2019-04-24\n* [#554](https://github.com/stripe/stripe-python/pull/554) Add support for the `TaxRate` resource and APIs\n\n## 2.26.0 - 2019-04-22\n* [#555](https://github.com/stripe/stripe-python/pull/555) Add support for the `TaxId` resource and APIs\n\n## 2.25.0 - 2019-04-18\n* [#551](https://github.com/stripe/stripe-python/pull/551) Add support for the `CreditNote` resource and APIs\n\n## 2.24.1 - 2019-04-08\n* [#550](https://github.com/stripe/stripe-python/pull/550) Fix encoding of nested parameters in multipart requests\n\n## 2.24.0 - 2019-04-03\n* [#543](https://github.com/stripe/stripe-python/pull/543) Add `delete` class method on deletable API resources\n* [#547](https://github.com/stripe/stripe-python/pull/547) Add class methods for all custom API requests (e.g. `Charge.capture`)\n\n## 2.23.0 - 2019-03-18\n* [#537](https://github.com/stripe/stripe-python/pull/537) Add support for the `PaymentMethod` resource and APIs\n* [#540](https://github.com/stripe/stripe-python/pull/540) Add support for retrieving a Checkout `Session`\n* [#542](https://github.com/stripe/stripe-python/pull/542) Add support for deleting a Terminal `Location` and `Reader`\n\n## 2.22.0 - 2019-03-14\n* [#541](https://github.com/stripe/stripe-python/pull/541) Add `stripe.util.convert_to_dict` method for converting `StripeObject` instances to regular `dict`s\n\n## 2.21.0 - 2019-02-12\n* [#532](https://github.com/stripe/stripe-python/pull/532) Add support for subscription schedules\n\n## 2.20.3 - 2019-01-30\n* [#530](https://github.com/stripe/stripe-python/pull/530) Fix client telemetry implementation\n\n## 2.20.2 - 2019-01-30\n* [#534](https://github.com/stripe/stripe-python/pull/534) Fix session initialization for multi-threaded environments\n\n## 2.20.1 - 2019-01-30\n* [#531](https://github.com/stripe/stripe-python/pull/531) Make `RequestsClient` thread-safe\n\n## 2.20.0 - 2019-01-29\n* [#526](https://github.com/stripe/stripe-python/pull/526) Reuse the default HTTP client by default\n\n## 2.19.0 - 2019-01-23\n* [#524](https://github.com/stripe/stripe-python/pull/524) Rename `CheckoutSession` to `Session` and move it under the `checkout` namespace. This is a breaking change, but we've reached out to affected merchants and all new merchants would use the new approach.\n\n## 2.18.1 - 2019-01-21\n* [#525](https://github.com/stripe/stripe-python/pull/525) Properly serialize `individual` on `Account` objects\n\n## 2.18.0 - 2019-01-15\n* [#518](https://github.com/stripe/stripe-python/pull/518) Add configurable telemetry to gather information on client-side request latency\n\n## 2.17.0 - 2018-12-21\n* [#510](https://github.com/stripe/stripe-python/pull/510) Add support for Checkout sessions\n\n## 2.16.0 - 2018-12-10\n* [#507](https://github.com/stripe/stripe-python/pull/507) Add support for account links\n\n## 2.15.0 - 2018-11-30\n* [#503](https://github.com/stripe/stripe-python/pull/503) Add support for providing custom CA certificate bundle\n\n## 2.14.0 - 2018-11-28\n* [#500](https://github.com/stripe/stripe-python/pull/500) Add support for `Review` for Radar\n\n## 2.13.0 - 2018-11-27\n* [#489](https://github.com/stripe/stripe-python/pull/489) Add support for `ValueList` and `ValueListItem` for Radar\n\n## 2.12.1 - 2018-11-22\n* [#495](https://github.com/stripe/stripe-python/pull/495) Make `StripeResponse` a new-style class\n\n## 2.12.0 - 2018-11-08\n* [#483](https://github.com/stripe/stripe-python/pull/483) Add new API endpoints for the `Invoice` resource.\n\n## 2.11.1 - 2018-11-08\n* [#491](https://github.com/stripe/stripe-python/pull/491) Bump minimum requests version to 2.20.0 (for [CVE-2018-18074](https://nvd.nist.gov/vuln/detail/CVE-2018-18074))\n\n## 2.11.0 - 2018-10-30\n* [#482](https://github.com/stripe/stripe-python/pull/482) Add support for the `Person` resource\n* [#484](https://github.com/stripe/stripe-python/pull/484) Add support for the `WebhookEndpoint` resource\n\n## 2.10.1 - 2018-10-02\n* [#481](https://github.com/stripe/stripe-python/pull/481) Correct behavior of `stripe.max_network_retries` if it's reset after initial use\n\n## 2.10.0 - 2018-09-24\n* [#478](https://github.com/stripe/stripe-python/pull/478) Add support for Stripe Terminal\n\n## 2.9.0 - 2018-09-24\n* [#477](https://github.com/stripe/stripe-python/pull/477) Rename `FileUpload` to `File`\n\n## 2.8.1 - 2018-09-13\n* [#474](https://github.com/stripe/stripe-python/pull/474) Don't URL-encode square brackets\n* [#473](https://github.com/stripe/stripe-python/pull/473) Integer-index encode all arrays\n\n## 2.8.0 - 2018-09-10\n* [#470](https://github.com/stripe/stripe-python/pull/470) Add support for automatic network retries\n\n## 2.7.0 - 2018-09-05\n* [#469](https://github.com/stripe/stripe-python/pull/469) Add support for reporting resources\n\n## 2.6.0 - 2018-08-23\n* [#467](https://github.com/stripe/stripe-python/pull/467) Add support for usage record summaries\n\n## 2.5.0 - 2018-08-16\n* [#463](https://github.com/stripe/stripe-python/pull/463) Remove unsupported Bitcoin endpoints (this is technically a breaking change, but we're releasing as a minor version because none of these APIs were usable anyway)\n\n## 2.4.0 - 2018-08-03\n* [#460](https://github.com/stripe/stripe-python/pull/460) Add cancel support for topups\n* [#461](https://github.com/stripe/stripe-python/pull/461) Add support for file links\n\n## 2.3.0 - 2018-07-27\n* [#456](https://github.com/stripe/stripe-python/pull/456) Add support for Sigma scheduled query run objects\n\n## 2.2.0 - 2018-07-26\n* [#455](https://github.com/stripe/stripe-python/pull/455) Add support for Stripe Issuing\n\n## 2.1.0 - 2018-07-25\n* [#452](https://github.com/stripe/stripe-python/pull/452) Add `InvoiceLineItem` class\n\n## 2.0.3 - 2018-07-19\n* [#450](https://github.com/stripe/stripe-python/pull/450) Internal improvements to `ApiResource.class_url`\n\n## 2.0.2 - 2018-07-18\n* [#448](https://github.com/stripe/stripe-python/pull/448) Avoid duplicate dependency on `requests` with Python 2.7\n\n## 2.0.1 - 2018-07-10\n* [#445](https://github.com/stripe/stripe-python/pull/445) Fix `setup.py`\n\n## 2.0.0 - 2018-07-10\nMajor version release. List of backwards incompatible changes to watch out for:\n* The minimum Python versions are now 2.7 / 3.4. If you're using Python 2.6 or 3.3, consider upgrading to a more recent version.\n* Stripe exception classes should now be accessed via `stripe.error` rather than just `stripe`\n* Some older deprecated methods have been removed\n* Trying to detach an unattached source will now raise a `stripe.error.InvalidRequestError` exception instead of a `NotImplementedError` exception\n\nFor more information, check out the [migration guide for v2](https://github.com/stripe/stripe-python/wiki/Migration-guide-for-v2)\n\nPull requests included in this release:\n* [#385](https://github.com/stripe/stripe-python/pull/385) Drop support for Python 2.6 and 3.3\n* [#384](https://github.com/stripe/stripe-python/pull/384) Use py.test for tests\n* [#399](https://github.com/stripe/stripe-python/pull/399) Remove deprecated code\n* [#402](https://github.com/stripe/stripe-python/pull/402) Remove `util.json` and use `json` module directly everywhere\n* [#403](https://github.com/stripe/stripe-python/pull/403) Update setup.py and test flow\n* [#410](https://github.com/stripe/stripe-python/pull/410) Use pipenv\n* [#415](https://github.com/stripe/stripe-python/pull/415) Change exception when detaching unattached sources from `NotImplementedError` to `stripe.error.InvalidRequestError`\n\n## 1.84.2 - 2018-07-06\n* [#441](https://github.com/stripe/stripe-python/pull/441) Better (hopefully) fix for serialization of empty `ListObject`s\n\n## 1.84.1 - 2018-07-04\n* [#439](https://github.com/stripe/stripe-python/pull/439) Fix serialization of empty `ListObject`s\n\n## 1.84.0 - 2018-06-29\n* [#436](https://github.com/stripe/stripe-python/pull/436) Add support for payment intents\n\n## 1.83.0 - 2018-06-28\n* [#437](https://github.com/stripe/stripe-python/pull/437) Add support for `partner_id` in `stripe.set_app_info()`\n\n## 1.82.2 - 2018-06-19\n* [#365](https://github.com/stripe/stripe-python/pull/365) Add `__repr__` methods to `StripeError` exception classes\n\n## 1.82.1 - 2018-05-14\n* [#430](https://github.com/stripe/stripe-python/pull/430) Handle the case where request ID is `None` when formatting errors\n\n## 1.82.0 - 2018-05-13\n* [#422](https://github.com/stripe/stripe-python/pull/422) Add `user_mesage` to `StripeError` for a way in Python 3 to avoid the \"Request req_...:\" string normally appended to error messages\n\n## 1.81.0 - 2018-05-10\n* [#425](https://github.com/stripe/stripe-python/pull/425) Add support for issuer fraud records\n\n## 1.80.0 - 2018-04-24\n* [#421](https://github.com/stripe/stripe-python/pull/421) Add support for flexible billing and usage records\n\n## 1.79.1 - 2018-02-27\n* [#401](https://github.com/stripe/stripe-python/pull/401) Drop conditional dependencies that incorrectly led to an added `simplejson` dependency in Python 3+ after switching to universal wheel\n\n## 1.79.0 - 2018-02-23\n* [#397](https://github.com/stripe/stripe-python/pull/397) Build universal wheels by default\n* [#398](https://github.com/stripe/stripe-python/pull/398) Add support for `code` attribute on all Stripe exceptions\n\n## 1.78.0 - 2018-02-21\n* [#396](https://github.com/stripe/stripe-python/pull/396) Add support for topups\n\n## 1.77.2 - 2018-02-08\n* [#394](https://github.com/stripe/stripe-python/pull/394) Make `last_response` available after calling `save()`\n\n## 1.77.1 - 2018-01-12\n* [#389](https://github.com/stripe/stripe-python/pull/389) Register unsaved attributes on assignment regardless of new value\n\n## 1.77.0 - 2017-12-21\n* [#371](https://github.com/stripe/stripe-python/pull/371) Add accessor `last_response` on `StripeObject` for accessing request ID and other metadata\n\n## 1.76.0 - 2017-12-21\n* [#382](https://github.com/stripe/stripe-python/pull/382) Add new `IdempotencyError` type\n\n## 1.75.3 - 2017-12-05\n* [#378](https://github.com/stripe/stripe-python/pull/378) Log encoded version of parameters instead of raw POST data\n\n## 1.75.2 - 2017-12-05\n* (Accidental no-op release. See 1.75.3.)\n\n## 1.75.1 - 2017-11-29\n* [#372](https://github.com/stripe/stripe-python/pull/372) Add only changed values to `_unsaved_values` in `StripeObject`\n* [#375](https://github.com/stripe/stripe-python/pull/375) Use a custom JSON encoder to handle `datetime` objects when serializing `StripeObject`s\n\n## 1.75.0 - 2017-11-08\n* [#369](https://github.com/stripe/stripe-python/pull/369) Make custom actions on various resources (e.g. `Account.reject`) more consistent with other APIs\n\n## 1.74.0 - 2017-11-07\n* [#368](https://github.com/stripe/stripe-python/pull/368) Remove API that allowed the creation of new disputes (this was an erroneous addition; it never worked because the API would not allow it)\n\n## 1.73.0 - 2017-11-02\n* [#364](https://github.com/stripe/stripe-python/pull/364) Switch to vendored version of the `six` package for compatibility between Python 2 and 3\n\n## 1.72.0 - 2017-10-31\n* [#361](https://github.com/stripe/stripe-python/pull/361) Support for exchange rates APIs\n\n## 1.71.2 - 2017-10-31\n* [#362](https://github.com/stripe/stripe-python/pull/362) Fix balance transaction and invoice item conversion into `StripeObject`s\n\n## 1.71.1 - 2017-10-27\n* [#360](https://github.com/stripe/stripe-python/pull/360) Fix `BytesWarning` being issued on logging in Python 3\n\n## 1.71.0 - 2017-10-26\n* [#359](https://github.com/stripe/stripe-python/pull/359) Support for listing source transactions\n\n## 1.70.0 - 2017-10-23\n* [#356](https://github.com/stripe/stripe-python/pull/356) Support uploading files with `StringIO` in addition to a file on disk\n\n## 1.69.0 - 2017-10-20\n* [#351](https://github.com/stripe/stripe-python/pull/351) Break resource.py module into separate ones for each type of resource\n    * Classes are still into resource.py for backwards compatibility\n* [#353](https://github.com/stripe/stripe-python/pull/353) Fix unpickling `StripeObject` in Python 3\n\n## 1.68.0 - 2017-10-19\n* [#350](https://github.com/stripe/stripe-python/pull/350) Add static methods to manipulate resources from parent\n    * `Account` gains methods for external accounts and login links (e.g. `.create_account`, `create_login_link`)\n    * `ApplicationFee` gains methods for refunds\n    * `Customer` gains methods for sources\n    * `Transfer` gains methods for reversals\n\n## 1.67.0 - 2017-10-11\n* [#349](https://github.com/stripe/stripe-python/pull/349) Rename source `delete` to `detach` (and deprecate the former)\n\n## 1.66.0 - 2017-09-29\n* Support length reads on list objects\n\n## 1.65.1 - 2017-09-21\n* Handle `bytearray` and `bytes` (in addition to string) in `Webhook.construct_event`\n\n## 1.65.0 - 2017-09-07\n* Add support for passing a `stripe_version` argument to all API requests\n\n## 1.64.0 - 2017-09-01\n* Error when an invalid type (i.e. non-string) passed as an API method argument\n\n## 1.63.1 - 2017-09-01\n* Fix serialization of `items` on Relay order creation and order return\n\n## 1.63.0 - 2017-08-29\n* Add support for `InvalidClientError` OAuth error\n\n## 1.62.1 - 2017-08-07\n* Change serialization of subscription items on update to encoded as an integer-indexed map\n\n## 1.62.0 - 2017-06-27\n* `pay` on invoice can now take parameter\n\n## 1.61.0 - 2017-06-24\n* Expose `code` on `InvalidRequestError`\n\n## 1.60.0 - 2017-06-19\n* Add support for ephemeral keys\n\n## 1.59.0 - 2017-06-07\n* Refactor OAuth implementation to have dedicated classes for errors\n\n## 1.58.0 - 2017-06-02\n* Re-use connections with Pycurl\n\n## 1.57.1 - 2017-05-31\n* Fix the pycurl client\n\n## 1.57.0 - 2017-05-26\n* Add `api_key` parameter to webhook's `construct_event`\n\n## 1.56.0 - 2017-05-25\n* Add support for account login links\n\n## 1.55.2 - 2017-05-11\n* Remove Requests constraint from 1.55.1 now that they've patched (as of 2.14.2)\n\n## 1.55.1 - 2017-05-10\n* Constrain Requests to < 2.13.0 if on setuptools < 18.0.0\n\n## 1.55.0 - 2017-04-28\n* Support for checking webhook signatures\n\n## 1.54.0 - 2017-04-28\n* Add `stripe.set_app_info` for use by plugin creators\n\n## 1.53.0 - 2017-04-06\n* Add support for payouts and recipient transfers\n\n## 1.52.0 - 2017-04-06\n* No-op release: peg test suite to a specific API version\n\n## 1.51.0 - 2017-03-20\n* Support OAuth operations (getting a token and deauthorizing)\n\n## 1.50.0 - 2017-03-17\n* Support for detaching sources from customers\n\n## 1.49.0 - 2017-03-13\n* Accept `session` argument for `RequestsClient`\n\n## 1.48.1 - 2017-02-21\n* Fix encoding of parameters when fetching upcoming invoices\n\n## 1.48.0 - 2017-02-21\n* Add `Account.modify_external_account` to modify an account in one API call\n* Add `Customer.modify_source` to modify a source in one API call\n\n## 1.47.0 - 2017-01-18\n* Allow sources to be updated\n\n## 1.46.0 - 2017-01-06\n* Use internal session for Requests for connection pooling\n\n## 1.45.0 - 2017-01-06\n* request logging goes to stderr now\n* Logs properly handle unicode\n* Format is now the same between logging logs, and console logs\n\n## 1.44.0 - 2016-12-16\n* Add request logging and some mechanisms to enable it when debugging\n\n## 1.43.0 - 2016-11-30\n* Add support for verifying sources\n\n## 1.42.0 - 2016-11-21\n* Add retrieve method for 3-D Secure resources\n\n## 1.41.1 - 2016-10-26\n* Implement __copy__ and __deepcopy__ on StripeObject to fix these operations\n\n## 1.41.0 - 2016-10-12\n* Add `Source` model for generic payment sources\n\n## 1.40.1 - 2016-10-10\n* Return subscription model instance on subscription create/modify\n\n## 1.40.0 - 2016-10-07\n* Add configurable timeout for Requests HTTP library\n\n## 1.39.0 - 2016-10-06\n* Add support for subscription items\n* Add proxy support for pycurl, Requests, urlfetch, and urllib2 libraries\n\n## 1.38.0 - 2016-09-15\n* Add support for Apple Pay domains\n\n## 1.37.0 - 2016-07-12\n* Add `ThreeDSecure` model for 3-D secure payments\n\n## 1.36.0 - 2016-06-29\n* Add `update` class method to resources that can be updated\n\n## 1.35.0 - 2016-05-24\n* Add support for returning Relay orders\n\n## 1.34.0 - 2016-05-20\n* Add support for Alipay accounts\n\n## 1.33.0 - 2016-05-04\n* Add support for the new `/v1/subscriptions` endpoint\n  * `stripe.Subscription.retrieve`\n  * `stripe.Subscription.update`\n  * `stripe.Subscription.create`\n  * `stripe.Subscription.list`\n\n## 1.32.2 - 2016-04-12\n* Fix bug where file uploads could not be properly listed\n\n## 1.32.1 - 2016-04-11\n* Fix bug where request parameters were not passed between pages with `auto_paging_iter`\n\n## 1.32.0 - 2016-03-31\n* Update CA cert bundle for compatibility with OpenSSL versions below 1.0.1\n\n## 1.31.1 - 2016-03-24\n* Fix uploading of binary files in Python 3\n\n## 1.31.0 - 2016-03-15\n* Add `reject` on `Account` to support the new API feature\n\n## 1.30.0 - 2016-02-27\n* Add `CountrySpec` model for looking up country payment information\n\n## 1.29.1 - 2016-02-01\n* Update bundled CA certs\n\n## 1.29.0 - 2016-01-26\n* Add support for deleting Relay products and SKUs\n\n## 1.28.0 - 2016-01-04\n* Add an automatic paginating iterator to lists available via `auto_paging_iter`\n* List objects are now iterable\n* Error messages set to `None` are now handled properly\n* The `all` method on list objects has been deprecated in favor of `list`\n* Calls to `instance_url` are now side effect free\n\n## 1.27.1 - 2015-10-02\n* Official Python 3.4 & 3.5 compatibility\n* Add configurable HTTP client\n* Add ability to delete attributes\n\n## 1.27.0 - 2015-09-14\n* Products, SKUs, Orders resources\n\n## 1.26.0 - 2015-09-11\n* Add support for new 429 rate limit response\n\n## 1.25.0 - 2015-08-17\n* Added refund listing, creation and retrieval\n\n## 1.24.1 - 2015-08-05\n* Fix error handling for Python 2.6\n\n## 1.24.0 - 2015-08-03\n* Managed accounts can now be deleted\n* Added dispute listing and retrieval\n\n## 1.23.0 - 2015-07-06\n* Include response headers in exceptions\n\n## 1.22.3 - 2015-06-04\n* Fix saving `additional_owners` on managed accounts\n\n## 1.22.2 - 2015-04-08\n* Fix saving manage accounts\n\n## 1.22.1 - 2015-03-30\n* Pass `stripe_account` to Balance.retrieve\n\n## 1.22.0 - 2015-03-22\n* Added methods for updating and saving arrays of objects\n\n## 1.21.0 - 2015-02-19\n* Added Bitcoin Receiver update and delete methods\n\n## 1.20.2 - 2015-01-21\n* Remove support for top-level bitcoin transactions\n\n## 1.20.1 - 2015-01-07\n* Adding bitcoin receiver and transaction objects\n\n## 1.20.0 - 2014-12-23\n* Adding support for file uploads resource\n\n## 1.19.1 - 2014-10-23\n* Remove redundant manual SSL blacklist preflight check\n\n## 1.19.0 - 2014-07-26\n* Application Fee refunds now a list instead of array\n\n## 1.18.0 - 2014-06-17\n* Add metadata for disputes and refunds\n\n## 1.17.0 - 2014-06-10\n* Remove official support for Python 2.5\n\n## 1.16.0 - 2014-05-28\n* Support for canceling transfers\n\n## 1.15.1 - 2014-05-21\n* Support cards for recipients.\n\n## 1.14.1 - 2014-05-19\n* Disable loading the ssl module on the Google App Engine dev server.\n\n## 1.14.0 - 2014-04-09\n* Use DER encoded certificate for checksumming\n* Don't rely on SNI support in integration tests\n\n## 1.13.0 - 2014-04-09\n* Update bundled ca-certificates\n* Add certificate blacklist for CVE-2014-0160 mitigation\n\n## 1.12.2 - 2014-03-13\n* Fix syntax errors in setup.py metadata\n\n## 1.12.1 - 2014-03-13\n* Added license and other metadata in setup.py\n* Fix `__repr__` in Python 3\n* Support pickling of responses\n\n## 1.12.0 - 2014-01-29\n* Added support for multiple subscriptions per customer\n\n## 1.11.0 - 2013-12-05\n* Added extensive unit tests\n* Extended functional test coverage\n* Refactored code into modules and out of stripe/__init__.py\n* Abstracted http library selection and use from the `APIRequestor` into `stripe.http_client`\n* Refactored `StripeObject` to inherit from `dict` and avoid direct access of `__dict__`.\n* PEP8ified the codebase and enforced with a test.\n* Proper encoding of timezone aware datetimes\n\n### Backwards incompatible changes\n* The `to_dict` and `values` methods on resources no longer recursively convert objects to plain `dict`s.  All resources now inherit from `dict` but are functionally different in that you cannot set a value to an empty string and cannot delete items.\n* The `previous_metadata` attribute on resources is now protected.\n* Timezone aware `datetime` objects passed to the API will now be encoded in a way that does not depend on the local system time.  If you are passing timezone-aware datetimes to our API and your server time is not already in UTC, this will change the value passed to our API.\n\n## 1.10.8 - 2013-12-02\n* Add stripe.ApplicationFee resource\n\n## 1.9.8 - 2013-10-17\n* Removed incorrect test.\n\n## 1.9.7 - 2013-10-10\n* Add support for metadata.\n\n## 1.9.6 - 2013-10-08\n* Fix issue with support for closing disputes.\n\n## 1.9.5 - 2013-09-18\n* Add support for closing disputes.\n\n## 1.9.4 - 2013-08-13\n* Add stripe.Balance and stripe.BalanceTransaction resources\n\n## 1.9.3 - 2013-08-12\n* Add support for unsetting attributes by setting to None.\n  Setting properties to a blank string is now an error.\n\n## 1.9.2 - 2013-07-12\n* Add support for multiple cards API\n\n## 1.9.1 - 2013-05-03\n* Remove 'id' from the list of permanent attributes\n\n## 1.9.0 - 2013-04-25\n* Support for Python 3 (github issue #32)\n\n## 1.8.0 - 2013-04-11\n* Allow transfers to be creatable\n* Add new stripe.Recipient resource\n\n## 1.7.10 - 2013-02-21\n* Add 'id' to the list of permanent attributes\n\n## 1.7.9 - 2013-02-01\n* Add support for passing options when retrieving Stripe objects; e.g., stripe.Charge.retrieve(\"foo\", params={\"expand\":[\"customer\"]})\n\n## 1.7.8 - 2013-01-15\n* Add support for setting a Stripe API version override\n\n## 1.7.7 - 2012-12-18\n* Update requests version check to work with requests 1.x.x (github issue #24)\n\n## 1.7.6 - 2012-11-08\n* Add support for updating charge disputes\n\n## 1.7.5 - 2012-10-30\n* Add support for creating invoices\n* Add support for new invoice lines return format\n* Add support for new List objects\n\n## 1.7.4 - 2012-08-31\n* Add update and pay methods for Invoice resource\n\n## 1.7.3 - 2012-08-15\n* Add new stripe.Account resource\n* Remove uncaptured_charge tests (this has been deprecated from the API).\n\n## 1.7.2 - 2012-05-31\n* Fix a bug that would cause nested objects to be mis-rendered in __str__ and __repr__ methods (github issues #17, #18)\n\n## 1.7.1 - 2012-05-21\n* Prefer App Engine's urlfetch over requests, as that's the only thing that will work in App Engine's environment. Previously, if requests was available in the App Engine environment, we would attempt to use it.\n\n## 1.7.0 - 2012-05-17\n* Add new delete_discount method to stripe.Customer\n* Add new stripe.Transfer resource\n* Switch from using HTTP Basic auth to Bearer auth. (Note: Stripe will support Basic auth for the indefinite future, but recommends Bearer auth when possible going forward)\n* Numerous test suite improvements\n\n## 1.6.1 - 2011-09-14\n* Parameters with value None are no longer included in API requests\n";
+
+// packages/core/src/review.ts
 var import_node_fs3 = require("node:fs");
-var import_node_path4 = require("node:path");
 
 // packages/core/src/safety.ts
 var import_node_crypto = require("node:crypto");
@@ -268898,7 +268901,7 @@ function validateEdits(root, raw, allowed, baseline2 = false) {
   for (const e of edits) {
     if (seen.has(e.path)) throw new Error("Duplicate edit");
     seen.add(e.path);
-    if (!allowed.includes(e.path) || (e.path !== "changelume.lock.json" || !baseline2) && (!/\.tsx?$/.test(e.path) || e.path.startsWith(".") || e.path.split("/").some((p) => ["node_modules", ".github", ".git"].includes(p)) || /(^|\/)(vitest|vite|webpack|eslint|next)\.config\./.test(e.path))) throw new Error("Edit outside permitted source paths");
+    if (!allowed.includes(e.path) || (e.path !== "changelume.lock.json" || !baseline2) && (!/\.(tsx?|py)$/.test(e.path) || e.path.startsWith(".") || e.path.split("/").some((p) => ["node_modules", ".github", ".git"].includes(p)) || /(^|\/)(vitest|vite|webpack|eslint|next)\.config\./.test(e.path))) throw new Error("Edit outside permitted source paths");
     const file2 = contained(root, e.path);
     const before = (0, import_node_fs2.existsSync)(file2) ? (0, import_node_fs2.readFileSync)(file2) : Buffer.alloc(0);
     if (before.length > 2e5 || hash2(before) !== e.beforeHash) throw new Error("Edit does not match expected revision");
@@ -268907,6 +268910,32 @@ function validateEdits(root, raw, allowed, baseline2 = false) {
   }
   return edits;
 }
+
+// packages/core/src/review.ts
+var schema = external_exports.object({ schemaVersion: external_exports.literal(1), acknowledgements: external_exports.array(external_exports.object({ id: external_exports.string(), evidenceHash: external_exports.string(), note: external_exports.string().min(1).max(1e3), reviewedAt: external_exports.string() })) }).strict();
+function reviews(root) {
+  const file2 = contained(root, "changelume.review.json");
+  try {
+    return (0, import_node_fs3.existsSync)(file2) ? schema.parse(JSON.parse((0, import_node_fs3.readFileSync)(file2, "utf8"))) : { schemaVersion: 1, acknowledgements: [] };
+  } catch {
+    throw new Error("Invalid changelume.review.json; restore a valid schema-1 review file before continuing");
+  }
+}
+function reviewQueue(root, p) {
+  const state2 = reviews(root);
+  return [
+    ...p.findings.filter((f) => f.outcome !== "no detected impact within supported analysis").map((f) => ({ id: `finding-${hash2(JSON.stringify(f)).slice(0, 16)}`, category: f.outcome === "unsupported analysis" ? "unsupported" : f.changeId === "stripe-node-12-api-default" ? "manual review" : "supported", summary: f.explanation, location: f.location })),
+    ...p.unclassified.map((summary) => ({ id: `unclassified-${hash2(summary).slice(0, 16)}`, category: "manual review", summary, location: void 0 }))
+  ].map((item) => {
+    const evidenceHash = hash2(JSON.stringify({ evidence: p.evidence.map((e) => ({ url: e.url, sha256: e.sha256 })), inventory: p.inventory, files: p.edits.map((e) => ({ path: e.path, beforeHash: e.beforeHash })), item }));
+    return { ...item, evidenceHash, sources: p.evidence.map((e) => ({ url: e.url, sha256: e.sha256 })), sdkVersion: p.inventory.resolved, acknowledged: state2.acknowledgements.some((a) => a.id === item.id && a.evidenceHash === evidenceHash) };
+  });
+}
+
+// packages/core/src/languages/typescript/analyze.ts
+var import_ts_morph2 = __toESM(require_ts_morph(), 1);
+var import_node_fs4 = require("node:fs");
+var import_node_path4 = require("node:path");
 
 // packages/core/src/languages/typescript/links.ts
 var import_ts_morph = __toESM(require_ts_morph(), 1);
@@ -268986,12 +269015,12 @@ var lockSchema = external_exports.object({ lockfileVersion: external_exports.num
 function sourceFiles(root, config2) {
   const paths = [];
   function walk(dir) {
-    for (const entry of (0, import_node_fs3.readdirSync)(dir, { withFileTypes: true })) {
+    for (const entry of (0, import_node_fs4.readdirSync)(dir, { withFileTypes: true })) {
       if (["node_modules", ".git", ".changelume"].includes(entry.name) || entry.isSymbolicLink()) continue;
       const full = (0, import_node_path4.resolve)(dir, entry.name), rel = (0, import_node_path4.relative)(root, full).replaceAll("\\", "/");
       if (entry.isDirectory()) walk(full);
       else if (/\.tsx?$/.test(rel) && config2.include.some((g) => (0, import_node_path4.matchesGlob)(rel, g)) && !config2.exclude.some((g) => (0, import_node_path4.matchesGlob)(rel, g))) {
-        if ((0, import_node_fs3.lstatSync)(full).size > 2e5) throw new Error("Source file size limit exceeded: " + rel);
+        if ((0, import_node_fs4.lstatSync)(full).size > 2e5) throw new Error("Source file size limit exceeded: " + rel);
         paths.push(full);
         if (paths.length > 5e3) throw new Error("Source file count limit exceeded");
       }
@@ -269007,12 +269036,12 @@ function analyze(root, config2) {
     return { inventory, edits: [] };
   }
   inventory.moduleMode = "unknown";
-  if ((0, import_node_fs3.existsSync)((0, import_node_path4.resolve)(root, "package.json"))) {
-    const p = manifest.parse(JSON.parse((0, import_node_fs3.readFileSync)((0, import_node_path4.resolve)(root, "package.json"), "utf8")));
+  if ((0, import_node_fs4.existsSync)((0, import_node_path4.resolve)(root, "package.json"))) {
+    const p = manifest.parse(JSON.parse((0, import_node_fs4.readFileSync)((0, import_node_path4.resolve)(root, "package.json"), "utf8")));
     inventory.declared = p.dependencies?.stripe ?? p.devDependencies?.stripe;
     inventory.moduleMode = p.type === "module" ? "esm" : p.type === "commonjs" ? "commonjs" : "unknown";
   }
-  if ((0, import_node_fs3.existsSync)((0, import_node_path4.resolve)(root, "tsconfig.json"))) {
+  if ((0, import_node_fs4.existsSync)((0, import_node_path4.resolve)(root, "tsconfig.json"))) {
     const result = import_ts_morph2.ts.readConfigFile((0, import_node_path4.resolve)(root, "tsconfig.json"), import_ts_morph2.ts.sys.readFile);
     if (result.error || result.config.extends) inventory.moduleMode = "unknown";
     else {
@@ -269022,8 +269051,8 @@ function analyze(root, config2) {
     }
   }
   inventory.limitations.push("Constructor aliases are removed in Stripe 12 ESM; CommonJS retains them. Module-mode inference uses root package/tsconfig only; nested settings and bundler rewrites require manual review.");
-  if ((0, import_node_fs3.existsSync)((0, import_node_path4.resolve)(root, "package-lock.json"))) {
-    const lock = lockSchema.parse(JSON.parse((0, import_node_fs3.readFileSync)((0, import_node_path4.resolve)(root, "package-lock.json"), "utf8")));
+  if ((0, import_node_fs4.existsSync)((0, import_node_path4.resolve)(root, "package-lock.json"))) {
+    const lock = lockSchema.parse(JSON.parse((0, import_node_fs4.readFileSync)((0, import_node_path4.resolve)(root, "package-lock.json"), "utf8")));
     inventory.resolved = lock.packages?.["node_modules/stripe"]?.version ?? lock.dependencies?.stripe?.version;
     inventory.versionOrigin = "package-lock.json (root installation)";
     if (Object.keys(lock.packages ?? {}).some((k) => k.endsWith("/node_modules/stripe") && k !== "node_modules/stripe")) inventory.limitations.push("Nested Stripe installations are unsupported; root version cannot establish their applicability");
@@ -269032,7 +269061,7 @@ function analyze(root, config2) {
     inventory.resolved = config2.vendors.stripe.sdkVersion;
     inventory.versionOrigin = "explicit configuration override";
   }
-  if (!(0, import_node_fs3.existsSync)((0, import_node_path4.resolve)(root, "node_modules/stripe"))) inventory.limitations.push("Stripe dependencies absent: lexical symbol binding available, SDK type checking unavailable; no dependencies installed");
+  if (!(0, import_node_fs4.existsSync)((0, import_node_path4.resolve)(root, "node_modules/stripe"))) inventory.limitations.push("Stripe dependencies absent: lexical symbol binding available, SDK type checking unavailable; no dependencies installed");
   const project = new import_ts_morph2.Project({ skipAddingFilesFromTsConfig: true, skipFileDependencyResolution: true, compilerOptions: { target: import_ts_morph2.ts.ScriptTarget.ESNext, jsx: import_ts_morph2.ts.JsxEmit.Preserve, noResolve: true } });
   const sources = sourceFiles(root, config2).map((file2) => project.addSourceFileAtPath(file2));
   const projectUnsafe = sources.some(unsafeConstructorReferences);
@@ -269089,6 +269118,27 @@ function analyze(root, config2) {
         }
       }
     }
+    for (const statement of source.getVariableStatements()) {
+      const declarations = statement.getDeclarations();
+      if (declarations.length !== 1 || statement.getDeclarationKind() !== "const") continue;
+      const declaration = declarations[0], init = declaration.getInitializer();
+      if (!init || !import_ts_morph2.Node.isNewExpression(init) || !isRoot(init.getExpression()) || init.getArguments().length !== 1) continue;
+      const next = statement.getNextSibling();
+      if (!next || !import_ts_morph2.Node.isExpressionStatement(next)) continue;
+      const call = next.getExpression();
+      if (!import_ts_morph2.Node.isCallExpression(call)) continue;
+      const expr = call.getExpression();
+      if (!import_ts_morph2.Node.isPropertyAccessExpression(expr) || expr.getExpression().getSymbol() !== declaration.getNameNode().getSymbol()) continue;
+      const options = { setTimeout: "timeout", setMaxNetworkRetries: "maxNetworkRetries", setTelemetryEnabled: "telemetry" };
+      const option = options[expr.getName()], value = call.getArguments()[0];
+      if (!option || call.getArguments().length !== 1 || !value || !(import_ts_morph2.Node.isNumericLiteral(value) || value.getKind() === import_ts_morph2.SyntaxKind.TrueKeyword || value.getKind() === import_ts_morph2.SyntaxKind.FalseKeyword)) continue;
+      const refs = source.getDescendantsOfKind(import_ts_morph2.SyntaxKind.Identifier).filter((id) => id.getSymbol() === declaration.getNameNode().getSymbol());
+      const safe = refs.every((id) => id === declaration.getNameNode() || import_ts_morph2.Node.isPropertyAccessExpression(id.getParent()) && id.getParent().getChildAtIndex(0) === id);
+      if (!safe || projectUnsafe || ![10, 11, 12].includes(Number(inventory.resolved?.split(".")[0])) || inventory.limitations.some((l) => l.startsWith("Nested"))) continue;
+      if (option === "telemetry" ? !["true", "false"].includes(value.getText()) : !import_ts_morph2.Node.isNumericLiteral(value)) continue;
+      replacements.push({ start: init.getEnd() - 1, end: init.getEnd() - 1, text: ", {" + option + ": " + value.getText() + "}" }, { start: next.getStart(), end: next.getEnd(), text: "" });
+      add(call, "field", expr.getText(), { changeId: "stripe-node-11-setter-" + option, editPlanned: true, replacement: option });
+    }
     for (const call of source.getDescendantsOfKind(import_ts_morph2.SyntaxKind.CallExpression)) {
       let base = call.getExpression();
       const segments = [];
@@ -269098,6 +269148,7 @@ function analyze(root, config2) {
       }
       if (import_ts_morph2.Node.isIdentifier(base) && clients.has(base.getSymbol())) {
         const operation = segments.join(".");
+        if (["setTimeout", "setMaxNetworkRetries", "setTelemetryEnabled"].includes(operation) && !inventory.usages.some((u) => u.line === call.getStartLineNumber() && u.changeId?.includes("setter"))) add(call, "unsupported", "Removed Stripe configuration setter requires adjacent literal construction for automatic migration");
         const option = call.getArguments()[1];
         if (operation === "customers.create" && call.getArguments().length === 2 && option && import_ts_morph2.Node.isObjectLiteralExpression(option)) {
           const references = source.getDescendantsOfKind(import_ts_morph2.SyntaxKind.Identifier).filter((id) => id.getSymbol() === base.getSymbol());
@@ -269124,7 +269175,7 @@ function analyze(root, config2) {
             }
           }
         }
-        const known = /^(customers|paymentIntents|charges|checkout.sessions)\.(create|retrieve|list|update|del)$/.test(operation);
+        const known = /^(customers|paymentIntents|charges|checkout.sessions)\.(create|retrieve|list|update|del)$/.test(operation) || inventory.usages.some((u) => u.line === call.getStartLineNumber() && u.symbol === call.getExpression().getText() && u.changeId?.includes("setter"));
         add(call, operation.startsWith("webhooks.") || operation.startsWith("webhookEndpoints.") ? "webhook" : known ? "call" : "unsupported", operation || "indirect client call", { requestApiVersion: clientVersions.get(base.getSymbol()) });
         for (const arg of call.getArguments()) if (import_ts_morph2.Node.isObjectLiteralExpression(arg)) {
           const v = arg.getProperty("apiVersion");
@@ -269152,9 +269203,68 @@ function analyze(root, config2) {
   return { inventory, edits };
 }
 
-// packages/core/src/vendors/stripe/sources.ts
-var import_node_fs4 = require("node:fs");
+// packages/core/src/languages/python/analyze.ts
+var import_node_fs5 = require("node:fs");
 var import_node_path5 = require("node:path");
+var import_node_child_process = require("node:child_process");
+
+// packages/core/src/languages/python/analyze.py
+var analyze_default = 'import ast, json, sys\r\ntext=sys.stdin.read()\r\ntree=ast.parse(text)\r\nroots={n.asname or "stripe" for n in tree.body if isinstance(n,ast.Import) for n in n.names if n.name=="stripe"}\r\nmapping={"UnsupportedGrantTypError":"UnsupportedGrantTypeError","UnsupportedResponseTypError":"UnsupportedResponseTypeError"}\r\n# Scope changes and module mutation require human review.\r\nunsafe=any(isinstance(n,(ast.FunctionDef,ast.AsyncFunctionDef,ast.ClassDef,ast.Lambda)) or isinstance(n,ast.Name) and n.id in roots and isinstance(n.ctx,ast.Store) or isinstance(n,ast.Attribute) and isinstance(n.ctx,ast.Store) for n in ast.walk(tree))\r\nparents={child:node for node in ast.walk(tree) for child in ast.iter_child_nodes(node)}\r\nfor node in ast.walk(tree):\r\n if isinstance(node,ast.Name) and node.id in roots:\r\n  parent=parents.get(node); grand=parents.get(parent)\r\n  if not (isinstance(parent,ast.Attribute) and parent.attr=="oauth_error" and isinstance(grand,ast.Attribute) and grand.attr in mapping):unsafe=True\r\n if isinstance(node,(ast.Import,ast.ImportFrom)):\r\n  for alias in node.names:\r\n   if (alias.asname or alias.name) in roots and not (isinstance(node,ast.Import) and alias.name=="stripe"):unsafe=True\r\nlines=text.splitlines(keepends=True); offsets=[0]\r\nfor line in lines: offsets.append(offsets[-1]+len(line.encode("utf8")))\r\nedits=[]; usages=[]\r\nfor n in ast.walk(tree):\r\n if isinstance(n,ast.Attribute) and n.attr in mapping and isinstance(n.value,ast.Attribute) and n.value.attr=="oauth_error" and isinstance(n.value.value,ast.Name) and n.value.value.id in roots:\r\n  end=offsets[n.end_lineno-1]+n.end_col_offset\r\n  usages.append({"line":n.lineno,"symbol":n.attr,"kind":"unsupported" if unsafe else "field","changeId":"stripe-python-5-oauth-exceptions","editPlanned":not unsafe,"replacement":mapping[n.attr]})\r\n  if not unsafe: edits.append((end-len(n.attr),end,mapping[n.attr]))\r\ndata=text.encode("utf8")\r\nfor start,end,value in sorted(edits,reverse=True):data=data[:start]+value.encode()+data[end:]\r\nprint(json.dumps({"content":data.decode(),"usages":usages,"unsafe":unsafe}))\r\n';
+
+// packages/core/src/languages/python/analyze.ts
+var pythonAdapter = { id: "python", analyze(root, config2) {
+  const inventory = { vendor: "stripe", sdkPackage: "stripe", versionOrigin: "unknown", usages: [], limitations: ["Python preview: top-level import stripe[ as alias], stripe.oauth_error OAuth exception spelling only; scopes and attribute mutations decline edits. Exact requirements.txt pin required."], webhookVersion: "unknown" };
+  const requirements = (0, import_node_path5.resolve)(root, "requirements.txt");
+  if ((0, import_node_fs5.existsSync)(requirements)) {
+    const versions = [...(0, import_node_fs5.readFileSync)(requirements, "utf8").matchAll(/^stripe==([0-9]+\.[0-9]+\.[0-9]+)\s*$/gm)];
+    if (versions.length === 1) {
+      inventory.resolved = inventory.declared = versions[0][1];
+      inventory.versionOrigin = "requirements.txt exact pin";
+    }
+  }
+  const edits = [];
+  let projectUnsafe = false;
+  let count = 0;
+  if (!config2.vendors.stripe.enabled) return { inventory, edits };
+  function walk(dir) {
+    for (const entry of (0, import_node_fs5.readdirSync)(dir, { withFileTypes: true })) {
+      if (entry.isSymbolicLink() || [".git", ".changelume", ".venv", "venv", "node_modules", "__pycache__"].includes(entry.name)) continue;
+      const path2 = (0, import_node_path5.resolve)(dir, entry.name);
+      if (entry.isDirectory()) {
+        walk(path2);
+        continue;
+      }
+      const name = (0, import_node_path5.relative)(root, path2).replaceAll("\\", "/");
+      if (!name.endsWith(".py") || !config2.include.some((g) => (0, import_node_path5.matchesGlob)(name, g)) || config2.exclude.some((g) => (0, import_node_path5.matchesGlob)(name, g))) continue;
+      if (++count > 5e3) throw new Error("Python source count limit exceeded");
+      const before = (0, import_node_fs5.readFileSync)(path2, "utf8");
+      if (Buffer.byteLength(before) > 2e5) throw new Error("Python source size limit exceeded");
+      const result = (0, import_node_child_process.spawnSync)(config2.pythonCommand, ["-I", "-c", analyze_default], { input: before, encoding: "utf8", timeout: 1e4, maxBuffer: 1e6, windowsHide: true });
+      if (result.status !== 0) throw new Error("Python AST analysis failed; ensure pythonCommand points to Python 3. No customer code is executed.");
+      const parsed = JSON.parse(result.stdout);
+      projectUnsafe ||= parsed.unsafe;
+      const applicable = [4, 5].includes(Number(inventory.resolved?.split(".")[0]));
+      for (const u of parsed.usages) inventory.usages.push({ ...u, file: name, kind: applicable ? u.kind : "unsupported", editPlanned: applicable && u.editPlanned });
+      if (applicable && parsed.content !== before) edits.push({ path: name, beforeHash: hash2(before), content: parsed.content });
+    }
+  }
+  walk(root);
+  if (projectUnsafe) {
+    edits.length = 0;
+    for (const usage of inventory.usages) {
+      usage.editPlanned = false;
+      usage.kind = "unsupported";
+    }
+  }
+  return { inventory, edits };
+} };
+
+// packages/core/src/languages/index.ts
+var adapters = { typescript: { id: "typescript", analyze }, python: pythonAdapter };
+
+// packages/core/src/vendors/stripe/sources.ts
+var import_node_fs6 = require("node:fs");
+var import_node_path6 = require("node:path");
 
 // fixtures/sources/stripe-v12-changelog.md
 var stripe_v12_changelog_default = "# Changelog\n\n## 12.0.0 - 2023-04-06\n* [#1743](https://github.com/stripe/stripe-node/pull/1743) Remove `Stripe.default` and `Stripe.Stripe`\nThis was added to maintain backwards compatibility during the transition of stripe-node to a dual ES module / CommonJS package, and should not be functionally necessary.\n* [#1742](https://github.com/stripe/stripe-node/pull/1743) Pin latest API version as the default\n  **\u26A0\uFE0F ACTION REQUIRED: the breaking change in this release likely affects you \u26A0\uFE0F**\n  \n  In this release, Stripe API Version `2022-11-15` (the latest at time of release) will be sent by default on all requests. \n  The previous default was to use your [Stripe account's default API version](https://stripe.com/docs/development/dashboard/request-logs#view-your-default-api-version).\n  \n  To successfully upgrade to stripe-node v12, you must either\n  \n  1. **(Recommended) Upgrade your integration to be compatible with API Version `2022-11-15`.**\n    \n     Please read the API Changelog carefully for each API Version from `2022-11-15` back to your [Stripe account's default API version](https://stripe.com/docs/development/dashboard/request-logs#view-your-default-api-version). Determine if you are using any of the APIs that have changed in a breaking way, and adjust your integration accordingly. Carefully test your changes with Stripe [Test Mode](https://stripe.com/docs/keys#test-live-modes) before deploying them to production.\n     \n     You can read the [v12 migration guide](https://github.com/stripe/stripe-node/wiki/Migration-guide-for-v12) for more detailed instructions.\n  2. **(Alternative option) Specify a version other than `2022-11-15` when initializing `stripe-node`.** \n  \n     If you were previously initializing stripe-node without an explicit API Version, you can postpone modifying your integration by specifying a version equal to your [Stripe account's default API version](https://stripe.com/docs/development/dashboard/request-logs#view-your-default-api-version). For example:\n    \n     ```diff\n     - const stripe = require('stripe')('sk_test_...'); \n     + const stripe = require('stripe')('sk_test_...', {\n     +   apiVersion: 'YYYY-MM-DD' // Determine your default version from https://dashboard.stripe.com/developers\n     + })\n     ```\n  \n     If you were already initializing stripe-node with an explicit API Version, upgrading to v12 will not affect your integration.\n  \n     Read the [v12 migration guide](https://github.com/stripe/stripe-node/wiki/Migration-guide-for-v12) for more details.\n  \n  Going forward, each major release of this library will be *pinned* by default to the latest Stripe API Version at the time of release. \n  That is, instead of upgrading stripe-node and separately upgrading your Stripe API Version through the Stripe Dashboard. whenever you upgrade major versions of stripe-node, you should also upgrade your integration to be compatible with the latest Stripe API version.\n\n## 11.18.0 - 2023-04-06\n* [#1738](https://github.com/stripe/stripe-node/pull/1738) Update generated code\n  * Add support for new value `link` on enums `Charge.payment_method_details.card.wallet.type` and `PaymentMethod.card.wallet.type`\n  * Change `IssuingCardholderCreateParams.type` to be optional\n  * Add support for `country` on `PaymentMethod.link`\n  * Add support for `status_details` on `PaymentMethod.us_bank_account`\n* [#1747](https://github.com/stripe/stripe-node/pull/1747) (Typescript) remove deprecated properties\n\n## 11.17.0 - 2023-03-30\n* [#1734](https://github.com/stripe/stripe-node/pull/1734) Update generated code\n  * Remove support for `create` method on resource `Tax.Transaction`\r\n    * This is not a breaking change, as this method was deprecated before the Tax Transactions API was released in favor of the `createFromCalculation` method.\r\n  * Add support for `export_license_id` and `export_purpose_code` on `Account.company`, `AccountCreateParams.company`, `AccountUpdateParams.company`, and `TokenCreateParams.account.company`\r\n  * Remove support for value `deleted` from enum `Invoice.status`\r\n    * This is not a breaking change, as `deleted` was never returned or accepted as input.\r\n  * Add support for `amount_tip` on `TerminalReaderPresentPaymentMethodParams.testHelpers`\r\n\n## 11.16.0 - 2023-03-23\n* [#1730](https://github.com/stripe/stripe-node/pull/1730) Update generated code\n  * Add support for new resources `Tax.CalculationLineItem`, `Tax.Calculation`, `Tax.TransactionLineItem`, and `Tax.Transaction`\n  * Add support for `create` and `list_line_items` methods on resource `Calculation`\n  * Add support for `create_from_calculation`, `create_reversal`, `create`, `list_line_items`, and `retrieve` methods on resource `Transaction`\n  * Add support for new value `link` on enum `CheckoutSessionCreateParams.payment_method_types[]`\n  * Add support for `currency_conversion` on `Checkout.Session`\n  * Add support for new value `link` on enums `PaymentLink.payment_method_types[]`, `PaymentLinkCreateParams.payment_method_types[]`, and `PaymentLinkUpdateParams.payment_method_types[]`\n  * Add support for `automatic_payment_methods` on `SetupIntentCreateParams` and `SetupIntent`\n* [#1726](https://github.com/stripe/stripe-node/pull/1726) Add Deno entry point\n\n## 11.15.0 - 2023-03-16\n* [#1714](https://github.com/stripe/stripe-node/pull/1714) API Updates\n  * Add support for `cashapp_payments` on `Account.capabilities`, `AccountCreateParams.capabilities`, and `AccountUpdateParams.capabilities`\n  * Add support for new value `cashapp` as a new `type` throughout the API.\n  * Add support for `future_requirements` and `requirements` on `BankAccount`\n  * Add support for `country` on `Charge.payment_method_details.link`\n  * Add support for new value `automatic_async` on enums `CheckoutSessionCreateParams.payment_intent_data.capture_method`, `PaymentIntent.capture_method`, `PaymentIntentConfirmParams.capture_method`, `PaymentIntentCreateParams.capture_method`, `PaymentIntentUpdateParams.capture_method`, `PaymentLink.payment_intent_data.capture_method`, and `PaymentLinkCreateParams.payment_intent_data.capture_method`\n\n  * Add support for `preferred_locale` on `PaymentIntent.payment_method_options.affirm`,\n  * Add support for `cashapp_handle_redirect_or_display_qr_code` on `PaymentIntent.next_action` and `SetupIntent.next_action`\n  * Add support for new value `payout.reconciliation_completed` on enums `WebhookEndpointCreateParams.enabled_events[]` and `WebhookEndpointUpdateParams.enabled_events[]`\n* [#1709](https://github.com/stripe/stripe-node/pull/1709) Add ES module package entry point\n  * Add support for ES modules by defining a separate ESM entry point. This updates stripe-node to be a [dual CommonJS / ES module package](https://nodejs.org/api/packages.html#dual-commonjses-module-packages).\n* [#1704](https://github.com/stripe/stripe-node/pull/1704) Configure 2 TypeScript compile targets for ESM and CJS\n* [#1710](https://github.com/stripe/stripe-node/pull/1710) Update generated code (new)\n  * Add support for `cashapp_payments` on `Account.capabilities`, `AccountCreateParams.capabilities`, and `AccountUpdateParams.capabilities`\n  * Add support for `cashapp` on `Charge.payment_method_details`, `Checkout.Session.payment_method_options`, `CheckoutSessionCreateParams.payment_method_options`, `Mandate.payment_method_details`, `PaymentIntent.payment_method_options`, `PaymentIntentConfirmParams.payment_method_data`, `PaymentIntentConfirmParams.payment_method_options`, `PaymentIntentCreateParams.payment_method_data`, `PaymentIntentCreateParams.payment_method_options`, `PaymentIntentUpdateParams.payment_method_data`, `PaymentIntentUpdateParams.payment_method_options`, `PaymentMethodCreateParams`, `PaymentMethodUpdateParams`, `PaymentMethod`, `SetupAttempt.payment_method_details`, `SetupIntentConfirmParams.payment_method_data`, `SetupIntentCreateParams.payment_method_data`, and `SetupIntentUpdateParams.payment_method_data`\n  * Add support for new value `cashapp` on enum `CheckoutSessionCreateParams.payment_method_types[]`\n  * Add support for new value `cashapp` on enums `CustomerListPaymentMethodsParams.type` and `PaymentMethodListParams.type`\n  * Add support for new value `cashapp` on enums `Invoice.payment_settings.payment_method_types[]`, `InvoiceCreateParams.payment_settings.payment_method_types[]`, `InvoiceUpdateParams.payment_settings.payment_method_types[]`, `Subscription.payment_settings.payment_method_types[]`, `SubscriptionCreateParams.payment_settings.payment_method_types[]`, and `SubscriptionUpdateParams.payment_settings.payment_method_types[]`\n  * Add support for new value `cashapp` on enums `PaymentIntentConfirmParams.payment_method_data.type`, `PaymentIntentCreateParams.payment_method_data.type`, `PaymentIntentUpdateParams.payment_method_data.type`, `SetupIntentConfirmParams.payment_method_data.type`, `SetupIntentCreateParams.payment_method_data.type`, and `SetupIntentUpdateParams.payment_method_data.type`\n  * Add support for `preferred_locale` on `PaymentIntent.payment_method_options.affirm`, `PaymentIntentConfirmParams.payment_method_options.affirm`, `PaymentIntentCreateParams.payment_method_options.affirm`, and `PaymentIntentUpdateParams.payment_method_options.affirm`\n  * Add support for `cashapp_handle_redirect_or_display_qr_code` on `PaymentIntent.next_action` and `SetupIntent.next_action`\n  * Add support for new value `cashapp` on enums `PaymentLink.payment_method_types[]`, `PaymentLinkCreateParams.payment_method_types[]`, and `PaymentLinkUpdateParams.payment_method_types[]`\n  * Add support for new value `cashapp` on enum `PaymentMethodCreateParams.type`\n  * Add support for new value `cashapp` on enum `PaymentMethod.type`\n  * Add support for new value `payout.reconciliation_completed` on enums `WebhookEndpointCreateParams.enabled_events[]` and `WebhookEndpointUpdateParams.enabled_events[]`\n\n## 11.14.0 - 2023-03-09\n* [#1703](https://github.com/stripe/stripe-node/pull/1703) API Updates\n  * Add support for `card_issuing` on `IssuingCardholderCreateParams.individual` and `IssuingCardholderUpdateParams.individual`\n  * Add support for new value `requirements.past_due` on enum `Issuing.Cardholder.requirements.disabled_reason`\n  * Add support for new values `individual.card_issuing.user_terms_acceptance.date` and `individual.card_issuing.user_terms_acceptance.ip` on enum `Issuing.Cardholder.requirements.past_due[]`\n  * Add support for `cancellation_details` on `SubscriptionCancelParams`, `SubscriptionUpdateParams`, and `Subscription`\n* [#1701](https://github.com/stripe/stripe-node/pull/1701) Change httpProxy to httpAgent in README example\n* [#1695](https://github.com/stripe/stripe-node/pull/1695) Migrate generated files to ES module syntax\n* [#1699](https://github.com/stripe/stripe-node/pull/1699) Remove extra test directory\n\n## 11.13.0 - 2023-03-02\n* [#1696](https://github.com/stripe/stripe-node/pull/1696) API Updates\n  * Add support for new values `electric_vehicle_charging`, `emergency_services_gcas_visa_use_only`, `government_licensed_horse_dog_racing_us_region_only`, `government_licensed_online_casions_online_gambling_us_region_only`, `government_owned_lotteries_non_us_region`, `government_owned_lotteries_us_region_only`, and `marketplaces` on spending control categories.\n  * Add support for `reconciliation_status` on `Payout`\n  * Add support for new value `lease_tax` on enums `TaxRate.tax_type`, `TaxRateCreateParams.tax_type`, and `TaxRateUpdateParams.tax_type`\n\n* [#1689](https://github.com/stripe/stripe-node/pull/1689) Update v11.8.0 changelog with breaking change disclaimer\n\n## 11.12.0 - 2023-02-23\n* [#1688](https://github.com/stripe/stripe-node/pull/1688) API Updates\n  * Add support for new value `yoursafe` on enums `Charge.payment_method_details.ideal.bank`, `PaymentIntentConfirmParams.payment_method_data.ideal.bank`, `PaymentIntentCreateParams.payment_method_data.ideal.bank`, `PaymentIntentUpdateParams.payment_method_data.ideal.bank`, `PaymentMethod.ideal.bank`, `PaymentMethodCreateParams.ideal.bank`, `SetupAttempt.payment_method_details.ideal.bank`, `SetupIntentConfirmParams.payment_method_data.ideal.bank`, `SetupIntentCreateParams.payment_method_data.ideal.bank`, and `SetupIntentUpdateParams.payment_method_data.ideal.bank`\n  * Add support for new value `BITSNL2A` on enums `Charge.payment_method_details.ideal.bic`, `PaymentMethod.ideal.bic`, and `SetupAttempt.payment_method_details.ideal.bic`\n  * Add support for new value `igst` on enums `TaxRate.tax_type`, `TaxRateCreateParams.tax_type`, and `TaxRateUpdateParams.tax_type`\n* [#1687](https://github.com/stripe/stripe-node/pull/1687) Convert TypeScript files to use ES modules\n\n## 11.11.0 - 2023-02-16\n* [#1681](https://github.com/stripe/stripe-node/pull/1681) API Updates\n  * Add support for `refund_payment` method on resource `Terminal.Reader`\n  * Add support for new value `name` on enums `BillingPortal.Configuration.features.customer_update.allowed_updates[]`, `BillingPortalConfigurationCreateParams.features.customer_update.allowed_updates[]`, and `BillingPortalConfigurationUpdateParams.features.customer_update.allowed_updates[]`\n  * Add support for `custom_fields` on `Checkout.Session`, `CheckoutSessionCreateParams`, `PaymentLinkCreateParams`, `PaymentLinkUpdateParams`, and `PaymentLink`\n  * Change `Subscription.trial_settings.end_behavior` and `Subscription.trial_settings` to be required\n  * Add support for `interac_present` on `TerminalReaderPresentPaymentMethodParams.testHelpers`\n  * Change type of `TerminalReaderPresentPaymentMethodParams.testHelpers.type` from `literal('card_present')` to `enum('card_present'|'interac_present')`\n  * Add support for `refund_payment` on `Terminal.Reader.action`\n  * Add support for new value `refund_payment` on enum `Terminal.Reader.action.type`\n* [#1683](https://github.com/stripe/stripe-node/pull/1683) Add NextJS webhook sample\n* [#1685](https://github.com/stripe/stripe-node/pull/1685) Add more webhook parsing checks\n* [#1684](https://github.com/stripe/stripe-node/pull/1684) Add infrastructure for mocked tests\n\n## 11.10.0 - 2023-02-09\n* [#1679](https://github.com/stripe/stripe-node/pull/1679) Enable library to work in worker environments without extra configuration.\n\n## 11.9.1 - 2023-02-03\n* [#1672](https://github.com/stripe/stripe-node/pull/1672) Update main entrypoint on package.json\n\n## 11.9.0 - 2023-02-02\n* [#1669](https://github.com/stripe/stripe-node/pull/1669) API Updates\n  * Add support for `resume` method on resource `Subscription`\n  * Add support for `payment_link` on `CheckoutSessionListParams`\n  * Add support for `trial_settings` on `CheckoutSessionCreateParams.subscription_data`, `SubscriptionCreateParams`, `SubscriptionUpdateParams`, and `Subscription`\n  * Add support for `shipping_cost` on `CreditNoteCreateParams`, `CreditNotePreviewLinesParams`, `CreditNotePreviewParams`, `CreditNote`, `InvoiceCreateParams`, `InvoiceUpdateParams`, and `Invoice`\n  * Add support for `amount_shipping` on `CreditNote` and `Invoice`\n  * Add support for `shipping_details` on `InvoiceCreateParams`, `InvoiceUpdateParams`, and `Invoice`\n  * Add support for `subscription_resume_at` on `InvoiceUpcomingLinesParams` and `InvoiceUpcomingParams`\n  * Change `IssuingCardholderCreateParams.individual.first_name`, `IssuingCardholderCreateParams.individual.last_name`, `IssuingCardholderUpdateParams.individual.first_name`, and `IssuingCardholderUpdateParams.individual.last_name` to be optional\n  * Change type of `Issuing.Cardholder.individual.first_name` and `Issuing.Cardholder.individual.last_name` from `string` to `string | null`\n  * Add support for `invoice_creation` on `PaymentLinkCreateParams`, `PaymentLinkUpdateParams`, and `PaymentLink`\n  * Add support for new value `America/Ciudad_Juarez` on enum `ReportingReportRunCreateParams.parameters.timezone`\n  * Add support for new value `paused` on enum `SubscriptionListParams.status`\n  * Add support for new value `paused` on enum `Subscription.status`\n  * Add support for new values `customer.subscription.paused` and `customer.subscription.resumed` on enums `WebhookEndpointCreateParams.enabled_events[]` and `WebhookEndpointUpdateParams.enabled_events[]`\n  * Add support for new value `funding_reversed` on enum `CustomerCashBalanceTransaction.type`\n\n* [#1670](https://github.com/stripe/stripe-node/pull/1670) Change default entrypoint to stripe.node\n* [#1668](https://github.com/stripe/stripe-node/pull/1668) Use EventTarget in worker / browser runtimes\n* [#1667](https://github.com/stripe/stripe-node/pull/1667) fix: added support for TypeScript \"NodeNext\" module resolution\n\n## 11.8.0 - 2023-01-26\n* [#1665](https://github.com/stripe/stripe-node/pull/1665) API Updates\n  * Add support for new value `BE` on enums `Checkout.Session.payment_method_options.customer_balance.bank_transfer.eu_bank_transfer.country`, `Invoice.payment_settings.payment_method_options.customer_balance.bank_transfer.eu_bank_transfer.country`, `PaymentIntent.payment_method_options.customer_balance.bank_transfer.eu_bank_transfer.country`, and `Subscription.payment_settings.payment_method_options.customer_balance.bank_transfer.eu_bank_transfer.country`\n  * Add support for new values `cs-CZ`, `el-GR`, `en-CZ`, and `en-GR` on enums `PaymentIntentConfirmParams.payment_method_options.klarna.preferred_locale`, `PaymentIntentCreateParams.payment_method_options.klarna.preferred_locale`, and `PaymentIntentUpdateParams.payment_method_options.klarna.preferred_locale`\n* [#1660](https://github.com/stripe/stripe-node/pull/1660) Introduce separate entry point for worker environments\n  * This is technically a breaking change that explicitly defines package entry points and was mistakenly released in a minor version. If your application previously imported other internal files from stripe-node and this change breaks it, please open an issue detailing your use case.\n\n## 11.7.0 - 2023-01-19\n* [#1661](https://github.com/stripe/stripe-node/pull/1661) API Updates\n  * Add support for `verification_session` on `EphemeralKeyCreateParams`\n  * Add support for new values `refund.created` and `refund.updated` on enums `WebhookEndpointCreateParams.enabled_events[]` and `WebhookEndpointUpdateParams.enabled_events[]`\n* [#1647](https://github.com/stripe/stripe-node/pull/1647) Bump json5 from 2.2.1 to 2.2.3\n\n## 11.6.0 - 2023-01-05\n* [#1646](https://github.com/stripe/stripe-node/pull/1646) API Updates\n  * Add support for `card_issuing` on `Issuing.Cardholder.individual`\n\n## 11.5.0 - 2022-12-22\n* [#1642](https://github.com/stripe/stripe-node/pull/1642) API Updates\n  * Add support for new value `merchant_default` on enums `CashBalanceUpdateParams.settings.reconciliation_mode`, `CustomerCreateParams.cash_balance.settings.reconciliation_mode`, and `CustomerUpdateParams.cash_balance.settings.reconciliation_mode`\n  * Add support for `using_merchant_default` on `CashBalance.settings`\n  * Change `CheckoutSessionCreateParams.cancel_url` to be optional\n  * Change type of `Checkout.Session.cancel_url` from `string` to `string | null`\n\n## 11.4.0 - 2022-12-15\n* [#1639](https://github.com/stripe/stripe-node/pull/1639) API Updates\n  * Add support for new value `invoice_overpaid` on enum `CustomerBalanceTransaction.type`\n* [#1637](https://github.com/stripe/stripe-node/pull/1637) Update packages in examples/webhook-signing\n\n## 11.3.0 - 2022-12-08\n* [#1634](https://github.com/stripe/stripe-node/pull/1634) API Updates\n  * Change `CustomerListPaymentMethodsParams.type` and `PaymentMethodListParams.type` to be optional\n\n## 11.2.0 - 2022-12-06\n* [#1632](https://github.com/stripe/stripe-node/pull/1632) API Updates\n  * Add support for `flow_data` on `BillingPortalSessionCreateParams`\n  * Add support for `flow` on `BillingPortal.Session`\n* [#1631](https://github.com/stripe/stripe-node/pull/1631) API Updates\n  * Add support for `india_international_payments` on `Account.capabilities`, `AccountCreateParams.capabilities`, and `AccountUpdateParams.capabilities`\n  * Add support for `invoice_creation` on `Checkout.Session` and `CheckoutSessionCreateParams`\n  * Add support for `invoice` on `Checkout.Session`\n  * Add support for `metadata` on `SubscriptionSchedule.phases[].items[]`, `SubscriptionScheduleCreateParams.phases[].items[]`, and `SubscriptionScheduleUpdateParams.phases[].items[]`\n* [#1630](https://github.com/stripe/stripe-node/pull/1630) Remove BASIC_METHODS from TS definitions\n* [#1629](https://github.com/stripe/stripe-node/pull/1629) Narrower type for stripe.invoices.retrieveUpcoming()\n* [#1627](https://github.com/stripe/stripe-node/pull/1627) remove unneeded IIFE\n* [#1625](https://github.com/stripe/stripe-node/pull/1625) Remove API version from the path\n* [#1626](https://github.com/stripe/stripe-node/pull/1626) Move child resource method params next to method declarations\n* [#1624](https://github.com/stripe/stripe-node/pull/1624) Split resource and service types\n\n## 11.1.0 - 2022-11-17\n* [#1623](https://github.com/stripe/stripe-node/pull/1623) API Updates\n  * Add support for `hosted_instructions_url` on `PaymentIntent.next_action.wechat_pay_display_qr_code`\n* [#1622](https://github.com/stripe/stripe-node/pull/1622) API Updates\n  * Add support for `custom_text` on `Checkout.Session`, `CheckoutSessionCreateParams`, `PaymentLinkCreateParams`, `PaymentLinkUpdateParams`, and `PaymentLink`\n  * Add support for `hosted_instructions_url` on `PaymentIntent.next_action.paynow_display_qr_code`\n\n\n## 11.0.0 - 2022-11-16\n\nThis release includes breaking changes resulting from moving to use the new API version \"2022-11-15\". To learn more about these changes to Stripe products, see https://stripe.com/docs/upgrades#2022-11-15\n\n\"\u26A0\uFE0F\" symbol highlights breaking changes.\n\n* [#1608](https://github.com/stripe/stripe-node/pull/1608) Next major release changes\n* [#1619](https://github.com/stripe/stripe-node/pull/1619) Annotate prototypes with types\n* [#1612](https://github.com/stripe/stripe-node/pull/1612) Add type information here and there\n* [#1615](https://github.com/stripe/stripe-node/pull/1615) API Updates\n  * \u26A0\uFE0F Remove support for `tos_shown_and_accepted` on `CheckoutSessionCreateParams.payment_method_options.paynow`. The property was mistakenly released and never worked.\n\n### \u26A0\uFE0F Changed\n* Drop support for Node.js 8 and 10. We now support Node.js 12+. ((#1579)\n* Change `StripeSignatureVerificationError` to have `header` and `payload` fields instead of `detail`. To access these properties, use `err.header` and `err.payload` instead of `err.detail.header` and `err.detail.payload`. (#1574)\n\n### \u26A0\uFE0F Removed\n* Remove `Orders` resource. (#1580)\n* Remove `SKU` resource (#1583)\n* Remove deprecated `CheckoutSessionCreateParams.subscription_data.items`. (#1580)\n* Remove deprecated configuration setter methods (`setHost`, `setProtocol`, `setPort`, `setApiVersion`, `setApiKey`, `setTimeout`, `setAppInfo`, `setHttpAgent`, `setMaxNetworkRetries`, and `setTelemetryEnabled`). (#1597)\n\n  Use the config object to set these options instead, for example:\n  ```typescript\n  const stripe = Stripe('sk_test_...', {\n    apiVersion: '2019-08-08',\n    maxNetworkRetries: 1,\n    httpAgent: new ProxyAgent(process.env.http_proxy),\n    timeout: 1000,\n    host: 'api.example.com',\n    port: 123,\n    telemetry: true,\n  });\n  ```\n* Remove deprecated basic method definitions. (#1600)\n  Use basic methods defined on the resource instead.\n  ```typescript\n  // Before\n  basicMethods: true\n\n  // After\n  create: stripeMethod({\n    method: 'POST',\n    fullPath: '/v1/resource',\n  }),\n  list: stripeMethod({\n    method: 'GET',\n    methodType: 'list',\n    fullPath: '/v1/resource',\n  }),\n  retrieve: stripeMethod({\n    method: 'GET',\n    fullPath: '/v1/resource/{id}',\n  }),\n  update: stripeMethod({\n    method: 'POST',\n    fullPath: '/v1/resource/{id}',\n  }),\n  // Avoid 'delete' keyword in JS\n  del: stripeMethod({\n    method: 'DELETE',\n    fullPath: '/v1/resource/{id}',\n  }),\n  ```\n* Remove deprecated option names. Use the following option names instead (`OLD`->`NEW`): `api_key`->`apiKey`, `idempotency_key`->`idempotencyKey`, `stripe_account`->`stripeAccount`, `stripe_version`->`apiVersion`, `stripeVersion`->`apiVersion`. (#1600)\n* Remove `charges` field on `PaymentIntent` and replace it with `latest_charge`. (#1614 )\n* Remove deprecated `amount` field on `Checkout.Session.LineItem`. (#1614 )\n* Remove support for `tos_shown_and_accepted` on `Checkout.Session.PaymentMethodOptions.Paynow`. (#1614 )\n\n## 10.17.0 - 2022-11-08\n* [#1610](https://github.com/stripe/stripe-node/pull/1610) API Updates\n  * Add support for new values `eg_tin`, `ph_tin`, and `tr_tin` on enums `Checkout.Session.customer_details.tax_ids[].type`, `Invoice.customer_tax_ids[].type`, `Order.tax_details.tax_ids[].type`, and `TaxId.type`\n  * Add support for new values `eg_tin`, `ph_tin`, and `tr_tin` on enums `CustomerCreateParams.tax_id_data[].type`, `InvoiceUpcomingLinesParams.customer_details.tax_ids[].type`, `InvoiceUpcomingParams.customer_details.tax_ids[].type`, `OrderCreateParams.tax_details.tax_ids[].type`, `OrderUpdateParams.tax_details.tax_ids[].type`, and `TaxIdCreateParams.type`\n  * Add support for `reason_message` on `Issuing.Authorization.request_history[]`\n  * Add support for new value `webhook_error` on enum `Issuing.Authorization.request_history[].reason`\n\n## 10.16.0 - 2022-11-03\n* [#1596](https://github.com/stripe/stripe-node/pull/1596) API Updates\n  * Add support for `on_behalf_of` on `CheckoutSessionCreateParams.subscription_data`, `SubscriptionCreateParams`, `SubscriptionSchedule.default_settings`, `SubscriptionSchedule.phases[]`, `SubscriptionScheduleCreateParams.default_settings`, `SubscriptionScheduleCreateParams.phases[]`, `SubscriptionScheduleUpdateParams.default_settings`, `SubscriptionScheduleUpdateParams.phases[]`, `SubscriptionUpdateParams`, and `Subscription`\n  * Add support for `tax_behavior` and `tax_code` on `InvoiceItemCreateParams`, `InvoiceItemUpdateParams`, `InvoiceUpcomingLinesParams.invoice_items[]`, and `InvoiceUpcomingParams.invoice_items[]`\n\n## 10.15.0 - 2022-10-20\n* [#1588](https://github.com/stripe/stripe-node/pull/1588) API Updates\n  * Add support for new values `jp_trn` and `ke_pin` on enums `Checkout.Session.customer_details.tax_ids[].type`, `Invoice.customer_tax_ids[].type`, `Order.tax_details.tax_ids[].type`, and `TaxId.type`\n  * Add support for new values `jp_trn` and `ke_pin` on enums `CustomerCreateParams.tax_id_data[].type`, `InvoiceUpcomingLinesParams.customer_details.tax_ids[].type`, `InvoiceUpcomingParams.customer_details.tax_ids[].type`, `OrderCreateParams.tax_details.tax_ids[].type`, `OrderUpdateParams.tax_details.tax_ids[].type`, and `TaxIdCreateParams.type`\n  * Add support for `tipping` on `Terminal.Reader.action.process_payment_intent.process_config` and `TerminalReaderProcessPaymentIntentParams.process_config`\n* [#1585](https://github.com/stripe/stripe-node/pull/1585) use native UUID method if available\n\n## 10.14.0 - 2022-10-13\n* [#1582](https://github.com/stripe/stripe-node/pull/1582) API Updates\n  * Add support for new values `invalid_representative_country` and `verification_failed_residential_address` on enums `Account.future_requirements.errors[].code`, `Account.requirements.errors[].code`, `Capability.future_requirements.errors[].code`, `Capability.requirements.errors[].code`, `Person.future_requirements.errors[].code`, and `Person.requirements.errors[].code`\n  * Add support for `request_log_url` on `StripeError` objects\n  * Add support for `network_data` on `Issuing.Authorization`\n  * \u26A0\uFE0F  Remove `currency`, `description`, `images`, and `name` from `Checkout.SessionCreateParams`. These properties do not work on the latest API version. (fixes #1575)\n\n## 10.13.0 - 2022-10-06\n* [#1571](https://github.com/stripe/stripe-node/pull/1571) API Updates\n  * Add support for new value `invalid_dob_age_under_18` on enums `Account.future_requirements.errors[].code`, `Account.requirements.errors[].code`, `Capability.future_requirements.errors[].code`, `Capability.requirements.errors[].code`, `Person.future_requirements.errors[].code`, and `Person.requirements.errors[].code`\n  * Add support for new value `bank_of_china` on enums `Charge.payment_method_details.fpx.bank`, `PaymentIntentConfirmParams.payment_method_data.fpx.bank`, `PaymentIntentCreateParams.payment_method_data.fpx.bank`, `PaymentIntentUpdateParams.payment_method_data.fpx.bank`, `PaymentMethod.fpx.bank`, `PaymentMethodCreateParams.fpx.bank`, `SetupIntentConfirmParams.payment_method_data.fpx.bank`, `SetupIntentCreateParams.payment_method_data.fpx.bank`, and `SetupIntentUpdateParams.payment_method_data.fpx.bank`\n  * Add support for new values `America/Nuuk`, `Europe/Kyiv`, and `Pacific/Kanton` on enum `ReportingReportRunCreateParams.parameters.timezone`\n  * Add support for `klarna` on `SetupAttempt.payment_method_details`\n* [#1570](https://github.com/stripe/stripe-node/pull/1570) Update node-fetch to 2.6.7\n* [#1568](https://github.com/stripe/stripe-node/pull/1568) Upgrade dependencies\n* [#1567](https://github.com/stripe/stripe-node/pull/1567) Fix release tag calculation\n\n## 10.12.0 - 2022-09-29\n* [#1564](https://github.com/stripe/stripe-node/pull/1564) API Updates\n  * Change type of `Charge.payment_method_details.card_present.incremental_authorization_supported` and `Charge.payment_method_details.card_present.overcapture_supported` from `boolean | null` to `boolean`\n  * Add support for `created` on `Checkout.Session`\n  * Add support for `setup_future_usage` on `PaymentIntent.payment_method_options.pix`, `PaymentIntentConfirmParams.payment_method_options.pix`, `PaymentIntentCreateParams.payment_method_options.pix`, and `PaymentIntentUpdateParams.payment_method_options.pix`\n  * Deprecate `CheckoutSessionCreateParams.subscription_data.items` (use the `line_items` param instead). This will be removed in the next major version.\n* [#1563](https://github.com/stripe/stripe-node/pull/1563) Migrate other Stripe infrastructure to TS\n* [#1562](https://github.com/stripe/stripe-node/pull/1562) Restore lib after generating\n* [#1551](https://github.com/stripe/stripe-node/pull/1551) Re-introduce Typescript changes\n\n## 10.11.0 - 2022-09-22\n* [#1560](https://github.com/stripe/stripe-node/pull/1560) API Updates\n  * Add support for `terms_of_service` on `Checkout.Session.consent_collection`, `Checkout.Session.consent`, `CheckoutSessionCreateParams.consent_collection`, `PaymentLink.consent_collection`, and `PaymentLinkCreateParams.consent_collection`\n  * \u26A0\uFE0F  Remove support for `plan` on `CheckoutSessionCreateParams.payment_method_options.card.installments`. The property was mistakenly released and never worked.\n  * Add support for `statement_descriptor` on `PaymentIntentIncrementAuthorizationParams`\n  * Change `SubscriptionSchedule.phases[].currency` to be required\n\n\n## 10.10.0 - 2022-09-15\n* [#1552](https://github.com/stripe/stripe-node/pull/1552) API Updates\n  * Add support for `pix` on `Charge.payment_method_details`, `Checkout.Session.payment_method_options`, `CheckoutSessionCreateParams.payment_method_options`, `PaymentIntent.payment_method_options`, `PaymentIntentConfirmParams.payment_method_data`, `PaymentIntentConfirmParams.payment_method_options`, `PaymentIntentCreateParams.payment_method_data`, `PaymentIntentCreateParams.payment_method_options`, `PaymentIntentUpdateParams.payment_method_data`, `PaymentIntentUpdateParams.payment_method_options`, `PaymentMethodCreateParams`, `PaymentMethod`, `SetupIntentConfirmParams.payment_method_data`, `SetupIntentCreateParams.payment_method_data`, and `SetupIntentUpdateParams.payment_method_data`\n  * Add support for new value `pix` on enum `CheckoutSessionCreateParams.payment_method_types[]`\n  * Add support for new value `pix` on enums `CustomerListPaymentMethodsParams.type` and `PaymentMethodListParams.type`\n  * Add support for `from_invoice` on `InvoiceCreateParams` and `Invoice`\n  * Add support for `latest_revision` on `Invoice`\n  * Add support for `amount` on `IssuingDisputeCreateParams` and `IssuingDisputeUpdateParams`\n  * Add support for new value `pix` on enums `PaymentIntentConfirmParams.payment_method_data.type`, `PaymentIntentCreateParams.payment_method_data.type`, `PaymentIntentUpdateParams.payment_method_data.type`, `SetupIntentConfirmParams.payment_method_data.type`, `SetupIntentCreateParams.payment_method_data.type`, and `SetupIntentUpdateParams.payment_method_data.type`\n  * Add support for `pix_display_qr_code` on `PaymentIntent.next_action`\n  * Add support for new value `pix` on enums `PaymentLink.payment_method_types[]`, `PaymentLinkCreateParams.payment_method_types[]`, and `PaymentLinkUpdateParams.payment_method_types[]`\n  * Add support for new value `pix` on enum `PaymentMethodCreateParams.type`\n  * Add support for new value `pix` on enum `PaymentMethod.type`\n  * Add support for `created` on `Treasury.CreditReversal` and `Treasury.DebitReversal`\n\n## 10.9.0 - 2022-09-09\n* [#1549](https://github.com/stripe/stripe-node/pull/1549) API Updates\n  * Add support for new value `terminal_reader_splashscreen` on enums `File.purpose` and `FileListParams.purpose`\n  * Add support for `require_signature` on `Issuing.Card.shipping` and `IssuingCardCreateParams.shipping`\n\n## 10.8.0 - 2022-09-07\n* [#1544](https://github.com/stripe/stripe-node/pull/1544) API Updates\n  * Add support for new value `terminal_reader_splashscreen` on enums `File.purpose` and `FileListParams.purpose`\n\n## 10.7.0 - 2022-08-31\n* [#1540](https://github.com/stripe/stripe-node/pull/1540) API Updates\n  * Add support for new values `de-CH`, `en-CH`, `en-PL`, `en-PT`, `fr-CH`, `it-CH`, `pl-PL`, and `pt-PT` on enums `OrderCreateParams.payment.settings.payment_method_options.klarna.preferred_locale`, `OrderUpdateParams.payment.settings.payment_method_options.klarna.preferred_locale`, `PaymentIntentConfirmParams.payment_method_options.klarna.preferred_locale`, `PaymentIntentCreateParams.payment_method_options.klarna.preferred_locale`, and `PaymentIntentUpdateParams.payment_method_options.klarna.preferred_locale`\n  * Add support for `description` on `PaymentLink.subscription_data` and `PaymentLinkCreateParams.subscription_data`\n\n## 10.6.0 - 2022-08-26\n* [#1534](https://github.com/stripe/stripe-node/pull/1534) API Updates\n  * Change `Account.company.name`, `Charge.refunds`, `PaymentIntent.charges`, `Product.caption`, `Product.statement_descriptor`, `Product.unit_label`, `Terminal.Configuration.tipping.aud.fixed_amounts`, `Terminal.Configuration.tipping.aud.percentages`, `Terminal.Configuration.tipping.cad.fixed_amounts`, `Terminal.Configuration.tipping.cad.percentages`, `Terminal.Configuration.tipping.chf.fixed_amounts`, `Terminal.Configuration.tipping.chf.percentages`, `Terminal.Configuration.tipping.czk.fixed_amounts`, `Terminal.Configuration.tipping.czk.percentages`, `Terminal.Configuration.tipping.dkk.fixed_amounts`, `Terminal.Configuration.tipping.dkk.percentages`, `Terminal.Configuration.tipping.eur.fixed_amounts`, `Terminal.Configuration.tipping.eur.percentages`, `Terminal.Configuration.tipping.gbp.fixed_amounts`, `Terminal.Configuration.tipping.gbp.percentages`, `Terminal.Configuration.tipping.hkd.fixed_amounts`, `Terminal.Configuration.tipping.hkd.percentages`, `Terminal.Configuration.tipping.myr.fixed_amounts`, `Terminal.Configuration.tipping.myr.percentages`, `Terminal.Configuration.tipping.nok.fixed_amounts`, `Terminal.Configuration.tipping.nok.percentages`, `Terminal.Configuration.tipping.nzd.fixed_amounts`, `Terminal.Configuration.tipping.nzd.percentages`, `Terminal.Configuration.tipping.sek.fixed_amounts`, `Terminal.Configuration.tipping.sek.percentages`, `Terminal.Configuration.tipping.sgd.fixed_amounts`, `Terminal.Configuration.tipping.sgd.percentages`, `Terminal.Configuration.tipping.usd.fixed_amounts`, `Terminal.Configuration.tipping.usd.percentages`, `Treasury.FinancialAccount.active_features`, `Treasury.FinancialAccount.pending_features`, `Treasury.FinancialAccount.platform_restrictions`, and `Treasury.FinancialAccount.restricted_features` to be optional\n    * This is a bug fix. These fields were all actually optional and not guaranteed to be returned by the Stripe API, however the type annotations did not correctly reflect this.\n    * Fixes https://github.com/stripe/stripe-node/issues/1518.\n  * Add support for `login_page` on `BillingPortal.Configuration`, `BillingPortalConfigurationCreateParams`, and `BillingPortalConfigurationUpdateParams`\n  * Add support for new value `deutsche_bank_ag` on enums `Charge.payment_method_details.eps.bank`, `PaymentIntentConfirmParams.payment_method_data.eps.bank`, `PaymentIntentCreateParams.payment_method_data.eps.bank`, `PaymentIntentUpdateParams.payment_method_data.eps.bank`, `PaymentMethod.eps.bank`, `PaymentMethodCreateParams.eps.bank`, `SetupIntentConfirmParams.payment_method_data.eps.bank`, `SetupIntentCreateParams.payment_method_data.eps.bank`, and `SetupIntentUpdateParams.payment_method_data.eps.bank`\n  * Add support for `customs` and `phone_number` on `Issuing.Card.shipping` and `IssuingCardCreateParams.shipping`\n  * Add support for `description` on `Quote.subscription_data`, `QuoteCreateParams.subscription_data`, `QuoteUpdateParams.subscription_data`, `SubscriptionSchedule.default_settings`, `SubscriptionSchedule.phases[]`, `SubscriptionScheduleCreateParams.default_settings`, `SubscriptionScheduleCreateParams.phases[]`, `SubscriptionScheduleUpdateParams.default_settings`, and `SubscriptionScheduleUpdateParams.phases[]`\n\n* [#1532](https://github.com/stripe/stripe-node/pull/1532) Update coveralls step to run for one node version, remove finish step\n* [#1531](https://github.com/stripe/stripe-node/pull/1531) Regen yarn.lock.\n\n## 10.5.0 - 2022-08-24\n* [#1527](https://github.com/stripe/stripe-node/pull/1527) fix: Update FetchHttpClient to send empty string for empty POST/PUT/PATCH requests.\n* [#1528](https://github.com/stripe/stripe-node/pull/1528) Update README.md to use a new NOTE notation\n* [#1526](https://github.com/stripe/stripe-node/pull/1526) Add test coverage using Coveralls\n\n## 10.4.0 - 2022-08-23\n* [#1520](https://github.com/stripe/stripe-node/pull/1520) Add beta readme.md section\n* [#1524](https://github.com/stripe/stripe-node/pull/1524) API Updates\n  * Change `Terminal.Reader.action` to be required\n  * Change `TreasuryOutboundTransferCreateParams.destination_payment_method` to be optional\n  * Change type of `Treasury.OutboundTransfer.destination_payment_method` from `string` to `string | null`\n  * Change the return type of `Customer.fundCashBalance` test helper from `CustomerBalanceTransaction` to `CustomerCashBalanceTransaction`.\n    * This would generally be considered a breaking change, but we've worked with all existing users to migrate and are comfortable releasing this as a minor as it is solely a test helper method. This was essentially broken prior to this change.\n\n\n## 10.3.0 - 2022-08-19\n* [#1516](https://github.com/stripe/stripe-node/pull/1516) API Updates\n  * Add support for new resource `CustomerCashBalanceTransaction`\n  * Remove support for value `paypal` from enums `Order.payment.settings.payment_method_types[]`, `OrderCreateParams.payment.settings.payment_method_types[]`, and `OrderUpdateParams.payment.settings.payment_method_types[]`\n  * Add support for `currency` on `PaymentLink`\n  * Add support for `network` on `SetupIntentConfirmParams.payment_method_options.card`, `SetupIntentCreateParams.payment_method_options.card`, `SetupIntentUpdateParams.payment_method_options.card`, `Subscription.payment_settings.payment_method_options.card`, `SubscriptionCreateParams.payment_settings.payment_method_options.card`, and `SubscriptionUpdateParams.payment_settings.payment_method_options.card`\n  * Change `Subscription.currency` to be required\n  * Change type of `Topup.source` from `Source` to `Source | null`\n  * Add support for new value `customer_cash_balance_transaction.created` on enums `WebhookEndpointCreateParams.enabled_events[]` and `WebhookEndpointUpdateParams.enabled_events[]`\n* [#1515](https://github.com/stripe/stripe-node/pull/1515) Add a support section to the readme\n\n## 10.2.0 - 2022-08-11\n* [#1510](https://github.com/stripe/stripe-node/pull/1510) API Updates\n  * Add support for `payment_method_collection` on `Checkout.Session`, `CheckoutSessionCreateParams`, `PaymentLinkCreateParams`, `PaymentLinkUpdateParams`, and `PaymentLink`\n\n\n## 10.1.0 - 2022-08-09\n* [#1506](https://github.com/stripe/stripe-node/pull/1506) API Updates\n  * Add support for `process_config` on `Terminal.Reader.action.process_payment_intent`\n* [#1505](https://github.com/stripe/stripe-node/pull/1505) Simplify AddressParam definitions\n  - Rename `AddressParam` to `ShippingAddressParam`, and change type of `Source.source_order.shipping.address`, `SourceUpdateParams.SourceOrder.Shipping.address`, and `SessionCreateParams.PaymentIntentData.Shipping.address` to `ShippingAddressParam`\n  - Rename `AccountAddressParam` go `AddressParam`, and change type of `AccountCreateParams.BusinessProfile.support_address`, `AccountCreateParams.Company.address`, `AccountCreateParams.Individual.address `, `AccountCreateParams.Individual.registered_address`, `AccountUpdateParams.BusinessProfile.support_address`, `AccountUpdateParams.Company.address`, `AccountUpdateParams.Individual.address`, `AccountUpdateParams.Individual.registered_address`, `ChargeCreateParams.Shipping.address`, `ChargeUpdateParams.Shipping.address`, `CustomerCreateParams.Shipping.address`, `CustomerUpdateParams.Shipping.address`, `CustomerSourceUpdateParams.Owner.address`, `InvoiceListUpcomingLinesParams.CustomerDetails.Shipping.address`, `InvoiceRetrieveUpcomingParams.CustomerDetails.Shipping.address`, `OrderCreateParams.BillingDetails.address`, `OrderCreateParams.ShippingDetails.address`, `OrderUpdateParams.BillingDetails.address`, `OrderUpdateParams.ShippingDetails.address`, `PaymentIntentCreateParams.Shipping.address`, `PaymentIntentUpdateParams.Shipping.address`, `PaymentIntentConfirmParams.Shipping.address`, `PersonCreateParams.address`, `PersonCreateParams.registered_address`, `PersonUpdateParams.address`, `PersonUpdateParams.registered_address`, `SourceCreateParams.Owner.address`, `SourceUpdateParams.Owner.address`, `TokenCreateParams.Account.Company.address`, `TokenCreateParams.Account.Individual.address`, `TokenCreateParams.Account.Individual.registered_address`, `TokenCreateParams.Person.address`, `TokenCreateParams.Person.registered_address`, and `Terminal.LocationUpdateParams.address` to `AddressParam`\n* [#1503](https://github.com/stripe/stripe-node/pull/1503) API Updates\n  * Add support for `expires_at` on `Apps.Secret` and `AppsSecretCreateParams`\n\n## 10.0.0 - 2022-08-02\n\nThis release includes breaking changes resulting from:\n\n* Moving to use the new API version \"2022-08-01\". To learn more about these changes to Stripe products, see https://stripe.com/docs/upgrades#2022-08-01\n* Cleaning up the SDK to remove deprecated/unused APIs and rename classes/methods/properties to sync with product APIs. Read more detailed description at https://github.com/stripe/stripe-node/wiki/Migration-guide-for-v10.\n\n\"\u26A0\uFE0F\" symbol highlights breaking changes.\n\n* [#1497](https://github.com/stripe/stripe-node/pull/1497) API Updates\n* [#1493](https://github.com/stripe/stripe-node/pull/1493) Next major release changes\n\n### Added\n* Add support for new value `invalid_tos_acceptance` on enums `Account.future_requirements.errors[].code`, `Account.requirements.errors[].code`, `Capability.future_requirements.errors[].code`, `Capability.requirements.errors[].code`, `Person.future_requirements.errors[].code`, and `Person.requirements.errors[].code`\n* Add support for `shipping_cost` and `shipping_details` on `Checkout.Session`\n\n### \u26A0\uFE0F Changed\n* Change type of `business_profile`, `business_type`, `country`, `default_currency`, and `settings` properties on `Account` resource to be nullable.\n* Change type of `currency` property on `Checkout.Session` resource from `string` to `'cad' | 'usd'`.\n* Change location of TypeScript definitions for `CreditNoteLineItemListPreviewParams`, `CreditNoteLineItemListPreviewParams.Line`, `CreditNoteLineItemListPreviewParams.Line.Type`, and `CreditNoteLineItemListPreviewParams.Line.Reason` interfaces from `CreditNoteLineItems.d.ts` to `CreditNotes.d.ts`.\n* Change type of `address`, `currency`, `delinquent`, `discount`, `invoice_prefix`, `name`, `phone`, and `preferred_locales` properties on `Customer` resource to be nullable.\n* Rename `InvoiceRetrieveUpcomingParams` to `InvoiceListUpcomingLinesParams`.\n\n### \u26A0\uFE0F Removed\n* Remove for `AlipayAccount`, `DeletedAlipayAccount`, `BitcoinReceiver`, `DeletedBitcoinReceiver`, `BitcoinTransaction`, and `BitcoinTransactionListParams` definitions.\n* Remove `AlipayAccount` and `BitcoinReceiver` from `CustomerSource`.\n* Remove `Stripe.DeletedAlipayAccount` and `Stripe.DeletedBitcoinReceiver` from possible values of `source` property in `PaymentIntent`.\n* Remove `IssuerFraudRecord`, `IssuerFraudRecordRetrieveParams`, `IssuerFraudRecordListParams`, and `IssuerFraudRecordsResource`, definitions.\n* Remove `treasury.received_credit.reversed` webhook event constant. Please use `treasury.received_credit.returned` instead.\n* Remove `order.payment_failed`, `transfer.failed`, and `transfer.paid`. The events were deprecated.\n* Remove `retrieveDetails` method from `Issuing.Card` resource. The method was unsupported. Read more at https://stripe.com/docs/issuing/cards/virtual.\n* Remove `Issuing.CardDetails` and `CardRetrieveDetailsParams` definition.\n* Remove `IssuerFraudRecords` resource.\n* Remove `Recipient` resource and`recipient` property from `Card` resource.\n* Remove `InvoiceMarkUncollectibleParams` definition.\n* Remove deprecated `Stripe.Errors` and `StripeError` (and derived `StripeCardError`, `StripeInvalidRequestError`, `StripeAPIError`, `StripeAuthenticationError`,  `StripePermissionError`, `StripeRateLimitError`, `StripeConnectionError`, `StripeSignatureVerificationError`, `StripeIdempotencyError`, and `StripeInvalidGrantError`)  definitions.\n* Remove `redirect_url` from `LoginLinks` definition. The property is no longer supported.\n* Remove `LineItemListParams` definition. The interface was no longer in use.\n\n### \u26A0\uFE0F Renamed\n* Rename `listUpcomingLineItems` method on `Invoice` resource to `listUpcomingLines`.\n* Rename `InvoiceLineItemListUpcomingParams` to `InvoiceListUpcomingLinesParams`.\n* Rename `InvoiceRetrieveUpcomingParams` to `InvoiceListUpcomingLinesParams`.\n\n## 9.16.0 - 2022-07-26\n* [#1492](https://github.com/stripe/stripe-node/pull/1492) API Updates\n  * Add support for new value `exempted` on enums `Charge.payment_method_details.card.three_d_secure.result` and `SetupAttempt.payment_method_details.card.three_d_secure.result`\n  * Add support for `customer_balance` on `Checkout.Session.payment_method_options` and `CheckoutSessionCreateParams.payment_method_options`\n  * Add support for new value `customer_balance` on enum `CheckoutSessionCreateParams.payment_method_types[]`\n  * Add support for new values `en-CA` and `fr-CA` on enums `OrderCreateParams.payment.settings.payment_method_options.klarna.preferred_locale`, `OrderUpdateParams.payment.settings.payment_method_options.klarna.preferred_locale`, `PaymentIntentConfirmParams.payment_method_options.klarna.preferred_locale`, `PaymentIntentCreateParams.payment_method_options.klarna.preferred_locale`, and `PaymentIntentUpdateParams.payment_method_options.klarna.preferred_locale`\n\n## 9.15.0 - 2022-07-25\n* [#1486](https://github.com/stripe/stripe-node/pull/1486) API Updates\n  * Add support for `installments` on `Checkout.Session.payment_method_options.card`, `CheckoutSessionCreateParams.payment_method_options.card`, `Invoice.payment_settings.payment_method_options.card`, `InvoiceCreateParams.payment_settings.payment_method_options.card`, and `InvoiceUpdateParams.payment_settings.payment_method_options.card`\n  * Add support for `default_currency` and `invoice_credit_balance` on `Customer`\n  * Add support for `currency` on `InvoiceCreateParams`\n  * Add support for `default_mandate` on `Invoice.payment_settings`, `InvoiceCreateParams.payment_settings`, and `InvoiceUpdateParams.payment_settings`\n  * Add support for `mandate` on `InvoicePayParams`\n  * Add support for `product_data` on `OrderCreateParams.line_items[]` and `OrderUpdateParams.line_items[]`\n\n\n## 9.14.0 - 2022-07-18\n* [#1477](https://github.com/stripe/stripe-node/pull/1477) API Updates\n  * Add support for `blik_payments` on `Account.capabilities`, `AccountCreateParams.capabilities`, and `AccountUpdateParams.capabilities`\n  * Add support for `blik` on `Charge.payment_method_details`, `Mandate.payment_method_details`, `PaymentIntent.payment_method_options`, `PaymentIntentConfirmParams.payment_method_data`, `PaymentIntentConfirmParams.payment_method_options`, `PaymentIntentCreateParams.payment_method_data`, `PaymentIntentCreateParams.payment_method_options`, `PaymentIntentUpdateParams.payment_method_data`, `PaymentIntentUpdateParams.payment_method_options`, `PaymentMethodCreateParams`, `PaymentMethodUpdateParams`, `PaymentMethod`, `SetupAttempt.payment_method_details`, `SetupIntent.payment_method_options`, `SetupIntentConfirmParams.payment_method_data`, `SetupIntentConfirmParams.payment_method_options`, `SetupIntentCreateParams.payment_method_data`, `SetupIntentCreateParams.payment_method_options`, `SetupIntentUpdateParams.payment_method_data`, and `SetupIntentUpdateParams.payment_method_options`\n  * Change type of `Checkout.Session.consent_collection.promotions`, `CheckoutSessionCreateParams.consent_collection.promotions`, `PaymentLink.consent_collection.promotions`, and `PaymentLinkCreateParams.consent_collection.promotions` from `literal('auto')` to `enum('auto'|'none')`\n  * Add support for new value `blik` on enum `CheckoutSessionCreateParams.payment_method_types[]`\n  * Add support for new value `blik` on enums `CustomerListPaymentMethodsParams.type` and `PaymentMethodListParams.type`\n  * Add support for new value `blik` on enums `PaymentIntentConfirmParams.payment_method_data.type`, `PaymentIntentCreateParams.payment_method_data.type`, `PaymentIntentUpdateParams.payment_method_data.type`, `SetupIntentConfirmParams.payment_method_data.type`, `SetupIntentCreateParams.payment_method_data.type`, and `SetupIntentUpdateParams.payment_method_data.type`\n  * Add support for new value `blik` on enums `PaymentLink.payment_method_types[]`, `PaymentLinkCreateParams.payment_method_types[]`, and `PaymentLinkUpdateParams.payment_method_types[]`\n  * Add support for new value `blik` on enum `PaymentMethodCreateParams.type`\n  * Add support for new value `blik` on enum `PaymentMethod.type`\n* [#1476](https://github.com/stripe/stripe-node/pull/1476) fix: Include trailing slash when passing empty query parameters.\n* [#1475](https://github.com/stripe/stripe-node/pull/1475) Move @types/node to devDependencies\n\n## 9.13.0 - 2022-07-12\n* [#1473](https://github.com/stripe/stripe-node/pull/1473) API Updates\n  * Add support for `customer_details` on `CheckoutSessionListParams`\n  * Change `LineItem.amount_discount` and `LineItem.amount_tax` to be required\n  * Change `Transfer.source_type` to be optional and not nullable\n* [#1471](https://github.com/stripe/stripe-node/pull/1471) Update readme to include a note on beta packages\n\n## 9.12.0 - 2022-07-07\n* [#1468](https://github.com/stripe/stripe-node/pull/1468) API Updates\n  * Add support for `currency` on `CheckoutSessionCreateParams`, `InvoiceUpcomingLinesParams`, `InvoiceUpcomingParams`, `PaymentLinkCreateParams`, `SubscriptionCreateParams`, `SubscriptionSchedule.phases[]`, `SubscriptionScheduleCreateParams.phases[]`, `SubscriptionScheduleUpdateParams.phases[]`, and `Subscription`\n  * Add support for `currency_options` on `CheckoutSessionCreateParams.shipping_options[].shipping_rate_data.fixed_amount`, `CouponCreateParams`, `CouponUpdateParams`, `Coupon`, `OrderCreateParams.shipping_cost.shipping_rate_data.fixed_amount`, `OrderUpdateParams.shipping_cost.shipping_rate_data.fixed_amount`, `PriceCreateParams`, `PriceUpdateParams`, `Price`, `ProductCreateParams.default_price_data`, `PromotionCode.restrictions`, `PromotionCodeCreateParams.restrictions`, `ShippingRate.fixed_amount`, and `ShippingRateCreateParams.fixed_amount`\n  * Add support for `restrictions` on `PromotionCodeUpdateParams`\n  * Add support for `fixed_amount` and `tax_behavior` on `ShippingRateUpdateParams`\n* [#1467](https://github.com/stripe/stripe-node/pull/1467) API Updates\n  * Add support for `customer` on `CheckoutSessionListParams` and `RefundCreateParams`\n  * Add support for `currency` and `origin` on `RefundCreateParams`\n  * Add support for new values `financial_connections.account.created`, `financial_connections.account.deactivated`, `financial_connections.account.disconnected`, `financial_connections.account.reactivated`, and `financial_connections.account.refreshed_balance` on enums `WebhookEndpointCreateParams.enabled_events[]` and `WebhookEndpointUpdateParams.enabled_events[]`\n\n## 9.11.0 - 2022-06-29\n* [#1462](https://github.com/stripe/stripe-node/pull/1462) API Updates\n  * Add support for `deliver_card`, `fail_card`, `return_card`, and `ship_card` test helper methods on resource `Issuing.Card`\n  * Change type of `PaymentLink.payment_method_types[]`, `PaymentLinkCreateParams.payment_method_types[]`, and `PaymentLinkUpdateParams.payment_method_types[]` from `literal('card')` to `enum`\n  * Add support for `hosted_regulatory_receipt_url` on `Treasury.ReceivedCredit` and `Treasury.ReceivedDebit`\n\n## 9.10.0 - 2022-06-23\n* [#1459](https://github.com/stripe/stripe-node/pull/1459) API Updates\n  * Add support for `capture_method` on `PaymentIntentConfirmParams` and `PaymentIntentUpdateParams`\n* [#1458](https://github.com/stripe/stripe-node/pull/1458) API Updates\n  * Add support for `promptpay_payments` on `Account.capabilities`, `AccountCreateParams.capabilities`, and `AccountUpdateParams.capabilities`\n  * Add support for `promptpay` on `Charge.payment_method_details`, `PaymentIntent.payment_method_options`, `PaymentIntentConfirmParams.payment_method_data`, `PaymentIntentConfirmParams.payment_method_options`, `PaymentIntentCreateParams.payment_method_data`, `PaymentIntentCreateParams.payment_method_options`, `PaymentIntentUpdateParams.payment_method_data`, `PaymentIntentUpdateParams.payment_method_options`, `PaymentMethodCreateParams`, `PaymentMethod`, `SetupIntentConfirmParams.payment_method_data`, `SetupIntentCreateParams.payment_method_data`, and `SetupIntentUpdateParams.payment_method_data`\n  * Add support for new value `promptpay` on enum `CheckoutSessionCreateParams.payment_method_types[]`\n  * Add support for `subtotal_excluding_tax` on `CreditNote` and `Invoice`\n  * Add support for `amount_excluding_tax` and `unit_amount_excluding_tax` on `CreditNoteLineItem` and `InvoiceLineItem`\n  * Add support for new value `promptpay` on enums `CustomerListPaymentMethodsParams.type` and `PaymentMethodListParams.type`\n  * Add support for `rendering_options` on `InvoiceCreateParams` and `InvoiceUpdateParams`\n  * Add support for new value `promptpay` on enums `Invoice.payment_settings.payment_method_types[]`, `InvoiceCreateParams.payment_settings.payment_method_types[]`, `InvoiceUpdateParams.payment_settings.payment_method_types[]`, `Subscription.payment_settings.payment_method_types[]`, `SubscriptionCreateParams.payment_settings.payment_method_types[]`, and `SubscriptionUpdateParams.payment_settings.payment_method_types[]`\n  * Add support for `total_excluding_tax` on `Invoice`\n  * Add support for `automatic_payment_methods` on `Order.payment.settings`\n  * Add support for new value `promptpay` on enums `PaymentIntentConfirmParams.payment_method_data.type`, `PaymentIntentCreateParams.payment_method_data.type`, `PaymentIntentUpdateParams.payment_method_data.type`, `SetupIntentConfirmParams.payment_method_data.type`, `SetupIntentCreateParams.payment_method_data.type`, and `SetupIntentUpdateParams.payment_method_data.type`\n  * Add support for `promptpay_display_qr_code` on `PaymentIntent.next_action`\n  * Add support for new value `promptpay` on enum `PaymentMethodCreateParams.type`\n  * Add support for new value `promptpay` on enum `PaymentMethod.type`\n* [#1455](https://github.com/stripe/stripe-node/pull/1455) fix: Stop using path.join to create URLs.\n\n## 9.9.0 - 2022-06-17\n* [#1453](https://github.com/stripe/stripe-node/pull/1453) API Updates\n  * Add support for `fund_cash_balance` test helper method on resource `Customer`\n  * Add support for `statement_descriptor_prefix_kana` and `statement_descriptor_prefix_kanji` on `Account.settings.card_payments`, `Account.settings.payments`, `AccountCreateParams.settings.card_payments`, and `AccountUpdateParams.settings.card_payments`\n  * Add support for `statement_descriptor_suffix_kana` and `statement_descriptor_suffix_kanji` on `Checkout.Session.payment_method_options.card`, `CheckoutSessionCreateParams.payment_method_options.card`, `PaymentIntent.payment_method_options.card`, `PaymentIntentConfirmParams.payment_method_options.card`, `PaymentIntentCreateParams.payment_method_options.card`, and `PaymentIntentUpdateParams.payment_method_options.card`\n  * Add support for `total_excluding_tax` on `CreditNote`\n  * Change type of `CustomerCreateParams.invoice_settings.rendering_options` and `CustomerUpdateParams.invoice_settings.rendering_options` from `rendering_options_param` to `emptyStringable(rendering_options_param)`\n  * Add support for `rendering_options` on `Customer.invoice_settings` and `Invoice`\n* [#1452](https://github.com/stripe/stripe-node/pull/1452) Fix non-conforming changelog entries and port the Makefile fix\n* [#1450](https://github.com/stripe/stripe-node/pull/1450) Only publish stable version to the latest tag\n\n## 9.8.0 - 2022-06-09\n* [#1448](https://github.com/stripe/stripe-node/pull/1448) Add types for extra request options\n* [#1446](https://github.com/stripe/stripe-node/pull/1446) API Updates\n  * Add support for `treasury` on `Account.settings`, `AccountCreateParams.settings`, and `AccountUpdateParams.settings`\n  * Add support for `rendering_options` on `CustomerCreateParams.invoice_settings` and `CustomerUpdateParams.invoice_settings`\n  * Add support for `eu_bank_transfer` on `CustomerCreateFundingInstructionsParams.bank_transfer`, `Invoice.payment_settings.payment_method_options.customer_balance.bank_transfer`, `InvoiceCreateParams.payment_settings.payment_method_options.customer_balance.bank_transfer`, `InvoiceUpdateParams.payment_settings.payment_method_options.customer_balance.bank_transfer`, `Order.payment.settings.payment_method_options.customer_balance.bank_transfer`, `OrderCreateParams.payment.settings.payment_method_options.customer_balance.bank_transfer`, `OrderUpdateParams.payment.settings.payment_method_options.customer_balance.bank_transfer`, `PaymentIntent.payment_method_options.customer_balance.bank_transfer`, `PaymentIntentConfirmParams.payment_method_options.customer_balance.bank_transfer`, `PaymentIntentCreateParams.payment_method_options.customer_balance.bank_transfer`, `PaymentIntentUpdateParams.payment_method_options.customer_balance.bank_transfer`, `Subscription.payment_settings.payment_method_options.customer_balance.bank_transfer`, `SubscriptionCreateParams.payment_settings.payment_method_options.customer_balance.bank_transfer`, and `SubscriptionUpdateParams.payment_settings.payment_method_options.customer_balance.bank_transfer`\n  * Change type of `CustomerCreateFundingInstructionsParams.bank_transfer.requested_address_types[]` from `literal('zengin')` to `enum('iban'|'sort_code'|'spei'|'zengin')`\n  * Change type of `CustomerCreateFundingInstructionsParams.bank_transfer.type`, `Order.payment.settings.payment_method_options.customer_balance.bank_transfer.type`, `OrderCreateParams.payment.settings.payment_method_options.customer_balance.bank_transfer.type`, `OrderUpdateParams.payment.settings.payment_method_options.customer_balance.bank_transfer.type`, `PaymentIntent.next_action.display_bank_transfer_instructions.type`, `PaymentIntent.payment_method_options.customer_balance.bank_transfer.type`, `PaymentIntentConfirmParams.payment_method_options.customer_balance.bank_transfer.type`, `PaymentIntentCreateParams.payment_method_options.customer_balance.bank_transfer.type`, and `PaymentIntentUpdateParams.payment_method_options.customer_balance.bank_transfer.type` from `literal('jp_bank_transfer')` to `enum('eu_bank_transfer'|'gb_bank_transfer'|'jp_bank_transfer'|'mx_bank_transfer')`\n  * Add support for `iban`, `sort_code`, and `spei` on `FundingInstructions.bank_transfer.financial_addresses[]` and `PaymentIntent.next_action.display_bank_transfer_instructions.financial_addresses[]`\n  * Add support for new values `bacs`, `fps`, and `spei` on enums `FundingInstructions.bank_transfer.financial_addresses[].supported_networks[]` and `PaymentIntent.next_action.display_bank_transfer_instructions.financial_addresses[].supported_networks[]`\n  * Add support for new values `sort_code` and `spei` on enums `FundingInstructions.bank_transfer.financial_addresses[].type` and `PaymentIntent.next_action.display_bank_transfer_instructions.financial_addresses[].type`\n  * Change type of `Order.payment.settings.payment_method_options.customer_balance.bank_transfer.requested_address_types[]`, `OrderCreateParams.payment.settings.payment_method_options.customer_balance.bank_transfer.requested_address_types[]`, `OrderUpdateParams.payment.settings.payment_method_options.customer_balance.bank_transfer.requested_address_types[]`, `PaymentIntent.payment_method_options.customer_balance.bank_transfer.requested_address_types[]`, `PaymentIntentConfirmParams.payment_method_options.customer_balance.bank_transfer.requested_address_types[]`, `PaymentIntentCreateParams.payment_method_options.customer_balance.bank_transfer.requested_address_types[]`, and `PaymentIntentUpdateParams.payment_method_options.customer_balance.bank_transfer.requested_address_types[]` from `literal('zengin')` to `enum`\n  * Add support for `custom_unit_amount` on `PriceCreateParams` and `Price`\n\n## 9.7.0 - 2022-06-08\n* [#1441](https://github.com/stripe/stripe-node/pull/1441) API Updates\n  * Add support for `affirm`, `bancontact`, `card`, `ideal`, `p24`, and `sofort` on `Checkout.Session.payment_method_options` and `CheckoutSessionCreateParams.payment_method_options`\n  * Add support for `afterpay_clearpay`, `au_becs_debit`, `bacs_debit`, `eps`, `fpx`, `giropay`, `grabpay`, `klarna`, `paynow`, and `sepa_debit` on `CheckoutSessionCreateParams.payment_method_options`\n  * Add support for `setup_future_usage` on `Checkout.Session.payment_method_options.*` and `CheckoutSessionCreateParams.payment_method_options.*`,\n  * Change `PaymentMethod.us_bank_account.networks` and `SetupIntent.flow_directions` to be required\n  * Add support for `attach_to_self` on `SetupAttempt`, `SetupIntentCreateParams`, `SetupIntentListParams`, and `SetupIntentUpdateParams`\n  * Add support for `flow_directions` on `SetupAttempt`, `SetupIntentCreateParams`, and `SetupIntentUpdateParams`\n\n## 9.6.0 - 2022-06-01\n* [#1439](https://github.com/stripe/stripe-node/pull/1439) API Updates\n  * Add support for `radar_options` on `ChargeCreateParams`, `Charge`, `PaymentIntentConfirmParams.payment_method_data`, `PaymentIntentConfirmParams`, `PaymentIntentCreateParams.payment_method_data`, `PaymentIntentCreateParams`, `PaymentIntentUpdateParams.payment_method_data`, `PaymentMethodCreateParams`, `PaymentMethod`, `SetupIntentConfirmParams.payment_method_data`, `SetupIntentCreateParams.payment_method_data`, and `SetupIntentUpdateParams.payment_method_data`\n  * Add support for `account_holder_name`, `account_number`, `account_type`, `bank_code`, `bank_name`, `branch_code`, and `branch_name` on `FundingInstructions.bank_transfer.financial_addresses[].zengin` and `PaymentIntent.next_action.display_bank_transfer_instructions.financial_addresses[].zengin`\n  * Add support for new values `en-AU` and `en-NZ` on enums `OrderCreateParams.payment.settings.payment_method_options.klarna.preferred_locale`, `OrderUpdateParams.payment.settings.payment_method_options.klarna.preferred_locale`, `PaymentIntentConfirmParams.payment_method_options.klarna.preferred_locale`, `PaymentIntentCreateParams.payment_method_options.klarna.preferred_locale`, and `PaymentIntentUpdateParams.payment_method_options.klarna.preferred_locale`\n  * Change type of `Order.payment.settings.payment_method_options.customer_balance.bank_transfer.type` and `PaymentIntent.payment_method_options.customer_balance.bank_transfer.type` from `enum` to `literal('jp_bank_transfer')`\n    * This is technically breaking in Typescript, but now accurately represents the behavior that was allowed by the server. We haven't historically treated breaking Typescript changes as requiring a major.\n  * Change `PaymentIntent.next_action.display_bank_transfer_instructions.hosted_instructions_url` to be required\n  * Add support for `network` on `SetupIntent.payment_method_options.card`\n  * Add support for new value `simulated_wisepos_e` on enums `Terminal.Reader.device_type` and `TerminalReaderListParams.device_type`\n\n\n## 9.5.0 - 2022-05-26\n* [#1434](https://github.com/stripe/stripe-node/pull/1434) API Updates\n  * Add support for `affirm_payments` and `link_payments` on `Account.capabilities`, `AccountCreateParams.capabilities`, and `AccountUpdateParams.capabilities`\n  * Add support for `id_number_secondary` on `AccountCreateParams.individual`, `AccountUpdateParams.individual`, `PersonCreateParams`, `PersonUpdateParams`, `TokenCreateParams.account.individual`, and `TokenCreateParams.person`\n  * Add support for new value `affirm` on enum `CheckoutSessionCreateParams.payment_method_types[]`\n  * Add support for `hosted_instructions_url` on `PaymentIntent.next_action.display_bank_transfer_instructions`\n  * Add support for `id_number_secondary_provided` on `Person`\n  * Add support for `card_issuing` on `TreasuryFinancialAccountCreateParams.features`, `TreasuryFinancialAccountUpdateFeaturesParams`, and `TreasuryFinancialAccountUpdateParams.features`\n\n* [#1432](https://github.com/stripe/stripe-node/pull/1432) docs: Update HttpClient documentation to remove experimental status.\n\n## 9.4.0 - 2022-05-23\n* [#1431](https://github.com/stripe/stripe-node/pull/1431) API Updates\n  * Add support for `treasury` on `Account.capabilities`, `AccountCreateParams.capabilities`, and `AccountUpdateParams.capabilities`\n\n## 9.3.0 - 2022-05-23\n* [#1430](https://github.com/stripe/stripe-node/pull/1430) API Updates\n  * Add support for new resource `Apps.Secret`\n  * Add support for `affirm` on `Charge.payment_method_details`, `PaymentIntent.payment_method_options`, `PaymentIntentConfirmParams.payment_method_data`, `PaymentIntentConfirmParams.payment_method_options`, `PaymentIntentCreateParams.payment_method_data`, `PaymentIntentCreateParams.payment_method_options`, `PaymentIntentUpdateParams.payment_method_data`, `PaymentIntentUpdateParams.payment_method_options`, `PaymentMethodCreateParams`, `PaymentMethodUpdateParams`, `PaymentMethod`, `SetupIntentConfirmParams.payment_method_data`, `SetupIntentCreateParams.payment_method_data`, and `SetupIntentUpdateParams.payment_method_data`\n  * Add support for `link` on `Charge.payment_method_details`, `Mandate.payment_method_details`, `OrderCreateParams.payment.settings.payment_method_options`, `OrderUpdateParams.payment.settings.payment_method_options`, `PaymentIntent.payment_method_options`, `PaymentIntentConfirmParams.payment_method_data`, `PaymentIntentConfirmParams.payment_method_options`, `PaymentIntentCreateParams.payment_method_data`, `PaymentIntentCreateParams.payment_method_options`, `PaymentIntentUpdateParams.payment_method_data`, `PaymentIntentUpdateParams.payment_method_options`, `PaymentMethodCreateParams`, `PaymentMethodUpdateParams`, `PaymentMethod`, `SetupAttempt.payment_method_details`, `SetupIntent.payment_method_options`, `SetupIntentConfirmParams.payment_method_data`, `SetupIntentConfirmParams.payment_method_options`, `SetupIntentCreateParams.payment_method_data`, `SetupIntentCreateParams.payment_method_options`, `SetupIntentUpdateParams.payment_method_data`, and `SetupIntentUpdateParams.payment_method_options`\n  * Add support for new values `affirm` and `link` on enums `CustomerListPaymentMethodsParams.type` and `PaymentMethodListParams.type`\n  * Add support for new value `link` on enums `Invoice.payment_settings.payment_method_types[]`, `InvoiceCreateParams.payment_settings.payment_method_types[]`, `InvoiceUpdateParams.payment_settings.payment_method_types[]`, `Subscription.payment_settings.payment_method_types[]`, `SubscriptionCreateParams.payment_settings.payment_method_types[]`, and `SubscriptionUpdateParams.payment_settings.payment_method_types[]`\n  * Add support for new values `affirm` and `link` on enums `PaymentIntentConfirmParams.payment_method_data.type`, `PaymentIntentCreateParams.payment_method_data.type`, `PaymentIntentUpdateParams.payment_method_data.type`, `SetupIntentConfirmParams.payment_method_data.type`, `SetupIntentCreateParams.payment_method_data.type`, and `SetupIntentUpdateParams.payment_method_data.type`\n  * Add support for new values `affirm` and `link` on enum `PaymentMethodCreateParams.type`\n  * Add support for new values `affirm` and `link` on enum `PaymentMethod.type`\n\n## 9.2.0 - 2022-05-19\n* [#1422](https://github.com/stripe/stripe-node/pull/1422) API Updates\n  * Add support for new `Treasury` APIs: `CreditReversal`, `DebitReversal`, `FinancialAccountFeatures`, `FinancialAccount`, `FlowDetails`, `InboundTransfer`, `OutboundPayment`, `OutboundTransfer`, `ReceivedCredit`, `ReceivedDebit`, `TransactionEntry`, and `Transaction`\n  * Add support for `treasury` on `Issuing.Authorization`, `Issuing.Dispute`, `Issuing.Transaction`, and `IssuingDisputeCreateParams`\n  * Add support for `retrieve_payment_method` method on resource `Customer`\n  * Add support for `list_owners` and `list` methods on resource `FinancialConnections.Account`\n  * Change `BillingPortalConfigurationCreateParams.features.customer_update.allowed_updates` to be optional\n  * Change type of `BillingPortal.Session.return_url` from `string` to `nullable(string)`\n  * Add support for `afterpay_clearpay`, `au_becs_debit`, `bacs_debit`, `eps`, `fpx`, `giropay`, `grabpay`, `klarna`, `paynow`, and `sepa_debit` on `Checkout.Session.payment_method_options`\n  * Add support for `financial_account` on `Issuing.Card` and `IssuingCardCreateParams`\n  * Add support for `client_secret` on `Order`\n  * Add support for `networks` on `PaymentIntentConfirmParams.payment_method_options.us_bank_account`, `PaymentIntentCreateParams.payment_method_options.us_bank_account`, `PaymentIntentUpdateParams.payment_method_options.us_bank_account`, `PaymentMethod.us_bank_account`, `SetupIntentConfirmParams.payment_method_options.us_bank_account`, `SetupIntentCreateParams.payment_method_options.us_bank_account`, and `SetupIntentUpdateParams.payment_method_options.us_bank_account`\n  * Add support for `attach_to_self` and `flow_directions` on `SetupIntent`\n  * Add support for `save_default_payment_method` on `Subscription.payment_settings`, `SubscriptionCreateParams.payment_settings`, and `SubscriptionUpdateParams.payment_settings`\n  * Add support for `czk` on `Terminal.Configuration.tipping`, `TerminalConfigurationCreateParams.tipping`, and `TerminalConfigurationUpdateParams.tipping`\n\n## 9.1.0 - 2022-05-11\n* [#1420](https://github.com/stripe/stripe-node/pull/1420) API Updates\n  * Add support for `description` on `CheckoutSessionCreateParams.subscription_data`, `SubscriptionCreateParams`, `SubscriptionUpdateParams`, and `Subscription`\n  * Add support for `consent_collection`, `payment_intent_data`, `shipping_options`, `submit_type`, and `tax_id_collection` on `PaymentLinkCreateParams` and `PaymentLink`\n  * Add support for `customer_creation` on `PaymentLinkCreateParams`, `PaymentLinkUpdateParams`, and `PaymentLink`\n  * Add support for `metadata` on `SubscriptionSchedule.phases[]`, `SubscriptionScheduleCreateParams.phases[]`, and `SubscriptionScheduleUpdateParams.phases[]`\n  * Add support for new value `billing_portal.session.created` on enums `WebhookEndpointCreateParams.enabled_events[]` and `WebhookEndpointUpdateParams.enabled_events[]`\n\n## 9.0.0 - 2022-05-09\nMajor version release - The [migration guide](https://github.com/stripe/stripe-node/wiki/Migration-Guide-for-v9) contains a detailed list of backwards-incompatible changes with upgrade instructions.\n(\u26A0\uFE0F = breaking changes):\n* \u26A0\uFE0F[#1336](https://github.com/stripe/stripe-node/pull/1336) feat(http-client): retry closed connection errors\n* [#1415](https://github.com/stripe/stripe-node/pull/1415) [#1417](https://github.com/stripe/stripe-node/pull/1417) API Updates\n  * \u26A0\uFE0F Replace the legacy `Order` API with the new `Order` API.\n    * Resource modified: `Order`.\n    * New methods: `cancel`, `list_line_items`, `reopen`, and `submit`\n    * Removed methods: `pay` and `return_order`\n    * Removed resources: `OrderItem` and `OrderReturn`\n    * Removed references from other resources: `Charge.order`\n  * Add support for `amount_discount`, `amount_tax`, and `product` on `LineItem`\n  * Change type of `Charge.shipping.name`, `Checkout.Session.shipping.name`, `Customer.shipping.name`, `Invoice.customer_shipping.name`, `PaymentIntent.shipping.name`, `ShippingDetails.name`, and `Source.source_order.shipping.name` from `nullable(string)` to `string`\n\n## 8.222.0 - 2022-05-05\n* [#1414](https://github.com/stripe/stripe-node/pull/1414) API Updates\n  * Add support for `default_price_data` on `ProductCreateParams`\n  * Add support for `default_price` on `ProductUpdateParams` and `Product`\n  * Add support for `instructions_email` on `RefundCreateParams` and `Refund`\n\n\n## 8.221.0 - 2022-05-05\n* [#1413](https://github.com/stripe/stripe-node/pull/1413) API Updates\n  * Add support for new resources `FinancialConnections.AccountOwner`, `FinancialConnections.AccountOwnership`, `FinancialConnections.Account`, and `FinancialConnections.Session`\n  * Add support for `financial_connections` on `Checkout.Session.payment_method_options.us_bank_account`, `CheckoutSessionCreateParams.payment_method_options.us_bank_account`, `Invoice.payment_settings.payment_method_options.us_bank_account`, `InvoiceCreateParams.payment_settings.payment_method_options.us_bank_account`, `InvoiceUpdateParams.payment_settings.payment_method_options.us_bank_account`, `PaymentIntent.payment_method_options.us_bank_account`, `PaymentIntentConfirmParams.payment_method_options.us_bank_account`, `PaymentIntentCreateParams.payment_method_options.us_bank_account`, `PaymentIntentUpdateParams.payment_method_options.us_bank_account`, `SetupIntent.payment_method_options.us_bank_account`, `SetupIntentConfirmParams.payment_method_options.us_bank_account`, `SetupIntentCreateParams.payment_method_options.us_bank_account`, `SetupIntentUpdateParams.payment_method_options.us_bank_account`, `Subscription.payment_settings.payment_method_options.us_bank_account`, `SubscriptionCreateParams.payment_settings.payment_method_options.us_bank_account`, and `SubscriptionUpdateParams.payment_settings.payment_method_options.us_bank_account`\n  * Add support for `financial_connections_account` on `PaymentIntentConfirmParams.payment_method_data.us_bank_account`, `PaymentIntentCreateParams.payment_method_data.us_bank_account`, `PaymentIntentUpdateParams.payment_method_data.us_bank_account`, `PaymentMethod.us_bank_account`, `PaymentMethodCreateParams.us_bank_account`, `SetupIntentConfirmParams.payment_method_data.us_bank_account`, `SetupIntentCreateParams.payment_method_data.us_bank_account`, and `SetupIntentUpdateParams.payment_method_data.us_bank_account`\n\n* [#1410](https://github.com/stripe/stripe-node/pull/1410) API Updates\n  * Add support for `registered_address` on `AccountCreateParams.individual`, `AccountUpdateParams.individual`, `PersonCreateParams`, `PersonUpdateParams`, `Person`, `TokenCreateParams.account.individual`, and `TokenCreateParams.person`\n  * Change type of `PaymentIntent.amount_details.tip.amount` from `nullable(integer)` to `integer`\n  * Change `PaymentIntent.amount_details.tip.amount` to be optional\n  * Add support for `payment_method_data` on `SetupIntentConfirmParams`, `SetupIntentCreateParams`, and `SetupIntentUpdateParams`\n* [#1409](https://github.com/stripe/stripe-node/pull/1409) Update autoPagination tests to be hermetic.\n* [#1411](https://github.com/stripe/stripe-node/pull/1411) Enable CI on beta branch\n\n## 8.220.0 - 2022-05-03\n* [#1407](https://github.com/stripe/stripe-node/pull/1407) API Updates\n  * Add support for new resource `CashBalance`\n  * Change type of `BillingPortal.Configuration.application` from `$Application` to `deletable($Application)`\n  * Add support for `alipay` on `Checkout.Session.payment_method_options` and `CheckoutSessionCreateParams.payment_method_options`\n  * Change type of `CheckoutSessionCreateParams.payment_method_options.konbini.expires_after_days` from `emptyStringable(integer)` to `integer`\n  * Add support for new value `eu_oss_vat` on enums `Checkout.Session.customer_details.tax_ids[].type`, `Invoice.customer_tax_ids[].type`, and `TaxId.type`\n  * Add support for new value `eu_oss_vat` on enums `CustomerCreateParams.tax_id_data[].type`, `InvoiceUpcomingLinesParams.customer_details.tax_ids[].type`, `InvoiceUpcomingParams.customer_details.tax_ids[].type`, and `TaxIdCreateParams.type`\n  * Add support for `cash_balance` on `Customer`\n  * Add support for `application` on `Invoice`, `Quote`, `SubscriptionSchedule`, and `Subscription`\n* [#1403](https://github.com/stripe/stripe-node/pull/1403) Add tests for specifying a custom host on StripeMethod.\n\n## 8.219.0 - 2022-04-21\n* [#1398](https://github.com/stripe/stripe-node/pull/1398) API Updates\n  * Add support for `expire` test helper method on resource `Refund`\n  * Change type of `BillingPortal.Configuration.application` from `string` to `expandable($Application)`\n  * Change `IssuingDisputeCreateParams.transaction` to be optional\n\n## 8.218.0 - 2022-04-18\n* [#1396](https://github.com/stripe/stripe-node/pull/1396) API Updates\n  * Add support for new resources `FundingInstructions` and `Terminal.Configuration`\n  * Add support for `create_funding_instructions` method on resource `Customer`\n  * Add support for new value `customer_balance` as a payment method `type`.\n  * Add support for `customer_balance` on `Charge.payment_method_details`, `PaymentIntent.payment_method_options`, `PaymentIntentConfirmParams.payment_method_data`, `PaymentIntentConfirmParams.payment_method_options`, `PaymentIntentCreateParams.payment_method_data`, `PaymentIntentCreateParams.payment_method_options`, `PaymentIntentUpdateParams.payment_method_data`, `PaymentIntentUpdateParams.payment_method_options`, `PaymentMethodCreateParams`, and `PaymentMethod`\n  * Add support for `cash_balance` on `CustomerCreateParams` and `CustomerUpdateParams`\n  * Add support for `amount_details` on `PaymentIntent`\n  * Add support for `display_bank_transfer_instructions` on `PaymentIntent.next_action`\n  * Add support for `configuration_overrides` on `Terminal.Location`, `TerminalLocationCreateParams`, and `TerminalLocationUpdateParams`\n\n## 8.217.0 - 2022-04-13\n* [#1395](https://github.com/stripe/stripe-node/pull/1395) API Updates\n  * Add support for `increment_authorization` method on resource `PaymentIntent`\n  * Add support for `incremental_authorization_supported` on `Charge.payment_method_details.card_present`\n  * Add support for `request_incremental_authorization_support` on `PaymentIntent.payment_method_options.card_present`, `PaymentIntentConfirmParams.payment_method_options.card_present`, `PaymentIntentCreateParams.payment_method_options.card_present`, and `PaymentIntentUpdateParams.payment_method_options.card_present`\n\n## 8.216.0 - 2022-04-08\n* [#1391](https://github.com/stripe/stripe-node/pull/1391) API Updates\n  * Add support for `apply_customer_balance` method on resource `PaymentIntent`\n  * Add support for new value `cash_balance.funds_available` on enums `WebhookEndpointCreateParams.enabled_events[]` and `WebhookEndpointUpdateParams.enabled_events[]`\n\n## 8.215.0 - 2022-04-01\n* [#1389](https://github.com/stripe/stripe-node/pull/1389) API Updates\n  * Add support for `bank_transfer_payments` on `Account.capabilities`, `AccountCreateParams.capabilities`, and `AccountUpdateParams.capabilities`\n  * Add support for `capture_before` on `Charge.payment_method_details.card_present`\n  * Add support for `address` and `name` on `Checkout.Session.customer_details`\n  * Add support for `customer_balance` on `Invoice.payment_settings.payment_method_options`, `InvoiceCreateParams.payment_settings.payment_method_options`, `InvoiceUpdateParams.payment_settings.payment_method_options`, `Subscription.payment_settings.payment_method_options`, `SubscriptionCreateParams.payment_settings.payment_method_options`, and `SubscriptionUpdateParams.payment_settings.payment_method_options`\n  * Add support for new value `customer_balance` on enums `Invoice.payment_settings.payment_method_types[]`, `InvoiceCreateParams.payment_settings.payment_method_types[]`, `InvoiceUpdateParams.payment_settings.payment_method_types[]`, `Subscription.payment_settings.payment_method_types[]`, `SubscriptionCreateParams.payment_settings.payment_method_types[]`, and `SubscriptionUpdateParams.payment_settings.payment_method_types[]`\n  * Add support for `request_extended_authorization` on `PaymentIntent.payment_method_options.card_present`, `PaymentIntentConfirmParams.payment_method_options.card_present`, `PaymentIntentCreateParams.payment_method_options.card_present`, and `PaymentIntentUpdateParams.payment_method_options.card_present`\n  * Add support for new values `payment_intent.partially_funded`, `terminal.reader.action_failed`, and `terminal.reader.action_succeeded` on enums `WebhookEndpointCreateParams.enabled_events[]` and `WebhookEndpointUpdateParams.enabled_events[]`\n\n* [#1388](https://github.com/stripe/stripe-node/pull/1388) Stop sending Content-Length header for verbs which don't have bodies.\n  * Fixes https://github.com/stripe/stripe-node/issues/1360.\n\n## 8.214.0 - 2022-03-30\n* [#1386](https://github.com/stripe/stripe-node/pull/1386) API Updates\n  * Add support for `cancel_action`, `process_payment_intent`, `process_setup_intent`, and `set_reader_display` methods on resource `Terminal.Reader`\n  * Change `Charge.failure_balance_transaction`, `Invoice.payment_settings.payment_method_options.us_bank_account`, `PaymentIntent.next_action.verify_with_microdeposits.microdeposit_type`, `SetupIntent.next_action.verify_with_microdeposits.microdeposit_type`, and `Subscription.payment_settings.payment_method_options.us_bank_account` to be required\n  * Add support for `action` on `Terminal.Reader`\n\n## 8.213.0 - 2022-03-28\n* [#1383](https://github.com/stripe/stripe-node/pull/1383) API Updates\n  * Add support for Search API\n    * Add support for `search` method on resources `Charge`, `Customer`, `Invoice`, `PaymentIntent`, `Price`, `Product`, and `Subscription`\n* [#1384](https://github.com/stripe/stripe-node/pull/1384) Bump qs package to latest.\n\n## 8.212.0 - 2022-03-25\n* [#1381](https://github.com/stripe/stripe-node/pull/1381) API Updates\n  * Add support for PayNow and US Bank Accounts Debits payments\n      * **Charge** ([API ref](https://stripe.com/docs/api/charges/object#charge_object-payment_method_details))\n          * Add support for `paynow` and `us_bank_account` on `Charge.payment_method_details`\n      * **Customer** ([API ref](https://stripe.com/docs/api/payment_methods/customer_list#list_customer_payment_methods-type))\n          * Add support for new values `paynow` and `us_bank_account` on enum `CustomerListPaymentMethodsParams.type`\n      * **Payment Intent** ([API ref](https://stripe.com/docs/api/payment_intents/object#payment_intent_object-payment_method_options))\n          * Add support for `paynow` and `us_bank_account` on `payment_method_options` on `PaymentIntent`, `PaymentIntentCreateParams`, `PaymentIntentUpdateParams`, and `PaymentIntentConfirmParams`\n          * Add support for `paynow` and `us_bank_account` on `payment_method_data` on `PaymentIntentCreateParams`, `PaymentIntentUpdateParams`, and `PaymentIntentConfirmParams`\n          * Add support for `paynow_display_qr_code` on `PaymentIntent.next_action`\n          * Add support for new values `paynow` and `us_bank_account` on enums `payment_method_data.type` on `PaymentIntentCreateParams`, and `PaymentIntentUpdateParams`, and `PaymentIntentConfirmParams`\n      * **Setup Intent** ([API ref](https://stripe.com/docs/api/setup_intents/object#setup_intent_object-payment_method_options))\n          * Add support for `us_bank_account` on `payment_method_options` on `SetupIntent`, `SetupIntentCreateParams`, `SetupIntentUpdateParams`, and `SetupIntentConfirmParams`\n      * **Setup Attempt** ([API ref](https://stripe.com/docs/api/setup_attempts/object#setup_attempt_object-payment_method_details))\n          * Add support for `us_bank_account` on `SetupAttempt.payment_method_details`\n      * **Payment Method** ([API ref](https://stripe.com/docs/api/payment_methods/object#payment_method_object-paynow))\n          * Add support for `paynow` and `us_bank_account` on `PaymentMethod` and `PaymentMethodCreateParams`\n          * Add support for `us_bank_account` on `PaymentMethodUpdateParams`\n          * Add support for new values `paynow` and `us_bank_account` on enums `PaymentMethod.type`, `PaymentMethodCreateParams.type`. and `PaymentMethodListParams.type`\n      * **Checkout Session** ([API ref](https://stripe.com/docs/api/checkout/sessions/create#create_checkout_session-payment_method_types))\n          * Add support for `us_bank_account` on `payment_method_options` on `Checkout.Session` and `CheckoutSessionCreateParams`\n          * Add support for new values `paynow` and `us_bank_account` on enum `CheckoutSessionCreateParams.payment_method_types[]`\n      * **Invoice** ([API ref](https://stripe.com/docs/api/invoices/object#invoice_object-payment_settings-payment_method_types))\n          * Add support for `us_bank_account` on `payment_settings.payment_method_options` on `Invoice`, `InvoiceCreateParams`, and `InvoiceUpdateParams`\n          * Add support for new values `paynow` and `us_bank_account` on enums `payment_settings.payment_method_types[]` on `Invoice`, `InvoiceCreateParams`, and `InvoiceUpdateParams`\n      * **Subscription** ([API ref](https://stripe.com/docs/api/subscriptions/object#subscription_object-payment_settings-payment_method_types))\n          * Add support for `us_bank_account` on `Subscription.payment_settings.payment_method_options`, `SubscriptionCreateParams.payment_settings.payment_method_options`, and `SubscriptionUpdateParams.payment_settings.payment_method_options`\n          * Add support for new values `paynow` and `us_bank_account` on enums `payment_settings.payment_method_types[]` on `Subscription`, `SubscriptionCreateParams`, and `SubscriptionUpdateParams`\n      * **Account capabilities** ([API ref](https://stripe.com/docs/api/accounts/object#account_object-capabilities))\n          * Add support for `paynow_payments` on `capabilities` on `Account`, `AccountCreateParams`, and `AccountUpdateParams`\n  * Add support for `failure_balance_transaction` on `Charge`\n  * Add support for `capture_method` on `afterpay_clearpay`, `card`, and `klarna` on `payment_method_options` on\n  `PaymentIntent`, `PaymentIntentCreateParams`, `PaymentIntentUpdateParams`, and `PaymentIntentConfirmParams` ([API ref](https://stripe.com/docs/api/payment_intents/object#payment_intent_object-payment_method_options-afterpay_clearpay-capture_method))\n  * Add additional support for verify microdeposits on Payment Intent and Setup Intent ([API ref](https://stripe.com/docs/api/payment_intents/verify_microdeposits))\n      * Add support for `microdeposit_type` on `next_action.verify_with_microdeposits` on `PaymentIntent` and `SetupIntent`\n      * Add support for `descriptor_code` on `PaymentIntentVerifyMicrodepositsParams` and `SetupIntentVerifyMicrodepositsParams`\n  * Add support for `test_clock` on `SubscriptionListParams` ([API ref](https://stripe.com/docs/api/subscriptions/list#list_subscriptions-test_clock))\n* [#1375](https://github.com/stripe/stripe-node/pull/1375) Update error types to be namespaced under Stripe.error\n* [#1380](https://github.com/stripe/stripe-node/pull/1380) Force update minimist dependency\n\n## 8.211.0 - 2022-03-23\n* [#1377](https://github.com/stripe/stripe-node/pull/1377) API Updates\n  * Add support for `cancel` method on resource `Refund`\n  * Add support for new values `bg_uic`, `hu_tin`, and `si_tin` on enums `Checkout.Session.customer_details.tax_ids[].type`, `Invoice.customer_tax_ids[].type`, and `TaxId.type`\n  * Add support for new values `bg_uic`, `hu_tin`, and `si_tin` on enums `CustomerCreateParams.tax_id_data[].type`, `InvoiceUpcomingLinesParams.customer_details.tax_ids[].type`, `InvoiceUpcomingParams.customer_details.tax_ids[].type`, and `TaxIdCreateParams.type`\n  * Change `InvoiceCreateParams.customer` to be optional\n  * Add support for `test_clock` on `QuoteListParams`\n  * Add support for new values `test_helpers.test_clock.advancing`, `test_helpers.test_clock.created`, `test_helpers.test_clock.deleted`, `test_helpers.test_clock.internal_failure`, and `test_helpers.test_clock.ready` on enums `WebhookEndpointCreateParams.enabled_events[]` and `WebhookEndpointUpdateParams.enabled_events[]`\n\n## 8.210.0 - 2022-03-18\n* [#1372](https://github.com/stripe/stripe-node/pull/1372) API Updates\n  * Add support for `status` on `Card`\n\n## 8.209.0 - 2022-03-11\n* [#1368](https://github.com/stripe/stripe-node/pull/1368) API Updates\n  * Add support for `mandate` on `Charge.payment_method_details.card`\n  * Add support for `mandate_options` on `PaymentIntentCreateParams.payment_method_options.card`, `PaymentIntentUpdateParams.payment_method_options.card`, `PaymentIntentConfirmParams.payment_method_options.card`, `PaymentIntent.payment_method_options.card`, `SetupIntentCreateParams.payment_method_options.card`, `SetupIntentUpdateParams.payment_method_options.card`, `SetupIntentConfirmParams.payment_method_options.card`, and `SetupIntent.payment_method_options.card`\n  * Add support for `card_await_notification` on `PaymentIntent.next_action`\n  * Add support for `customer_notification` on `PaymentIntent.processing.card`\n  * Change `PaymentLinkCreateParams.line_items` to be required, and change `PaymentLink.create` to require `PaymentLinkCreateParams`\n\n* [#1364](https://github.com/stripe/stripe-node/pull/1364) Update search pagination to use page param instead of next_page.\n\n## 8.208.0 - 2022-03-09\n* [#1366](https://github.com/stripe/stripe-node/pull/1366) API Updates\n  * Add support for `test_clock` on `CustomerListParams`\n  * Change `Invoice.test_clock`, `InvoiceItem.test_clock`, `Quote.test_clock`, `Subscription.test_clock`, and `SubscriptionSchedule.test_clock` to be required\n\n## 8.207.0 - 2022-03-02\n* [#1363](https://github.com/stripe/stripe-node/pull/1363) API Updates\n  * Add support for new resources `CreditedItems` and `ProrationDetails`\n  * Add support for `proration_details` on `InvoiceLineItem`\n\n## 8.206.0 - 2022-03-01\n* [#1361](https://github.com/stripe/stripe-node/pull/1361) [#1362](https://github.com/stripe/stripe-node/pull/1362) API Updates\n  * Add support for new resource `TestHelpers.TestClock`\n  * Add support for `test_clock` on `CustomerCreateParams`, `Customer`, `Invoice`, `InvoiceItem`, `QuoteCreateParams`, `Quote`, `Subscription`, and `SubscriptionSchedule`\n  * Add support for `pending_invoice_items_behavior` on `InvoiceCreateParams`\n  * Change type of `ProductUpdateParams.url` from `string` to `emptyStringable(string)`\n  * Add support for `next_action` on `Refund`\n\n## 8.205.0 - 2022-02-25\n* [#1098](https://github.com/stripe/stripe-node/pull/1098) Typescript: add declaration for `onDone` on `autoPagingEach`\n* [#1357](https://github.com/stripe/stripe-node/pull/1357) Properly handle API errors with unknown error types\n* [#1359](https://github.com/stripe/stripe-node/pull/1359) API Updates\n  * Change `BillingPortalConfiguration` `.business_profile.privacy_policy_url` and `.business_profile.terms_of_service_url` to be optional on requests and responses\n\n  * Add support for `konbini_payments` on `AccountUpdateParams.capabilities`, `AccountCreateParams.capabilities`, and `Account.capabilities`\n  * Add support for `konbini` on `Charge.payment_method_details`,\n  * Add support for `.payment_method_options.konbini` and `.payment_method_data.konbini` on the `PaymentIntent` API.\n  * Add support for `.payment_settings.payment_method_options.konbini` on the `Invoice` API.\n  * Add support for `.payment_method_options.konbini` on the `Subscription` API\n  * Add support for `.payment_method_options.konbini` on the `CheckoutSession` API\n  * Add support for `konbini` on the `PaymentMethod` API.\n  * Add support for `konbini_display_details` on `PaymentIntent.next_action`\n* [#1311](https://github.com/stripe/stripe-node/pull/1311) update documentation to use appInfo\n\n## 8.204.0 - 2022-02-23\n* [#1354](https://github.com/stripe/stripe-node/pull/1354) API Updates\n  * Add support for `setup_future_usage` on `PaymentIntentCreateParams.payment_method_options.*`\n  * Add support for new values `bbpos_wisepad3` and `stripe_m2` on enums `TerminalReaderListParams.device_type` and `Terminal.Reader.device_type`\n  * Add support for `object` on `ExternalAccountListParams` (fixes #1351)\n\n## 8.203.0 - 2022-02-15\n* [#1350](https://github.com/stripe/stripe-node/pull/1350) API Updates\n  * Add support for `verify_microdeposits` method on resources `PaymentIntent` and `SetupIntent`\n  * Add support for new value `grabpay` on enums `InvoiceCreateParams.payment_settings.payment_method_types[]`, `InvoiceUpdateParams.payment_settings.payment_method_types[]`, `Invoice.payment_settings.payment_method_types[]`, `SubscriptionCreateParams.payment_settings.payment_method_types[]`, `SubscriptionUpdateParams.payment_settings.payment_method_types[]`, and `Subscription.payment_settings.payment_method_types[]`\n* [#1348](https://github.com/stripe/stripe-node/pull/1348) API Updates\n  * Add support for `pin` on `IssuingCardUpdateParams`\n\n## 8.202.0 - 2022-02-03\n* [#1344](https://github.com/stripe/stripe-node/pull/1344) API Updates\n  * Add support for new value `au_becs_debit` on enum `CheckoutSessionCreateParams.payment_method_types[]`\n  * Change type of `Refund.reason` from `string` to `enum('duplicate'|'expired_uncaptured_charge'|'fraudulent'|'requested_by_customer')`\n\n## 8.201.0 - 2022-01-28\n* [#1342](https://github.com/stripe/stripe-node/pull/1342) Bump nanoid from 3.1.20 to 3.2.0.\n* [#1335](https://github.com/stripe/stripe-node/pull/1335) Fix StripeResource to successfully import TIMEOUT_ERROR_CODE.\n* [#1339](https://github.com/stripe/stripe-node/pull/1339) Bump node-fetch from 2.6.2 to 2.6.7\n\n## 8.200.0 - 2022-01-25\n* [#1338](https://github.com/stripe/stripe-node/pull/1338) API Updates\n  * Change `Checkout.Session.payment_link` to be required\n  * Add support for `phone_number_collection` on `PaymentLinkCreateParams` and `PaymentLink`\n  * Add support for new values `payment_link.created` and `payment_link.updated` on enums `WebhookEndpointCreateParams.enabled_events[]` and `WebhookEndpointUpdateParams.enabled_events[]`\n  * Add support for new value `is_vat` on enums `Checkout.Session.customer_details.tax_ids[].type`, `Invoice.customer_tax_ids[].type`, and `TaxId.type`\n  * Add support for new value `is_vat` on enums `CustomerCreateParams.tax_id_data[].type`, `InvoiceUpcomingParams.customer_details.tax_ids[].type`, `InvoiceUpcomingLinesParams.customer_details.tax_ids[].type`, and `TaxIdCreateParams.type`\n\n* [#1333](https://github.com/stripe/stripe-node/pull/1333) Customer tax_ids is not included by default\n\n## 8.199.0 - 2022-01-20\n* [#1332](https://github.com/stripe/stripe-node/pull/1332) API Updates\n  * Add support for new resource `PaymentLink`\n  * Add support for `payment_link` on `Checkout.Session`\n\n## 8.198.0 - 2022-01-19\n* [#1331](https://github.com/stripe/stripe-node/pull/1331) API Updates\n  * Change type of `Charge.status` from `string` to `enum('failed'|'pending'|'succeeded')`\n  * Add support for `bacs_debit` and `eps` on `PaymentIntentCreateParams.payment_method_options`, `PaymentIntentUpdateParams.payment_method_options`, `PaymentIntentConfirmParams.payment_method_options`, and `PaymentIntent.payment_method_options`\n  * Add support for `image_url_png` and `image_url_svg` on `PaymentIntent.next_action.wechat_pay_display_qr_code`\n\n## 8.197.0 - 2022-01-13\n* [#1329](https://github.com/stripe/stripe-node/pull/1329) API Updates\n  * Add support for `paid_out_of_band` on `Invoice`\n\n## 8.196.0 - 2022-01-12\n* [#1328](https://github.com/stripe/stripe-node/pull/1328) API Updates\n  * Add support for `customer_creation` on `CheckoutSessionCreateParams` and `Checkout.Session`\n  * Add support for `fpx` and `grabpay` on `PaymentIntentCreateParams.payment_method_options`, `PaymentIntentUpdateParams.payment_method_options`, `PaymentIntentConfirmParams.payment_method_options`, and `PaymentIntent.payment_method_options`\n* [#1315](https://github.com/stripe/stripe-node/pull/1315) API Updates\n  * Add support for `mandate_options` on `SubscriptionCreateParams.payment_settings.payment_method_options.card`, `SubscriptionUpdateParams.payment_settings.payment_method_options.card`, and `Subscription.payment_settings.payment_method_options.card`\n* [#1327](https://github.com/stripe/stripe-node/pull/1327) Remove DOM type references.\n* [#1325](https://github.com/stripe/stripe-node/pull/1325) Add comment documenting makeRequest#headers type.\n\n## 8.195.0 - 2021-12-22\n* [#1314](https://github.com/stripe/stripe-node/pull/1314) API Updates\n  * Add support for `au_becs_debit` on `PaymentIntentCreateParams.payment_method_options`, `PaymentIntentUpdateParams.payment_method_options`, `PaymentIntentConfirmParams.payment_method_options`, and `PaymentIntent.payment_method_options`\n  * Change type of `PaymentIntent.processing.type` from `string` to `literal('card')`. This is not considered a breaking change as the field was added in the same release.\n* [#1313](https://github.com/stripe/stripe-node/pull/1313) API Updates\n  * Add support for new values `en-FR`, `es-US`, and `fr-FR` on enums `PaymentIntentCreateParams.payment_method_options.klarna.preferred_locale`, `PaymentIntentUpdateParams.payment_method_options.klarna.preferred_locale`, and `PaymentIntentConfirmParams.payment_method_options.klarna.preferred_locale`\n  * Add support for `boleto` on `SetupAttempt.payment_method_details`\n\n* [#1312](https://github.com/stripe/stripe-node/pull/1312) API Updates\n  * Add support for `processing` on `PaymentIntent`\n\n## 8.194.0 - 2021-12-15\n* [#1309](https://github.com/stripe/stripe-node/pull/1309) API Updates\n  * Add support for new resource `PaymentIntentTypeSpecificPaymentMethodOptionsClient`\n  * Add support for `setup_future_usage` on `PaymentIntentCreateParams.payment_method_options.card`, `PaymentIntentUpdateParams.payment_method_options.card`, `PaymentIntentConfirmParams.payment_method_options.card`, and `PaymentIntent.payment_method_options.card`\n\n## 8.193.0 - 2021-12-09\n* [#1308](https://github.com/stripe/stripe-node/pull/1308) API Updates\n  * Add support for `metadata` on `BillingPortalConfigurationCreateParams`, `BillingPortalConfigurationUpdateParams`, and `BillingPortal.Configuration`\n\n## 8.192.0 - 2021-12-09\n* [#1307](https://github.com/stripe/stripe-node/pull/1307) API Updates\n  * Add support for new values `ge_vat` and `ua_vat` on enums `Checkout.Session.customer_details.tax_ids[].type`, `Invoice.customer_tax_ids[].type`, and `TaxId.type`\n  * Add support for new values `ge_vat` and `ua_vat` on enums `CustomerCreateParams.tax_id_data[].type`, `InvoiceUpcomingParams.customer_details.tax_ids[].type`, `InvoiceUpcomingLinesParams.customer_details.tax_ids[].type`, and `TaxIdCreateParams.type`\n  * Change type of `PaymentIntentCreateParams.payment_method_data.billing_details.email`, `PaymentIntentUpdateParams.payment_method_data.billing_details.email`, `PaymentIntentConfirmParams.payment_method_data.billing_details.email`, `PaymentMethodCreateParams.billing_details.email`, and `PaymentMethodUpdateParams.billing_details.email` from `string` to `emptyStringable(string)`\n  * Add support for `giropay` on `PaymentIntentCreateParams.payment_method_options`, `PaymentIntentUpdateParams.payment_method_options`, `PaymentIntentConfirmParams.payment_method_options`, and `PaymentIntent.payment_method_options`\n  * Add support for new value `en-IE` on enums `PaymentIntentCreateParams.payment_method_options.klarna.preferred_locale`, `PaymentIntentUpdateParams.payment_method_options.klarna.preferred_locale`, and `PaymentIntentConfirmParams.payment_method_options.klarna.preferred_locale`\n* [#1301](https://github.com/stripe/stripe-node/pull/1301) Remove coveralls from package.json\n* [#1300](https://github.com/stripe/stripe-node/pull/1300) Fix broken link in docstring\n\n## 8.191.0 - 2021-11-19\n* [#1299](https://github.com/stripe/stripe-node/pull/1299) API Updates\n  * Add support for `wallets` on `Issuing.Card`\n\n* [#1298](https://github.com/stripe/stripe-node/pull/1298) API Updates\n  * Add support for `interac_present` on `PaymentIntentCreateParams.payment_method_options`, `PaymentIntentUpdateParams.payment_method_options`, `PaymentIntentConfirmParams.payment_method_options`, and `PaymentIntent.payment_method_options`\n  * Add support for new value `jct` on enums `TaxRateCreateParams.tax_type`, `TaxRateUpdateParams.tax_type`, and `TaxRate.tax_type`\n\n## 8.190.0 - 2021-11-17\n* [#1297](https://github.com/stripe/stripe-node/pull/1297) API Updates\n  * Add support for `automatic_payment_methods` on `PaymentIntentCreateParams` and `PaymentIntent`\n\n\n## 8.189.0 - 2021-11-16\n* [#1295](https://github.com/stripe/stripe-node/pull/1295) API Updates\n  * Add support for new resource `ShippingRate`\n  * Add support for `shipping_options` on `CheckoutSessionCreateParams` and `Checkout.Session`\n  * Add support for `shipping_rate` on `Checkout.Session`\n\n## 8.188.0 - 2021-11-12\n* [#1293](https://github.com/stripe/stripe-node/pull/1293) API Updates\n  * Add support for new value `agrobank` on enums `Charge.payment_method_details.fpx.bank`, `PaymentIntentCreateParams.payment_method_data.fpx.bank`, `PaymentIntentUpdateParams.payment_method_data.fpx.bank`, `PaymentIntentConfirmParams.payment_method_data.fpx.bank`, `PaymentMethodCreateParams.fpx.bank`, and `PaymentMethod.fpx.bank`\n\n## 8.187.0 - 2021-11-11\n* [#1292](https://github.com/stripe/stripe-node/pull/1292) API Updates\n  * Add support for `expire` method on resource `Checkout.Session`\n  * Add support for `status` on `Checkout.Session`\n* [#1288](https://github.com/stripe/stripe-node/pull/1288) Add SubtleCryptoProvider and update Webhooks to allow async crypto.\n* [#1291](https://github.com/stripe/stripe-node/pull/1291) Better types in `lib.d.ts`\n\n## 8.186.1 - 2021-11-04\n* [#1284](https://github.com/stripe/stripe-node/pull/1284) API Updates\n  * Remove support for `ownership_declaration_shown_and_signed` on `TokenCreateParams.account`. This API was unused.\n  * Add support for `ownership_declaration_shown_and_signed` on `TokenCreateParams.account.company`\n\n\n## 8.186.0 - 2021-11-01\n* [#1283](https://github.com/stripe/stripe-node/pull/1283) API Updates\n  * Add support for `ownership_declaration` on `AccountUpdateParams.company`, `AccountCreateParams.company`, `Account.company`, and `TokenCreateParams.account.company`\n  * Add support for `proof_of_registration` on `AccountUpdateParams.documents` and `AccountCreateParams.documents`\n  * Add support for `ownership_declaration_shown_and_signed` on `TokenCreateParams.account`\n\n## 8.185.0 - 2021-11-01\n* [#1282](https://github.com/stripe/stripe-node/pull/1282) API Updates\n  * Change type of `AccountUpdateParams.individual.full_name_aliases`, `AccountCreateParams.individual.full_name_aliases`, `PersonCreateParams.full_name_aliases`, `PersonUpdateParams.full_name_aliases`, `TokenCreateParams.account.individual.full_name_aliases`, and `TokenCreateParams.person.full_name_aliases` from `array(string)` to `emptyStringable(array(string))`\n  * Add support for new values `en-BE`, `en-ES`, and `en-IT` on enums `PaymentIntentCreateParams.payment_method_options.klarna.preferred_locale`, `PaymentIntentUpdateParams.payment_method_options.klarna.preferred_locale`, and `PaymentIntentConfirmParams.payment_method_options.klarna.preferred_locale`\n\n## 8.184.0 - 2021-10-20\n* [#1276](https://github.com/stripe/stripe-node/pull/1276) API Updates\n  * Change `Account.controller.type` to be required\n  * Add support for `buyer_id` on `Charge.payment_method_details.alipay`\n* [#1273](https://github.com/stripe/stripe-node/pull/1273) Add typed createFetchHttpClient function.\n\n## 8.183.0 - 2021-10-15\n* [#1272](https://github.com/stripe/stripe-node/pull/1272) API Updates\n  * Change type of `UsageRecordCreateParams.timestamp` from `integer` to `literal('now') | integer`\n  * Change `UsageRecordCreateParams.timestamp` to be optional\n\n## 8.182.0 - 2021-10-14\n* [#1271](https://github.com/stripe/stripe-node/pull/1271) API Updates\n  * Change `Charge.payment_method_details.klarna.payment_method_category`, `Charge.payment_method_details.klarna.preferred_locale`, `Checkout.Session.customer_details.phone`, and `PaymentMethod.klarna.dob` to be required\n  * Add support for new value `klarna` on enum `CheckoutSessionCreateParams.payment_method_types[]`\n\n## 8.181.0 - 2021-10-11\n* [#1269](https://github.com/stripe/stripe-node/pull/1269) API Updates\n  * Add support for `payment_method_category` and `preferred_locale` on `Charge.payment_method_details.klarna`\n  * Add support for new value `klarna` on enums `CustomerListPaymentMethodsParams.type` and `PaymentMethodListParams.type`\n  * Add support for `klarna` on `PaymentIntentCreateParams.payment_method_data`, `PaymentIntentCreateParams.payment_method_options`, `PaymentIntentUpdateParams.payment_method_data`, `PaymentIntentUpdateParams.payment_method_options`, `PaymentIntentConfirmParams.payment_method_data`, `PaymentIntentConfirmParams.payment_method_options`, `PaymentIntent.payment_method_options`, `PaymentMethodCreateParams`, and `PaymentMethod`\n  * Add support for new value `klarna` on enums `PaymentIntentCreateParams.payment_method_data.type`, `PaymentIntentUpdateParams.payment_method_data.type`, and `PaymentIntentConfirmParams.payment_method_data.type`\n  * Add support for new value `klarna` on enum `PaymentMethodCreateParams.type`\n  * Add support for new value `klarna` on enum `PaymentMethod.type`\n\n## 8.180.0 - 2021-10-11\n* [#1266](https://github.com/stripe/stripe-node/pull/1266) API Updates\n  * Add support for `list_payment_methods` method on resource `Customer`\n\n## 8.179.0 - 2021-10-07\n* [#1265](https://github.com/stripe/stripe-node/pull/1265) API Updates\n  * Add support for `phone_number_collection` on `CheckoutSessionCreateParams` and `Checkout.Session`\n  * Add support for `phone` on `Checkout.Session.customer_details`\n  * Change `PaymentMethodListParams.customer` to be optional\n  * Add support for new value `customer_id` on enums `RadarValueListCreateParams.item_type` and `Radar.ValueList.item_type`\n  * Add support for new value `bbpos_wisepos_e` on enums `TerminalReaderListParams.device_type` and `Terminal.Reader.device_type`\n\n## 8.178.0 - 2021-09-29\n* [#1261](https://github.com/stripe/stripe-node/pull/1261) API Updates\n  * Add support for `klarna_payments` on `AccountUpdateParams.capabilities`, `AccountCreateParams.capabilities`, and `Account.capabilities`\n\n## 8.177.0 - 2021-09-28\n* [#1257](https://github.com/stripe/stripe-node/pull/1257) API Updates\n  * Add support for `amount_authorized` and `overcapture_supported` on `Charge.payment_method_details.card_present`\n* [#1256](https://github.com/stripe/stripe-node/pull/1256) Bump up ansi-regex version to 5.0.1.\n* [#1253](https://github.com/stripe/stripe-node/pull/1253) Update FetchHttpClient to make fetch function optional.\n\n## 8.176.0 - 2021-09-16\n* [#1248](https://github.com/stripe/stripe-node/pull/1248) API Updates\n  * Add support for `full_name_aliases` on `AccountUpdateParams.individual`, `AccountCreateParams.individual`, `PersonCreateParams`, `PersonUpdateParams`, `Person`, `TokenCreateParams.account.individual`, and `TokenCreateParams.person`\n* [#1247](https://github.com/stripe/stripe-node/pull/1247) Update README.md\n* [#1245](https://github.com/stripe/stripe-node/pull/1245) Fix StripeResource.extend type\n\n## 8.175.0 - 2021-09-15\n* [#1242](https://github.com/stripe/stripe-node/pull/1242) API Updates\n  * Change `BillingPortal.Configuration.features.subscription_cancel.cancellation_reason` to be required\n  * Add support for `default_for` on `CheckoutSessionCreateParams.payment_method_options.acss_debit.mandate_options`, `Checkout.Session.payment_method_options.acss_debit.mandate_options`, `Mandate.payment_method_details.acss_debit`, `SetupIntentCreateParams.payment_method_options.acss_debit.mandate_options`, `SetupIntentUpdateParams.payment_method_options.acss_debit.mandate_options`, `SetupIntentConfirmParams.payment_method_options.acss_debit.mandate_options`, and `SetupIntent.payment_method_options.acss_debit.mandate_options`\n  * Add support for `acss_debit` on `InvoiceCreateParams.payment_settings.payment_method_options`, `InvoiceUpdateParams.payment_settings.payment_method_options`, `Invoice.payment_settings.payment_method_options`, `SubscriptionCreateParams.payment_settings.payment_method_options`, `SubscriptionUpdateParams.payment_settings.payment_method_options`, and `Subscription.payment_settings.payment_method_options`\n  * Add support for new value `acss_debit` on enums `InvoiceCreateParams.payment_settings.payment_method_types[]`, `InvoiceUpdateParams.payment_settings.payment_method_types[]`, `Invoice.payment_settings.payment_method_types[]`, `SubscriptionCreateParams.payment_settings.payment_method_types[]`, `SubscriptionUpdateParams.payment_settings.payment_method_types[]`, and `Subscription.payment_settings.payment_method_types[]`\n  * Add support for `livemode` on `Reporting.ReportType`\n* [#1235](https://github.com/stripe/stripe-node/pull/1235) API Updates\n  * Change `Account.future_requirements.alternatives`, `Account.requirements.alternatives`, `Capability.future_requirements.alternatives`, `Capability.requirements.alternatives`, `Checkout.Session.after_expiration`, `Checkout.Session.consent`, `Checkout.Session.consent_collection`, `Checkout.Session.expires_at`, `Checkout.Session.recovered_from`, `Person.future_requirements.alternatives`, and `Person.requirements.alternatives` to be required\n  * Change type of `Capability.future_requirements.alternatives`, `Capability.requirements.alternatives`, `Person.future_requirements.alternatives`, and `Person.requirements.alternatives` from `array(AccountRequirementsAlternative)` to `nullable(array(AccountRequirementsAlternative))`\n  * Add support for new value `rst` on enums `TaxRateCreateParams.tax_type`, `TaxRateUpdateParams.tax_type`, and `TaxRate.tax_type`\n  * Add support for new value `checkout.session.expired` on enums `WebhookEndpointCreateParams.enabled_events[]` and `WebhookEndpointUpdateParams.enabled_events[]`\n* [#1237](https://github.com/stripe/stripe-node/pull/1237) Add a CryptoProvider interface and NodeCryptoProvider implementation.\n* [#1236](https://github.com/stripe/stripe-node/pull/1236) Add an HTTP client which uses fetch.\n\n## 8.174.0 - 2021-09-01\n* [#1231](https://github.com/stripe/stripe-node/pull/1231) API Updates\n  * Add support for `future_requirements` on `Account`, `Capability`, and `Person`\n  * Add support for `alternatives` on `Account.requirements`, `Capability.requirements`, and `Person.requirements`\n\n## 8.173.0 - 2021-09-01\n* [#1230](https://github.com/stripe/stripe-node/pull/1230) [#1228](https://github.com/stripe/stripe-node/pull/1228) API Updates\n  * Add support for `after_expiration`, `consent_collection`, and `expires_at` on `CheckoutSessionCreateParams` and `Checkout.Session`\n  * Add support for `consent` and `recovered_from` on `Checkout.Session`\n\n## 8.172.0 - 2021-08-31\n* [#1198](https://github.com/stripe/stripe-node/pull/1198) Add support for  paginting SearchResult objects.\n\n## 8.171.0 - 2021-08-27\n* [#1226](https://github.com/stripe/stripe-node/pull/1226) API Updates\n  * Add support for `cancellation_reason` on `BillingPortalConfigurationCreateParams.features.subscription_cancel`, `BillingPortalConfigurationUpdateParams.features.subscription_cancel`, and `BillingPortal.Configuration.features.subscription_cancel`\n\n## 8.170.0 - 2021-08-19\n* [#1223](https://github.com/stripe/stripe-node/pull/1223) API Updates\n  * Add support for new value `fil` on enums `CheckoutSessionCreateParams.locale` and `Checkout.Session.locale`\n  * Add support for new value `au_arn` on enums `Checkout.Session.customer_details.tax_ids[].type`, `Invoice.customer_tax_ids[].type`, and `TaxId.type`\n  * Add support for new value `au_arn` on enums `CustomerCreateParams.tax_id_data[].type`, `InvoiceUpcomingParams.customer_details.tax_ids[].type`, `InvoiceUpcomingLinesParams.customer_details.tax_ids[].type`, and `TaxIdCreateParams.type`\n* [#1221](https://github.com/stripe/stripe-node/pull/1221) Add client name property to HttpClient.\n* [#1219](https://github.com/stripe/stripe-node/pull/1219) Update user agent computation to handle environments without process.\n* [#1218](https://github.com/stripe/stripe-node/pull/1218) Add an HttpClient interface and NodeHttpClient implementation.\n* [#1217](https://github.com/stripe/stripe-node/pull/1217) Update nock.\n\n## 8.169.0 - 2021-08-11\n* [#1215](https://github.com/stripe/stripe-node/pull/1215) API Updates\n  * Add support for `locale` on `BillingPortalSessionCreateParams` and `BillingPortal.Session`\n  * Change type of `Invoice.collection_method` and `Subscription.collection_method` from `nullable(enum('charge_automatically'|'send_invoice'))` to `enum('charge_automatically'|'send_invoice')`\n\n## 8.168.0 - 2021-08-04\n* [#1211](https://github.com/stripe/stripe-node/pull/1211) API Updates\n  * Change type of `PaymentIntentCreateParams.payment_method_options.sofort.preferred_language`, `PaymentIntentUpdateParams.payment_method_options.sofort.preferred_language`, and `PaymentIntentConfirmParams.payment_method_options.sofort.preferred_language` from `enum` to `emptyStringable(enum)`\n  * Change `Price.tax_behavior`, `Product.tax_code`, `Quote.automatic_tax`, and `TaxRate.tax_type` to be required\n\n## 8.167.0 - 2021-07-28\n* [#1206](https://github.com/stripe/stripe-node/pull/1206) Fix Typescript definition for `StripeResource.LastResponse.headers`\n* [#1205](https://github.com/stripe/stripe-node/pull/1205) Prevent concurrent initial `uname` invocations\n* [#1199](https://github.com/stripe/stripe-node/pull/1199) Explicitly define basic method specs\n* [#1200](https://github.com/stripe/stripe-node/pull/1200) Add support for `fullPath` on method specs\n\n## 8.166.0 - 2021-07-28\n* [#1203](https://github.com/stripe/stripe-node/pull/1203) API Updates\n  * Bugfix: add missing autopagination methods to `Quote.listLineItems` and `Quote.listComputedUpfrontLineItems`\n  * Add support for `account_type` on `BankAccount`, `ExternalAccountUpdateParams`, and `TokenCreateParams.bank_account`\n  * Add support for `category_code` on `Issuing.Authorization.merchant_data` and `Issuing.Transaction.merchant_data`\n  * Add support for new value `redacted` on enum `Review.closed_reason`\n  * Remove duplicate type definition for `Account.retrieve`.\n  * Fix some `attributes` fields mistakenly defined as `Stripe.Metadata`\n* [#1097](https://github.com/stripe/stripe-node/pull/1097) fix error arguments\n\n## 8.165.0 - 2021-07-22\n* [#1197](https://github.com/stripe/stripe-node/pull/1197) API Updates\n  * Add support for new values `hr`, `ko`, and `vi` on enums `CheckoutSessionCreateParams.locale` and `Checkout.Session.locale`\n  * Add support for `payment_settings` on `SubscriptionCreateParams`, `SubscriptionUpdateParams`, and `Subscription`\n\n## 8.164.0 - 2021-07-20\n* [#1196](https://github.com/stripe/stripe-node/pull/1196) API Updates\n  * Remove support for values `api_connection_error`, `authentication_error`, and `rate_limit_error` from enums `StripeError.type`, `StripeErrorResponse.error.type`, `Invoice.last_finalization_error.type`, `PaymentIntent.last_payment_error.type`, `SetupAttempt.setup_error.type`, and `SetupIntent.last_setup_error.type`\n  * Add support for `wallet` on `Issuing.Transaction`\n  * Add support for `ideal` on `PaymentIntentCreateParams.payment_method_options`, `PaymentIntentUpdateParams.payment_method_options`, `PaymentIntentConfirmParams.payment_method_options`, and `PaymentIntent.payment_method_options`\n\n\n## 8.163.0 - 2021-07-15\n* [#1102](https://github.com/stripe/stripe-node/pull/1102), [#1191](https://github.com/stripe/stripe-node/pull/1191) Add support for `stripeAccount` when initializing the client\n\n## 8.162.0 - 2021-07-14\n* [#1194](https://github.com/stripe/stripe-node/pull/1194) API Updates\n  * Add support for `quote.accepted`, `quote.canceled`, `quote.created`, and `quote.finalized` events.\n* [#1190](https://github.com/stripe/stripe-node/pull/1190) API Updates\n  * Add support for `list_computed_upfront_line_items` method on resource `Quote`\n* [#1192](https://github.com/stripe/stripe-node/pull/1192) Update links to Stripe.js docs\n\n## 8.161.0 - 2021-07-09\n* [#1188](https://github.com/stripe/stripe-node/pull/1188) API Updates\n  * Add support for new resource `Quote`\n  * Add support for `quote` on `Invoice`\n  * Add support for new value `quote_accept` on enum `Invoice.billing_reason`\n  * Changed type of `Charge.payment_method_details.card.three_d_secure.result`, `SetupAttempt.payment_method_details.card.three_d_secure.result`, `Charge.payment_method_details.card.three_d_secure.version`, and `SetupAttempt.payment_method_details.card.three_d_secure.version` to be nullable.\n\n* [#1187](https://github.com/stripe/stripe-node/pull/1187) Bugfix in binary streaming support\n\n## 8.160.0 - 2021-06-30\n* [#1182](https://github.com/stripe/stripe-node/pull/1182) API Updates\n  * Add support for new value `boleto` on enums `InvoiceCreateParams.payment_settings.payment_method_types[]`, `InvoiceUpdateParams.payment_settings.payment_method_types[]`, and `Invoice.payment_settings.payment_method_types[]`.\n\n## 8.159.0 - 2021-06-30\n* [#1180](https://github.com/stripe/stripe-node/pull/1180) API Updates\n  * Add support for `wechat_pay` on `Charge.payment_method_details`, `CheckoutSessionCreateParams.payment_method_options`, `PaymentIntentCreateParams.payment_method_data`, `PaymentIntentCreateParams.payment_method_options`, `PaymentIntentUpdateParams.payment_method_data`, `PaymentIntentUpdateParams.payment_method_options`, `PaymentIntentConfirmParams.payment_method_data`, `PaymentIntentConfirmParams.payment_method_options`, `PaymentIntent.payment_method_options`, `PaymentMethodCreateParams`, and `PaymentMethod`\n  * Add support for new value `wechat_pay` on enums `CheckoutSessionCreateParams.payment_method_types[]`, `InvoiceCreateParams.payment_settings.payment_method_types[]`, `InvoiceUpdateParams.payment_settings.payment_method_types[]`, `Invoice.payment_settings.payment_method_types[]`, `PaymentIntentCreateParams.payment_method_data.type`, `PaymentIntentUpdateParams.payment_method_data.type`, `PaymentIntentConfirmParams.payment_method_data.type`, `PaymentMethodCreateParams.type`, `PaymentMethodListParams.type`, and `PaymentMethod.type`\n  * Add support for `wechat_pay_display_qr_code`, `wechat_pay_redirect_to_android_app`, and `wechat_pay_redirect_to_ios_app` on `PaymentIntent.next_action`\n\n## 8.158.0 - 2021-06-29\n* [#1179](https://github.com/stripe/stripe-node/pull/1179) API Updates\n  * Added support for `boleto_payments` on `Account.capabilities`\n  * Added support for `boleto` and `oxxo` on `Checkout.SessionCreateParams.payment_method_options` and `Checkout.Session.payment_method_options`\n  * Added support for `boleto` and `oxxo` as members of the `type` enum inside `Checkout.SessionCreateParams.payment_method_types[]`.\n\n## 8.157.0 - 2021-06-25\n* [#1177](https://github.com/stripe/stripe-node/pull/1177) API Updates\n  * Added support for `boleto` on `PaymentMethodCreateParams`, `PaymentIntent.payment_method_options`, `PaymentIntentConfirmParams.payment_method_options`, `PaymentIntentConfirmParams.payment_method_data`, `PaymentIntentUpdateParams.payment_method_options`, `PaymentIntentUpdateParams.payment_method_data`, `PaymentIntentCreateParams.payment_method_options`, `PaymentIntentCreateParams.payment_method_data`, `Charge.payment_method_details` and `PaymentMethod`\n  * `PaymentMethodListParams.type`, `PaymentMethodCreateParams.type`, `PaymentIntentConfirmParams.payment_method_data.type`, `PaymentIntentUpdateParams.payment_method_data.type`, `PaymentIntentCreataParams.payment_method_data.type` and `PaymentMethod.type` added new enum members: `boleto`\n  * Added support for `boleto_display_details` on `PaymentIntent.next_action`\n  * `TaxIdCreateParams.type`, `Invoice.customer_tax_ids[].type`, `InvoiceLineItemListUpcomingParams.customer_details.tax_ids[].type`, `InvoiceUpcomingParams.customer_details.tax_ids[].type`, `CustomerCreateParams.tax_id_data[].type`, `Checkout.Session.customer_details.tax_ids[].type` and `TaxId.type` added new enum members: `il_vat`.\n* [#1157](https://github.com/stripe/stripe-node/pull/1157) Add support for streaming requests\n\n## 8.156.0 - 2021-06-18\n* [#1175](https://github.com/stripe/stripe-node/pull/1175) API Updates\n  * Add support for new TaxId types: `ca_pst_mb`, `ca_pst_bc`, `ca_gst_hst`, and `ca_pst_sk`.\n\n## 8.155.0 - 2021-06-16\n* [#1173](https://github.com/stripe/stripe-node/pull/1173) API Updates\n  * Add support for `url` on Checkout `Session`.\n\n## 8.154.0 - 2021-06-07\n* [#1170](https://github.com/stripe/stripe-node/pull/1170) API Updates\n  * Added support for `tax_id_collection` on Checkout `Session.tax_id_collection` and `SessionCreateParams`\n  * Update `Terminal.Reader.location` to be expandable (TypeScript breaking change)\n\n## 8.153.0 - 2021-06-04\n* [#1168](https://github.com/stripe/stripe-node/pull/1168) API Updates\n  * Add support for `controller` on `Account`.\n\n## 8.152.0 - 2021-06-04\n* [#1167](https://github.com/stripe/stripe-node/pull/1167) API Updates\n  * Add support for new resource `TaxCode`.\n  * Add support for `tax_code` on `Product`, `ProductCreateParams`, `ProductUpdateParams`, `PriceCreateParams.product_data`, `PlanCreateParams.product`, and Checkout `SessionCreateParams.line_items[].price_data.product_data`.\n  * Add support for `tax` to `Customer`, `CustomerCreateParams`, `CustomerUpdateParams`.\n  * Add support for `default_settings[automatic_tax]` and `phases[].automatic_tax` on `SubscriptionSchedule`, `SubscriptionScheduleCreateParams`, and `SubscriptionScheduleUpdateParams`.\n  * Add support for `automatic_tax` on `Subscription`, `SubscriptionCreateParams`, `SubscriptionUpdateParams`; `Invoice`, `InvoiceCreateParams`, `InvoiceRetrieveUpcomingParams` and `InvoiceLineItemListUpcomingParams`; Checkout `Session` and Checkout `SessionCreateParams`.\n  * Add support for `tax_behavior` to `Price`, `PriceCreateParams`, `PriceUpdateParams` and to the many Param objects that contain `price_data`:\n      - `SubscriptionScheduleCreateParams` and `SubscriptionScheduleUpdateParams`, beneath `phases[].add_invoice_items[]` and `phases[].items[]`\n      - `SubscriptionItemCreateParams` and `SubscriptionItemUpdateParams`, on the top-level\n      - `SubscriptionCreateParams` create and `UpdateCreateParams`, beneath `items[]` and `add_invoice_items[]`\n      - `InvoiceItemCreateParams` and `InvoiceItemUpdateParams`,  on the top-level\n      - `InvoiceRetrieveUpcomingParams` and `InvoiceLineItemListUpcomingParams` beneath `subscription_items[]` and `invoice_items[]`.\n      - Checkout `SessionCreateParams`, beneath `line_items[]`.\n  * Add support for `customer_update` to Checkout `SessionCreateParams`.\n  * Add support for `customer_details` to `InvoiceRetrieveUpcomingParams` and `InvoiceLineItemListUpcomingParams`.\n  * Add support for `tax_type` to `TaxRate`, `TaxRateCreateParams`, and `TaxRateUpdateParams`.\n\n## 8.151.0 - 2021-06-02\n* [#1166](https://github.com/stripe/stripe-node/pull/1166) API Updates\n  * Added support for `llc`, `free_zone_llc`, `free_zone_establishment` and `sole_establishment` to the `structure` enum on `Account.company`, `AccountCreateParams.company`, `AccountUpdateParams.company` and `TokenCreateParams.account.company`.\n\n## 8.150.0 - 2021-05-26\n* [#1163](https://github.com/stripe/stripe-node/pull/1163) API Updates\n  * Added support for `documents` on `PersonUpdateParams`, `PersonCreateParams` and `TokenCreateParams.person`\n\n## 8.149.0 - 2021-05-19\n* [#1159](https://github.com/stripe/stripe-node/pull/1159) API Updates\n  * Add support for Identity VerificationSupport and VerificationReport APIs\n  * Update Typescript for `CouponCreateParams.duration` and `CouponCreateParams.products` to be optional.\n* [#1158](https://github.com/stripe/stripe-node/pull/1158) API Updates\n  * `AccountUpdateParams.business_profile.support_url` and `AccountCreatParams.business_profile.support_url` changed from `string` to `Stripe.Emptyable<string>`\n  * `File.purpose` added new enum members: `finance_report_run`, `document_provider_identity_document`, and `sigma_scheduled_query`\n\n## 8.148.0 - 2021-05-06\n* [#1154](https://github.com/stripe/stripe-node/pull/1154) API Updates\n  * Added support for `reference` on `Charge.payment_method_details.afterpay_clearpay`\n  * Added support for `afterpay_clearpay` on `PaymentIntent.payment_method_options`.\n\n## 8.147.0 - 2021-05-05\n* [#1153](https://github.com/stripe/stripe-node/pull/1153) API Updates\n  * Add support for `payment_intent` on `Radar.EarlyFraudWarning`\n\n## 8.146.0 - 2021-05-04\n* Add support for `card_present` on `PaymentIntent#confirm.payment_method_options`, `PaymentIntent#update.payment_method_options`, `PaymentIntent#create.payment_method_options` and `PaymentIntent.payment_method_options`\n* `SubscriptionItem#create.payment_behavior`, `Subscription#update.payment_behavior`, `Subscription#create.payment_behavior` and `SubscriptionItem#update.payment_behavior` added new enum members: `default_incomplete`\n\n## 8.145.0 - 2021-04-21\n* [#1143](https://github.com/stripe/stripe-node/pull/1143) API Updates\n  * Add support for `single_member_llc` as an enum member of `Account.company.structure` and `TokenCreateParams.account.company.structure` added new enum members:\n  * Add support for `dhl` and `royal_mail` as enum members of `Issuing.Card.shipping.carrier`.\n* [#1142](https://github.com/stripe/stripe-node/pull/1142) Improve type definition for for `AccountCreateParams.external_account`\n\n## 8.144.0 - 2021-04-16\n* [#1140](https://github.com/stripe/stripe-node/pull/1140) API Updates\n  * Add support for `currency` on `Checkout.Session.PaymentMethodOptions.AcssDebit`\n\n## 8.143.0 - 2021-04-12\n* [#1139](https://github.com/stripe/stripe-node/pull/1139) API Updates\n  * Add support for `acss_debit_payments` on `Account.capabilities`\n  * Add support for `payment_method_options` on `Checkout.Session`\n  * Add support for `acss_debit` on `SetupIntent.payment_method_options`, `SetupAttempt.payment_method_details`, `PaymentMethod`, `PaymentIntent.payment_method_options`,  `PaymentIntentUpdateParams.payment_method_options`, `PaymentIntentCreateParams.payment_method_options`, `PaymentIntentConfirmParams.payment_method_data`, `PaymentIntentUpdateParams.payment_method_data`, `PaymentIntentCreateParams.payment_method_data`, `Mandate.payment_method_details` and `SetupIntent.payment_method_options`\n  * Add support for `verify_with_microdeposits` on `PaymentIntent.next_action` and `SetupIntent.next_action`\n  * Add support for `acss_debit` as member of the `type` enum on `PaymentMethod` and `PaymentIntent`, and inside `Checkout.SessionCreateParams.payment_method_types[]`.\n\n## 8.142.0 - 2021-04-02\n* [#1138](https://github.com/stripe/stripe-node/pull/1138) API Updates\n  * Add support for `subscription_pause` on `BillingPortal.ConfigurationUpdateParams.features`, `BillingPortal.ConfigurationCreateParams.features` and `BillingPortal.Configuration.features`\n\n## 8.141.0 - 2021-03-31\n* [#1137](https://github.com/stripe/stripe-node/pull/1137) API Updates\n  * Add support for `transfer_data` on `SessionCreateParams.subscription_data`\n* [#1134](https://github.com/stripe/stripe-node/pull/1134) API Updates\n  * Added support for `card_issuing` on `AccountUpdateParams.settings` and `Account.settings`\n\n## 8.140.0 - 2021-03-25\n* [#1133](https://github.com/stripe/stripe-node/pull/1133) API Updates\n  * `Capability.requirements.errors[].code`, `Account.requirements.errors[].code` and `Person.requirements.errors[].code` added new enum members: `verification_missing_owners, verification_missing_executives and verification_requires_additional_memorandum_of_associations`\n  * `SessionCreateParams.locale` and `CheckoutSession.locale` added new enum members: `th`\n\n## 8.139.0 - 2021-03-22\n* [#1132](https://github.com/stripe/stripe-node/pull/1132) API Updates\n  * Added support for `shipping_rates` on `SessionCreateOptions`\n  * Added support for `amount_shipping` on `Checkout.SessionTotalDetails`\n* [#1131](https://github.com/stripe/stripe-node/pull/1131) types: export StripeRawError type\n\n## 8.138.0 - 2021-03-10\n* [#1124](https://github.com/stripe/stripe-node/pull/1124) API Updates\n  * Added support for `BillingPortal.Configuration` API.\n  * `Terminal.LocationUpdateParams.country` is now optional.\n\n## 8.137.0 - 2021-02-17\n* [#1123](https://github.com/stripe/stripe-node/pull/1123) API Updates\n  * Add support for on_behalf_of to Invoice\n  * Add support for enum member revolut on PaymentIntent.payment_method_data.ideal.bank, PaymentMethod.ideal.bank, Charge.payment_method_details.ideal.bank and SetupAttempt.payment_method_details.ideal.bank\n  * Added support for enum member REVOLT21 on PaymentMethod.ideal.bic, Charge.payment_method_details.ideal.bic and SetupAttempt.payment_method_details.ideal.bic\n\n## 8.136.0 - 2021-02-16\n* [#1122](https://github.com/stripe/stripe-node/pull/1122) API Updates\n  * Add support for `afterpay_clearpay` on `PaymentMethod`, `PaymentIntent.payment_method_data`, and `Charge.payment_method_details`.\n  * Add support for `afterpay_clearpay` as a payment method type on `PaymentMethod`, `PaymentIntent` and `Checkout.Session`\n  * Add support for `adjustable_quantity` on `SessionCreateParams.LineItem`\n  * Add support for `bacs_debit`, `au_becs_debit` and `sepa_debit` on `SetupAttempt.payment_method_details`\n\n## 8.135.0 - 2021-02-08\n* [#1119](https://github.com/stripe/stripe-node/pull/1119) API Updates\n  * Add support for `afterpay_clearpay_payments` on `Account.capabilities`\n  * Add support for `payment_settings` on `Invoice`\n\n## 8.134.0 - 2021-02-05\n* [#1118](https://github.com/stripe/stripe-node/pull/1118) API Updates\n  * `LineItem.amount_subtotal` and `LineItem.amount_total` changed from `nullable(integer)` to `integer`\n  * Improve error message for `EphemeralKeys.create`\n\n## 8.133.0 - 2021-02-03\n* [#1115](https://github.com/stripe/stripe-node/pull/1115) API Updates\n  * Added support for `nationality` on `Person`, `PersonUpdateParams`, `PersonCreateParams` and `TokenCreateParams.person`\n  * Added `gb_vat` to `TaxId.type` enum.\n\n## 8.132.0 - 2021-01-21\n* [#1112](https://github.com/stripe/stripe-node/pull/1112) API Updates\n  * `Issuing.Transaction.type` dropped enum members: 'dispute'\n  * `LineItem.price` can now be null.\n\n## 8.131.1 - 2021-01-15\n* [#1104](https://github.com/stripe/stripe-node/pull/1104) Make request timeout errors eligible for retry\n\n## 8.131.0 - 2021-01-14\n* [#1108](https://github.com/stripe/stripe-node/pull/1108) Multiple API Changes\n  * Added support for `dynamic_tax_rates` on `Checkout.SessionCreateParams.line_items`\n  * Added support for `customer_details` on `Checkout.Session`\n  * Added support for `type` on `Issuing.TransactionListParams`\n  * Added support for `country` and `state` on `TaxRateUpdateParams`, `TaxRateCreateParams` and `TaxRate`\n* [#1107](https://github.com/stripe/stripe-node/pull/1107) More consistent type definitions\n\n## 8.130.0 - 2021-01-07\n* [#1105](https://github.com/stripe/stripe-node/pull/1105) API Updates\n  * Added support for `company_registration_verification`, `company_ministerial_decree`, `company_memorandum_of_association`, `company_license` and `company_tax_id_verification` on AccountUpdateParams.documents and AccountCreateParams.documents\n* [#1100](https://github.com/stripe/stripe-node/pull/1100) implement/fix reverse iteration when iterating with ending_before\n* [#1096](https://github.com/stripe/stripe-node/pull/1096) typo receieved -> received\n\n## 8.129.0 - 2020-12-15\n* [#1093](https://github.com/stripe/stripe-node/pull/1093) API Updates\n  * Added support for card_present on SetupAttempt.payment_method_details\n\n## 8.128.0 - 2020-12-10\n* [#1088](https://github.com/stripe/stripe-node/pull/1088) Multiple API changes\n  * Add newlines for consistency.\n  * Prefix deleted references with `Stripe.` for consistency.\n  * Add support for `bank` on `PaymentMethod[eps]`.\n  * Add support for `tos_shown_and_accepted` to `payment_method_options[p24]` on `PaymentMethod`.\n\n## 8.127.0 - 2020-12-03\n* [#1084](https://github.com/stripe/stripe-node/pull/1084) Add support for `documents` on `Account` create and update\n* [#1080](https://github.com/stripe/stripe-node/pull/1080) fixed promises example\n\n## 8.126.0 - 2020-11-24\n* [#1079](https://github.com/stripe/stripe-node/pull/1079) Multiple API changes\n  * Add support for `account_tax_ids` on `Invoice`\n  * Add support for `payment_method_options[sepa_debit]` on `PaymentIntent`\n\n## 8.125.0 - 2020-11-20\n* [#1075](https://github.com/stripe/stripe-node/pull/1075) Add support for `capabilities[grabpay_payments]` on `Account`\n\n## 8.124.0 - 2020-11-19\n* [#1074](https://github.com/stripe/stripe-node/pull/1074)\n  * Add support for mandate_options on SetupIntent.payment_method_options.sepa_debit.\n  * Add support for card_present and interact_present as values for PaymentMethod.type.\n* [#1073](https://github.com/stripe/stripe-node/pull/1073) More consistent namespacing for shared types\n\n## 8.123.0 - 2020-11-18\n* [#1072](https://github.com/stripe/stripe-node/pull/1072) Add support for `grabpay` on `PaymentMethod`\n\n## 8.122.1 - 2020-11-17\n* Identical to 8.122.0. Published to resolve a release issue.\n\n## 8.122.0 - 2020-11-17\n* [#1070](https://github.com/stripe/stripe-node/pull/1070)\n  * Add support for `sepa_debit` on `SetupIntent.PaymentMethodOptions`\n  * `Invoice.tax_amounts` and `InvoiceLineItem.tax_rates` are no longer nullable\n  * `Invoice.default_tax_rates` and `InvoiceLineItem.tax_amounts` are no longer nullable\n\n## 8.121.0 - 2020-11-09\n* [#1064](https://github.com/stripe/stripe-node/pull/1064) Add `invoice.finalization_error` as a `type` on `Event`\n* [#1063](https://github.com/stripe/stripe-node/pull/1063) Multiple API changes\n  * Add support for `last_finalization_error` on `Invoice`\n  * Add support for deserializing Issuing `Dispute` as a `source` on `BalanceTransaction`\n  * Add support for `payment_method_type` on `StripeError` used by other API resources\n\n## 8.120.0 - 2020-11-04\n* [#1061](https://github.com/stripe/stripe-node/pull/1061) Add support for `company[registration_number]` on `Account`\n\n## 8.119.0 - 2020-10-27\n* [#1056](https://github.com/stripe/stripe-node/pull/1056) Add  `payment_method_details[interac_present][preferred_locales]` on `Charge`\n* [#1057](https://github.com/stripe/stripe-node/pull/1057) Standardize on CRULD order for method definitions\n* [#1055](https://github.com/stripe/stripe-node/pull/1055) Added requirements to README\n\n## 8.118.0 - 2020-10-26\n* [#1053](https://github.com/stripe/stripe-node/pull/1053) Multiple API changes\n  * Improving Typescript types for nullable parameters and introduced `Stripe.Emptyable` as a type\n  * Add support for `payment_method_options[card][cvc_token]` on `PaymentIntent`\n  * Add support for `cvc_update[cvc]` on `Token` creation\n* [#1052](https://github.com/stripe/stripe-node/pull/1052) Add Stripe.Emptyable type definition\n\n## 8.117.0 - 2020-10-23\n* [#1050](https://github.com/stripe/stripe-node/pull/1050) Add support for passing `p24[bank]` for P24 on `PaymentIntent` or `PaymentMethod`\n\n## 8.116.0 - 2020-10-22\n* [#1049](https://github.com/stripe/stripe-node/pull/1049) Support passing `tax_rates` when creating invoice items through `Subscription` or `SubscriptionSchedule`\n\n## 8.115.0 - 2020-10-20\n* [#1048](https://github.com/stripe/stripe-node/pull/1048) Add support for `jp_rn` and `ru_kpp` as a `type` on `TaxId`\n* [#1046](https://github.com/stripe/stripe-node/pull/1046) chore: replace recommended extension sublime babel with babel javascript\n\n## 8.114.0 - 2020-10-15\n* [#1045](https://github.com/stripe/stripe-node/pull/1045) Make `original_payout` and `reversed_by` not optional anymore\n\n## 8.113.0 - 2020-10-14\n* [#1044](https://github.com/stripe/stripe-node/pull/1044) Add support for `discounts` on `Session.create`\n\n## 8.112.0 - 2020-10-14\n* [#1042](https://github.com/stripe/stripe-node/pull/1042) Add support for the Payout Reverse API\n* [#1041](https://github.com/stripe/stripe-node/pull/1041) Do not mutate user-supplied opts\n\n## 8.111.0 - 2020-10-12\n* [#1038](https://github.com/stripe/stripe-node/pull/1038) Add support for `description`, `iin` and `issuer` in `payment_method_details[card_present]` and `payment_method_details[interac_present]` on `Charge`\n\n## 8.110.0 - 2020-10-12\n* [#1035](https://github.com/stripe/stripe-node/pull/1035) Add support for `setup_intent.requires_action` on Event\n\n## 8.109.0 - 2020-10-09\n* [#1033](https://github.com/stripe/stripe-node/pull/1033) Add support for internal-only `description`, `iin`, and `issuer` for `card_present` and `interac_present` on `Charge.payment_method_details`\n\n## 8.108.0 - 2020-10-08\n* [#1028](https://github.com/stripe/stripe-node/pull/1028) Add support for `Bancontact/iDEAL/Sofort -> SEPA`\n  * Add support for `generated_sepa_debit` and `generated_sepa_debit_mandate` on `Charge.payment_method_details.ideal`, `Charge.payment_method_details.bancontact` and `Charge.payment_method_details.sofort`\n  * Add support for `generated_from` on `PaymentMethod.sepa_debit`\n  * Add support for `ideal`, `bancontact` and `sofort` on `SetupAttempt.payment_method_details`\n\n## 8.107.0 - 2020-10-02\n* [#1026](https://github.com/stripe/stripe-node/pull/1026) Add support for `tos_acceptance[service_agreement]` on `Account`\n* [#1025](https://github.com/stripe/stripe-node/pull/1025) Add support for new payments capabilities on `Account`\n\n## 8.106.0 - 2020-09-29\n* [#1024](https://github.com/stripe/stripe-node/pull/1024) Add support for the `SetupAttempt` resource and List API\n\n## 8.105.0 - 2020-09-29\n* [#1023](https://github.com/stripe/stripe-node/pull/1023) Add support for `contribution` in `reporting_category` on `ReportRun`\n\n## 8.104.0 - 2020-09-28\n* [#1022](https://github.com/stripe/stripe-node/pull/1022) Add support for `oxxo_payments` capability on `Account`\n\n## 8.103.0 - 2020-09-28\n* [#1021](https://github.com/stripe/stripe-node/pull/1021) Add VERSION constant to instantiated Stripe client.\n\n## 8.102.0 - 2020-09-25\n* [#1019](https://github.com/stripe/stripe-node/pull/1019) Add support for `oxxo` as a valid `type` on the List PaymentMethod API\n\n## 8.101.0 - 2020-09-25\n* [#1018](https://github.com/stripe/stripe-node/pull/1018) More idiomatic types\n\n## 8.100.0 - 2020-09-24\n* [#1016](https://github.com/stripe/stripe-node/pull/1016) Multiple API changes\n  * Add support for OXXO on `PaymentMethod` and `PaymentIntent`\n  * Add support for `contribution` on `BalanceTransaction`\n\n## 8.99.0 - 2020-09-24\n* [#1011](https://github.com/stripe/stripe-node/pull/1011) Add type definition for Stripe.StripeResource\n\n## 8.98.0 - 2020-09-23\n* [#1014](https://github.com/stripe/stripe-node/pull/1014) Multiple API changes\n  * Add support for `issuing_dispute.closed` and `issuing_dispute.submitted` events\n  * Add support for `instant_available` on `Balance`\n\n## 8.97.0 - 2020-09-21\n* [#1012](https://github.com/stripe/stripe-node/pull/1012) Multiple API changes\n  * `metadata` is now always nullable on all resources\n  * Add support for `amount_captured` on `Charge`\n  * Add `checkout_session` on `Discount`\n\n## 8.96.0 - 2020-09-13\n* [#1003](https://github.com/stripe/stripe-node/pull/1003) Add support for `promotion_code.created` and `promotion_code.updated` on `Event`\n\n## 8.95.0 - 2020-09-10\n* [#999](https://github.com/stripe/stripe-node/pull/999) Add support for SEPA debit on Checkout\n\n## 8.94.0 - 2020-09-09\n* [#998](https://github.com/stripe/stripe-node/pull/998) Multiple API changes\n  * Add support for `sofort` as a `type` on the List PaymentMethods API\n  * Add back support for `invoice.payment_succeeded`\n\n## 8.93.0 - 2020-09-08\n* [#995](https://github.com/stripe/stripe-node/pull/995) Add support for Sofort on `PaymentMethod` and `PaymentIntent`\n\n## 8.92.0 - 2020-09-02\n* [#993](https://github.com/stripe/stripe-node/pull/993) Multiple API changes\n  * Add support for the Issuing `Dispute` submit API\n  * Add support for evidence details on Issuing `Dispute` creation, update and the resource.\n  * Add `available_payout_methods` on `BankAccount`\n  * Add `payment_status` on Checkout `Session`\n\n## 8.91.0 - 2020-08-31\n* [#992](https://github.com/stripe/stripe-node/pull/992) Add support for `payment_method.automatically_updated` on `WebhookEndpoint`\n\n## 8.90.0 - 2020-08-28\n* [#991](https://github.com/stripe/stripe-node/pull/991) Multiple API changes\n* [#990](https://github.com/stripe/stripe-node/pull/990) Typescript: add 'lastResponse' to return types\n\n## 8.89.0 - 2020-08-19\n* [#988](https://github.com/stripe/stripe-node/pull/988) Multiple API changes\n  * `tax_ids` on `Customer` can now be nullable\n  * Added support for `expires_at` on `File`\n\n## 8.88.0 - 2020-08-17\n* [#987](https://github.com/stripe/stripe-node/pull/987) Add support for `amount_details` on Issuing `Authorization` and `Transaction`\n\n## 8.87.0 - 2020-08-17\n* [#984](https://github.com/stripe/stripe-node/pull/984) Multiple API changes\n  * Add `alipay` on `type` for the List PaymentMethods API\n  * Add `payment_intent.requires_action` as a new `type` on `Event`\n\n## 8.86.0 - 2020-08-13\n* [#981](https://github.com/stripe/stripe-node/pull/981) Add support for Alipay on Checkout `Session`\n\n## 8.85.0 - 2020-08-13\n* [#980](https://github.com/stripe/stripe-node/pull/980) [codegen] Multiple API Changes\n  * Added support for bank_name on `Charge.payment_method_details.acss_debit`\n  * `Issuing.dispute.balance_transactions` is now nullable.\n\n## 8.84.0 - 2020-08-07\n* [#975](https://github.com/stripe/stripe-node/pull/975) Add support for Alipay on `PaymentMethod` and `PaymentIntent`\n\n## 8.83.0 - 2020-08-05\n* [#973](https://github.com/stripe/stripe-node/pull/973) Multiple API changes\n  * Add support for the `PromotionCode` resource and APIs\n  * Add support for `allow_promotion_codes` on Checkout `Session`\n  * Add support for `applies_to[products]` on `Coupon`\n  * Add support for `promotion_code` on `Customer` and `Subscription`\n  * Add support for `promotion_code` on `Discount`\n\n## 8.82.0 - 2020-08-04\n* [#972](https://github.com/stripe/stripe-node/pull/972) Multiple API changes\n  * Add `zh-HK` and `zh-TW` as `locale` on Checkout `Session`\n  * Add `payment_method_details[card_present][receipt][account_type]` on `Charge`\n\n## 8.81.0 - 2020-07-30\n* [#970](https://github.com/stripe/stripe-node/pull/970) Improve types for `customer` on `CreditNote` to support `DeletedCustomer`\n\n## 8.80.0 - 2020-07-29\n* [#969](https://github.com/stripe/stripe-node/pull/969) Multiple API changes\n  * Add support for `id`, `invoice` and `invoice_item` on `Discount` and `DeletedDiscount`\n  * Add support for `discount_amounts` on `CreditNote`, `CreditNoteLineItem`, `InvoiceLineItem`\n  * Add support for `discounts` on `InvoiceItem`, `InvoiceLineItem` and `Invoice`\n  * Add support for `total_discount_amounts` on `Invoice`\n  * Make `customer` and `verification` on `TaxId` optional as the resource will be re-used for `Account` in the future.\n\n## 8.79.0 - 2020-07-24\n* [#967](https://github.com/stripe/stripe-node/pull/967) Multiple API changes\n  * Make all properties from `Discount` available on `DeletedDiscount`\n  * Add `capabilities[fpx_payments]` on `Account` create and update\n\n## 8.78.0 - 2020-07-22\n* [#965](https://github.com/stripe/stripe-node/pull/965) Add support for `cartes_bancaires_payments` as a `Capability`\n\n## 8.77.0 - 2020-07-20\n* [#963](https://github.com/stripe/stripe-node/pull/963) Add support for `capabilities` as a parameter on `Account` create and update\n\n## 8.76.0 - 2020-07-17\n* [#962](https://github.com/stripe/stripe-node/pull/962) Add support for `political_exposure` on `Person`\n\n## 8.75.0 - 2020-07-16\n* [#961](https://github.com/stripe/stripe-node/pull/961) Add support for `account_onboarding` and `account_update` as `type` on `AccountLink`\n\n## 8.74.0 - 2020-07-16\n* [#959](https://github.com/stripe/stripe-node/pull/959) Refactor remaining 'var' to 'let/const' usages\n* [#960](https://github.com/stripe/stripe-node/pull/960) Use strict equality check for 'protocol' field for consistency\n* [#952](https://github.com/stripe/stripe-node/pull/952) Add new fields to lastResponse: apiVersion, stripeAccount, idempotencyKey\n\n## 8.73.0 - 2020-07-15\n* [#958](https://github.com/stripe/stripe-node/pull/958) Multiple API changes\n  * Add support for `en-GB`, `fr-CA` and `id` as `locale` on Checkout `Session`\n  * Move `purpose` to an enum on `File`\n* [#957](https://github.com/stripe/stripe-node/pull/957) Bump lodash from 4.17.15 to 4.17.19\n\n## 8.72.0 - 2020-07-15\n* [#956](https://github.com/stripe/stripe-node/pull/956) Add support for `amount_total`, `amount_subtotal`, `currency` and `total_details` on Checkout `Session`\n\n## 8.71.0 - 2020-07-14\n* [#955](https://github.com/stripe/stripe-node/pull/955) Change from string to enum value for `billing_address_collection` on Checkout `Session`\n\n## 8.70.0 - 2020-07-13\n* [#953](https://github.com/stripe/stripe-node/pull/953) Multiple API changes\n  * Adds `es-419` as a `locale` to Checkout `Session`\n  * Adds `billing_cycle_anchor` to `default_settings` and `phases` for `SubscriptionSchedule`\n\n## 8.69.0 - 2020-07-06\n* [#946](https://github.com/stripe/stripe-node/pull/946) Fix `assert_capabilities` type definition\n* [#920](https://github.com/stripe/stripe-node/pull/920) Expose StripeResource on instance\n\n## 8.68.0 - 2020-07-01\n* [#940](https://github.com/stripe/stripe-node/pull/940) Document but discourage `protocol` config option\n* [#933](https://github.com/stripe/stripe-node/pull/933) Fix tests for `Plan` and `Price` to not appear as amount can be updated.\n\n## 8.67.0 - 2020-06-24\n* [#929](https://github.com/stripe/stripe-node/pull/929) Add support for `invoice.paid` event\n\n## 8.66.0 - 2020-06-23\n* [#927](https://github.com/stripe/stripe-node/pull/927) Add support for `payment_method_data` on `PaymentIntent`\n\n## 8.65.0 - 2020-06-23\n* [#926](https://github.com/stripe/stripe-node/pull/926) Multiple API changes\n  * Add `discounts` on `LineItem`\n  * Add `document_provider_identity_document` as a `purpose` on `File`\n  * Support nullable `metadata` on Issuing `Dispute`\n  * Add `klarna[shipping_delay]` on `Source`\n\n## 8.64.0 - 2020-06-18\n* [#924](https://github.com/stripe/stripe-node/pull/924) Multiple API changes\n  * Add support for `refresh_url` and `return_url` on `AccountLink`\n  * Add support for `issuing_dispute.*` events\n\n## 8.63.0 - 2020-06-11\n* [#919](https://github.com/stripe/stripe-node/pull/919) Multiple API changes\n  * Add `transaction` on Issuing `Dispute`\n  * Add `payment_method_details[acss_debit][mandate]` on `Charge`\n\n## 8.62.0 - 2020-06-10\n* [#918](https://github.com/stripe/stripe-node/pull/918) Add support for Cartes Bancaires payments on `PaymentIntent` and `Pay\u2026\n\n## 8.61.0 - 2020-06-09\n* [#917](https://github.com/stripe/stripe-node/pull/917) Add support for `id_npwp` and `my_frp` as `type` on `TaxId`\n\n## 8.60.0 - 2020-06-03\n* [#911](https://github.com/stripe/stripe-node/pull/911) Add support for `payment_intent_data[transfer_group]` on Checkout `Session`\n\n## 8.59.0 - 2020-06-03\n* [#910](https://github.com/stripe/stripe-node/pull/910) Add support for Bancontact, EPS, Giropay and P24 on Checkout `Session`\n\n## 8.58.0 - 2020-06-03\n* [#909](https://github.com/stripe/stripe-node/pull/909) Multiple API changes\n  * Add `bacs_debit_payments` as a `Capability`\n  * Add support for BACS Debit on Checkout `Session`\n  * Add support for `checkout.session.async_payment_failed` and `checkout.session.async_payment_succeeded` as `type` on `Event`\n\n## 8.57.0 - 2020-06-03\n* [#908](https://github.com/stripe/stripe-node/pull/908) Multiple API changes\n  * Add support for bg, cs, el, et, hu, lt, lv, mt, ro, ru, sk, sl and tr as new locale on Checkout `Session`\n  * Add `settings[sepa_debit_payments][creditor_id]` on `Account`\n  * Add support for Bancontact, EPS, Giropay and P24 on `PaymentMethod`, `PaymentIntent` and `SetupIntent`\n  * Add support for `order_item[parent]` on `Source` for Klarna\n* [#905](https://github.com/stripe/stripe-node/pull/905) Add support for BACS Debit as a `PaymentMethod`\n\n## 8.56.0 - 2020-05-28\n* [#904](https://github.com/stripe/stripe-node/pull/904) Multiple API changes\n  * Add `payment_method_details[card][three_d_secure][authentication_flow]` on `Charge`\n  * Add `line_items[][price_data][product_data]` on Checkout `Session` creation\n\n## 8.55.0 - 2020-05-22\n* [#899](https://github.com/stripe/stripe-node/pull/899) Multiple API changes\n  * Add support for `ae_trn`, `cl_tin` and `sa_vat` as `type` on `TaxId`\n  * Add `result` and `result_reason` inside `payment_method_details[card][three_d_secure]` on `Charge`\n\n## 8.54.0 - 2020-05-20\n* [#897](https://github.com/stripe/stripe-node/pull/897) Multiple API changes\n  * Add `anticipation_repayment` as a `type` on `BalanceTransaction`\n  * Add `interac_present` as a `type` on `PaymentMethod`\n  * Add `payment_method_details[interac_present]` on `Charge`\n  * Add `transfer_data` on `SubscriptionSchedule`\n\n## 8.53.0 - 2020-05-18\n* [#895](https://github.com/stripe/stripe-node/pull/895) Multiple API changes\n  * Add support for `issuing_dispute` as a `type` on `BalanceTransaction`\n  * Add `balance_transactions` as an array of `BalanceTransaction` on Issuing `Dispute`\n  * Add `fingerprint` and `transaction_id` in `payment_method_details[alipay]` on `Charge`\n  * Add `transfer_data[amount]` on `Invoice`\n  * Add `transfer_data[amount_percent]` on `Subscription`\n  * Add `price.created`, `price.deleted` and `price.updated` on `Event`\n\n## 8.52.0 - 2020-05-13\n* [#891](https://github.com/stripe/stripe-node/pull/891) Add support for `purchase_details` on Issuing `Transaction`\n\n## 8.51.0 - 2020-05-11\n* [#890](https://github.com/stripe/stripe-node/pull/890) Add support for the `LineItem` resource and APIs\n\n## 8.50.0 - 2020-05-07\n* [#888](https://github.com/stripe/stripe-node/pull/888) Multiple API changes\n  * Remove parameters in `price_data[recurring]` across APIs as they were never supported\n  * Move `payment_method_details[card][three_d_secure]` to a list of enum values on `Charge`\n  * Add support for for `business_profile[support_adress]` on `Account` create and update\n\n## 8.49.0 - 2020-05-01\n* [#883](https://github.com/stripe/stripe-node/pull/883) Multiple API changes\n  * Add `issuing` on `Balance`\n  * Add `br_cnpj` and `br_cpf` as `type` on `TaxId`\n  * Add `price` support in phases on `SubscriptionSchedule`\n  * Make `quantity` nullable on `SubscriptionSchedule` for upcoming API version change\n\n## 8.48.0 - 2020-04-29\n* [#881](https://github.com/stripe/stripe-node/pull/881) Add support for the `Price` resource and APIs\n\n## 8.47.1 - 2020-04-28\n* [#880](https://github.com/stripe/stripe-node/pull/880) Make `display_items` on Checkout `Session` optional\n\n## 8.47.0 - 2020-04-24\n* [#876](https://github.com/stripe/stripe-node/pull/876) Add support for `jcb_payments` as a `Capability`\n\n## 8.46.0 - 2020-04-22\n* [#875](https://github.com/stripe/stripe-node/pull/875) Add support for `coupon` when for subscriptions on Checkout\n\n## 8.45.0 - 2020-04-22\n* [#874](https://github.com/stripe/stripe-node/pull/874) Add support for `billingPortal` namespace and `session` resource and APIs\n\n## 8.44.0 - 2020-04-17\n* [#873](https://github.com/stripe/stripe-node/pull/873) Multiple API changes\n  * Add support for `cardholder_name` in `payment_method_details[card_present]` on `Charge`\n  * Add new enum values for `company.structure` on `Account`\n\n## 8.43.0 - 2020-04-16\n* [#868](https://github.com/stripe/stripe-node/pull/868) Multiple API changes\n\n## 8.42.0 - 2020-04-15\n* [#867](https://github.com/stripe/stripe-node/pull/867) Clean up deprecated features in our Typescript definitions for Issuing and other resources\n\n## 8.41.0 - 2020-04-14\n* [#866](https://github.com/stripe/stripe-node/pull/866) Add support for `settings[branding][secondary_color]` on `Account`\n\n## 8.40.0 - 2020-04-13\n* [#865](https://github.com/stripe/stripe-node/pull/865) Add support for `description` on `WebhookEndpoint`\n\n## 8.39.2 - 2020-04-10\n* [#864](https://github.com/stripe/stripe-node/pull/864) Multiple API changes\n  * Make `payment_intent` expandable on `Charge`\n  * Add support for `sg_gst` as a value for `type` on `TaxId` and related APIs\n  * Add `cancellation_reason` and new enum values for `replacement_reason` on Issuing `Card`\n\n## 8.39.1 - 2020-04-08\n* [#848](https://github.com/stripe/stripe-node/pull/848) Fix TS return type for autoPagingEach\n\n## 8.39.0 - 2020-04-03\n* [#859](https://github.com/stripe/stripe-node/pull/859) Add support for `calculatedStatementDescriptor` on `Charge`\n\n## 8.38.0 - 2020-03-27\n\n- [#853](https://github.com/stripe/stripe-node/pull/853) Improve StripeError.generate()\n  - Add `doc_url` field to StripeError.\n  - Expose `Stripe.errors.generate()` as a convenience for `Stripe.errors.StripeError.generate()`.\n  - Fix several TS types related to StripeErrors.\n  - Add types for `StripeInvalidGrantError`.\n  - Add support for `authentication_error` and `rate_limit_error` in `.generate()`.\n\n## 8.37.0 - 2020-03-26\n\n- [#851](https://github.com/stripe/stripe-node/pull/851) Add support for `spending_controls` on Issuing `Card` and `Cardholder`\n\n## 8.36.0 - 2020-03-25\n\n- [#850](https://github.com/stripe/stripe-node/pull/850) Multiple API changes\n  - Add support for `pt-BR` as a `locale` on Checkout `Session`\n  - Add support for `company` as a `type` on Issuing `Cardholder`\n\n## 8.35.0 - 2020-03-24\n\n- [#849](https://github.com/stripe/stripe-node/pull/849) Add support for `pause_collection` on `Subscription`\n\n## 8.34.0 - 2020-03-24\n\n- [#847](https://github.com/stripe/stripe-node/pull/847) Add new capabilities for AU Becs Debit and tax reporting\n\n## 8.33.0 - 2020-03-20\n\n- [#842](https://github.com/stripe/stripe-node/pull/842) Multiple API changes for Issuing:\n  - Add `amount`, `currency`, `merchant_amount` and `merchant_currency` on `Authorization`\n  - Add `amount`, `currency`, `merchant_amount` and `merchant_currency` inside `request_history` on `Authorization`\n  - Add `pending_request` on `Authorization`\n  - Add `amount` when approving an `Authorization`\n  - Add `replaced_by` on `Card`\n\n## 8.32.0 - 2020-03-13\n\n- [#836](https://github.com/stripe/stripe-node/pull/836) Multiple API changes for Issuing:\n  - Rename `speed` to `service` on Issuing `Card`\n  - Rename `wallet_provider` to `wallet` and `address_zip_check` to `address_postal_code_check` on Issuing `Authorization`\n  - Mark `is_default` as deprecated on Issuing `Cardholder`\n\n## 8.31.0 - 2020-03-12\n\n- [#835](https://github.com/stripe/stripe-node/pull/835) Add support for `shipping` and `shipping_address_collection` on Checkout `Session`\n\n## 8.30.0 - 2020-03-12\n\n- [#834](https://github.com/stripe/stripe-node/pull/834) Add support for `ThreeDSecure` on Issuing `Authorization`\n\n## 8.29.0 - 2020-03-05\n\n- [#833](https://github.com/stripe/stripe-node/pull/833) Make metadata nullable in many endpoints\n\n## 8.28.1 - 2020-03-05\n\n- [#827](https://github.com/stripe/stripe-node/pull/827) Allow `null`/`undefined` to be passed for `options` arg.\n\n## 8.28.0 - 2020-03-04\n\n- [#830](https://github.com/stripe/stripe-node/pull/830) Add support for `metadata` on `WebhookEndpoint`\n\n## 8.27.0 - 2020-03-04\n\n- [#829](https://github.com/stripe/stripe-node/pull/829) Multiple API changes\n  - Add support for `account` as a parameter on `Token` to create Account tokens\n  - Add support for `verification_data.expiry_check` on Issuing `Authorization`\n  - Add support for `incorrect_cvc` and `incorrect_expiry` as a value for `request_history.reason` on Issuing `Authorization`\n\n## 8.26.0 - 2020-03-04\n\n- [#828](https://github.com/stripe/stripe-node/pull/828) Multiple API changes\n  - Add support for `errors` in `requirements` on `Account`, `Capability` and `Person`\n  - Add support for `payment_intent.processing` as a new `type` on `Event`.\n\n## 8.25.0 - 2020-03-03\n\n\u26A0\uFE0F This is a breaking change for TypeScript users.\n\n- [#826](https://github.com/stripe/stripe-node/pull/826) Multiple API changes:\n  - \u26A0\uFE0F Types are now for the API version `2020-03-02`. This is a breaking change for TypeScript users\n  - Remove `uob_regional` as a value on `bank` for FPX as this is deprecated and was never used\n  - Add support for `next_invoice_sequence` on `Customer`\n  - Add support for `proration_behavior` on `SubscriptionItem` delete\n\n## 8.24.1 - 2020-03-02\n\n- [#824](https://github.com/stripe/stripe-node/pull/824) Update type for StripeError to extend Error\n\n## 8.24.0 - 2020-02-28\n\n- [#822](https://github.com/stripe/stripe-node/pull/822) Add `my_sst` as a valid value for `type` on `TaxId`\n\n## 8.23.0 - 2020-02-27\n\n- [#821](https://github.com/stripe/stripe-node/pull/821) Make `type` on `AccountLink` an enum\n\n## 8.22.0 - 2020-02-24\n\n- [#820](https://github.com/stripe/stripe-node/pull/820) Add new enum values in `reason` for Issuing `Dispute` creation\n\n## 8.21.0 - 2020-02-24\n\n- [#819](https://github.com/stripe/stripe-node/pull/819) Add support for listing Checkout `Session` and passing tax rate information\n\n## 8.20.0 - 2020-02-21\n\n- [#813](https://github.com/stripe/stripe-node/pull/813) Multiple API changes\n  - Add support for `timezone` on `ReportRun`\n  - Add support for `proration_behavior` on `SubscriptionSchedule`\n\n## 8.19.0 - 2020-02-18\n\n- [#807](https://github.com/stripe/stripe-node/pull/807) Change timeout default to constant 80000 instead Node default\n\n## 8.18.0 - 2020-02-14\n\n- [#802](https://github.com/stripe/stripe-node/pull/802) TS Fixes\n  - Correctly type `Array<CustomField>`\n  - More consistently describe nullable fields as `| null`, vs `| ''`.\n\n## 8.17.0 - 2020-02-12\n\n- [#804](https://github.com/stripe/stripe-node/pull/804) Add support for `payment_intent_data[transfer_data][amount]` on Checkout `Session`\n\n## 8.16.0 - 2020-02-12\n\n- [#803](https://github.com/stripe/stripe-node/pull/803) Multiple API changes reflect in Typescript definitions\n  - Add `fpx` as a valid `source_type` on `Balance`, `Payout` and `Transfer`\n  - Add `fpx` support on Checkout `Session`\n  - Fields inside `verification_data` on Issuing `Authorization` are now enums\n  - Support updating `payment_method_options` on `PaymentIntent` and `SetupIntent`\n\n## 8.15.0 - 2020-02-10\n\n- [#801](https://github.com/stripe/stripe-node/pull/801) Multiple API changes\n  - Add support for new `type` values for `TaxId`.\n  - Add support for `payment_intent_data[statement_descriptor_suffix]` on Checkout `Session`.\n\n## 8.14.0 - 2020-02-04\n\n- [#793](https://github.com/stripe/stripe-node/pull/793) Rename `sort_code` to `sender_sort_code` on `SourceTransaction` for BACS debit.\n\n## 8.13.0 - 2020-02-03\n\n- [#792](https://github.com/stripe/stripe-node/pull/792) Multiple API changes\n  - Add new `purpose` for `File`: `additional_verification`\n  - Add `error_on_requires_action` as a parameter for `PaymentIntent` creation and confirmation\n\n## 8.12.0 - 2020-01-31\n\n- [#790](https://github.com/stripe/stripe-node/pull/790) Add new type of `TaxId`\n\n## 8.11.0 - 2020-01-30\n\n- [#789](https://github.com/stripe/stripe-node/pull/789) Add support for `company.structure` on `Account` and other docs changes\n\n## 8.10.0 - 2020-01-30\n\n- [#788](https://github.com/stripe/stripe-node/pull/788) Make typescript param optional\n\n## 8.9.0 - 2020-01-30\n\n- [#787](https://github.com/stripe/stripe-node/pull/787) Add support for FPX as a `PaymentMethod`\n- [#769](https://github.com/stripe/stripe-node/pull/769) Fix Typescript definition on `Token` creation for bank accounts\n\n## 8.8.2 - 2020-01-30\n\n- [#785](https://github.com/stripe/stripe-node/pull/785) Fix file uploads with nested params\n\n## 8.8.1 - 2020-01-29\n\n- [#784](https://github.com/stripe/stripe-node/pull/784) Allow @types/node 8.1\n\n## 8.8.0 - 2020-01-28\n\n- [#780](https://github.com/stripe/stripe-node/pull/780) Add new type for `TaxId` and `sender_account_name` on `SourceTransaction`\n\n## 8.7.0 - 2020-01-24\n\n- [#777](https://github.com/stripe/stripe-node/pull/777) Add support for `shipping[speed]` on Issuing `Card`\n\n## 8.6.0 - 2020-01-23\n\n- [#775](https://github.com/stripe/stripe-node/pull/775) Gracefully handle a missing `subprocess` module\n\n## 8.5.0 - 2020-01-23\n\n- [#776](https://github.com/stripe/stripe-node/pull/776) Add support for new `type` on `CustomerTaxId`\n\n## 8.4.1 - 2020-01-21\n\n- [#774](https://github.com/stripe/stripe-node/pull/774) Improve docstrings for many properties and parameters\n\n## 8.4.0 - 2020-01-17\n\n- [#771](https://github.com/stripe/stripe-node/pull/771) Add `metadata` on Checkout `Session` and remove deprecated features\n- [#764](https://github.com/stripe/stripe-node/pull/764) Added typescript webhook example\n\n## 8.3.0 - 2020-01-15\n\n- [#767](https://github.com/stripe/stripe-node/pull/767) Adding missing events for pending updates on `Subscription`\n\n## 8.2.0 - 2020-01-15\n\n- [#765](https://github.com/stripe/stripe-node/pull/765) Add support for `pending_update` on `Subscription` to the Typescript definitions\n\n## 8.1.0 - 2020-01-14\n\n- [#763](https://github.com/stripe/stripe-node/pull/763) Add support for listing line items on a `CreditNote`\n- [#762](https://github.com/stripe/stripe-node/pull/762) Improve docs for core fields such as `metadata` on Typescript definitions\n\n## 8.0.1 - 2020-01-09\n\n- [#757](https://github.com/stripe/stripe-node/pull/757) [bugfix] Add types dir to npmignore whitelist and stop warning when instantiating stripe with no args\n\n## 8.0.0 - 2020-01-09\n\nMajor version release, adding TypeScript definitions and dropping support for Node 6. [The migration guide](https://github.com/stripe/stripe-node/wiki/Migration-guide-for-v8) contains a detailed list of backwards-incompatible changes with upgrade instructions.\n\nMajor pull requests included in this release (cf. [#742](https://github.com/stripe/stripe-node/pull/742)) (\u26A0\uFE0F = breaking changes):\n\n- [#736](https://github.com/stripe/stripe-node/pull/736) Add TypeScript definitions\n- [#744](https://github.com/stripe/stripe-node/pull/744) Remove deprecated resources and methods\n- [#752](https://github.com/stripe/stripe-node/pull/752) Deprecate many library api's, unify others\n\n## 7.63.1 - 2020-11-17\n- Identical to 7.15.0.\n\n## 7.63.0 - 2020-11-17\n- Published in error. Do not use. This is identical to 8.122.0.\n\n## 7.15.0 - 2019-12-30\n\n- [#745](https://github.com/stripe/stripe-node/pull/745) Bump handlebars from 4.1.2 to 4.5.3\n- [#737](https://github.com/stripe/stripe-node/pull/737) Fix flows test\n\n## 7.14.0 - 2019-11-26\n\n- [#732](https://github.com/stripe/stripe-node/pull/732) Add support for CreditNote preview\n\n## 7.13.1 - 2019-11-22\n\n- [#728](https://github.com/stripe/stripe-node/pull/728) Remove duplicate export\n\n## 7.13.0 - 2019-11-06\n\n- [#703](https://github.com/stripe/stripe-node/pull/703) New config object\n\n## 7.12.0 - 2019-11-05\n\n- [#724](https://github.com/stripe/stripe-node/pull/724) Add support for `Mandate`\n\n## 7.11.0 - 2019-10-31\n\n- [#719](https://github.com/stripe/stripe-node/pull/719) Define 'type' as a property on errors rather than a getter\n- [#709](https://github.com/stripe/stripe-node/pull/709) README: imply context of stripe-node\n- [#717](https://github.com/stripe/stripe-node/pull/717) Contributor Convenant\n\n## 7.10.0 - 2019-10-08\n\n- [#699](https://github.com/stripe/stripe-node/pull/699) Add request-specific fields from raw error to top level error\n\n## 7.9.1 - 2019-09-17\n\n- [#692](https://github.com/stripe/stripe-node/pull/692) Retry based on `Stripe-Should-Retry` and `Retry-After` headers\n\n## 7.9.0 - 2019-09-09\n\n- [#691](https://github.com/stripe/stripe-node/pull/691) GET and DELETE requests data: body->queryParams\n- [#684](https://github.com/stripe/stripe-node/pull/684) Bump eslint-utils from 1.3.1 to 1.4.2\n\n## 7.8.0 - 2019-08-12\n\n- [#678](https://github.com/stripe/stripe-node/pull/678) Add `subscriptionItems.createUsageRecord()` method\n\n## 7.7.0 - 2019-08-09\n\n- [#675](https://github.com/stripe/stripe-node/pull/675) Remove subscription schedule revisions\n  - This is technically a breaking change. We've chosen to release it as a minor vesion bump because the associated API is unused.\n\n## 7.6.2 - 2019-08-09\n\n- [#674](https://github.com/stripe/stripe-node/pull/674) Refactor requestDataProcessor for File out into its own file\n\n## 7.6.1 - 2019-08-08\n\n- [#673](https://github.com/stripe/stripe-node/pull/673) Add request start and end time to request and response events\n\n## 7.6.0 - 2019-08-02\n\n- [#661](https://github.com/stripe/stripe-node/pull/661) Refactor errors to ES6 classes.\n- [#672](https://github.com/stripe/stripe-node/pull/672) Refinements to error ES6 classes.\n\n## 7.5.5 - 2019-08-02\n\n- [#665](https://github.com/stripe/stripe-node/pull/665) Remove `lodash.isplainobject`.\n\n## 7.5.4 - 2019-08-01\n\n- [#671](https://github.com/stripe/stripe-node/pull/671) Include a prefix in generated idempotency keys and remove uuid dependency.\n\n## 7.5.3 - 2019-07-31\n\n- [#667](https://github.com/stripe/stripe-node/pull/667) Refactor request headers, allowing any header to be overridden.\n\n## 7.5.2 - 2019-07-30\n\n- [#664](https://github.com/stripe/stripe-node/pull/664) Expose and use `once`\n\n## 7.5.1 - 2019-07-30\n\n- [#662](https://github.com/stripe/stripe-node/pull/662) Remove `safe-buffer` dependency\n- [#666](https://github.com/stripe/stripe-node/pull/666) Bump lodash from 4.17.11 to 4.17.15\n- [#668](https://github.com/stripe/stripe-node/pull/668) Move Balance History to /v1/balance_transactions\n\n## 7.5.0 - 2019-07-24\n\n- [#660](https://github.com/stripe/stripe-node/pull/660) Interpret any string in args as API Key instead of a regex\n  - \u26A0\uFE0F Careful: passing strings which are not API Keys as as the final argument to a request previously would have ignored those strings, and would now result in the request failing with an authentication error.\n  - \u26A0\uFE0F Careful: The private api `utils.isAuthKey` was removed.\n- [#658](https://github.com/stripe/stripe-node/pull/658) Update README retry code sample to use two retries\n- [#653](https://github.com/stripe/stripe-node/pull/653) Reorder customer methods\n\n## 7.4.0 - 2019-06-27\n\n- [#652](https://github.com/stripe/stripe-node/pull/652) Add support for the `SetupIntent` resource and APIs\n\n## 7.3.0 - 2019-06-24\n\n- [#649](https://github.com/stripe/stripe-node/pull/649) Enable request latency telemetry by default\n\n## 7.2.0 - 2019-06-17\n\n- [#608](https://github.com/stripe/stripe-node/pull/608) Add support for `CustomerBalanceTransaction` resource and APIs\n\n## 7.1.0 - 2019-05-23\n\n- [#632](https://github.com/stripe/stripe-node/pull/632) Add support for `radar.early_fraud_warning` resource\n\n## 7.0.1 - 2019-05-22\n\n- [#631](https://github.com/stripe/stripe-node/pull/631) Make autopagination functions work for `listLineItems` and `listUpcomingLineItems`\n\n## 7.0.0 - 2019-05-14\n\nMajor version release. [The migration guide](https://github.com/stripe/stripe-node/wiki/Migration-guide-for-v7) contains a detailed list of backwards-incompatible changes with upgrade instructions.\n\nPull requests included in this release (cf. [#606](https://github.com/stripe/stripe-node/pull/606)) (\u26A0\uFE0F = breaking changes):\n\n- \u26A0\uFE0F Drop support for Node 4, 5 and 7 ([#606](https://github.com/stripe/stripe-node/pull/606))\n- Prettier formatting ([#604](https://github.com/stripe/stripe-node/pull/604))\n- Alphabetize \u201Cbasic\u201D methods ([#610](https://github.com/stripe/stripe-node/pull/610))\n- Use `id` for single positional arguments ([#611](https://github.com/stripe/stripe-node/pull/611))\n- Modernize ES5 to ES6 with lebab ([#607](https://github.com/stripe/stripe-node/pull/607))\n- \u26A0\uFE0F Remove deprecated methods ([#613](https://github.com/stripe/stripe-node/pull/613))\n- Add VSCode and EditorConfig files ([#620](https://github.com/stripe/stripe-node/pull/620))\n- \u26A0\uFE0F Drop support for Node 9 and bump dependencies to latest versions ([#614](https://github.com/stripe/stripe-node/pull/614))\n- Misc. manual formatting ([#623](https://github.com/stripe/stripe-node/pull/623))\n- \u26A0\uFE0F Remove legacy parameter support in `invoices.retrieveUpcoming()` ([#621](https://github.com/stripe/stripe-node/pull/621))\n- \u26A0\uFE0F Remove curried urlData and manually specified urlParams ([#625](https://github.com/stripe/stripe-node/pull/625))\n- Extract resources file ([#626](https://github.com/stripe/stripe-node/pull/626))\n\n## 6.36.0 - 2019-05-14\n\n- [#622](https://github.com/stripe/stripe-node/pull/622) Add support for the `Capability` resource and APIs\n\n## 6.35.0 - 2019-05-14\n\n- [#627](https://github.com/stripe/stripe-node/pull/627) Add `listLineItems` and `listUpcomingLineItems` methods to `Invoice`\n\n## 6.34.0 - 2019-05-08\n\n- [#619](https://github.com/stripe/stripe-node/pull/619) Move `generateTestHeaderString` to stripe.webhooks (fixes a bug in 6.33.0)\n\n## 6.33.0 - 2019-05-08\n\n**Important**: This version is non-functional and has been yanked in favor of 6.32.0.\n\n- [#609](https://github.com/stripe/stripe-node/pull/609) Add `generateWebhookHeaderString` to make it easier to mock webhook events\n\n## 6.32.0 - 2019-05-07\n\n- [#612](https://github.com/stripe/stripe-node/pull/612) Add `balanceTransactions` resource\n\n## 6.31.2 - 2019-05-03\n\n- [#602](https://github.com/stripe/stripe-node/pull/602) Handle errors from the oauth/token endpoint\n\n## 6.31.1 - 2019-04-26\n\n- [#600](https://github.com/stripe/stripe-node/pull/600) Fix encoding of nested parameters in multipart requests\n\n## 6.31.0 - 2019-04-24\n\n- [#588](https://github.com/stripe/stripe-node/pull/588) Add support for the `TaxRate` resource and APIs\n\n## 6.30.0 - 2019-04-22\n\n- [#589](https://github.com/stripe/stripe-node/pull/589) Add support for the `TaxId` resource and APIs\n- [#593](https://github.com/stripe/stripe-node/pull/593) `retrieveUpcoming` on `Invoice` can now take one hash as parameter instead of requiring a customer id.\n\n## 6.29.0 - 2019-04-18\n\n- [#585](https://github.com/stripe/stripe-node/pull/585) Add support for the `CreditNote` resource and APIs\n\n## 6.28.0 - 2019-03-18\n\n- [#570](https://github.com/stripe/stripe-node/pull/570) Add support for the `PaymentMethod` resource and APIs\n- [#578](https://github.com/stripe/stripe-node/pull/578) Add support for retrieving a Checkout `Session`\n\n## 6.27.0 - 2019-03-15\n\n- [#581](https://github.com/stripe/stripe-node/pull/581) Add support for deleting Terminal `Location` and `Reader`\n\n## 6.26.1 - 2019-03-14\n\n- [#580](https://github.com/stripe/stripe-node/pull/580) Fix support for HTTPS proxies\n\n## 6.26.0 - 2019-03-11\n\n- [#574](https://github.com/stripe/stripe-node/pull/574) Encode `Date`s as Unix timestamps\n\n## 6.25.1 - 2019-02-14\n\n- [#565](https://github.com/stripe/stripe-node/pull/565) Always encode arrays as integer-indexed hashes\n\n## 6.25.0 - 2019-02-13\n\n- [#559](https://github.com/stripe/stripe-node/pull/559) Add `stripe.setMaxNetworkRetries(n)` for automatic network retries\n\n## 6.24.0 - 2019-02-12\n\n- [#562](https://github.com/stripe/stripe-node/pull/562) Add support for `SubscriptionSchedule` and `SubscriptionScheduleRevision`\n\n## 6.23.1 - 2019-02-04\n\n- [#560](https://github.com/stripe/stripe-node/pull/560) Enable persistent connections by default\n\n## 6.23.0 - 2019-01-30\n\n- [#557](https://github.com/stripe/stripe-node/pull/557) Add configurable telemetry to gather information on client-side request latency\n\n## 6.22.0 - 2019-01-25\n\n- [#555](https://github.com/stripe/stripe-node/pull/555) Add support for OAuth methods\n\n## 6.21.0 - 2019-01-23\n\n- [#551](https://github.com/stripe/stripe-node/pull/551) Rename `CheckoutSession` to `Session` and move it under the `checkout` namespace. This is a breaking change, but we've reached out to affected merchants and all new merchants would use the new approach.\n\n## 6.20.1 - 2019-01-17\n\n- [#552](https://github.com/stripe/stripe-node/pull/552) Fix `Buffer` deprecation warnings\n\n## 6.20.0 - 2018-12-21\n\n- [#539](https://github.com/stripe/stripe-node/pull/539) Add support for the `CheckoutSession` resource\n\n## 6.19.0 - 2018-12-10\n\n- [#535](https://github.com/stripe/stripe-node/pull/535) Add support for account links\n\n## 6.18.1 - 2018-12-07\n\n- [#534](https://github.com/stripe/stripe-node/pull/534) Fix iterating on `files.list` method\n\n## 6.18.0 - 2018-12-06\n\n- [#530](https://github.com/stripe/stripe-node/pull/530) Export errors on root Stripe object\n\n## 6.17.0 - 2018-11-28\n\n- [#527](https://github.com/stripe/stripe-node/pull/527) Add support for the `Review` APIs\n\n## 6.16.0 - 2018-11-27\n\n- [#515](https://github.com/stripe/stripe-node/pull/515) Add support for `ValueLists` and `ValueListItems` for Radar\n\n## 6.15.2 - 2018-11-26\n\n- [#526](https://github.com/stripe/stripe-node/pull/526) Fixes an accidental mutation of input in rare cases\n\n## 6.15.1 - 2018-11-23\n\n- [#523](https://github.com/stripe/stripe-node/pull/523) Handle `Buffer` instances in `Webhook.constructEvent`\n\n## 6.15.0 - 2018-11-12\n\n- [#474](https://github.com/stripe/stripe-node/pull/474) Add support for `partner_id` in `setAppInfo`\n\n## 6.14.0 - 2018-11-09\n\n- [#509](https://github.com/stripe/stripe-node/pull/509) Add support for new `Invoice` methods\n\n## 6.13.0 - 2018-10-30\n\n- [#507](https://github.com/stripe/stripe-node/pull/507) Add support for persons\n- [#510](https://github.com/stripe/stripe-node/pull/510) Add support for webhook endpoints\n\n## 6.12.1 - 2018-09-24\n\n- [#502](https://github.com/stripe/stripe-node/pull/502) Fix test suite\n\n## 6.12.0 - 2018-09-24\n\n- [#498](https://github.com/stripe/stripe-node/pull/498) Add support for Stripe Terminal\n- [#500](https://github.com/stripe/stripe-node/pull/500) Rename `FileUploads` to `Files`. For backwards compatibility, `Files` is aliased to `FileUploads`. `FileUploads` is deprecated and will be removed from the next major version.\n\n## 6.11.0 - 2018-09-18\n\n- [#496](https://github.com/stripe/stripe-node/pull/496) Add auto-pagination\n\n## 6.10.0 - 2018-09-05\n\n- [#491](https://github.com/stripe/stripe-node/pull/491) Add support for usage record summaries\n\n## 6.9.0 - 2018-09-05\n\n- [#493](https://github.com/stripe/stripe-node/pull/493) Add support for reporting resources\n\n## 6.8.0 - 2018-08-27\n\n- [#488](https://github.com/stripe/stripe-node/pull/488) Remove support for `BitcoinReceivers` write-actions\n\n## 6.7.0 - 2018-08-03\n\n- [#485](https://github.com/stripe/stripe-node/pull/485) Add support for `cancel` on topups\n\n## 6.6.0 - 2018-08-02\n\n- [#483](https://github.com/stripe/stripe-node/pull/483) Add support for file links\n\n## 6.5.0 - 2018-07-28\n\n- [#482](https://github.com/stripe/stripe-node/pull/482) Add support for Sigma scheduled query runs\n\n## 6.4.0 - 2018-07-26\n\n- [#481](https://github.com/stripe/stripe-node/pull/481) Add support for Stripe Issuing\n\n## 6.3.0 - 2018-07-18\n\n- [#471](https://github.com/stripe/stripe-node/pull/471) Add support for streams in file uploads\n\n## 6.2.1 - 2018-07-03\n\n- [#475](https://github.com/stripe/stripe-node/pull/475) Fixes array encoding of subscription items for the upcoming invoices endpoint.\n\n## 6.2.0 - 2018-06-28\n\n- [#473](https://github.com/stripe/stripe-node/pull/473) Add support for payment intents\n\n## 6.1.1 - 2018-06-07\n\n- [#469](https://github.com/stripe/stripe-node/pull/469) Add `.npmignore` to create a lighter package (minus examples and tests)\n\n## 6.1.0 - 2018-06-01\n\n- [#465](https://github.com/stripe/stripe-node/pull/465) Warn when unknown options are passed to functions\n\n## 6.0.0 - 2018-05-14\n\n- [#453](https://github.com/stripe/stripe-node/pull/453) Re-implement usage record's `create` so that it correctly passes all arguments (this is a very minor breaking change)\n\n## 5.10.0 - 2018-05-14\n\n- [#459](https://github.com/stripe/stripe-node/pull/459) Export error types on `stripe.errors` so that errors can be matched with `instanceof` instead of comparing the strings generated by `type`\n\n## 5.9.0 - 2018-05-09\n\n- [#456](https://github.com/stripe/stripe-node/pull/456) Add support for issuer fraud records\n\n## 5.8.0 - 2018-04-04\n\n- [#444](https://github.com/stripe/stripe-node/pull/444) Introduce flexible billing primitives for subscriptions\n\n## 5.7.0 - 2018-04-02\n\n- [#441](https://github.com/stripe/stripe-node/pull/441) Write directly to a connection that's known to be still open\n\n## 5.6.1 - 2018-03-25\n\n- [#437](https://github.com/stripe/stripe-node/pull/437) Fix error message when passing invalid parameters to some API methods\n\n## 5.6.0 - 2018-03-24\n\n- [#439](https://github.com/stripe/stripe-node/pull/439) Drop Bluebird dependency and use native ES6 promises\n\n## 5.5.0 - 2018-02-21\n\n- [#425](https://github.com/stripe/stripe-node/pull/425) Add support for topups\n\n## 5.4.0 - 2017-12-05\n\n- [#412](https://github.com/stripe/stripe-node/pull/412) Add `StripeIdempotencyError` type for new kind of stripe error\n\n## 5.3.0 - 2017-10-31\n\n- [#405](https://github.com/stripe/stripe-node/pull/405) Support for exchange rates APIs\n\n## 5.2.0 - 2017-10-26\n\n- [#404](https://github.com/stripe/stripe-node/pull/404) Support for listing source transactions\n\n## 5.1.1 - 2017-10-04\n\n- [#394](https://github.com/stripe/stripe-node/pull/394) Fix improper warning for requests that have options but no parameters\n\n## 5.1.0 - 2017-09-25\n\n- Add check for when options are accidentally included in an arguments object\n- Use safe-buffer package instead of building our own code\n- Remove dependency on object-assign package\n- Bump required versions of bluebird and qs\n\n## 5.0.0 - 2017-09-12\n\n- Drop support for Node 0.x (minimum required version is now >= 4)\n\n## 4.25.0 - 2017-09-05\n\n- Switch to Bearer token authentication on API requests\n\n## 4.24.1 - 2017-08-25\n\n- Specify UTF-8 encoding when verifying HMAC-SHA256 payloads\n\n## 4.24.0 - 2017-08-10\n\n- Support informational events with `Stripe.on` (see README for details)\n\n## 4.23.2 - 2017-08-03\n\n- Handle `Buffer.from` incompatibility for Node versions prior to 4.5.x\n\n## 4.23.1 - 2017-06-24\n\n- Properly encode subscription items when retrieving upcoming invoice\n\n## 4.23.0 - 2017-06-20\n\n- Add support for ephemeral keys\n\n## 4.22.1 - 2017-06-20\n\n- Fix usage of hasOwnProperty in utils\n\n## 4.22.0 - 2017-05-25\n\n- Make response headers accessible on error objects\n\n## 4.21.0 - 2017-05-25\n\n- Add support for account login links\n\n## 4.20.0 - 2017-05-24\n\n- Add `stripe.setAppInfo` for plugin authors to register app information\n\n## 4.19.1 - 2017-05-18\n\n- Tweak class initialization for compatibility with divergent JS engines\n\n## 4.19.0 - 2017-05-11\n\n- Support for checking webhook signatures\n\n## 4.18.0 - 2017-04-12\n\n- Reject ID parameters that don't look like strings\n\n## 4.17.1 - 2017-04-05\n\n- Fix paths in error messages on bad arguments\n\n## 4.17.0 - 2017-03-31\n\n- Add support for payouts\n\n## 4.16.1 - 2017-03-30\n\n- Fix bad reference to `requestId` when initializing errors\n\n## 4.16.0 - 2017-03-22\n\n- Make `requestId` available on resource `lastResponse` objects\n\n## 4.15.1 - 2017-03-08\n\n- Update required version of \"qs\" dependency to 6.0.4+\n\n## 4.15.0 - 2017-01-18\n\n- Add support for updating sources\n\n## 4.14.0 - 2016-12-01\n\n- Add support for verifying sources\n\n## 4.13.0 - 2016-11-21\n\n- Add retrieve method for 3-D Secure resources\n\n## 4.12.0 - 2016-10-18\n\n- Support for 403 status codes (permission denied)\n\n## 4.11.0 - 2016-09-16\n\n- Add support for Apple Pay domains\n\n## 4.10.0 - 2016-08-29\n\n- Refactor deprecated uses of Bluebird's `Promise.defer`\n\n## 4.9.1 - 2016-08-22\n\n- URI-encode unames for Stripe user agents so we don't fail on special characters\n\n## 4.9.0 - 2016-07-19\n\n- Add `Source` model for generic payment sources support (experimental)\n\n## 4.8.0 - 2016-07-14\n\n- Add `ThreeDSecure` model for 3-D secure payments\n\n## 4.7.0 - 2016-05-25\n\n- Add support for returning Relay orders\n\n## 4.6.0 - 2016-05-04\n\n- Add `update`, `create`, `retrieve`, `list` and `del` methods to `stripe.subscriptions`\n\n## 4.5.0 - 2016-03-15\n\n- Add `reject` on `Account` to support the new API feature\n\n## 4.4.0 - 2016-02-08\n\n- Add `CountrySpec` model for looking up country payment information\n\n## 4.3.0 - 2016-01-26\n\n- Add support for deleting Relay SKUs and products\n\n## 4.2.0 - 2016-01-13\n\n- Add `lastResponse` property on `StripeResource` objects\n- Return usage errors of `stripeMethod` through callback instead of raising\n- Use latest year for expiry years in tests to avoid new year problems\n\n## 4.1.0 - 2015-12-02\n\n- Add a verification routine for external accounts\n\n## 4.0.0 - 2015-09-17\n\n- Remove ability for API keys to be passed as 1st param to acct.retrieve\n- Rename StripeInvalidRequest to StripeInvalidRequestError\n\n## 3.9.0 - 2015-09-14\n\n- Add Relay resources: Products, SKUs, and Orders\n\n## 3.8.0 - 2015-09-11\n\n- Added rate limiting responses\n\n## 3.7.1 - 2015-08-17\n\n- Added refund object with listing, retrieval, updating, and creation.\n\n## 3.7.0 - 2015-08-03\n\n- Added managed account deletion\n- Added dispute listing and retrieval\n\n## 3.6.0 - 2015-07-07\n\n- Added request IDs to all Stripe errors\n\n## 3.5.2 - 2015-06-30\n\n- [BUGFIX] Fixed issue with uploading binary files (Gabriel Chagas Marques)\n\n## 3.5.1 - 2015-06-30\n\n- [BUGFIX] Fixed issue with passing arrays of objects\n\n## 3.5.0 - 2015-06-11\n\n- Added support for optional parameters when retrieving an upcoming invoice\n  (Matthew Arkin)\n\n## 3.4.0 - 2015-06-10\n\n- Added support for bank accounts and debit cards in managed accounts\n\n## 3.3.4 - 2015-04-02\n\n- Remove SSL revocation tests and check\n\n## 3.3.3 - 2015-03-31\n\n- [BUGFIX] Fix support for both stripe.account and stripe.accounts\n\n## 3.3.2 - 2015-02-24\n\n- Support transfer reversals.\n\n## 3.3.1 - 2015-02-21\n\n- [BUGFIX] Fix passing in only a callback to the Account resource. (Matthew Arkin)\n\n## 3.3.0 - 2015-02-19\n\n- Support BitcoinReceiver update & delete actions\n- Add methods for manipulating customer sources as per 2015-02-18 API version\n- The Account resource will now take an account ID. However, legacy use of the resource (without an account ID) will still work.\n\n## 3.2.0 - 2015-02-05\n\n- [BUGFIX] Fix incorrect failing tests for headers support\n- Update all dependencies (remove mocha-as-promised)\n- Switch to bluebird for promises\n\n## 3.1.0 - 2015-01-21\n\n- Support making bitcoin charges through BitcoinReceiver source object\n\n## 3.0.3 - 2014-12-23\n\n- Adding file uploads as a resource.\n\n## 3.0.2 - 2014-11-26\n\n- [BUGFIX] Fix issue where multiple expand params were not getting passed through (#130)\n\n## 3.0.1 - 2014-11-26\n\n- (Version skipped due to npm mishap)\n\n## 3.0.0 - 2014-11-18\n\n- [BUGFIX] Fix `stringifyRequestData` to deal with nested objs correctly\n- Bump MAJOR as we're no longer supporting Node 0.8\n\n## 2.9.0 - 2014-11-12\n\n- Allow setting of HTTP agent (proxy) (issue #124)\n- Add stack traces to all Stripe Errors\n\n## 2.8.0 - 2014-07-26\n\n- Make application fee refunds a list instead of array\n\n## 2.7.4 - 2014-07-17\n\n- [BUGFIX] Fix lack of subscription param in `invoices#retrieveUpcoming` method\n- Add support for an `optional!` annotation on `urlParams`\n\n## 2.7.3 - 2014-06-17\n\n- Add metadata to disputes and refunds\n\n## 2.6.3 - 2014-05-21\n\n- Support cards for recipients.\n\n## 2.5.3 - 2014-05-16\n\n- Allow the `update` method on coupons for metadata changes\n\n## 2.5.2 - 2014-04-28\n\n- [BUGFIX] Fix when.js version string in package.json to support older npm versions\n\n## 2.5.1 - 2014-04-25\n\n- [BUGFIX] Fix revoked-ssl check\n- Upgrade when.js to 3.1.0\n\n## 2.5.0 - 2014-04-09\n\n- Ensure we prevent requests using revoked SSL certs\n\n## 2.4.5 - 2014-04-08\n\n- Add better checks for incorrect arguments (throw exceptions accordingly).\n- Validate the Connect Auth key, if passed\n\n## 2.4.4 - 2014-03-27\n\n- [BUGFIX] Fix URL encoding issue (not encoding interpolated URL params, see issue #93)\n\n## 2.4.3 - 2014-03-27\n\n- Add more debug information to the case of a failed `JSON.parse()`\n\n## 2.4.2 - 2014-02-20\n\n- Add binding for `transfers/{tr_id}/transactions` endpoint\n\n## 2.4.1 - 2014-02-07\n\n- Ensure raw error object is accessible on the generated StripeError\n\n## 2.4.0 - 2014-01-29\n\n- Support multiple subscriptions per customer\n\n## 2.3.4 - 2014-01-11\n\n- [BUGFIX] Fix #76, pass latest as version to api & fix constructor arg signature\n\n## 2.3.3 - 2014-01-10\n\n- Document cancelSubscription method params and add specs for `at_period_end`\n\n## 2.3.2 - 2013-12-02\n\n- Add application fees API\n\n## 2.2.2 - 2013-11-20\n\n- [BUGFIX] Fix incorrect deleteDiscount method & related spec(s)\n\n### 2.2.1 - 2013-12-01\n\n- [BUGFIX] Fix user-agent header issue (see issue #75)\n\n## 2.2.0 - 2013-11-09\n\n- Add support for setTimeout\n- Add specs for invoice-item listing/querying via timestamp\n\n## 2.1.0 - 2013-11-07\n\n- Support single key/value setting on setMetadata method\n- [BUGFIX] Fix Windows url-path issue\n- Add missing stripe.charges.update method\n- Support setting auth_token per request (useful in Connect)\n- Remove global 'resources' variable\n\n## 2.0.0 - 2013-10-18\n\n- API overhaul and refactor, including addition of promises.\n- Release of version 2.0.0\n\n## 1.3.0 - 2013-01-30\n\n- Requests return Javascript Errors (Guillaume Flandre)\n\n## 1.2.0 - 2012-08-03\n\n- Added events API (Jonathan Hollinger)\n- Added plans update API (Pavan Kumar Sunkara)\n- Various test fixes, node 0.8.x tweaks (Jan Lehnardt)\n\n## 1.1.0 - 2012-02-01\n\n- Add Coupons API (Ryan)\n- Pass a more robust error object to the callback (Ryan)\n- Fix duplicate callbacks from some functions when called incorrectly (bug #24, reported by Kishore Nallan)\n\n## 1.0.0 - 2011-12-06\n\n- Add APIs and tests for Plans and \"Invoice Items\"\n  (both changes by Ryan Ettipio)\n\n## 0.0.5 - 2011-11-26\n\n- Add Subscription API (John Ku, #3)\n- Add Invoices API (Chris Winn, #6)\n- [BUGFIX] Fix a bug where callback could be called twice, if the callback() threw an error itself (Peteris Krumins)\n- [BUGFIX] Fix bug in tokens.retrieve API (Xavi)\n- Change documentation links (Stripe changed their URL structure)\n- Make tests pass again (error in callback is null instead of 0 if all is well)\n- Amount in stripe.charges.refund is optional (Branko Vukelic)\n- Various documentation fixes (Xavi)\n- Only require node 0.4.0\n\n## 0.0.3 - 2011-10-05\n\n- Add Charges API (issue #1, brackishlake)\n- Add customers.list API\n\n## 0.0.2 - 2011-09-28\n\n- Initial release with customers and tokens APIs\n";
@@ -269206,9 +269316,9 @@ async function collectSources(root, offline, config2, fetcher = fetch) {
   if (!offline) {
     const path2 = contained(root, ".changelume/cache/stripe.json");
     let origin = "network";
-    if ((0, import_node_fs4.existsSync)(path2)) {
+    if ((0, import_node_fs6.existsSync)(path2)) {
       try {
-        const c = cacheSchema.safeParse(JSON.parse((0, import_node_fs4.readFileSync)(path2, "utf8")));
+        const c = cacheSchema.safeParse(JSON.parse((0, import_node_fs6.readFileSync)(path2, "utf8")));
         if (c.success && c.data.url === currentUrl && hash2(c.data.text) === c.data.sha256 && Date.now() - c.data.fetchedAt >= 0 && Date.now() - c.data.fetchedAt < 36e5) {
           text = c.data.text;
           origin = "cache";
@@ -269219,8 +269329,8 @@ async function collectSources(root, offline, config2, fetcher = fetch) {
     if (origin === "network") {
       text = await fetchSource(currentUrl, config2.sources, fetcher);
       releaseHeadings(text);
-      (0, import_node_fs4.mkdirSync)((0, import_node_path5.resolve)(root, ".changelume/cache"), { recursive: true });
-      (0, import_node_fs4.writeFileSync)(path2, JSON.stringify({ url: currentUrl, text, sha256: hash2(text), fetchedAt: Date.now() }));
+      (0, import_node_fs6.mkdirSync)((0, import_node_path6.resolve)(root, ".changelume/cache"), { recursive: true });
+      (0, import_node_fs6.writeFileSync)(path2, JSON.stringify({ url: currentUrl, text, sha256: hash2(text), fetchedAt: Date.now() }));
     }
     evidence.push({ url: currentUrl, sha256: hash2(text), origin, release: "observed changelog" });
   }
@@ -269228,21 +269338,21 @@ async function collectSources(root, offline, config2, fetcher = fetch) {
   const observations = contained(root, `.changelume/observations/stripe-${offline ? "offline" : "online"}.json`);
   let previous = [];
   try {
-    previous = observationSchema.parse(JSON.parse((0, import_node_fs4.readFileSync)(observations, "utf8"))).releases;
+    previous = observationSchema.parse(JSON.parse((0, import_node_fs6.readFileSync)(observations, "utf8"))).releases;
   } catch {
   }
   const newlyObserved = releases.filter((r) => !previous.includes(r));
-  (0, import_node_fs4.mkdirSync)((0, import_node_path5.resolve)(root, ".changelume/observations"), { recursive: true });
+  (0, import_node_fs6.mkdirSync)((0, import_node_path6.resolve)(root, ".changelume/observations"), { recursive: true });
   const temporary = contained(root, `.changelume/observations/stripe-${offline ? "offline" : "online"}.tmp`);
-  (0, import_node_fs4.writeFileSync)(temporary, JSON.stringify({ schemaVersion: 1, releases, sourceHash: hash2(text), observedAt: Date.now() }));
-  (0, import_node_fs4.renameSync)(temporary, observations);
+  (0, import_node_fs6.writeFileSync)(temporary, JSON.stringify({ schemaVersion: 1, releases, sourceHash: hash2(text), observedAt: Date.now() }));
+  (0, import_node_fs6.renameSync)(temporary, observations);
   return { evidence, releases, newlyObserved, unclassified: ["Stripe v12 default request API version change requires manual compatibility review.", ...releases.filter((r) => r !== "12.0.0").map((r) => r === "11.0.0" ? "Release 11.0.0: partially classified; legacy request-option rules cover only documented patterns. Other changes require manual review." : `Release ${r}: observed, changes unclassified (no recipe)`)] };
 }
 
 // packages/core/src/git.ts
-var import_node_child_process = require("node:child_process");
+var import_node_child_process2 = require("node:child_process");
 function git(root, ...args) {
-  return (0, import_node_child_process.execFileSync)("git", ["-c", "core.hooksPath=/dev/null", ...args], { cwd: root, encoding: "utf8", maxBuffer: 5e6, stdio: ["ignore", "pipe", "pipe"], env: { ...process.env, GIT_CONFIG_COUNT: "0", GIT_CONFIG_NOSYSTEM: "1", GIT_TERMINAL_PROMPT: "0" } }).trimEnd();
+  return (0, import_node_child_process2.execFileSync)("git", ["-c", "core.hooksPath=/dev/null", ...args], { cwd: root, encoding: "utf8", maxBuffer: 5e6, stdio: ["ignore", "pipe", "pipe"], env: { ...process.env, GIT_CONFIG_COUNT: "0", GIT_CONFIG_NOSYSTEM: "1", GIT_TERMINAL_PROMPT: "0" } }).trimEnd();
 }
 function revision(root) {
   return git(root, "rev-parse", "HEAD");
@@ -269492,7 +269602,7 @@ var safeJSON = (text) => {
 };
 
 // node_modules/openai/internal/utils/sleep.mjs
-var sleep = (ms, ...signals) => new Promise((resolve8, reject) => {
+var sleep = (ms, ...signals) => new Promise((resolve9, reject) => {
   const activeSignals = [...new Set(signals.filter((signal) => signal != null))];
   let timeout;
   let settled = false;
@@ -269524,7 +269634,7 @@ var sleep = (ms, ...signals) => new Promise((resolve8, reject) => {
     return;
   }
   timeout = setTimeout(() => {
-    settle2(resolve8);
+    settle2(resolve9);
   }, ms);
   for (const signal of activeSignals) {
     if (settled) {
@@ -270325,8 +270435,8 @@ function createAbortableSSESource(body, signal) {
   let interrupt;
   const waitForAbort = () => (
     // oxlint-disable-next-line promise/avoid-new -- AbortSignal callbacks need a portable Promise bridge.
-    new Promise((resolve8) => {
-      interrupt = resolve8;
+    new Promise((resolve9) => {
+      interrupt = resolve9;
     })
   );
   const cancel = () => {
@@ -271262,8 +271372,8 @@ function resolveDataResidency(options) {
 var _APIPromise_client;
 var APIPromise = class _APIPromise extends Promise {
   constructor(client, responsePromise, parseResponse2 = defaultParseResponse) {
-    super((resolve8) => {
-      resolve8(null);
+    super((resolve9) => {
+      resolve9(null);
     });
     this.responsePromise = responsePromise;
     this.parseResponse = parseResponse2;
@@ -274320,12 +274430,12 @@ var EventStream = class {
     _EventStream_aborted.set(this, false);
     _EventStream_catchingPromiseCreated.set(this, false);
     _EventStream_terminalFailure.set(this, void 0);
-    __classPrivateFieldSet(this, _EventStream_connectedPromise, new Promise((resolve8, reject) => {
-      __classPrivateFieldSet(this, _EventStream_resolveConnectedPromise, resolve8, "f");
+    __classPrivateFieldSet(this, _EventStream_connectedPromise, new Promise((resolve9, reject) => {
+      __classPrivateFieldSet(this, _EventStream_resolveConnectedPromise, resolve9, "f");
       __classPrivateFieldSet(this, _EventStream_rejectConnectedPromise, reject, "f");
     }), "f");
-    __classPrivateFieldSet(this, _EventStream_endPromise, new Promise((resolve8, reject) => {
-      __classPrivateFieldSet(this, _EventStream_resolveEndPromise, resolve8, "f");
+    __classPrivateFieldSet(this, _EventStream_endPromise, new Promise((resolve9, reject) => {
+      __classPrivateFieldSet(this, _EventStream_resolveEndPromise, resolve9, "f");
       __classPrivateFieldSet(this, _EventStream_rejectEndPromise, reject, "f");
     }), "f");
     __classPrivateFieldGet(this, _EventStream_connectedPromise, "f").catch(() => void 0);
@@ -274463,7 +274573,7 @@ var EventStream = class {
    *   const message = await stream.emitted('message') // rejects if the stream errors
    */
   emitted(event) {
-    return new Promise((resolve8, reject) => {
+    return new Promise((resolve9, reject) => {
       __classPrivateFieldSet(this, _EventStream_catchingPromiseCreated, true, "f");
       const onError = (error62) => {
         this.off(event, onEvent);
@@ -274473,7 +274583,7 @@ var EventStream = class {
         if (event !== "error") {
           this.off("error", onError);
         }
-        resolve8(values.length > 1 ? values : values[0]);
+        resolve9(values.length > 1 ? values : values[0]);
       };
       if (event !== "error") {
         __classPrivateFieldGet(this, _EventStream_instances, "m", _EventStream_onceForEmitted).call(this, "error", onError);
@@ -274689,8 +274799,8 @@ var EventStream = class {
         if (ended) {
           return Promise.resolve(doneResult());
         }
-        return new Promise((resolve8, reject) => {
-          readQueue.enqueue({ resolve: resolve8, reject });
+        return new Promise((resolve9, reject) => {
+          readQueue.enqueue({ resolve: resolve9, reject });
         });
       },
       return: () => {
@@ -276075,11 +276185,11 @@ function canonicalSerializedParserSchema(value, budget) {
 }
 function rememberSerializedParserSchema(signatures, source, holder, key) {
   const parser = Object.getOwnPropertyDescriptor(source, "$parseRaw");
-  const schema = Object.getOwnPropertyDescriptor(holder, key);
-  if (!parser || !("value" in parser) || typeof parser.value !== "function" || !schema || !("value" in schema)) {
+  const schema2 = Object.getOwnPropertyDescriptor(holder, key);
+  if (!parser || !("value" in parser) || typeof parser.value !== "function" || !schema2 || !("value" in schema2)) {
     return;
   }
-  const normalized = canonicalSerializedParserSchema(schema.value, { nodes: 0, bytes: 0 });
+  const normalized = canonicalSerializedParserSchema(schema2.value, { nodes: 0, bytes: 0 });
   if (normalized !== void 0) {
     signatures.set(source, normalized);
   }
@@ -282935,8 +283045,8 @@ _AgentToolDispatcher_handlers = /* @__PURE__ */ new WeakMap(), _AgentToolDispatc
     try {
       await __classPrivateFieldGet(this, _AgentToolDispatcher_instances, "m", _AgentToolDispatcher_wait).call(this, () => (
         // oxlint-disable-next-line promise/avoid-new -- Own the registration timer so cancellation clears it promptly.
-        new Promise((resolve8) => {
-          timer = setTimeout(resolve8, delay);
+        new Promise((resolve9) => {
+          timer = setTimeout(resolve9, delay);
         })
       ));
     } finally {
@@ -283030,12 +283140,12 @@ function agentFormatParser(format) {
   if (!descriptor || !("value" in descriptor) || typeof descriptor.value !== "function") {
     return void 0;
   }
-  const schema = ownJSONValue(format, "schema");
-  if (ownJSONValue(format, "type") !== "json_schema" || !schema) {
+  const schema2 = ownJSONValue(format, "schema");
+  if (ownJSONValue(format, "type") !== "json_schema" || !schema2) {
     throw new OpenAIError("Typed agent formats require own enumerable type and schema data properties");
   }
   const parse6 = descriptor.value;
-  return { type: "json_schema", schema, $parseRaw: (text) => parse6.call(format, text) };
+  return { type: "json_schema", schema: schema2, $parseRaw: (text) => parse6.call(format, text) };
 }
 function snapshotJSONProperty(object2, key, capture = (value) => value) {
   const descriptor = Object.getOwnPropertyDescriptor(object2, key);
@@ -283059,7 +283169,7 @@ function captureAgentOutput(input3, options) {
   if (!format) {
     return { body, options };
   }
-  const schema = structuredClone(format.schema);
+  const schema2 = structuredClone(format.schema);
   for (const envelope of [body, agent, text]) {
     if (envelope && "toJSON" in envelope) {
       throw new OpenAIError("Typed agent requests cannot customize body, agent, or text serialization");
@@ -283076,7 +283186,7 @@ function captureAgentOutput(input3, options) {
       ...body,
       agent: {
         ...agent,
-        text: { ...text, format: { type: "json_schema", schema } }
+        text: { ...text, format: { type: "json_schema", schema: schema2 } }
       }
     },
     format
@@ -284710,7 +284820,7 @@ var Steps = class extends APIResource {
 
 // node_modules/openai/lib/polling.mjs
 function sleepUntilAborted(milliseconds, signal) {
-  return new Promise((resolve8, reject) => {
+  return new Promise((resolve9, reject) => {
     let timer;
     let registered;
     let settled = false;
@@ -284759,7 +284869,7 @@ function sleepUntilAborted(milliseconds, signal) {
       }
       settled = true;
       cleanup();
-      resolve8();
+      resolve9();
     }, milliseconds);
     registered = abort;
     try {
@@ -292857,25 +292967,31 @@ function redactDiagnostics(value) {
 var baselineSchema = external_exports.object({ schemaVersion: external_exports.literal(1), accepted: external_exports.array(external_exports.string()), sources: external_exports.array(external_exports.object({ url: external_exports.string().url(), sha256: external_exports.string().regex(/^[a-f0-9]{64}$/) })), observedReleases: external_exports.array(external_exports.string()) }).strict();
 function baseline(root) {
   const path2 = contained(root, "changelume.lock.json");
-  return (0, import_node_fs5.existsSync)(path2) ? baselineSchema.parse(JSON.parse((0, import_node_fs5.readFileSync)(path2, "utf8"))) : { schemaVersion: 1, accepted: [], sources: [], observedReleases: [] };
+  return (0, import_node_fs7.existsSync)(path2) ? baselineSchema.parse(JSON.parse((0, import_node_fs7.readFileSync)(path2, "utf8"))) : { schemaVersion: 1, accepted: [], sources: [], observedReleases: [] };
 }
 async function plan(root, config2, offline = false) {
-  const accepted = baseline(root), { inventory, edits } = analyze(root, config2);
-  const sources = await collectSources(root, offline, config2);
+  const accepted = baseline(root), { inventory, edits } = adapters[config2.language].analyze(root, config2);
+  const sources = config2.language === "python" ? { evidence: [], releases: [], newlyObserved: [], unclassified: [] } : await collectSources(root, offline, config2);
+  if (config2.language === "python") {
+    sources.evidence = [{ url: "https://raw.githubusercontent.com/stripe/stripe-python/v5.0.0/CHANGELOG.md", sha256: hash2(stripe_python_v5_changelog_default), origin: "offline snapshot", release: "5.0.0" }];
+    sources.unclassified = ["Python preview classifies only the two OAuth exception spelling corrections; all other changes require manual review."];
+    sources.releases = [];
+    sources.newlyObserved = [];
+  }
   const major = Number(inventory.resolved?.split(".")[0]);
   const findings = inventory.usages.filter((u) => u.kind === "field" && u.replacement && !u.changeId).map((u) => ({ changeId: CHANGE_ID, location: { file: u.file, line: u.line, symbol: u.symbol }, outcome: major === 12 && inventory.moduleMode === "esm" ? "confirmed impact" : major === 11 || major === 12 ? "possible impact" : "unsupported analysis", explanation: major === 12 ? `Stripe 12 ESM removed this constructor alias; CommonJS retains it. Detected module mode: ${inventory.moduleMode}. The source cleanup is compatible with either build; review module-mode evidence.` : major === 11 ? "Stripe 11 still supports this alias; removing it prepares this usage for v12 ESM. No dependency upgrade is performed." : "Recipe applicability cannot be established outside resolved SDK majors 11 and 12." }));
-  for (const u of inventory.usages.filter((u2) => u2.changeId)) findings.push({ changeId: u.changeId, location: { file: u.file, line: u.line, symbol: u.symbol }, outcome: major >= 11 ? "confirmed impact" : "possible impact", explanation: "Stripe 11 removed legacy request option names. Rename the explicit inline request option; no dependency or API-version upgrade is performed." });
-  for (const u of inventory.usages.filter((u2) => u2.kind === "unsupported")) findings.push({ changeId: CHANGE_ID, location: { file: u.file, line: u.line, symbol: u.symbol }, outcome: "unsupported analysis", explanation: u.symbol });
+  for (const u of inventory.usages.filter((u2) => u2.changeId)) findings.push({ changeId: u.changeId, location: { file: u.file, line: u.line, symbol: u.symbol }, outcome: u.kind === "unsupported" ? "unsupported analysis" : major >= 11 || config2.language === "python" && major === 5 ? "confirmed impact" : "possible impact", explanation: u.kind === "unsupported" ? "Recipe preconditions are not satisfied; manual review required." : u.changeId.startsWith("stripe-python") ? "Stripe Python 5 corrected the OAuth exception spelling. No SDK upgrade is performed." : u.changeId.includes("setter") ? "Stripe Node 11 removed configuration setters; move the adjacent literal option into construction." : "Stripe 11 removed legacy request option names; rename the explicit inline option." });
+  for (const u of inventory.usages.filter((u2) => u2.kind === "unsupported" && !u2.changeId)) findings.push({ changeId: CHANGE_ID, location: { file: u.file, line: u.line, symbol: u.symbol }, outcome: "unsupported analysis", explanation: u.symbol });
   for (const u of inventory.usages.filter((u2) => u2.kind === "client" && u2.requestApiVersion === "unknown")) findings.push({ changeId: "stripe-node-12-api-default", location: { file: u.file, line: u.line, symbol: u.symbol }, outcome: "possible impact", explanation: "Request API version is unknown; SDK, account and webhook versions are independent." });
   if (!findings.length) findings.push({ changeId: CHANGE_ID, outcome: "no detected impact within supported analysis", explanation: "No supported obsolete constructor aliases found; this does not establish overall Stripe compatibility." });
-  return { id: inventory.usages.some((u) => u.changeId) ? "stripe-supported-recipes-v1" : CHANGE_ID, revision: revision(root), inventory, evidence: sources.evidence, observedReleases: sources.releases, newlyObserved: sources.newlyObserved, unclassified: sources.unclassified, findings, edits, preconditions: ["Clean Git working tree for migration", "Runtime default or named Stripe constructor import; recipe-specific usage pattern", "Recipe-specific SDK versions: aliases 11/12, request options 10/11/12; no ambiguous nested installation", "Expected file hashes and canonical source paths match"], manualSteps: ["Review Stripe API compatibility and webhook endpoint versions separately.", "No SDK upgrade is performed. For Stripe 11, update dependencies and lockfile separately after reviewing all v12 changes.", "Review unclassified release changes; accepting this recipe does not accept them."], verification: config2.verification, acceptedBaseline: accepted, llm: { used: false } };
+  return { id: config2.language === "python" ? "stripe-python-5-oauth-exceptions" : inventory.usages.some((u) => u.changeId) ? "stripe-supported-recipes-v1" : CHANGE_ID, revision: revision(root), inventory, evidence: sources.evidence, observedReleases: sources.releases, newlyObserved: sources.newlyObserved, unclassified: sources.unclassified, findings, edits, preconditions: ["Clean Git working tree for migration", "Selected language adapter and recipe-specific import/usage pattern", "Recipe-specific SDK versions and unambiguous package resolution; see preview support matrix", "Expected file hashes and canonical source paths match"], manualSteps: ["Review Stripe API compatibility and webhook endpoint versions separately.", "No SDK upgrade is performed. For Stripe 11, update dependencies and lockfile separately after reviewing all v12 changes.", "Review unclassified release changes; accepting this recipe does not accept them."], verification: config2.verification, acceptedBaseline: accepted, llm: { used: false } };
 }
 function verify(root, commands) {
   const results = [];
   for (const c of commands) {
     const env = {};
     for (const key of ["PATH", "Path", "SystemRoot", "WINDIR", "TEMP", "TMP", "PATHEXT"]) if (process.env[key]) env[key] = process.env[key];
-    const result = (0, import_node_child_process2.spawnSync)(c.command, c.args, { cwd: root, env, timeout: c.timeoutMs, encoding: "utf8", maxBuffer: 65536, stdio: ["ignore", "pipe", "pipe"], shell: false, windowsHide: true });
+    const result = (0, import_node_child_process3.spawnSync)(c.command, c.args, { cwd: root, env, timeout: c.timeoutMs, encoding: "utf8", maxBuffer: 65536, stdio: ["ignore", "pipe", "pipe"], shell: false, windowsHide: true });
     const sanitize = redactDiagnostics;
     const stdout = result.stdout ?? "", stderr = result.stderr ?? "";
     const errorCode = result.error?.code;
@@ -292918,15 +293034,16 @@ function publicPlan(p) {
 }
 function saveReport(root, p, verification = { status: "skipped", results: [] }) {
   const dir = contained(root, ".changelume");
-  (0, import_node_fs5.mkdirSync)(dir, { recursive: true });
-  (0, import_node_fs5.writeFileSync)(contained(root, ".changelume/report.json"), JSON.stringify({ plan: publicPlan(p), verification }, null, 2) + "\n");
+  (0, import_node_fs7.mkdirSync)(dir, { recursive: true });
+  persistQueue(root, p);
+  (0, import_node_fs7.writeFileSync)(contained(root, ".changelume/report.json"), JSON.stringify({ plan: publicPlan(p), verification }, null, 2) + "\n");
   const diagnostics = verification.results.map((r, i) => `
 ### Command ${i + 1} diagnostics${r.outputTruncated ? " (truncated)" : ""}
 
 ` + [r.stdout, r.stderr].filter(Boolean).join("\n").split("\n").map((line) => "    " + line).join("\n")).join("\n");
-  (0, import_node_fs5.writeFileSync)(contained(root, ".changelume/report.md"), markdown(p, verification) + (diagnostics ? "\n## Verification output\n" + diagnostics + "\n" : ""));
+  (0, import_node_fs7.writeFileSync)(contained(root, ".changelume/report.md"), markdown(p, verification) + (diagnostics ? "\n## Verification output\n" + diagnostics + "\n" : ""));
 }
-function candidate(root, p, runVerification = true, cleanup = (path2) => (0, import_node_fs5.rmSync)(path2, { recursive: true, force: true })) {
+function candidate(root, p, runVerification = true, cleanup = (path2) => (0, import_node_fs7.rmSync)(path2, { recursive: true, force: true })) {
   assertClean(root);
   if (revision(root) !== p.revision) throw new Error("Repository revision changed");
   validateEdits(root, { edits: p.edits }, p.edits.map((e) => e.path));
@@ -292936,18 +293053,18 @@ function candidate(root, p, runVerification = true, cleanup = (path2) => (0, imp
   if (edits.length) {
     const previous = baseline(root), path2 = contained(root, "changelume.lock.json");
     const next = { schemaVersion: 1, accepted: [.../* @__PURE__ */ new Set([...previous.accepted, ...p.inventory.usages.filter((u) => u.editPlanned && p.edits.some((e) => e.path === u.file)).map((u) => u.changeId ?? CHANGE_ID), p.id])], sources: p.evidence.filter((e) => e.origin === "offline snapshot").map(({ url: url2, sha256 }) => ({ url: url2, sha256 })), observedReleases: previous.observedReleases };
-    edits.push({ path: "changelume.lock.json", beforeHash: hash2((0, import_node_fs5.existsSync)(path2) ? (0, import_node_fs5.readFileSync)(path2) : ""), content: JSON.stringify(next, null, 2) + "\n" });
+    edits.push({ path: "changelume.lock.json", beforeHash: hash2((0, import_node_fs7.existsSync)(path2) ? (0, import_node_fs7.readFileSync)(path2) : ""), content: JSON.stringify(next, null, 2) + "\n" });
   }
-  const temp = (0, import_node_fs5.mkdtempSync)((0, import_node_path6.resolve)((0, import_node_os.tmpdir)(), "changelume-"));
+  const temp = (0, import_node_fs7.mkdtempSync)((0, import_node_path7.resolve)((0, import_node_os.tmpdir)(), "changelume-"));
   let patch = "", verification = { status: "skipped", results: [] };
   try {
     git(temp, "clone", "--quiet", "--no-hardlinks", "--", root, "candidate");
-    const checkout = (0, import_node_path6.resolve)(temp, "candidate");
+    const checkout = (0, import_node_path7.resolve)(temp, "candidate");
     git(checkout, "checkout", "--quiet", "--detach", p.revision);
     for (const e of edits) {
       const path2 = contained(checkout, e.path);
-      (0, import_node_fs5.mkdirSync)((0, import_node_path6.dirname)(path2), { recursive: true });
-      (0, import_node_fs5.writeFileSync)(path2, e.content);
+      (0, import_node_fs7.mkdirSync)((0, import_node_path7.dirname)(path2), { recursive: true });
+      (0, import_node_fs7.writeFileSync)(path2, e.content);
     }
     if (edits.length) git(checkout, "add", "--intent-to-add", "--", ...edits.map((e) => e.path));
     patch = git(checkout, "diff", "--no-ext-diff", "--no-textconv", "--binary", "--unified=0", "HEAD") + "\n";
@@ -292964,30 +293081,30 @@ function candidate(root, p, runVerification = true, cleanup = (path2) => (0, imp
     }
   }
   const bundle = { schemaVersion: 1, revision: p.revision, plan: p, edits, patchHash: hash2(patch), verification };
-  (0, import_node_fs5.mkdirSync)(contained(root, ".changelume"), { recursive: true });
-  (0, import_node_fs5.writeFileSync)(contained(root, ".changelume/migration.patch"), patch);
-  (0, import_node_fs5.writeFileSync)(contained(root, ".changelume/bundle.json"), JSON.stringify(bundle, null, 2) + "\n");
+  (0, import_node_fs7.mkdirSync)(contained(root, ".changelume"), { recursive: true });
+  (0, import_node_fs7.writeFileSync)(contained(root, ".changelume/migration.patch"), patch);
+  (0, import_node_fs7.writeFileSync)(contained(root, ".changelume/bundle.json"), JSON.stringify(bundle, null, 2) + "\n");
   saveReport(root, p, verification);
   return bundle;
 }
-function applyCandidate(root, b, replace = import_node_fs5.renameSync) {
+function applyCandidate(root, b, replace = import_node_fs7.renameSync) {
   assertClean(root);
   if (revision(root) !== b.revision) throw new Error("Repository revision changed");
   if (b.verification.status === "failed") throw new Error("Verification failed; patch and report preserved, source not changed");
   validateEdits(root, { edits: b.edits }, [...b.plan.edits.map((e) => e.path), "changelume.lock.json"], true);
   const recovery = contained(root, `.changelume/recovery/${(0, import_node_crypto2.randomUUID)()}`);
-  (0, import_node_fs5.mkdirSync)(recovery, { recursive: true });
+  (0, import_node_fs7.mkdirSync)(recovery, { recursive: true });
   const originals = b.edits.map((e, i) => {
-    const path2 = contained(root, e.path), existed = (0, import_node_fs5.existsSync)(path2);
-    if (existed) (0, import_node_fs5.writeFileSync)((0, import_node_path6.resolve)(recovery, `${i}.original`), (0, import_node_fs5.readFileSync)(path2));
-    (0, import_node_fs5.writeFileSync)((0, import_node_path6.resolve)(recovery, `${i}.candidate`), e.content);
+    const path2 = contained(root, e.path), existed = (0, import_node_fs7.existsSync)(path2);
+    if (existed) (0, import_node_fs7.writeFileSync)((0, import_node_path7.resolve)(recovery, `${i}.original`), (0, import_node_fs7.readFileSync)(path2));
+    (0, import_node_fs7.writeFileSync)((0, import_node_path7.resolve)(recovery, `${i}.candidate`), e.content);
     return { path: e.path, existed };
   });
-  (0, import_node_fs5.writeFileSync)((0, import_node_path6.resolve)(recovery, "manifest.json"), JSON.stringify({ revision: b.revision, originals }, null, 2));
+  (0, import_node_fs7.writeFileSync)((0, import_node_path7.resolve)(recovery, "manifest.json"), JSON.stringify({ revision: b.revision, originals }, null, 2));
   const applied = [];
   try {
     for (const [i, e] of b.edits.entries()) {
-      replace((0, import_node_path6.resolve)(recovery, `${i}.candidate`), contained(root, e.path));
+      replace((0, import_node_path7.resolve)(recovery, `${i}.candidate`), contained(root, e.path));
       applied.push(i);
     }
   } catch {
@@ -292996,8 +293113,8 @@ function applyCandidate(root, b, replace = import_node_fs5.renameSync) {
       try {
         const original = originals[i];
         const path2 = contained(root, original.path);
-        if (original.existed) (0, import_node_fs5.writeFileSync)(path2, (0, import_node_fs5.readFileSync)((0, import_node_path6.resolve)(recovery, `${i}.original`)));
-        else (0, import_node_fs5.rmSync)(path2);
+        if (original.existed) (0, import_node_fs7.writeFileSync)(path2, (0, import_node_fs7.readFileSync)((0, import_node_path7.resolve)(recovery, `${i}.original`)));
+        else (0, import_node_fs7.rmSync)(path2);
       } catch {
         restored = false;
       }
@@ -293005,9 +293122,23 @@ function applyCandidate(root, b, replace = import_node_fs5.renameSync) {
     throw new Error(`Migration application failed; ${restored ? "original files restored" : "rollback incomplete"}. Recovery copies and manifest: ${recovery}. Report and patch preserved.`);
   }
   try {
-    (0, import_node_fs5.rmSync)(recovery, { recursive: true, force: true });
+    (0, import_node_fs7.rmSync)(recovery, { recursive: true, force: true });
   } catch {
   }
+}
+function persistQueue(root, p) {
+  const path2 = contained(root, ".changelume/monitor/queue.json");
+  (0, import_node_fs7.mkdirSync)((0, import_node_path7.dirname)(path2), { recursive: true });
+  let previous = {};
+  try {
+    previous = JSON.parse((0, import_node_fs7.readFileSync)(path2, "utf8")).history ?? {};
+  } catch {
+  }
+  const now = (/* @__PURE__ */ new Date()).toISOString();
+  const items = reviewQueue(root, p).map((item) => ({ ...item, firstSeen: previous[item.id]?.firstSeen ?? now, lastSeen: now }));
+  const history = { ...previous, ...Object.fromEntries(items.map((item) => [item.id, { firstSeen: item.firstSeen }])) };
+  (0, import_node_fs7.writeFileSync)(path2, JSON.stringify({ schemaVersion: 1, revision: p.revision, items, history }, null, 2) + "\n");
+  (0, import_node_fs7.writeFileSync)(contained(root, ".changelume/queue.json"), JSON.stringify({ schemaVersion: 1, revision: p.revision, items }, null, 2) + "\n");
 }
 
 // node_modules/universal-user-agent/index.js
@@ -297074,6 +297205,10 @@ async function publish(b, config2, repository, client = new Octokit2({ auth: pro
     if (existing.state === "closed" && !existing.merged_at) throw new Error("Migration PR was closed without merging; inspect it before restarting this revision");
     return { url: existing.html_url, reused: true };
   }
+  const open2 = await client.rest.pulls.list({ owner, repo, base: config2.pr.base, state: "open", per_page: 100 });
+  if (open2.data.length === 100) throw new Error("Too many open PRs to establish duplicate safety; review manually");
+  const related = open2.data.find((pr2) => pr2.head?.repo?.full_name === repository && pr2.head.ref.startsWith(`changelume/${b.plan.id}/`));
+  if (related) return { url: related.html_url, reused: true };
   let existingSha;
   try {
     existingSha = (await client.rest.git.getRef({ owner, repo, ref: `heads/${branch}` })).data.object.sha;
@@ -297099,35 +297234,37 @@ async function publish(b, config2, repository, client = new Octokit2({ auth: pro
 // packages/core/src/action.ts
 var input2 = (key) => process.env["INPUT_" + key.toUpperCase().replaceAll("-", "_")] ?? process.env["INPUT_" + key.toUpperCase()] ?? "";
 function output2(key, value) {
-  if (process.env.GITHUB_OUTPUT) (0, import_node_fs6.appendFileSync)(process.env.GITHUB_OUTPUT, `${key}=${value}
+  if (process.env.GITHUB_OUTPUT) (0, import_node_fs8.appendFileSync)(process.env.GITHUB_OUTPUT, `${key}=${value}
 `);
 }
 async function main() {
   const stage = external_exports.enum(["analyze", "verify", "publish"]).parse(input2("stage") || "analyze");
-  const root = (0, import_node_path7.resolve)(input2("cwd") || process.env.GITHUB_WORKSPACE || ".");
+  const root = (0, import_node_path8.resolve)(input2("cwd") || process.env.GITHUB_WORKSPACE || ".");
   const config2 = loadConfig(root, input2("config") || "changelume.yml");
   assertClean(root);
   if (stage === "analyze") {
     const p2 = await plan(root, config2, input2("offline") === "true");
     const b = candidate(root, p2, false);
+    if (process.env.GITHUB_STEP_SUMMARY) (0, import_node_fs8.appendFileSync)(process.env.GITHUB_STEP_SUMMARY, `Changelume: ${p2.newlyObserved.length} newly observed releases; ${reviewQueue(root, p2).filter((i) => !i.acknowledged).length} pending review items; ${p2.edits.length} proposed files. Download changelume-candidate for queue.json and report.md.
+`);
     output2("revision", b.revision);
     output2("patch-hash", b.patchHash);
-    output2("bundle-hash", hash2((0, import_node_fs6.readFileSync)(contained(root, ".changelume/bundle.json"))));
+    output2("bundle-hash", hash2((0, import_node_fs8.readFileSync)(contained(root, ".changelume/bundle.json"))));
     output2("has-edits", String(b.edits.length > 0));
     return;
   }
-  const data = (0, import_node_fs6.readFileSync)(contained(root, ".changelume/bundle.json"));
+  const data = (0, import_node_fs8.readFileSync)(contained(root, ".changelume/bundle.json"));
   if (data.length > 2e6 || hash2(data) !== input2("bundle-hash")) throw new Error("Artifact digest does not match trusted analysis job output");
   const raw = JSON.parse(data.toString("utf8"));
   const envelope = external_exports.object({ schemaVersion: external_exports.literal(1), revision: external_exports.string().regex(/^[a-f0-9]{40}$/), patchHash: external_exports.string().regex(/^[a-f0-9]{64}$/), edits: external_exports.array(external_exports.unknown()) }).parse(raw);
   if (envelope.revision !== revision(root) || envelope.revision !== input2("revision")) throw new Error("Artifact analyzed revision mismatch");
-  if (envelope.patchHash !== input2("patch-hash") || hash2((0, import_node_fs6.readFileSync)(contained(root, ".changelume/migration.patch"))) !== envelope.patchHash) throw new Error("Patch integrity mismatch");
+  if (envelope.patchHash !== input2("patch-hash") || hash2((0, import_node_fs8.readFileSync)(contained(root, ".changelume/migration.patch"))) !== envelope.patchHash) throw new Error("Patch integrity mismatch");
   const p = await plan(root, config2, true), expected = candidate(root, p, false);
   if (JSON.stringify(envelope.edits) !== JSON.stringify(expected.edits) || envelope.patchHash !== expected.patchHash) throw new Error("Artifact exceeds deterministic recipe scope");
   if (stage === "verify") {
     applyCandidate(root, expected);
     const result = verify(root, config2.verification);
-    if (expected.edits.some((e) => (0, import_node_fs6.readFileSync)(contained(root, e.path), "utf8") !== e.content)) result.status = "failed";
+    if (expected.edits.some((e) => (0, import_node_fs8.readFileSync)(contained(root, e.path), "utf8") !== e.content)) result.status = "failed";
     saveReport(root, p, result);
     output2("verification", result.status);
     output2("verified-patch-hash", expected.patchHash);

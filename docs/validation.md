@@ -52,3 +52,12 @@ The prior coverage limits are expanded by five explicit legacy request-option re
 - [Live beta consumer run](https://github.com/okal0/changelume-consumer-test/actions/runs/40943958765) passed analysis, real-SDK installation/type checking/verification, and publication. [Draft PR #3](https://github.com/okal0/changelume-consumer-test/pull/3) contains only `src/index.ts`, `src/options.ts`, and the accepted baseline. Its earlier [failed fixture run](https://github.com/okal0/changelume-consumer-test/actions/runs/40943672730) preserved a constructor-configuration compiler error and correctly skipped publication; the fixture was corrected before the successful run.
 
 Human usability feedback and public/package release remain explicit gates. No release or package was published. Closed test PRs are not automatically reopened and no test PR was merged.
+
+## 0.3.0-rc.1 controlled evaluation
+
+- Strict type checking and build passed; 66 tests passed, including adjacent setters, unsafe relocation refusal, persistent monitoring timestamps, Python candidate verification and draft publication with an injected client, and open-PR reuse across revisions.
+- Twelve controlled benchmark cases report zero incorrect edits, missed affected cases or unnecessary located warnings under the case-level definitions in preview-0.3.0.md. No independent participants.
+- Live Python analysis, real stripe==5.0.0 installation, verification and publication passed in [consumer run](https://github.com/okal0/changelume-consumer-test/actions/runs/41076062412), creating [draft PR #4](https://github.com/okal0/changelume-consumer-test/pull/4). No vendor requests and no merge. The preceding failed run caught an incorrect OAuth namespace in the initial implementation; verification blocked publication before the correction.
+- Python online release monitoring remains outside this preview; its evidence is the fixed historical v5 changelog. TypeScript recurring monitoring continues to fetch current releases.
+
+- Installed 0.3.0-rc.1 archive passed the six-case beta and twelve-case benchmark. Real Node SDK integration passed constructor, legacy-option and all three new configuration-option checks against 11.18.0/12.0.0.

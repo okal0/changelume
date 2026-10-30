@@ -27,6 +27,7 @@ jobs:
           path: |
             .changelume/observations/
             .changelume/cache/
+            .changelume/monitor/
           key: changelume-observations-${{ github.ref_name }}-${{ github.run_id }}
           restore-keys: |
             changelume-observations-${{ github.ref_name }}-

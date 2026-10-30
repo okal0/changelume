@@ -21,3 +21,7 @@
 For Stripe 12 with root ESM evidence the removed constructor is confirmed impact. For CommonJS or unknown module mode it is possible impact requiring review; the cleanup is compatible with both unmutated builds. For Stripe 11 this is possible future impact and a preparatory source cleanup; dependency versions remain unchanged. An unknown API version is possible impact independently of constructor repair. “No detected impact” means within this table's supported analysis only.
 
 The fast offline demo does not install Stripe or perform vendor integration tests. The separate `scripts/integration.mjs` test installs actual historical SDK packages and checks ESM and CommonJS runtime behavior without vendor requests. Local candidate checkouts do not inherit node_modules. Configure dependency installation explicitly if needed. Symlinked source files are not traversed; hard links, complex monorepos, response data flow, and arbitrary secrets are not comprehensively analyzed. No claim of complete integration discovery is made.
+
+## 0.3 preview additions
+
+See [exact preview boundaries](preview-0.3.0.md): three adjacent-literal Node setters and two Python OAuth exception corrections. Cross-file discovery remains inventory only. Language is selected per run.

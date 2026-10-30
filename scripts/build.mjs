@@ -5,7 +5,7 @@ mkdirSync('dist',{recursive:true});
 writeFileSync('dist/STRIPE-SOURCE-LICENSE.txt',readFileSync('fixtures/sources/STRIPE-LICENSE.txt','utf8').replaceAll('\r\n','\n'));
 const results=[];
 for(const [entry,outfile] of [['packages/cli/src/index.ts','dist/cli.cjs'],['packages/core/src/action.ts','dist/action.cjs']]) {
-  results.push(await build({entryPoints:[entry],outfile,bundle:true,platform:'node',target:'node24',format:'cjs',loader:{'.md':'text'},legalComments:'external',metafile:true}));
+  results.push(await build({entryPoints:[entry],outfile,bundle:true,platform:'node',target:'node24',format:'cjs',loader:{'.md':'text','.py':'text'},legalComments:'external',metafile:true}));
   // pnpm shortens long virtual-store names on Windows. Normalize only generated path comments.
   writeFileSync(outfile,readFileSync(outfile,'utf8').replace(/^\/\/ node_modules\/\.pnpm\/[^/]+\/node_modules\//gm,'// node_modules/'));
 }

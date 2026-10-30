@@ -1,0 +1,106 @@
+{
+  "schemaVersion": 1,
+  "kind": "controlled synthetic benchmark",
+  "independentParticipants": 0,
+  "incorrectEdits": 0,
+  "missedUsages": 0,
+  "unnecessaryWarnings": 0,
+  "results": [
+    {
+      "name": "alias",
+      "expectedEdit": true,
+      "proposedEdit": true,
+      "correct": true,
+      "locatedFindings": 1,
+      "verification": "passed"
+    },
+    {
+      "name": "setTimeout",
+      "expectedEdit": true,
+      "proposedEdit": true,
+      "correct": true,
+      "locatedFindings": 2,
+      "verification": "passed"
+    },
+    {
+      "name": "setMaxNetworkRetries",
+      "expectedEdit": true,
+      "proposedEdit": true,
+      "correct": true,
+      "locatedFindings": 2,
+      "verification": "passed"
+    },
+    {
+      "name": "setTelemetryEnabled",
+      "expectedEdit": true,
+      "proposedEdit": true,
+      "correct": true,
+      "locatedFindings": 2,
+      "verification": "passed"
+    },
+    {
+      "name": "unrelated",
+      "expectedEdit": false,
+      "proposedEdit": false,
+      "correct": true,
+      "locatedFindings": 0,
+      "verification": "skipped"
+    },
+    {
+      "name": "mutated",
+      "expectedEdit": false,
+      "proposedEdit": false,
+      "correct": true,
+      "locatedFindings": 2,
+      "verification": "skipped"
+    },
+    {
+      "name": "mixed-versions",
+      "expectedEdit": false,
+      "proposedEdit": false,
+      "correct": true,
+      "locatedFindings": 1,
+      "verification": "skipped"
+    },
+    {
+      "name": "shared-client",
+      "expectedEdit": false,
+      "proposedEdit": false,
+      "correct": true,
+      "locatedFindings": 1,
+      "verification": "skipped"
+    },
+    {
+      "name": "factory",
+      "expectedEdit": false,
+      "proposedEdit": false,
+      "correct": true,
+      "locatedFindings": 2,
+      "verification": "skipped"
+    },
+    {
+      "name": "nonadjacent-setter",
+      "expectedEdit": false,
+      "proposedEdit": false,
+      "correct": true,
+      "locatedFindings": 2,
+      "verification": "skipped"
+    },
+    {
+      "name": "python-oauth",
+      "expectedEdit": true,
+      "proposedEdit": true,
+      "correct": true,
+      "locatedFindings": 1,
+      "verification": "passed"
+    },
+    {
+      "name": "python-shadow",
+      "expectedEdit": false,
+      "proposedEdit": false,
+      "correct": true,
+      "locatedFindings": 1,
+      "verification": "skipped"
+    }
+  ]
+}

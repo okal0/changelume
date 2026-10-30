@@ -1,0 +1,5 @@
+language: python
+include: ['src/**/*.py']
+verification:
+  - command: python
+    args: [verify.py]
