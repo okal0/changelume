@@ -272979,7 +272979,7 @@ function saveProposal(root, p, v = { status: "skipped", results: [] }, pr) {
     const a = version2.split(".").map(Number), b = (current ?? "0.0.0").split(".").map(Number);
     return a[0] > b[0] || a[0] === b[0] && a[1] > b[1] || a[0] === b[0] && a[1] === b[1] && a[2] > b[2];
   });
-  const proposal = { schemaVersion: 1, id, revision: p.revision, currentVersion: current, targetVersion: p.upgrade?.to, availableUpgrade: current === "11.18.0" ? { from: current, to: "12.0.0", configuration: "upgrade: {from: '11.18.0', to: '12.0.0'}", requires: "Review unresolved API changes and configure installation plus behavioral checks" } : null, newerObservedReleases: newer, affected: p.findings.filter((f) => f.location), recipes: [...new Set(p.inventory.usages.filter((u) => u.editPlanned).map((u) => u.changeId ?? p.id))], files, review: { pending: queue.filter((i) => !i.acknowledged).length, unresolved: p.unclassified }, verification: v.status === "skipped" && same ? previous.verification : v.status, pr: pr ?? (same ? previous.pr : void 0) };
+  const proposal = { schemaVersion: 1, id, revision: p.revision, currentVersion: current, targetVersion: p.upgrade?.to, availableUpgrade: current === "11.18.0" ? { from: current, to: "12.0.0", configuration: "upgrade: {from: '11.18.0', to: '12.0.0'}", requires: "Review unresolved API changes and configure installation plus behavioral checks" } : null, newerObservedReleases: newer, affected: p.findings.filter((f) => f.location), recipes: [...new Set(p.inventory.usages.filter((u) => u.editPlanned).map((u) => u.changeId ?? p.id))], files, review: { pending: queue.filter((i) => !i.acknowledged).length, unresolved: p.unclassified }, history: [...previous?.history ?? [], ...!same && previous?.pr ? [{ id: previous.id, revision: previous.revision, verification: previous.verification, pr: previous.pr }] : []].slice(-10), verification: v.status === "skipped" && same && previous.revision === p.revision ? previous.verification : v.status, pr: pr ?? (same ? previous.pr : void 0) };
   (0, import_node_fs3.mkdirSync)(contained(root, ".changelume/monitor"), { recursive: true });
   (0, import_node_fs3.writeFileSync)(path3, JSON.stringify(proposal, null, 2) + "\n");
   (0, import_node_fs3.writeFileSync)(contained(root, ".changelume/monitor/proposal.json"), JSON.stringify(proposal, null, 2) + "\n");
@@ -272988,12 +272988,13 @@ function saveProposal(root, p, v = { status: "skipped", results: [] }, pr) {
 async function refreshProposal(root, client = new Octokit2({ auth: process.env.GITHUB_TOKEN })) {
   const path3 = contained(root, ".changelume/proposal.json");
   const proposal = JSON.parse((0, import_node_fs3.readFileSync)(path3, "utf8"));
-  if (!proposal.pr?.url) throw new Error("No published proposal PR to refresh");
-  const url2 = new URL(proposal.pr.url);
+  const record2 = proposal.pr ? proposal : proposal.history?.at(-1);
+  if (!record2?.pr?.url) throw new Error("No published proposal PR to refresh");
+  const url2 = new URL(record2.pr.url);
   const match = /^\/([\w.-]+)\/([\w.-]+)\/pull\/(\d+)$/.exec(url2.pathname);
   if (url2.hostname !== "github.com" || !match) throw new Error("Invalid proposal PR URL");
   const { data } = await client.rest.pulls.get({ owner: match[1], repo: match[2], pull_number: Number(match[3]) });
-  proposal.pr = { ...proposal.pr, state: data.merged ? "merged" : data.state, draft: data.draft, head: data.head.sha };
+  record2.pr = { ...record2.pr, state: data.merged ? "merged" : data.state, draft: data.draft, head: data.head.sha };
   (0, import_node_fs3.writeFileSync)(path3, JSON.stringify(proposal, null, 2) + "\n");
   (0, import_node_fs3.mkdirSync)(contained(root, ".changelume/monitor"), { recursive: true });
   (0, import_node_fs3.writeFileSync)(contained(root, ".changelume/monitor/proposal.json"), JSON.stringify(proposal, null, 2) + "\n");
