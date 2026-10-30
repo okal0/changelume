@@ -41,7 +41,7 @@ Use `path: .` for a root unit. Include/exclude globs are relative to the unit. N
 
 Each unit has its own dependency inventory and scoped verification. Reports combine affected locations with repository-relative paths; project metadata retains source evidence and release observations per ecosystem. Aggregated release IDs are prefixed with node/python/go/etc., avoiding collisions across SDKs. Unknown SDK impact stays manual.
 
-Migration verifies every edited unit in its own directory, generates one combined patch, and applies it through the existing recoverable transaction. A failed or missing verifier prevents application/publication. Source acceptance uses the repository's single changelume.lock.json. Unit-local observation or acceptance files are not created. Put explicit upgrade from/to configuration on the relevant unit; root-wide upgrades and LLM edits are refused for multi-project runs. Only one edited adapter/upgrade may own a file.
+Migration verifies every edited unit in its own directory, generates one combined patch, and applies it through the existing recoverable transaction. A failed or missing verifier prevents application/publication. Large PR descriptions are shortened with explicit unresolved counts and a pointer to the full analysis report. Source acceptance uses the repository's single changelume.lock.json. Unit-local observation or acceptance files are not created. Put explicit upgrade from/to configuration on the relevant unit; root-wide upgrades and LLM edits are refused for multi-project runs. Only one edited adapter/upgrade may own a file.
 
 ## Monitoring evidence
 

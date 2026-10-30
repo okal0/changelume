@@ -1,9 +1,10 @@
 import { Octokit } from '@octokit/rest';
-import type { Bundle } from '../models.js';
+import type { Bundle,Plan,Verification } from '../models.js';
 import type { Config } from '../config.js';
 import { markdown } from '../pipeline.js';
 import { hash } from '../safety.js';
 
+export function publicationBody(p:Plan,v:Verification){const full=markdown(p,v);if(Buffer.byteLength(full)<=48000)return full;let summary='';for(const line of full.split('\n')){if(Buffer.byteLength(summary)+Buffer.byteLength(line)+1>46000)break;summary+=line+'\n';}return summary+`\nVerification: ${v.status}. Report shortened for GitHub: ${p.findings.length} findings and ${p.unclassified.length} unresolved change entries. Full report: analysis artifact or local .changelume/report.json. Review all unresolved changes before accepting this migration.\n`;}
 export type GitHubClient=Pick<Octokit,'rest'>;
 export async function publish(b:Bundle,config:Config,repository:string,client:GitHubClient=new Octokit({auth:process.env.GITHUB_TOKEN})) {
   if(b.verification.status==='failed') throw new Error('Cannot publish failed verification');
@@ -34,6 +35,6 @@ export async function publish(b:Bundle,config:Config,repository:string,client:Gi
     const commit=await client.rest.git.createCommit({owner,repo,message:expectedMarker,tree:tree.data.sha,parents:[b.revision]});
     await client.rest.git.createRef({owner,repo,ref:`refs/heads/${branch}`,sha:commit.data.sha});
   }
-  const pr=await client.rest.pulls.create({owner,repo,head:branch,base:config.pr.base,title:'Migrate supported Stripe usages',body:markdown(b.plan,b.verification),draft:config.pr.draft||b.verification.status!=='passed'});
+  const pr=await client.rest.pulls.create({owner,repo,head:branch,base:config.pr.base,title:'Migrate supported Stripe usages',body:publicationBody(b.plan,b.verification),draft:config.pr.draft||b.verification.status!=='passed'});
   return {url:pr.data.html_url,reused:false};
 }
