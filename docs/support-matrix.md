@@ -25,3 +25,7 @@ The fast offline demo does not install Stripe or perform vendor integration test
 ## 0.3 preview additions
 
 See [exact preview boundaries](preview-0.3.0.md): three adjacent-literal Node setters and two Python OAuth exception corrections. Cross-file discovery remains inventory only. Language is selected per run.
+
+## 0.4 application repair iteration
+
+See [application repair, explicit upgrade and evaluation guide](preview-0.4.0.md). This supersedes inventory-only linked-option limitations for the selected documented patterns. Other coverage limits remain explicit.

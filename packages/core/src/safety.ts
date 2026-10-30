@@ -15,11 +15,11 @@ export function contained(root:string,path:string):string {
   for(const segment of path.split('/')) {part=resolve(part,segment);if(existsSync(part)&&lstatSync(part).isSymbolicLink()) throw new Error('Symlink paths are not allowed');}
   return target;
 }
-export function validateEdits(root:string,raw:unknown,allowed:string[],baseline=false):Edit[] {
+export function validateEdits(root:string,raw:unknown,allowed:string[],baseline=false,manifests=false):Edit[] {
   const {edits}=outputSchema.parse(raw); let bytes=0; const seen=new Set<string>();
   for(const e of edits) {
     if(seen.has(e.path)) throw new Error('Duplicate edit'); seen.add(e.path);
-    if(!allowed.includes(e.path) || (e.path!=='changelume.lock.json'||!baseline) && (!/\.(tsx?|py)$/.test(e.path)||e.path.startsWith('.')||e.path.split('/').some(p=>['node_modules','.github','.git'].includes(p))||/(^|\/)(vitest|vite|webpack|eslint|next)\.config\./.test(e.path))) throw new Error('Edit outside permitted source paths');
+    if(!allowed.includes(e.path) || (e.path!=='changelume.lock.json'||!baseline) && !(manifests&&['package.json','package-lock.json'].includes(e.path)) && (!/\.(tsx?|py)$/.test(e.path)||e.path.startsWith('.')||e.path.split('/').some(p=>['node_modules','.github','.git'].includes(p))||/(^|\/)(vitest|vite|webpack|eslint|next)\.config\./.test(e.path))) throw new Error('Edit outside permitted source paths');
     const file=contained(root,e.path); const before=existsSync(file)?readFileSync(file):Buffer.alloc(0);
     if(before.length>200000||hash(before)!==e.beforeHash) throw new Error('Edit does not match expected revision');
     bytes+=before.length+Buffer.byteLength(e.content); if(bytes>1000000) throw new Error('Patch size limit exceeded');

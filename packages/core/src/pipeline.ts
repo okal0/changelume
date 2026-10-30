@@ -8,6 +8,8 @@ import type { Config } from './config.js';
 import type { Plan, Bundle, Verification } from './models.js';
 import pythonSnapshot from '../../../fixtures/sources/stripe-python-v5-changelog.md';
 import {reviewQueue} from './review.js';
+import {saveProposal} from './proposal.js';
+import {upgradeEdits} from './upgrade.js';
 import { adapters } from './languages/index.js';
 import { collectSources, CHANGE_ID } from './vendors/stripe/sources.js';
 import { hash, contained, validateEdits } from './safety.js';
@@ -18,7 +20,9 @@ import { redactDiagnostics } from './diagnostics.js';
 export const baselineSchema=z.object({schemaVersion:z.literal(1),accepted:z.array(z.string()),sources:z.array(z.object({url:z.string().url(),sha256:z.string().regex(/^[a-f0-9]{64}$/)})),observedReleases:z.array(z.string())}).strict();
 export function baseline(root:string) {const path=contained(root,'changelume.lock.json');return existsSync(path)?baselineSchema.parse(JSON.parse(readFileSync(path,'utf8'))):{schemaVersion:1 as const,accepted:[],sources:[],observedReleases:[]};}
 export async function plan(root:string,config:Config,offline=false):Promise<Plan> {
-  const accepted=baseline(root), {inventory,edits}=adapters[config.language]!.analyze(root,config);
+  const dependencyEdits=upgradeEdits(root,config);
+  const accepted=baseline(root), {inventory,edits}=adapters[config.language]!.analyze(root,config.upgrade?{...config,vendors:{stripe:{...config.vendors.stripe,sdkVersion:config.upgrade.to}}}:config);
+  edits.push(...dependencyEdits);
   const sources=config.language==='python'?{evidence:[] as Plan['evidence'],releases:[] as string[],newlyObserved:[] as string[],unclassified:[] as string[]}:await collectSources(root,offline,config);
   if(config.language==='python') {sources.evidence=[{url:'https://raw.githubusercontent.com/stripe/stripe-python/v5.0.0/CHANGELOG.md',sha256:hash(pythonSnapshot),origin:'offline snapshot',release:'5.0.0'}];sources.unclassified=['Python preview classifies only the two OAuth exception spelling corrections; all other changes require manual review.'];sources.releases=[];sources.newlyObserved=[];}
   const major=Number(inventory.resolved?.split('.')[0]);
@@ -27,7 +31,7 @@ export async function plan(root:string,config:Config,offline=false):Promise<Plan
   for(const u of inventory.usages.filter(u=>u.kind==='unsupported'&&!u.changeId)) findings.push({changeId:CHANGE_ID,location:{file:u.file,line:u.line,symbol:u.symbol},outcome:'unsupported analysis',explanation:u.symbol});
   for(const u of inventory.usages.filter(u=>u.kind==='client'&&u.requestApiVersion==='unknown')) findings.push({changeId:'stripe-node-12-api-default',location:{file:u.file,line:u.line,symbol:u.symbol},outcome:'possible impact',explanation:'Request API version is unknown; SDK, account and webhook versions are independent.'});
   if(!findings.length) findings.push({changeId:CHANGE_ID,outcome:'no detected impact within supported analysis',explanation:'No supported obsolete constructor aliases found; this does not establish overall Stripe compatibility.'});
-  return {id:config.language==='python'?'stripe-python-5-oauth-exceptions':inventory.usages.some(u=>u.changeId)?'stripe-supported-recipes-v1':CHANGE_ID,revision:revision(root),inventory,evidence:sources.evidence,observedReleases:sources.releases,newlyObserved:sources.newlyObserved,unclassified:sources.unclassified,findings,edits,preconditions:['Clean Git working tree for migration','Selected language adapter and recipe-specific import/usage pattern','Recipe-specific SDK versions and unambiguous package resolution; see preview support matrix','Expected file hashes and canonical source paths match'],manualSteps:['Review Stripe API compatibility and webhook endpoint versions separately.','No SDK upgrade is performed. For Stripe 11, update dependencies and lockfile separately after reviewing all v12 changes.','Review unclassified release changes; accepting this recipe does not accept them.'],verification:config.verification,acceptedBaseline:accepted,llm:{used:false}};
+  return {upgrade:config.upgrade,id:config.upgrade?`stripe-node-upgrade-${config.upgrade.from}-to-${config.upgrade.to}`:config.language==='python'?'stripe-python-5-oauth-exceptions':inventory.usages.some(u=>u.changeId)?'stripe-supported-recipes-v1':CHANGE_ID,revision:revision(root),inventory,evidence:sources.evidence,observedReleases:sources.releases,newlyObserved:sources.newlyObserved,unclassified:sources.unclassified,findings,edits,preconditions:['Clean Git working tree for migration','Selected language adapter and recipe-specific import/usage pattern','Recipe-specific SDK versions and unambiguous package resolution; see preview support matrix','Expected file hashes and canonical source paths match'],manualSteps:[...(config.upgrade?[`SDK upgrade ${config.upgrade.from} -> ${config.upgrade.to}; configured installation and behavioral verification must pass.`]:[]),'Review Stripe API compatibility and webhook endpoint versions separately.',config.upgrade?'Review remaining v12 changes before accepting the upgrade.':'No SDK upgrade is performed.','Review unclassified release changes; accepting this recipe does not accept them.'],verification:config.verification,acceptedBaseline:accepted,llm:{used:false}};
 }
 export function verify(root:string,commands:Config['verification']):Verification {
   const results:Verification['results']=[];
@@ -48,14 +52,15 @@ export function markdown(p:Plan,verification:Verification={status:'skipped',resu
 export function publicPlan(p:Plan) {return {...p,edits:p.edits.map(e=>({path:e.path,beforeHash:e.beforeHash,afterHash:hash(e.content)}))};}
 export function saveReport(root:string,p:Plan,verification:Verification={status:'skipped',results:[]}) {
   const dir=contained(root,'.changelume');mkdirSync(dir,{recursive:true});
-  persistQueue(root,p);
+  persistQueue(root,p);saveProposal(root,p,verification);
   writeFileSync(contained(root,'.changelume/report.json'),JSON.stringify({plan:publicPlan(p),verification},null,2)+'\n');
   const diagnostics=verification.results.map((r,i)=>`\n### Command ${i+1} diagnostics${r.outputTruncated?' (truncated)':''}\n\n`+[r.stdout,r.stderr].filter(Boolean).join('\n').split('\n').map(line=>'    '+line).join('\n')).join('\n');
   writeFileSync(contained(root,'.changelume/report.md'),markdown(p,verification)+(diagnostics?'\n## Verification output\n'+diagnostics+'\n':''));
 }
 export function candidate(root:string,p:Plan,runVerification=true,cleanup=(path:string)=>rmSync(path,{recursive:true,force:true})):Bundle {
+  if(p.upgrade&&runVerification&&!p.verification.length)throw new Error('SDK upgrades require configured installation and behavioral verification');
   assertClean(root); if(revision(root)!==p.revision) throw new Error('Repository revision changed');
-  validateEdits(root,{edits:p.edits},p.edits.map(e=>e.path));
+  validateEdits(root,{edits:p.edits},p.edits.map(e=>e.path),false,Boolean(p.upgrade));
   for(const e of p.edits) if(!git(root,'ls-files','--stage','--',e.path).startsWith('100644 ')) throw new Error('Migration only edits regular tracked source files');
   const edits=[...p.edits];
   for(const e of edits) assertNoCredentials(e.content);
@@ -89,7 +94,7 @@ export function candidate(root:string,p:Plan,runVerification=true,cleanup=(path:
 export function applyCandidate(root:string,b:Bundle,replace:typeof renameSync=renameSync) {
   assertClean(root);if(revision(root)!==b.revision) throw new Error('Repository revision changed');
   if(b.verification.status==='failed') throw new Error('Verification failed; patch and report preserved, source not changed');
-  validateEdits(root,{edits:b.edits},[...b.plan.edits.map(e=>e.path),'changelume.lock.json'],true);
+  validateEdits(root,{edits:b.edits},[...b.plan.edits.map(e=>e.path),'changelume.lock.json'],true,Boolean(b.plan.upgrade));
   const recovery=contained(root,`.changelume/recovery/${randomUUID()}`);mkdirSync(recovery,{recursive:true});
   const originals=b.edits.map((e,i)=>{const path=contained(root,e.path), existed=existsSync(path);if(existed) writeFileSync(resolve(recovery,`${i}.original`),readFileSync(path));writeFileSync(resolve(recovery,`${i}.candidate`),e.content);return {path:e.path,existed};});
   writeFileSync(resolve(recovery,'manifest.json'),JSON.stringify({revision:b.revision,originals},null,2));

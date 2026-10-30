@@ -61,3 +61,9 @@ Human usability feedback and public/package release remain explicit gates. No re
 - Python online release monitoring remains outside this preview; its evidence is the fixed historical v5 changelog. TypeScript recurring monitoring continues to fetch current releases.
 
 - Installed 0.3.0-rc.1 archive passed the six-case beta and twelve-case benchmark. Real Node SDK integration passed constructor, legacy-option and all three new configuration-option checks against 11.18.0/12.0.0.
+
+## 0.4 application repair iteration
+
+See [application repair, explicit upgrade and evaluation guide](preview-0.4.0.md). This supersedes inventory-only linked-option limitations for the selected documented patterns. Other coverage limits remain explicit.
+
+The 0.4 application upgrade passed [live consumer run](https://github.com/okal0/changelume-consumer-test/actions/runs/41081773173), creating [draft PR #5](https://github.com/okal0/changelume-consumer-test/pull/5). API inspection confirmed exactly src/index.ts, package.json, package-lock.json and changelume.lock.json. Installation, strict type checking and four mocked SDK HTTP requests passed. No vendor requests or merges occurred. Additional evaluation and behavioral reports are in evaluation-results-0.4.0.json and application-result-0.4.0.json; warning scoring is explicitly limited.

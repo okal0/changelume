@@ -5,7 +5,7 @@ export interface Inventory {vendor:'stripe'; sdkPackage:'stripe'; declared?:stri
 export interface Evidence {url:string; sha256:string; origin:'offline snapshot'|'network'|'cache'; release:string}
 export interface Finding {outcome:Outcome; location?:Location; explanation:string; changeId:string}
 export interface Edit {path:string; beforeHash:string; content:string}
-export interface Plan {id:string; revision:string; inventory:Inventory; evidence:Evidence[]; observedReleases:string[]; newlyObserved:string[]; unclassified:string[]; findings:Finding[]; edits:Edit[]; preconditions:string[]; manualSteps:string[]; verification: {command:string;args:string[];timeoutMs:number}[]; acceptedBaseline:unknown; llm:{used:boolean;contextHash?:string};}
+export interface Plan {upgrade?:{from:string;to:string};id:string; revision:string; inventory:Inventory; evidence:Evidence[]; observedReleases:string[]; newlyObserved:string[]; unclassified:string[]; findings:Finding[]; edits:Edit[]; preconditions:string[]; manualSteps:string[]; verification: {command:string;args:string[];timeoutMs:number}[]; acceptedBaseline:unknown; llm:{used:boolean;contextHash?:string};}
 export interface Verification {status:'passed'|'failed'|'skipped'; results:{command:string;exitCode:number|null;timedOut:boolean;stdout?:string;stderr?:string;outputTruncated?:boolean}[]}
 export interface Bundle {schemaVersion:1; revision:string; plan:Plan; edits:Edit[]; patchHash:string; verification:Verification}
 export interface VendorAdapter {id:string; collect(root:string, offline:boolean):Promise<{evidence:Evidence[]; releases:string[]; unclassified:string[]}>}

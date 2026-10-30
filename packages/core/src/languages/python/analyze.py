@@ -4,12 +4,12 @@ tree=ast.parse(text)
 roots={n.asname or "stripe" for n in tree.body if isinstance(n,ast.Import) for n in n.names if n.name=="stripe"}
 mapping={"UnsupportedGrantTypError":"UnsupportedGrantTypeError","UnsupportedResponseTypError":"UnsupportedResponseTypeError"}
 # Scope changes and module mutation require human review.
-unsafe=any(isinstance(n,(ast.FunctionDef,ast.AsyncFunctionDef,ast.ClassDef,ast.Lambda)) or isinstance(n,ast.Name) and n.id in roots and isinstance(n.ctx,ast.Store) or isinstance(n,ast.Attribute) and isinstance(n.ctx,ast.Store) for n in ast.walk(tree))
+unsafe=any(isinstance(n,ast.ExceptHandler) and n.name in roots or isinstance(n,(ast.MatchAs,ast.MatchStar)) and n.name in roots or isinstance(n,ast.arg) and n.arg in roots or isinstance(n,(ast.FunctionDef,ast.AsyncFunctionDef,ast.ClassDef)) and n.name in roots or isinstance(n,ast.Name) and n.id in roots and isinstance(n.ctx,ast.Store) or isinstance(n,ast.Attribute) and isinstance(n.ctx,(ast.Store,ast.Del)) for n in ast.walk(tree))
 parents={child:node for node in ast.walk(tree) for child in ast.iter_child_nodes(node)}
 for node in ast.walk(tree):
  if isinstance(node,ast.Name) and node.id in roots:
   parent=parents.get(node); grand=parents.get(parent)
-  if not (isinstance(parent,ast.Attribute) and parent.attr=="oauth_error" and isinstance(grand,ast.Attribute) and grand.attr in mapping):unsafe=True
+  if not (isinstance(parent,ast.Attribute)):unsafe=True
  if isinstance(node,(ast.Import,ast.ImportFrom)):
   for alias in node.names:
    if (alias.asname or alias.name) in roots and not (isinstance(node,ast.Import) and alias.name=="stripe"):unsafe=True

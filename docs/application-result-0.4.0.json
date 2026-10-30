@@ -1,0 +1,19 @@
+{
+  "schemaVersion": 1,
+  "kind": "controlled real-SDK application repair",
+  "from": "11.18.0",
+  "to": "12.0.0",
+  "oldSDKBehavior": "passed",
+  "unmigratedTargetBehavior": "constructor failure reproduced",
+  "migratedBehavior": "passed",
+  "checks": [
+    "customer creation",
+    "payment success",
+    "card decline",
+    "request amount and customer",
+    "dry-run preservation",
+    "manifest and lockfile upgrade"
+  ],
+  "vendorRequests": 0,
+  "independentParticipants": 0
+}

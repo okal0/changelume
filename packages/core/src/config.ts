@@ -4,6 +4,7 @@ import { parse } from 'yaml';
 import { z } from 'zod';
 
 export const configSchema = z.object({
+  upgrade: z.object({from:z.string(),to:z.string()}).strict().optional(),
   language: z.enum(['typescript','python']).default('typescript'),
   pythonCommand: z.string().default('python'),
   vendors: z.object({stripe: z.object({enabled: z.boolean().default(true), sdkVersion: z.string().regex(/^\d+\.\d+\.\d+$/).optional(), requestApiVersion: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(), webhookVersion: z.string().optional()}).strict().default({enabled:true})}).strict().default({stripe:{enabled:true}}),

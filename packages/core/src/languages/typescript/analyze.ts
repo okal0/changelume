@@ -46,12 +46,15 @@ export function analyze(root:string,config:Config):{inventory:Inventory;edits:Ed
   const sources=sourceFiles(root,config).map(file=>project.addSourceFileAtPath(file));
   const projectUnsafe=sources.some(unsafeConstructorReferences);
   if(projectUnsafe) inventory.limitations.push('A Stripe constructor binding escapes supported analysis in this repository; constructor and request-option edits are conservatively declined.');
+  const linked=discoverLinks(root,sourceFiles(root,config),inventory);
   const edits:Edit[]=[];
   for(const file of sourceFiles(root,config)) {
     const source=project.addSourceFileAtPath(file), name=relative(root,file).replaceAll('\\','/'), before=source.getFullText();
     const imports=source.getImportDeclarations().filter(d=>d.getModuleSpecifierValue()==='stripe');
     const roots=new Set(imports.filter(d=>!d.isTypeOnly()).flatMap(d=>[d.getDefaultImport(),...d.getNamedImports().filter(n=>!n.isTypeOnly()&&['Stripe','default'].includes(n.getName())).map(n=>n.getAliasNode()??n.getNameNode())]).map(n=>n?.getSymbol()).filter(Boolean));
     const clients=new Set<ReturnType<Node['getSymbol']>>();
+    const linkedNames=linked.get(source.getFilePath())??new Set<number>();
+    for(const id of source.getDescendantsOfKind(SyntaxKind.Identifier))if(linkedNames.has(id.getStart())){const parent=id.getParent();if(Node.isImportSpecifier(parent)||Node.isVariableDeclaration(parent)&&parent.getNameNode()===id)clients.add(id.getSymbol());}
     const clientVersions=new Map<ReturnType<Node['getSymbol']>,string>();
     const add=(node:Node,kind:Usage['kind'],symbol:string,extra:Partial<Usage>={})=>inventory.usages.push({file:name,line:node.getStartLineNumber(),kind,symbol,...extra});
     const isRoot=(node:Node)=>Node.isIdentifier(node)&&roots.has(node.getSymbol());
@@ -108,7 +111,7 @@ export function analyze(root:string,config:Config):{inventory:Inventory;edits:Ed
         const option=call.getArguments()[1];
         if(operation==='customers.create'&&call.getArguments().length===2&&option&&Node.isObjectLiteralExpression(option)) {
           const references=source.getDescendantsOfKind(SyntaxKind.Identifier).filter(id=>id.getSymbol()===base.getSymbol());
-          const safe=references.every(id=>{const p=id.getParent();if(Node.isVariableDeclaration(p))return p.getVariableStatement()?.getDeclarationKind()==='const';return Node.isPropertyAccessExpression(p)&&p.getExpression()===id&&Node.isPropertyAccessExpression(p.getParent())&&Node.isCallExpression(p.getParent()?.getParent());});
+          const safe=references.every(id=>{const p=id.getParent();if(Node.isImportSpecifier(p))return true;if(Node.isVariableDeclaration(p))return p.getVariableStatement()?.getDeclarationKind()==='const';return Node.isPropertyAccessExpression(p)&&p.getExpression()===id&&Node.isPropertyAccessExpression(p.getParent())&&Node.isCallExpression(p.getParent()?.getParent());});
           const mapping:Record<string,string>={api_key:'apiKey',idempotency_key:'idempotencyKey',stripe_account:'stripeAccount',stripe_version:'apiVersion',stripeVersion:'apiVersion'};
           const properties=option.getProperties();
           const names=properties.filter(Node.isPropertyAssignment).map(p=>p.getName().replace(/^['"]|['"]$/g,''));
@@ -141,6 +144,6 @@ export function analyze(root:string,config:Config):{inventory:Inventory;edits:Ed
     const text=source.getFullText();
     if(text!==before) edits.push({path:name,beforeHash:hash(before),content:text});
   }
-  discoverLinks(root,sourceFiles(root,config),inventory);
+
   return {inventory,edits};
 }

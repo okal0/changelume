@@ -1,0 +1,127 @@
+{
+  "schemaVersion": 1,
+  "kind": "additional controlled source evaluation",
+  "independentParticipants": 0,
+  "missedUsages": 0,
+  "unexpectedRepairs": 0,
+  "incorrectEdits": 0,
+  "falseWarnings": 0,
+  "falseWarningScope": "unrelated-object control only; other warnings remain unscored",
+  "behavioralRepairs": "see application-result.json for real-SDK before/after behavior",
+  "results": [
+    {
+      "name": "two-aliases",
+      "expectedReferences": [
+        "index.ts:2:S.Stripe",
+        "index.ts:3:S.default"
+      ],
+      "detectedRepairs": [
+        "index.ts:2:S.Stripe",
+        "index.ts:3:S.default"
+      ],
+      "missed": [],
+      "unexpected": [],
+      "incorrectEdits": 0,
+      "falseWarnings": 0,
+      "proposedFiles": [
+        "src/index.ts"
+      ]
+    },
+    {
+      "name": "shared-options",
+      "expectedReferences": [
+        "route.ts:2:customers.create options.stripe_account"
+      ],
+      "detectedRepairs": [
+        "route.ts:2:customers.create options.stripe_account"
+      ],
+      "missed": [],
+      "unexpected": [],
+      "incorrectEdits": 0,
+      "falseWarnings": 0,
+      "proposedFiles": [
+        "src/route.ts"
+      ]
+    },
+    {
+      "name": "factory-options",
+      "expectedReferences": [
+        "route.ts:3:customers.create options.idempotency_key"
+      ],
+      "detectedRepairs": [
+        "route.ts:3:customers.create options.idempotency_key"
+      ],
+      "missed": [],
+      "unexpected": [],
+      "incorrectEdits": 0,
+      "falseWarnings": 0,
+      "proposedFiles": [
+        "src/route.ts"
+      ]
+    },
+    {
+      "name": "mutated-shared-client",
+      "expectedReferences": [],
+      "detectedRepairs": [],
+      "missed": [],
+      "unexpected": [],
+      "incorrectEdits": 0,
+      "falseWarnings": 0,
+      "proposedFiles": []
+    },
+    {
+      "name": "unrelated-objects",
+      "expectedReferences": [],
+      "detectedRepairs": [],
+      "missed": [],
+      "unexpected": [],
+      "incorrectEdits": 0,
+      "falseWarnings": 0,
+      "proposedFiles": []
+    },
+    {
+      "name": "python-function",
+      "expectedReferences": [
+        "main.py:5:UnsupportedGrantTypError"
+      ],
+      "detectedRepairs": [
+        "main.py:5:UnsupportedGrantTypError"
+      ],
+      "missed": [],
+      "unexpected": [],
+      "incorrectEdits": 0,
+      "falseWarnings": 0,
+      "proposedFiles": [
+        "src/main.py"
+      ]
+    },
+    {
+      "name": "python-shadowed-argument",
+      "expectedReferences": [],
+      "detectedRepairs": [],
+      "missed": [],
+      "unexpected": [],
+      "incorrectEdits": 0,
+      "falseWarnings": 0,
+      "proposedFiles": []
+    },
+    {
+      "name": "python-two-handlers",
+      "expectedReferences": [
+        "main.py:3:UnsupportedGrantTypError",
+        "main.py:5:UnsupportedResponseTypError"
+      ],
+      "detectedRepairs": [
+        "main.py:3:UnsupportedGrantTypError",
+        "main.py:5:UnsupportedResponseTypError"
+      ],
+      "missed": [],
+      "unexpected": [],
+      "incorrectEdits": 0,
+      "falseWarnings": 0,
+      "proposedFiles": [
+        "src/main.py"
+      ]
+    }
+  ]
+}

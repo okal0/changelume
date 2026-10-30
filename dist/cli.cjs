@@ -249122,3382 +249122,4063 @@ var require_x509_transport_state = __commonJS({
   }
 });
 
-// node_modules/commander/lib/error.js
-var CommanderError = class extends Error {
-  /**
-   * Constructs the CommanderError class
-   * @param {number} exitCode suggested exit code which could be used with process.exit
-   * @param {string} code an id string representing the error
-   * @param {string} message human-readable description of the error
-   */
-  constructor(exitCode, code, message) {
-    super(message);
-    Error.captureStackTrace(this, this.constructor);
-    this.name = this.constructor.name;
-    this.code = code;
-    this.exitCode = exitCode;
-    this.nestedError = void 0;
+// node_modules/universal-user-agent/index.js
+function getUserAgent() {
+  if (typeof navigator === "object" && "userAgent" in navigator) {
+    return navigator.userAgent;
   }
-};
-var InvalidArgumentError = class extends CommanderError {
-  /**
-   * Constructs the InvalidArgumentError class
-   * @param {string} [message] explanation of why argument is invalid
-   */
-  constructor(message) {
-    super(1, "commander.invalidArgument", message);
-    Error.captureStackTrace(this, this.constructor);
-    this.name = this.constructor.name;
+  if (typeof process === "object" && process.version !== void 0) {
+    return `Node.js/${process.version.substr(1)} (${process.platform}; ${process.arch})`;
   }
-};
-
-// node_modules/commander/lib/argument.js
-var Argument = class {
-  /**
-   * Initialize a new command argument with the given name and description.
-   * The default is that the argument is required, and you can explicitly
-   * indicate this with <> around the name. Put [] around the name for an optional argument.
-   *
-   * @param {string} name
-   * @param {string} [description]
-   */
-  constructor(name, description) {
-    this.description = description || "";
-    this.variadic = false;
-    this.parseArg = void 0;
-    this.defaultValue = void 0;
-    this.defaultValueDescription = void 0;
-    this.argChoices = void 0;
-    switch (name[0]) {
-      case "<":
-        this.required = true;
-        this._name = name.slice(1, -1);
-        break;
-      case "[":
-        this.required = false;
-        this._name = name.slice(1, -1);
-        break;
-      default:
-        this.required = true;
-        this._name = name;
-        break;
-    }
-    if (this._name.endsWith("...")) {
-      this.variadic = true;
-      this._name = this._name.slice(0, -3);
-    }
-  }
-  /**
-   * Return argument name.
-   *
-   * @return {string}
-   */
-  name() {
-    return this._name;
-  }
-  /**
-   * @package
-   */
-  _collectValue(value, previous) {
-    if (previous === this.defaultValue || !Array.isArray(previous)) {
-      return [value];
-    }
-    previous.push(value);
-    return previous;
-  }
-  /**
-   * Set the default value, and optionally supply the description to be displayed in the help.
-   *
-   * @param {*} value
-   * @param {string} [description]
-   * @return {Argument}
-   */
-  default(value, description) {
-    this.defaultValue = value;
-    this.defaultValueDescription = description;
-    return this;
-  }
-  /**
-   * Set the custom handler for processing CLI command arguments into argument values.
-   *
-   * @param {Function} [fn]
-   * @return {Argument}
-   */
-  argParser(fn) {
-    this.parseArg = fn;
-    return this;
-  }
-  /**
-   * Only allow argument value to be one of choices.
-   *
-   * @param {string[]} values
-   * @return {Argument}
-   */
-  choices(values) {
-    this.argChoices = values.slice();
-    this.parseArg = (arg, previous) => {
-      if (!this.argChoices.includes(arg)) {
-        throw new InvalidArgumentError(
-          `Allowed choices are ${this.argChoices.join(", ")}.`
-        );
-      }
-      if (this.variadic) {
-        return this._collectValue(arg, previous);
-      }
-      return arg;
-    };
-    return this;
-  }
-  /**
-   * Make argument required.
-   *
-   * @returns {Argument}
-   */
-  argRequired() {
-    this.required = true;
-    return this;
-  }
-  /**
-   * Make argument optional.
-   *
-   * @returns {Argument}
-   */
-  argOptional() {
-    this.required = false;
-    return this;
-  }
-};
-function humanReadableArgName(arg) {
-  const nameOutput = arg.name() + (arg.variadic === true ? "..." : "");
-  return arg.required ? "<" + nameOutput + ">" : "[" + nameOutput + "]";
+  return "<environment undetectable>";
 }
 
-// node_modules/commander/lib/command.js
-var import_node_events = require("node:events");
-var import_node_child_process = __toESM(require("node:child_process"), 1);
-var import_node_path = __toESM(require("node:path"), 1);
-var import_node_fs = __toESM(require("node:fs"), 1);
-var import_node_process = __toESM(require("node:process"), 1);
-var import_node_util2 = require("node:util");
+// node_modules/before-after-hook/lib/register.js
+function register(state2, name, method, options) {
+  if (typeof method !== "function") {
+    throw new Error("method for before hook must be a function");
+  }
+  if (!options) {
+    options = {};
+  }
+  if (Array.isArray(name)) {
+    return name.reverse().reduce((callback, name2) => {
+      return register.bind(null, state2, name2, callback, options);
+    }, method)();
+  }
+  return Promise.resolve().then(() => {
+    if (!state2.registry[name]) {
+      return method(options);
+    }
+    return state2.registry[name].reduce((method2, registered) => {
+      return registered.hook.bind(null, method2, options);
+    }, method)();
+  });
+}
 
-// node_modules/commander/lib/help.js
-var import_node_util = require("node:util");
-var Help = class {
-  constructor() {
-    this.helpWidth = void 0;
-    this.minWidthToWrap = 40;
-    this.sortSubcommands = false;
-    this.sortOptions = false;
-    this.showGlobalOptions = false;
+// node_modules/before-after-hook/lib/add.js
+function addHook(state2, kind, name, hook2) {
+  const orig = hook2;
+  if (!state2.registry[name]) {
+    state2.registry[name] = [];
   }
-  /**
-   * prepareContext is called by Commander after applying overrides from `Command.configureHelp()`
-   * and just before calling `formatHelp()`.
-   *
-   * Commander just uses the helpWidth and the rest is provided for optional use by more complex subclasses.
-   *
-   * @param {{ error?: boolean, helpWidth?: number, outputHasColors?: boolean }} contextOptions
-   */
-  prepareContext(contextOptions) {
-    this.helpWidth = this.helpWidth ?? contextOptions.helpWidth ?? 80;
-  }
-  /**
-   * Get an array of the visible subcommands. Includes a placeholder for the implicit help command, if there is one.
-   *
-   * @param {Command} cmd
-   * @returns {Command[]}
-   */
-  visibleCommands(cmd) {
-    const visibleCommands = cmd.commands.filter((cmd2) => !cmd2._hidden);
-    const helpCommand = cmd._getHelpCommand();
-    if (helpCommand && !helpCommand._hidden) {
-      visibleCommands.push(helpCommand);
-    }
-    if (this.sortSubcommands) {
-      visibleCommands.sort((a, b) => {
-        return a.name().localeCompare(b.name());
-      });
-    }
-    return visibleCommands;
-  }
-  /**
-   * Compare options for sort.
-   *
-   * @param {Option} a
-   * @param {Option} b
-   * @returns {number}
-   */
-  compareOptions(a, b) {
-    const getSortKey = (option) => {
-      return option.short ? option.short.replace(/^-/, "") : option.long.replace(/^--/, "");
+  if (kind === "before") {
+    hook2 = (method, options) => {
+      return Promise.resolve().then(orig.bind(null, options)).then(method.bind(null, options));
     };
-    return getSortKey(a).localeCompare(getSortKey(b));
   }
-  /**
-   * Get an array of the visible options. Includes a placeholder for the implicit help option, if there is one.
-   *
-   * @param {Command} cmd
-   * @returns {Option[]}
-   */
-  visibleOptions(cmd) {
-    const visibleOptions = cmd.options.filter((option) => !option.hidden);
-    const helpOption = cmd._getHelpOption();
-    if (helpOption && !helpOption.hidden) {
-      const removeShort = helpOption.short && cmd._findOption(helpOption.short);
-      const removeLong = helpOption.long && cmd._findOption(helpOption.long);
-      if (!removeShort && !removeLong) {
-        visibleOptions.push(helpOption);
-      } else if (helpOption.long && !removeLong) {
-        visibleOptions.push(
-          cmd.createOption(helpOption.long, helpOption.description)
-        );
-      } else if (helpOption.short && !removeShort) {
-        visibleOptions.push(
-          cmd.createOption(helpOption.short, helpOption.description)
-        );
-      }
-    }
-    if (this.sortOptions) {
-      visibleOptions.sort(this.compareOptions);
-    }
-    return visibleOptions;
-  }
-  /**
-   * Get an array of the visible global options. (Not including help.)
-   *
-   * @param {Command} cmd
-   * @returns {Option[]}
-   */
-  visibleGlobalOptions(cmd) {
-    if (!this.showGlobalOptions) return [];
-    const globalOptions = [];
-    for (let ancestorCmd = cmd.parent; ancestorCmd; ancestorCmd = ancestorCmd.parent) {
-      const visibleOptions = ancestorCmd.options.filter(
-        (option) => !option.hidden
-      );
-      globalOptions.push(...visibleOptions);
-    }
-    if (this.sortOptions) {
-      globalOptions.sort(this.compareOptions);
-    }
-    return globalOptions;
-  }
-  /**
-   * Get an array of the arguments if any have a description.
-   *
-   * @param {Command} cmd
-   * @returns {Argument[]}
-   */
-  visibleArguments(cmd) {
-    if (cmd._argsDescription) {
-      cmd.registeredArguments.forEach((argument) => {
-        argument.description = argument.description || cmd._argsDescription[argument.name()] || "";
+  if (kind === "after") {
+    hook2 = (method, options) => {
+      let result;
+      return Promise.resolve().then(method.bind(null, options)).then((result_) => {
+        result = result_;
+        return orig(result, options);
+      }).then(() => {
+        return result;
       });
+    };
+  }
+  if (kind === "error") {
+    hook2 = (method, options) => {
+      return Promise.resolve().then(method.bind(null, options)).catch((error62) => {
+        return orig(error62, options);
+      });
+    };
+  }
+  state2.registry[name].push({
+    hook: hook2,
+    orig
+  });
+}
+
+// node_modules/before-after-hook/lib/remove.js
+function removeHook(state2, name, method) {
+  if (!state2.registry[name]) {
+    return;
+  }
+  const index = state2.registry[name].map((registered) => {
+    return registered.orig;
+  }).indexOf(method);
+  if (index === -1) {
+    return;
+  }
+  state2.registry[name].splice(index, 1);
+}
+
+// node_modules/before-after-hook/index.js
+var bind = Function.bind;
+var bindable = bind.bind(bind);
+function bindApi(hook2, state2, name) {
+  const removeHookRef = bindable(removeHook, null).apply(
+    null,
+    name ? [state2, name] : [state2]
+  );
+  hook2.api = { remove: removeHookRef };
+  hook2.remove = removeHookRef;
+  ["before", "error", "after", "wrap"].forEach((kind) => {
+    const args = name ? [state2, kind, name] : [state2, kind];
+    hook2[kind] = hook2.api[kind] = bindable(addHook, null).apply(null, args);
+  });
+}
+function Singular() {
+  const singularHookName = /* @__PURE__ */ Symbol("Singular");
+  const singularHookState = {
+    registry: {}
+  };
+  const singularHook = register.bind(null, singularHookState, singularHookName);
+  bindApi(singularHook, singularHookState, singularHookName);
+  return singularHook;
+}
+function Collection() {
+  const state2 = {
+    registry: {}
+  };
+  const hook2 = register.bind(null, state2);
+  bindApi(hook2, state2);
+  return hook2;
+}
+var before_after_hook_default = { Singular, Collection };
+
+// node_modules/@octokit/endpoint/dist-bundle/index.js
+var VERSION = "0.0.0-development";
+var userAgent = `octokit-endpoint.js/${VERSION} ${getUserAgent()}`;
+var DEFAULTS = {
+  method: "GET",
+  baseUrl: "https://api.github.com",
+  headers: {
+    accept: "application/vnd.github.v3+json",
+    "user-agent": userAgent
+  },
+  mediaType: {
+    format: ""
+  }
+};
+function lowercaseKeys(object2) {
+  if (!object2) {
+    return {};
+  }
+  return Object.keys(object2).reduce((newObj, key) => {
+    newObj[key.toLowerCase()] = object2[key];
+    return newObj;
+  }, {});
+}
+function isPlainObject(value) {
+  if (typeof value !== "object" || value === null) return false;
+  if (Object.prototype.toString.call(value) !== "[object Object]") return false;
+  const proto = Object.getPrototypeOf(value);
+  if (proto === null) return true;
+  const Ctor = Object.prototype.hasOwnProperty.call(proto, "constructor") && proto.constructor;
+  return typeof Ctor === "function" && Ctor instanceof Ctor && Function.prototype.call(Ctor) === Function.prototype.call(value);
+}
+function mergeDeep(defaults2, options) {
+  const result = Object.assign({}, defaults2);
+  Object.keys(options).forEach((key) => {
+    if (isPlainObject(options[key])) {
+      if (!(key in defaults2)) Object.assign(result, { [key]: options[key] });
+      else result[key] = mergeDeep(defaults2[key], options[key]);
+    } else {
+      Object.assign(result, { [key]: options[key] });
     }
-    if (cmd.registeredArguments.find((argument) => argument.description)) {
-      return cmd.registeredArguments;
+  });
+  return result;
+}
+function removeUndefinedProperties(obj) {
+  for (const key in obj) {
+    if (obj[key] === void 0) {
+      delete obj[key];
     }
+  }
+  return obj;
+}
+function merge(defaults2, route, options) {
+  if (typeof route === "string") {
+    let [method, url2] = route.split(" ");
+    options = Object.assign(url2 ? { method, url: url2 } : { url: method }, options);
+  } else {
+    options = Object.assign({}, route);
+  }
+  options.headers = lowercaseKeys(options.headers);
+  removeUndefinedProperties(options);
+  removeUndefinedProperties(options.headers);
+  const mergedOptions = mergeDeep(defaults2 || {}, options);
+  if (options.url === "/graphql") {
+    if (defaults2 && defaults2.mediaType.previews?.length) {
+      mergedOptions.mediaType.previews = defaults2.mediaType.previews.filter(
+        (preview) => !mergedOptions.mediaType.previews.includes(preview)
+      ).concat(mergedOptions.mediaType.previews);
+    }
+    mergedOptions.mediaType.previews = (mergedOptions.mediaType.previews || []).map((preview) => preview.replace(/-preview/, ""));
+  }
+  return mergedOptions;
+}
+function addQueryParameters(url2, parameters) {
+  const separator = /\?/.test(url2) ? "&" : "?";
+  const names = Object.keys(parameters);
+  if (names.length === 0) {
+    return url2;
+  }
+  return url2 + separator + names.map((name) => {
+    if (name === "q") {
+      return "q=" + parameters.q.split("+").map(encodeURIComponent).join("+");
+    }
+    return `${name}=${encodeURIComponent(parameters[name])}`;
+  }).join("&");
+}
+var urlVariableRegex = /\{[^{}}]+\}/g;
+function removeNonChars(variableName) {
+  return variableName.replace(/(?:^\W+)|(?:(?<!\W)\W+$)/g, "").split(/,/);
+}
+function extractUrlVariableNames(url2) {
+  const matches = url2.match(urlVariableRegex);
+  if (!matches) {
     return [];
   }
-  /**
-   * Get the command term to show in the list of subcommands.
-   *
-   * @param {Command} cmd
-   * @returns {string}
-   */
-  subcommandTerm(cmd) {
-    const args = cmd.registeredArguments.map((arg) => humanReadableArgName(arg)).join(" ");
-    return cmd._name + (cmd._aliases[0] ? "|" + cmd._aliases[0] : "") + (cmd.options.length ? " [options]" : "") + // simplistic check for non-help option
-    (args ? " " + args : "");
-  }
-  /**
-   * Get the option term to show in the list of options.
-   *
-   * @param {Option} option
-   * @returns {string}
-   */
-  optionTerm(option) {
-    return option.flags;
-  }
-  /**
-   * Get the argument term to show in the list of arguments.
-   *
-   * @param {Argument} argument
-   * @returns {string}
-   */
-  argumentTerm(argument) {
-    return argument.name();
-  }
-  /**
-   * Get the longest command term length.
-   *
-   * @param {Command} cmd
-   * @param {Help} helper
-   * @returns {number}
-   */
-  longestSubcommandTermLength(cmd, helper) {
-    return helper.visibleCommands(cmd).reduce((max, command) => {
-      return Math.max(
-        max,
-        this.displayWidth(
-          helper.styleSubcommandTerm(helper.subcommandTerm(command))
-        )
-      );
-    }, 0);
-  }
-  /**
-   * Get the longest option term length.
-   *
-   * @param {Command} cmd
-   * @param {Help} helper
-   * @returns {number}
-   */
-  longestOptionTermLength(cmd, helper) {
-    return helper.visibleOptions(cmd).reduce((max, option) => {
-      return Math.max(
-        max,
-        this.displayWidth(helper.styleOptionTerm(helper.optionTerm(option)))
-      );
-    }, 0);
-  }
-  /**
-   * Get the longest global option term length.
-   *
-   * @param {Command} cmd
-   * @param {Help} helper
-   * @returns {number}
-   */
-  longestGlobalOptionTermLength(cmd, helper) {
-    return helper.visibleGlobalOptions(cmd).reduce((max, option) => {
-      return Math.max(
-        max,
-        this.displayWidth(helper.styleOptionTerm(helper.optionTerm(option)))
-      );
-    }, 0);
-  }
-  /**
-   * Get the longest argument term length.
-   *
-   * @param {Command} cmd
-   * @param {Help} helper
-   * @returns {number}
-   */
-  longestArgumentTermLength(cmd, helper) {
-    return helper.visibleArguments(cmd).reduce((max, argument) => {
-      return Math.max(
-        max,
-        this.displayWidth(
-          helper.styleArgumentTerm(helper.argumentTerm(argument))
-        )
-      );
-    }, 0);
-  }
-  /**
-   * Get the command usage to be displayed at the top of the built-in help.
-   *
-   * @param {Command} cmd
-   * @returns {string}
-   */
-  commandUsage(cmd) {
-    let cmdName = cmd._name;
-    if (cmd._aliases[0]) {
-      cmdName = cmdName + "|" + cmd._aliases[0];
+  return matches.map(removeNonChars).reduce((a, b) => a.concat(b), []);
+}
+function omit(object2, keysToOmit) {
+  const result = { __proto__: null };
+  for (const key of Object.keys(object2)) {
+    if (keysToOmit.indexOf(key) === -1) {
+      result[key] = object2[key];
     }
-    let ancestorCmdNames = "";
-    for (let ancestorCmd = cmd.parent; ancestorCmd; ancestorCmd = ancestorCmd.parent) {
-      ancestorCmdNames = ancestorCmd.name() + " " + ancestorCmdNames;
+  }
+  return result;
+}
+function encodeReserved(str) {
+  return str.split(/(%[0-9A-Fa-f]{2})/g).map(function(part) {
+    if (!/%[0-9A-Fa-f]/.test(part)) {
+      part = encodeURI(part).replace(/%5B/g, "[").replace(/%5D/g, "]");
     }
-    return ancestorCmdNames + cmdName + " " + cmd.usage();
+    return part;
+  }).join("");
+}
+function encodeUnreserved(str) {
+  return encodeURIComponent(str).replace(/[!'()*]/g, function(c) {
+    return "%" + c.charCodeAt(0).toString(16).toUpperCase();
+  });
+}
+function encodeValue(operator, value, key) {
+  value = operator === "+" || operator === "#" ? encodeReserved(value) : encodeUnreserved(value);
+  if (key) {
+    return encodeUnreserved(key) + "=" + value;
+  } else {
+    return value;
   }
-  /**
-   * Get the description for the command.
-   *
-   * @param {Command} cmd
-   * @returns {string}
-   */
-  commandDescription(cmd) {
-    return cmd.description();
-  }
-  /**
-   * Get the subcommand summary to show in the list of subcommands.
-   * (Fallback to description for backwards compatibility.)
-   *
-   * @param {Command} cmd
-   * @returns {string}
-   */
-  subcommandDescription(cmd) {
-    return cmd.summary() || cmd.description();
-  }
-  /**
-   * Get the option description to show in the list of options.
-   *
-   * @param {Option} option
-   * @return {string}
-   */
-  optionDescription(option) {
-    const extraInfo = [];
-    if (option.argChoices) {
-      extraInfo.push(
-        // use stringify to match the display of the default value
-        `choices: ${option.argChoices.map((choice) => JSON.stringify(choice)).join(", ")}`
-      );
-    }
-    if (option.defaultValue !== void 0) {
-      const showDefault = option.required || option.optional || option.isBoolean() && typeof option.defaultValue === "boolean";
-      if (showDefault) {
-        extraInfo.push(
-          `default: ${option.defaultValueDescription || JSON.stringify(option.defaultValue)}`
-        );
+}
+function isDefined(value) {
+  return value !== void 0 && value !== null;
+}
+function isKeyOperator(operator) {
+  return operator === ";" || operator === "&" || operator === "?";
+}
+function getValues(context, operator, key, modifier) {
+  var value = context[key], result = [];
+  if (isDefined(value) && value !== "") {
+    if (typeof value === "string" || typeof value === "number" || typeof value === "bigint" || typeof value === "boolean") {
+      value = value.toString();
+      if (modifier && modifier !== "*") {
+        value = value.substring(0, parseInt(modifier, 10));
       }
-    }
-    if (option.presetArg !== void 0 && option.optional) {
-      extraInfo.push(`preset: ${JSON.stringify(option.presetArg)}`);
-    }
-    if (option.envVar !== void 0) {
-      extraInfo.push(`env: ${option.envVar}`);
-    }
-    if (extraInfo.length > 0) {
-      const extraDescription = `(${extraInfo.join(", ")})`;
-      if (option.description) {
-        return `${option.description} ${extraDescription}`;
-      }
-      return extraDescription;
-    }
-    return option.description;
-  }
-  /**
-   * Get the argument description to show in the list of arguments.
-   *
-   * @param {Argument} argument
-   * @return {string}
-   */
-  argumentDescription(argument) {
-    const extraInfo = [];
-    if (argument.argChoices) {
-      extraInfo.push(
-        // use stringify to match the display of the default value
-        `choices: ${argument.argChoices.map((choice) => JSON.stringify(choice)).join(", ")}`
+      result.push(
+        encodeValue(operator, value, isKeyOperator(operator) ? key : "")
       );
-    }
-    if (argument.defaultValue !== void 0) {
-      extraInfo.push(
-        `default: ${argument.defaultValueDescription || JSON.stringify(argument.defaultValue)}`
-      );
-    }
-    if (extraInfo.length > 0) {
-      const extraDescription = `(${extraInfo.join(", ")})`;
-      if (argument.description) {
-        return `${argument.description} ${extraDescription}`;
-      }
-      return extraDescription;
-    }
-    return argument.description;
-  }
-  /**
-   * Format a list of items, given a heading and an array of formatted items.
-   *
-   * @param {string} heading
-   * @param {string[]} items
-   * @param {Help} helper
-   * @returns string[]
-   */
-  formatItemList(heading, items, helper) {
-    if (items.length === 0) return [];
-    return [helper.styleTitle(heading), ...items, ""];
-  }
-  /**
-   * Group items by their help group heading.
-   *
-   * @param {Command[] | Option[]} unsortedItems
-   * @param {Command[] | Option[]} visibleItems
-   * @param {Function} getGroup
-   * @returns {Map<string, Command[] | Option[]>}
-   */
-  groupItems(unsortedItems, visibleItems, getGroup) {
-    const result = /* @__PURE__ */ new Map();
-    unsortedItems.forEach((item) => {
-      const group = getGroup(item);
-      if (!result.has(group)) result.set(group, []);
-    });
-    visibleItems.forEach((item) => {
-      const group = getGroup(item);
-      if (!result.has(group)) {
-        result.set(group, []);
-      }
-      result.get(group).push(item);
-    });
-    return result;
-  }
-  /**
-   * Generate the built-in help text.
-   *
-   * @param {Command} cmd
-   * @param {Help} helper
-   * @returns {string}
-   */
-  formatHelp(cmd, helper) {
-    const termWidth = helper.padWidth(cmd, helper);
-    const helpWidth = helper.helpWidth ?? 80;
-    function callFormatItem(term, description) {
-      return helper.formatItem(term, termWidth, description, helper);
-    }
-    let output2 = [
-      `${helper.styleTitle("Usage:")} ${helper.styleUsage(helper.commandUsage(cmd))}`,
-      ""
-    ];
-    const commandDescription = helper.commandDescription(cmd);
-    if (commandDescription.length > 0) {
-      output2 = output2.concat([
-        helper.boxWrap(
-          helper.styleCommandDescription(commandDescription),
-          helpWidth
-        ),
-        ""
-      ]);
-    }
-    const argumentList = helper.visibleArguments(cmd).map((argument) => {
-      return callFormatItem(
-        helper.styleArgumentTerm(helper.argumentTerm(argument)),
-        helper.styleArgumentDescription(helper.argumentDescription(argument))
-      );
-    });
-    output2 = output2.concat(
-      this.formatItemList("Arguments:", argumentList, helper)
-    );
-    const optionGroups = this.groupItems(
-      cmd.options,
-      helper.visibleOptions(cmd),
-      (option) => option.helpGroupHeading ?? "Options:"
-    );
-    optionGroups.forEach((options, group) => {
-      const optionList = options.map((option) => {
-        return callFormatItem(
-          helper.styleOptionTerm(helper.optionTerm(option)),
-          helper.styleOptionDescription(helper.optionDescription(option))
-        );
-      });
-      output2 = output2.concat(this.formatItemList(group, optionList, helper));
-    });
-    if (helper.showGlobalOptions) {
-      const globalOptionList = helper.visibleGlobalOptions(cmd).map((option) => {
-        return callFormatItem(
-          helper.styleOptionTerm(helper.optionTerm(option)),
-          helper.styleOptionDescription(helper.optionDescription(option))
-        );
-      });
-      output2 = output2.concat(
-        this.formatItemList("Global Options:", globalOptionList, helper)
-      );
-    }
-    const commandGroups = this.groupItems(
-      cmd.commands,
-      helper.visibleCommands(cmd),
-      (sub) => sub.helpGroup() || "Commands:"
-    );
-    commandGroups.forEach((commands, group) => {
-      const commandList = commands.map((sub) => {
-        return callFormatItem(
-          helper.styleSubcommandTerm(helper.subcommandTerm(sub)),
-          helper.styleSubcommandDescription(helper.subcommandDescription(sub))
-        );
-      });
-      output2 = output2.concat(this.formatItemList(group, commandList, helper));
-    });
-    return output2.join("\n");
-  }
-  /**
-   * Return display width of string, ignoring ANSI escape sequences. Used in padding and wrapping calculations.
-   *
-   * @param {string} str
-   * @returns {number}
-   */
-  displayWidth(str) {
-    return (0, import_node_util.stripVTControlCharacters)(str).length;
-  }
-  /**
-   * Style the title for displaying in the help. Called with 'Usage:', 'Options:', etc.
-   *
-   * @param {string} str
-   * @returns {string}
-   */
-  styleTitle(str) {
-    return str;
-  }
-  styleUsage(str) {
-    return str.split(" ").map((word) => {
-      if (word === "[options]") return this.styleOptionText(word);
-      if (word === "[command]") return this.styleSubcommandText(word);
-      if (word[0] === "[" || word[0] === "<")
-        return this.styleArgumentText(word);
-      return this.styleCommandText(word);
-    }).join(" ");
-  }
-  styleCommandDescription(str) {
-    return this.styleDescriptionText(str);
-  }
-  styleOptionDescription(str) {
-    return this.styleDescriptionText(str);
-  }
-  styleSubcommandDescription(str) {
-    return this.styleDescriptionText(str);
-  }
-  styleArgumentDescription(str) {
-    return this.styleDescriptionText(str);
-  }
-  styleDescriptionText(str) {
-    return str;
-  }
-  styleOptionTerm(str) {
-    return this.styleOptionText(str);
-  }
-  styleSubcommandTerm(str) {
-    return str.split(" ").map((word) => {
-      if (word === "[options]") return this.styleOptionText(word);
-      if (word[0] === "[" || word[0] === "<")
-        return this.styleArgumentText(word);
-      return this.styleSubcommandText(word);
-    }).join(" ");
-  }
-  styleArgumentTerm(str) {
-    return this.styleArgumentText(str);
-  }
-  styleOptionText(str) {
-    return str;
-  }
-  styleArgumentText(str) {
-    return str;
-  }
-  styleSubcommandText(str) {
-    return str;
-  }
-  styleCommandText(str) {
-    return str;
-  }
-  /**
-   * Calculate the pad width from the maximum term length.
-   *
-   * @param {Command} cmd
-   * @param {Help} helper
-   * @returns {number}
-   */
-  padWidth(cmd, helper) {
-    return Math.max(
-      helper.longestOptionTermLength(cmd, helper),
-      helper.longestGlobalOptionTermLength(cmd, helper),
-      helper.longestSubcommandTermLength(cmd, helper),
-      helper.longestArgumentTermLength(cmd, helper)
-    );
-  }
-  /**
-   * Detect manually wrapped and indented strings by checking for line break followed by whitespace.
-   *
-   * @param {string} str
-   * @returns {boolean}
-   */
-  preformatted(str) {
-    return /\n[^\S\r\n]/.test(str);
-  }
-  /**
-   * Format the "item", which consists of a term and description. Pad the term and wrap the description, indenting the following lines.
-   *
-   * So "TTT", 5, "DDD DDDD DD DDD" might be formatted for this.helpWidth=17 like so:
-   *   TTT  DDD DDDD
-   *        DD DDD
-   *
-   * @param {string} term
-   * @param {number} termWidth
-   * @param {string} description
-   * @param {Help} helper
-   * @returns {string}
-   */
-  formatItem(term, termWidth, description, helper) {
-    const itemIndent = 2;
-    const itemIndentStr = " ".repeat(itemIndent);
-    if (!description) return itemIndentStr + term;
-    const paddedTerm = term.padEnd(
-      termWidth + term.length - helper.displayWidth(term)
-    );
-    const spacerWidth = 2;
-    const helpWidth = this.helpWidth ?? 80;
-    const remainingWidth = helpWidth - termWidth - spacerWidth - itemIndent;
-    let formattedDescription;
-    if (remainingWidth < this.minWidthToWrap || helper.preformatted(description)) {
-      formattedDescription = description;
     } else {
-      const wrappedDescription = helper.boxWrap(description, remainingWidth);
-      formattedDescription = wrappedDescription.replace(
-        /\n/g,
-        "\n" + " ".repeat(termWidth + spacerWidth)
+      if (modifier === "*") {
+        if (Array.isArray(value)) {
+          value.filter(isDefined).forEach(function(value2) {
+            result.push(
+              encodeValue(operator, value2, isKeyOperator(operator) ? key : "")
+            );
+          });
+        } else {
+          Object.keys(value).forEach(function(k) {
+            if (isDefined(value[k])) {
+              result.push(encodeValue(operator, value[k], k));
+            }
+          });
+        }
+      } else {
+        const tmp = [];
+        if (Array.isArray(value)) {
+          value.filter(isDefined).forEach(function(value2) {
+            tmp.push(encodeValue(operator, value2));
+          });
+        } else {
+          Object.keys(value).forEach(function(k) {
+            if (isDefined(value[k])) {
+              tmp.push(encodeUnreserved(k));
+              tmp.push(encodeValue(operator, value[k].toString()));
+            }
+          });
+        }
+        if (isKeyOperator(operator)) {
+          result.push(encodeUnreserved(key) + "=" + tmp.join(","));
+        } else if (tmp.length !== 0) {
+          result.push(tmp.join(","));
+        }
+      }
+    }
+  } else {
+    if (operator === ";") {
+      if (isDefined(value)) {
+        result.push(encodeUnreserved(key));
+      }
+    } else if (value === "" && (operator === "&" || operator === "?")) {
+      result.push(encodeUnreserved(key) + "=");
+    } else if (value === "") {
+      result.push("");
+    }
+  }
+  return result;
+}
+function parseUrl(template) {
+  return {
+    expand: expand.bind(null, template)
+  };
+}
+function expand(template, context) {
+  var operators = ["+", "#", ".", "/", ";", "?", "&"];
+  template = template.replace(
+    /\{([^\{\}]+)\}|([^\{\}]+)/g,
+    function(_, expression, literal2) {
+      if (expression) {
+        let operator = "";
+        const values = [];
+        if (operators.indexOf(expression.charAt(0)) !== -1) {
+          operator = expression.charAt(0);
+          expression = expression.substr(1);
+        }
+        expression.split(/,/g).forEach(function(variable) {
+          var tmp = /([^:\*]*)(?::(\d+)|(\*))?/.exec(variable);
+          values.push(getValues(context, operator, tmp[1], tmp[2] || tmp[3]));
+        });
+        if (operator && operator !== "+") {
+          var separator = ",";
+          if (operator === "?") {
+            separator = "&";
+          } else if (operator !== "#") {
+            separator = operator;
+          }
+          return (values.length !== 0 ? operator : "") + values.join(separator);
+        } else {
+          return values.join(",");
+        }
+      } else {
+        return encodeReserved(literal2);
+      }
+    }
+  );
+  if (template === "/") {
+    return template;
+  } else {
+    return template.replace(/\/$/, "");
+  }
+}
+function parse(options) {
+  let method = options.method.toUpperCase();
+  let url2 = (options.url || "/").replace(/:([a-z]\w+)/g, "{$1}");
+  let headers = Object.assign({}, options.headers);
+  let body;
+  let parameters = omit(options, [
+    "method",
+    "baseUrl",
+    "url",
+    "headers",
+    "request",
+    "mediaType"
+  ]);
+  const urlVariableNames = extractUrlVariableNames(url2);
+  url2 = parseUrl(url2).expand(parameters);
+  if (!/^http/.test(url2)) {
+    url2 = options.baseUrl + url2;
+  }
+  const omittedParameters = Object.keys(options).filter((option) => urlVariableNames.includes(option)).concat("baseUrl");
+  const remainingParameters = omit(parameters, omittedParameters);
+  const isBinaryRequest = /application\/octet-stream/i.test(headers.accept);
+  if (!isBinaryRequest) {
+    if (options.mediaType.format) {
+      headers.accept = headers.accept.split(/,/).map(
+        (format) => format.replace(
+          /application\/vnd(\.\w+)(\.v3)?(\.\w+)?(\+json)?$/,
+          `application/vnd$1$2.${options.mediaType.format}`
+        )
+      ).join(",");
+    }
+    if (url2.endsWith("/graphql")) {
+      if (options.mediaType.previews?.length) {
+        const previewsFromAcceptHeader = headers.accept.match(/(?<![\w-])[\w-]+(?=-preview)/g) || [];
+        headers.accept = previewsFromAcceptHeader.concat(options.mediaType.previews).map((preview) => {
+          const format = options.mediaType.format ? `.${options.mediaType.format}` : "+json";
+          return `application/vnd.github.${preview}-preview${format}`;
+        }).join(",");
+      }
+    }
+  }
+  if (["GET", "HEAD"].includes(method)) {
+    url2 = addQueryParameters(url2, remainingParameters);
+  } else {
+    if ("data" in remainingParameters) {
+      body = remainingParameters.data;
+    } else {
+      if (Object.keys(remainingParameters).length) {
+        body = remainingParameters;
+      }
+    }
+  }
+  if (!headers["content-type"] && typeof body !== "undefined") {
+    headers["content-type"] = "application/json; charset=utf-8";
+  }
+  if (["PATCH", "PUT"].includes(method) && typeof body === "undefined") {
+    body = "";
+  }
+  return Object.assign(
+    { method, url: url2, headers },
+    typeof body !== "undefined" ? { body } : null,
+    options.request ? { request: options.request } : null
+  );
+}
+function endpointWithDefaults(defaults2, route, options) {
+  return parse(merge(defaults2, route, options));
+}
+function withDefaults(oldDefaults, newDefaults) {
+  const DEFAULTS2 = merge(oldDefaults, newDefaults);
+  const endpoint2 = endpointWithDefaults.bind(null, DEFAULTS2);
+  return Object.assign(endpoint2, {
+    DEFAULTS: DEFAULTS2,
+    defaults: withDefaults.bind(null, DEFAULTS2),
+    merge: merge.bind(null, DEFAULTS2),
+    parse
+  });
+}
+var endpoint = withDefaults(null, DEFAULTS);
+
+// node_modules/content-type/dist/index.js
+var SP = 32;
+var HTAB = 9;
+var SEMI = 59;
+var EQ = 61;
+var DQUOTE = 34;
+var BSLASH = 92;
+var COMMA = 44;
+var LOWER_CASE = 1;
+var OWS = 2;
+var SEMI_FLAG = 4;
+var COMMA_FLAG = 8;
+var TOKEN_FLAG = 16;
+var NON_ASCII = 65280;
+var CASE_FLAGS = LOWER_CASE | NON_ASCII;
+var CHAR_MAP = new Uint8Array(256);
+CHAR_MAP[HTAB] |= OWS;
+CHAR_MAP[SP] |= OWS;
+CHAR_MAP[SEMI] |= SEMI_FLAG;
+CHAR_MAP[COMMA] |= COMMA_FLAG;
+for (let code = 128; code <= 255; code++) {
+  CHAR_MAP[code] |= LOWER_CASE;
+}
+for (const char of "!#$%&'*+-.^_`|~") {
+  CHAR_MAP[char.charCodeAt(0)] |= TOKEN_FLAG;
+}
+for (let code = 48; code <= 57; code++) {
+  CHAR_MAP[code] |= TOKEN_FLAG;
+}
+for (let code = 65; code <= 90; code++) {
+  CHAR_MAP[code] |= LOWER_CASE | TOKEN_FLAG;
+}
+for (let code = 97; code <= 122; code++) {
+  CHAR_MAP[code] |= TOKEN_FLAG;
+}
+var NullObject = /* @__PURE__ */ (() => {
+  const C = function() {
+  };
+  C.prototype = /* @__PURE__ */ Object.create(null);
+  return C;
+})();
+function parse2(header, options) {
+  const stopFlags = SEMI_FLAG | (options?.comma === true ? COMMA_FLAG : 0);
+  const len = header.length;
+  let valueStart = options?.start ?? 0;
+  while ((CHAR_MAP[header.charCodeAt(valueStart)] & OWS) !== 0) {
+    valueStart++;
+  }
+  let index = valueStart;
+  let typeFlags = 0;
+  let whitespace = -1;
+  let stop = options?.parameters === false ? COMMA_FLAG : 0;
+  while (index < len) {
+    const code = header.charCodeAt(index);
+    const flags = CHAR_MAP[code];
+    if ((flags & stopFlags) !== 0) {
+      stop |= flags & COMMA_FLAG;
+      break;
+    }
+    if ((flags & OWS) !== 0) {
+      if (whitespace === -1)
+        whitespace = index;
+    } else {
+      whitespace = -1;
+    }
+    typeFlags |= code & NON_ASCII | flags;
+    index++;
+  }
+  const valueEnd = whitespace === -1 ? index : whitespace;
+  const value = header.slice(valueStart, valueEnd);
+  const type = (typeFlags & CASE_FLAGS) === 0 ? value : value.toLowerCase();
+  if (index === len || stop !== 0) {
+    return { type, index, parameters: new NullObject() };
+  }
+  return parseParameters(header, type, index, len, stopFlags);
+}
+function parseParameters(header, type, index, len, stopFlags) {
+  const parameters = new NullObject();
+  parameter: while (index < len) {
+    index++;
+    while ((CHAR_MAP[header.charCodeAt(index)] & OWS) !== 0) {
+      index++;
+    }
+    const keyStart = index;
+    let keyFlags = 0;
+    let keyWhitespace = -1;
+    while (index < len) {
+      const code = header.charCodeAt(index);
+      const flags = CHAR_MAP[code];
+      if ((flags & stopFlags) !== 0) {
+        if ((flags & COMMA_FLAG) !== 0)
+          break parameter;
+        continue parameter;
+      }
+      if (code === EQ) {
+        const keyEnd = keyWhitespace === -1 ? index : keyWhitespace;
+        const value = header.slice(keyStart, keyEnd);
+        const key = (keyFlags & CASE_FLAGS) === 0 ? value : value.toLowerCase();
+        index++;
+        while ((CHAR_MAP[header.charCodeAt(index)] & OWS) !== 0) {
+          index++;
+        }
+        if (index < len && header.charCodeAt(index) === DQUOTE) {
+          const quotedStart = ++index;
+          let escaped = false;
+          while (index < len) {
+            const code2 = header.charCodeAt(index);
+            if (code2 === DQUOTE) {
+              if (parameters[key] === void 0) {
+                parameters[key] = escaped ? unescapeQuotedPairs(header, quotedStart, index) : header.slice(quotedStart, index);
+              }
+              index++;
+              let stop2 = 0;
+              while (index < len) {
+                const code3 = header.charCodeAt(index);
+                const flags2 = CHAR_MAP[code3];
+                if ((flags2 & stopFlags) !== 0) {
+                  stop2 = flags2 & COMMA_FLAG;
+                  break;
+                }
+                index++;
+              }
+              if (stop2 !== 0)
+                break parameter;
+              continue parameter;
+            }
+            if (code2 === BSLASH && index + 1 < len) {
+              escaped = true;
+              index += 2;
+              continue;
+            }
+            index++;
+          }
+          continue parameter;
+        }
+        const valueStart = index;
+        let stop = 0;
+        let valueWhitespace = -1;
+        while (index < len) {
+          const code2 = header.charCodeAt(index);
+          const flags2 = CHAR_MAP[code2];
+          if ((flags2 & stopFlags) !== 0) {
+            stop = flags2 & COMMA_FLAG;
+            break;
+          }
+          if ((flags2 & OWS) !== 0) {
+            if (valueWhitespace === -1)
+              valueWhitespace = index;
+          } else {
+            valueWhitespace = -1;
+          }
+          index++;
+        }
+        if (parameters[key] === void 0) {
+          const valueEnd = valueWhitespace === -1 ? index : valueWhitespace;
+          parameters[key] = header.slice(valueStart, valueEnd);
+        }
+        if (stop !== 0)
+          break parameter;
+        continue parameter;
+      }
+      if ((flags & OWS) !== 0) {
+        if (keyWhitespace === -1)
+          keyWhitespace = index;
+      } else {
+        keyWhitespace = -1;
+      }
+      keyFlags |= code & NON_ASCII | flags;
+      index++;
+    }
+  }
+  return { type, index, parameters };
+}
+function unescapeQuotedPairs(str, start, end) {
+  let result = "";
+  for (let index = start; index < end; index++) {
+    if (str.charCodeAt(index) === BSLASH) {
+      result += str.slice(start, index);
+      start = ++index;
+    }
+  }
+  return result + str.slice(start, end);
+}
+
+// node_modules/json-with-bigint/json-with-bigint.js
+var intRegex = /^-?\d+$/;
+var noiseValue = /^-?\d+n+$/;
+var originalStringify = JSON.stringify;
+var originalParse = JSON.parse;
+var customFormat = /^-?\d+n$/;
+var bigIntsStringify = /([\[:])?"(-?\d+)n"($|\s*[,\}\]])/g;
+var noiseStringify = /([\[:])?("-?\d+n+)n("$|"\s*[,\}\]])/g;
+var isUnstringifiable = (val) => val === void 0 || typeof val === "function" || typeof val === "symbol";
+var isRawJSON = (val) => val !== null && typeof val === "object" && val.constructor && val.constructor.name === "RawJSON";
+var stringifyIteratively = (rootValue, replacer, spaceParam) => {
+  let space = "";
+  if (typeof spaceParam === "number") {
+    space = " ".repeat(Math.min(10, Math.max(0, Math.floor(spaceParam))));
+  } else if (typeof spaceParam === "string") {
+    space = spaceParam.slice(0, 10);
+  }
+  const isFunctionReplacer = typeof replacer === "function";
+  const propertyList = Array.isArray(replacer) ? new Set(replacer.map(String)) : null;
+  const prepareVal = (parent, key, val) => {
+    const isObject2 = val !== null && typeof val === "object";
+    const hasToJSON = isObject2 && typeof val.toJSON === "function";
+    if (hasToJSON) {
+      val = val.toJSON(key);
+    }
+    const isNoise = typeof val === "string" && noiseValue.test(val);
+    if (isNoise) return val + "n";
+    const isBigInt = typeof val === "bigint";
+    if (isBigInt) {
+      const supportsRawJSON = "rawJSON" in JSON;
+      if (supportsRawJSON) return JSON.rawJSON(val.toString());
+      return val.toString() + "n";
+    }
+    if (isFunctionReplacer) {
+      val = replacer.call(parent, key, val);
+    }
+    const isPostReplacerObject = val !== null && typeof val === "object";
+    if (isPostReplacerObject) {
+      const isPrimitiveWrapper = val instanceof Number || val instanceof String || val instanceof Boolean;
+      if (isPrimitiveWrapper) {
+        val = val.valueOf();
+      }
+    }
+    return val;
+  };
+  const rootProcessed = prepareVal({ "": rootValue }, "", rootValue);
+  if (isUnstringifiable(rootProcessed)) {
+    return void 0;
+  }
+  const isRootPrimitive = rootProcessed === null || typeof rootProcessed !== "object";
+  const isRootNativeRawJSON = isRawJSON(rootProcessed);
+  if (isRootPrimitive || isRootNativeRawJSON) {
+    return originalStringify(rootProcessed);
+  }
+  const chunks = [];
+  let level = 0;
+  const stack = [
+    {
+      parent: { "": rootProcessed },
+      key: "",
+      val: rootProcessed,
+      isArray: Array.isArray(rootProcessed),
+      keys: Array.isArray(rootProcessed) ? null : Object.keys(rootProcessed),
+      index: 0,
+      first: true
+    }
+  ];
+  const visited = new WeakSet([rootProcessed]);
+  while (stack.length > 0) {
+    const node2 = stack[stack.length - 1];
+    if (node2.index === 0) {
+      chunks.push(node2.isArray ? "[" : "{");
+      level++;
+    }
+    let isDone = false;
+    if (node2.isArray) {
+      if (node2.index < node2.val.length) {
+        if (!node2.first) chunks.push(",");
+        if (space) chunks.push("\n" + space.repeat(level));
+        const childRaw = node2.val[node2.index];
+        const childVal = prepareVal(node2.val, String(node2.index), childRaw);
+        if (isUnstringifiable(childVal)) {
+          chunks.push("null");
+          node2.first = false;
+          node2.index++;
+        } else {
+          const isComplexObject = childVal !== null && typeof childVal === "object";
+          const isNativeRaw = isRawJSON(childVal);
+          if (isComplexObject && !isNativeRaw) {
+            if (visited.has(childVal)) {
+              throw new TypeError("Converting circular structure to JSON");
+            }
+            visited.add(childVal);
+            stack.push({
+              parent: node2.val,
+              key: String(node2.index),
+              val: childVal,
+              isArray: Array.isArray(childVal),
+              keys: Array.isArray(childVal) ? null : Object.keys(childVal),
+              index: 0,
+              first: true
+            });
+            node2.first = false;
+            node2.index++;
+          } else {
+            chunks.push(originalStringify(childVal));
+            node2.first = false;
+            node2.index++;
+          }
+        }
+      } else {
+        isDone = true;
+      }
+    } else {
+      while (node2.index < node2.keys.length) {
+        const k = node2.keys[node2.index++];
+        const isFilteredOutByArray = propertyList && !propertyList.has(k);
+        if (isFilteredOutByArray) continue;
+        const childRaw = node2.val[k];
+        const childVal = prepareVal(node2.val, k, childRaw);
+        if (isUnstringifiable(childVal)) continue;
+        if (!node2.first) chunks.push(",");
+        if (space) {
+          chunks.push("\n" + space.repeat(level) + originalStringify(k) + ": ");
+        } else {
+          chunks.push(originalStringify(k) + ":");
+        }
+        const isComplexObject = childVal !== null && typeof childVal === "object";
+        const isNativeRaw = isRawJSON(childVal);
+        if (isComplexObject && !isNativeRaw) {
+          if (visited.has(childVal)) {
+            throw new TypeError("Converting circular structure to JSON");
+          }
+          visited.add(childVal);
+          stack.push({
+            parent: node2.val,
+            key: k,
+            val: childVal,
+            isArray: Array.isArray(childVal),
+            keys: Array.isArray(childVal) ? null : Object.keys(childVal),
+            index: 0,
+            first: true
+          });
+          node2.first = false;
+          break;
+        } else {
+          chunks.push(originalStringify(childVal));
+          node2.first = false;
+        }
+      }
+      const isNodeFullyProcessed = node2.index >= node2.keys.length && stack[stack.length - 1] === node2;
+      if (isNodeFullyProcessed) {
+        isDone = true;
+      }
+    }
+    if (isDone) {
+      level--;
+      if (!node2.first && space) chunks.push("\n" + space.repeat(level));
+      chunks.push(node2.isArray ? "]" : "}");
+      visited.delete(node2.val);
+      stack.pop();
+    }
+  }
+  return chunks.join("");
+};
+var JSONStringify = (value, replacer, space) => {
+  try {
+    const supportsRawJSON = "rawJSON" in JSON;
+    if (supportsRawJSON) {
+      return originalStringify(
+        value,
+        (key, val) => {
+          if (typeof val === "bigint") return JSON.rawJSON(val.toString());
+          const hasFunctionReplacer = typeof replacer === "function";
+          if (hasFunctionReplacer) return replacer(key, val);
+          const isKeyInArrayReplacer = Array.isArray(replacer) && replacer.includes(key);
+          if (isKeyInArrayReplacer) return val;
+          return val;
+        },
+        space
       );
     }
-    return itemIndentStr + paddedTerm + " ".repeat(spacerWidth) + formattedDescription.replace(/\n/g, `
-${itemIndentStr}`);
+    if (!value) return originalStringify(value, replacer, space);
+    const convertedToCustomJSON = originalStringify(
+      value,
+      (key, val) => {
+        const isNoise = typeof val === "string" && noiseValue.test(val);
+        if (isNoise) return val.toString() + "n";
+        if (typeof val === "bigint") return val.toString() + "n";
+        const hasFunctionReplacer = typeof replacer === "function";
+        if (hasFunctionReplacer) return replacer(key, val);
+        const isKeyInArrayReplacer = Array.isArray(replacer) && replacer.includes(key);
+        if (isKeyInArrayReplacer) return val;
+        return val;
+      },
+      space
+    );
+    const processedJSON = convertedToCustomJSON.replace(
+      bigIntsStringify,
+      "$1$2$3"
+    );
+    const denoisedJSON = processedJSON.replace(noiseStringify, "$1$2$3");
+    return denoisedJSON;
+  } catch (error62) {
+    if (error62 instanceof RangeError) {
+      const convertedJSON = stringifyIteratively(value, replacer, space);
+      if (convertedJSON === void 0) return void 0;
+      const supportsRawJSON = "rawJSON" in JSON;
+      if (supportsRawJSON) return convertedJSON;
+      const processedJSON = convertedJSON.replace(bigIntsStringify, "$1$2$3");
+      return processedJSON.replace(noiseStringify, "$1$2$3");
+    }
+    throw error62;
   }
-  /**
-   * Wrap a string at whitespace, preserving existing line breaks.
-   * Wrapping is skipped if the width is less than `minWidthToWrap`.
-   *
-   * @param {string} str
-   * @param {number} width
-   * @returns {string}
-   */
-  boxWrap(str, width) {
-    if (width < this.minWidthToWrap) return str;
-    const rawLines = str.split(/\r\n|\n/);
-    const chunkPattern = /[\s]*[^\s]+/g;
-    const wrappedLines = [];
-    rawLines.forEach((line) => {
-      const chunks = line.match(chunkPattern);
-      if (chunks === null) {
-        wrappedLines.push("");
-        return;
+};
+var featureCache = /* @__PURE__ */ new Map();
+var isContextSourceSupported = () => {
+  const parseFingerprint = JSON.parse.toString();
+  if (featureCache.has(parseFingerprint)) {
+    return featureCache.get(parseFingerprint);
+  }
+  try {
+    const result = JSON.parse(
+      "1",
+      (_, __, context) => !!context?.source && context.source === "1"
+    );
+    featureCache.set(parseFingerprint, result);
+    return result;
+  } catch {
+    featureCache.set(parseFingerprint, false);
+    return false;
+  }
+};
+var convertMarkedBigIntsReviver = (key, value, context, userReviver) => {
+  const isCustomFormatBigInt = typeof value === "string" && customFormat.test(value);
+  if (isCustomFormatBigInt) return BigInt(value.slice(0, -1));
+  const isNoiseValue = typeof value === "string" && noiseValue.test(value);
+  if (isNoiseValue) return value.slice(0, -1);
+  const hasUserReviver = typeof userReviver === "function";
+  if (!hasUserReviver) return value;
+  return userReviver(key, value, context);
+};
+var JSONParseV2 = (text, reviver) => {
+  return JSON.parse(text, (key, value, context) => {
+    const isNumber = typeof value === "number";
+    const isOutOfBounds = value > Number.MAX_SAFE_INTEGER || value < Number.MIN_SAFE_INTEGER;
+    const isBigNumber = isNumber && isOutOfBounds;
+    const isInt = context && intRegex.test(context.source);
+    const isBigInt = isBigNumber && isInt;
+    if (isBigInt) return BigInt(context.source);
+    const hasCustomReviver = typeof reviver === "function";
+    if (!hasCustomReviver) return value;
+    return reviver(key, value, context);
+  });
+};
+var MAX_INT = Number.MAX_SAFE_INTEGER.toString();
+var MAX_DIGITS = MAX_INT.length;
+var stringsOrLargeNumbers = /"(?:[^"\\]|\\.)*"|-?(0|[1-9][0-9]*)(\.[0-9]+)?([eE][+-]?[0-9]+)?/g;
+var noiseValueWithQuotes = /^"-?\d+n+"$/;
+var applyReviverIteratively = (parsed, userReviver) => {
+  const rootHolder = { "": parsed };
+  const stack = [{ parent: rootHolder, key: "", visited: false }];
+  while (stack.length > 0) {
+    const node2 = stack[stack.length - 1];
+    if (!node2.visited) {
+      node2.visited = true;
+      const value = node2.parent[node2.key];
+      const isComplexObject = value !== null && typeof value === "object";
+      if (isComplexObject) {
+        const keys = Object.keys(value);
+        for (let i = keys.length - 1; i >= 0; i--) {
+          stack.push({ parent: value, key: keys[i], visited: false });
+        }
       }
-      let sumChunks = [chunks.shift()];
-      let sumWidth = this.displayWidth(sumChunks[0]);
-      chunks.forEach((chunk) => {
-        const visibleWidth = this.displayWidth(chunk);
-        if (sumWidth + visibleWidth <= width) {
-          sumChunks.push(chunk);
-          sumWidth += visibleWidth;
+    } else {
+      const { parent, key } = node2;
+      let value = parent[key];
+      if (typeof value === "string") {
+        const isCustomFormatBigInt = customFormat.test(value);
+        if (isCustomFormatBigInt) {
+          value = BigInt(value.slice(0, -1));
+        } else {
+          const isNoise = noiseValue.test(value);
+          if (isNoise) value = value.slice(0, -1);
+        }
+      }
+      const hasUserReviver = typeof userReviver === "function";
+      if (hasUserReviver) {
+        value = userReviver.call(parent, key, value);
+      }
+      const isDeleted = value === void 0;
+      if (isDeleted) {
+        delete parent[key];
+      } else {
+        parent[key] = value;
+      }
+      stack.pop();
+    }
+  }
+  return rootHolder[""];
+};
+var serializeBigInts = (text) => {
+  return text.replace(
+    stringsOrLargeNumbers,
+    (match, digits, fractional, exponential) => {
+      const isString = match[0] === '"';
+      const isNoise = isString && noiseValueWithQuotes.test(match);
+      if (isNoise) return match.substring(0, match.length - 1) + 'n"';
+      const hasFractionalOrExponential = fractional || exponential;
+      const isLessThanMaxSafeInt = digits && (digits.length < MAX_DIGITS || digits.length === MAX_DIGITS && digits <= MAX_INT);
+      const isStandardValue = isString || hasFractionalOrExponential || isLessThanMaxSafeInt;
+      if (isStandardValue) return match;
+      return '"' + match + 'n"';
+    }
+  );
+};
+var JSONParse = (text, reviver) => {
+  if (!text) return originalParse(text, reviver);
+  try {
+    if (isContextSourceSupported()) return JSONParseV2(text, reviver);
+    const serializedData = serializeBigInts(text);
+    return originalParse(
+      serializedData,
+      (key, value, context) => convertMarkedBigIntsReviver(key, value, context, reviver)
+    );
+  } catch (error62) {
+    if (error62 instanceof RangeError) {
+      const serializedData = serializeBigInts(text);
+      const parsed = originalParse(serializedData);
+      return applyReviverIteratively(parsed, reviver);
+    }
+    throw error62;
+  }
+};
+
+// node_modules/@octokit/request-error/dist-src/index.js
+var RequestError = class extends Error {
+  name;
+  /**
+   * http status code
+   */
+  status;
+  /**
+   * Request options that lead to the error.
+   */
+  request;
+  /**
+   * Response object if a response was received
+   */
+  response;
+  constructor(message, statusCode, options) {
+    super(message, { cause: options.cause });
+    this.name = "HttpError";
+    this.status = Number.parseInt(statusCode);
+    if (Number.isNaN(this.status)) {
+      this.status = 0;
+    }
+    if ("response" in options) {
+      this.response = options.response;
+    }
+    const requestCopy = Object.assign({}, options.request);
+    if (options.request.headers.authorization) {
+      requestCopy.headers = Object.assign({}, options.request.headers, {
+        authorization: options.request.headers.authorization.replace(
+          /(?<! ) .*$/,
+          " [REDACTED]"
+        )
+      });
+    }
+    requestCopy.url = requestCopy.url.replace(/\bclient_secret=\w+/g, "client_secret=[REDACTED]").replace(/\baccess_token=\w+/g, "access_token=[REDACTED]");
+    this.request = requestCopy;
+  }
+};
+
+// node_modules/@octokit/request/dist-bundle/index.js
+var VERSION2 = "10.0.16";
+var defaults_default = {
+  headers: {
+    "user-agent": `octokit-request.js/${VERSION2} ${getUserAgent()}`
+  }
+};
+function isPlainObject2(value) {
+  if (typeof value !== "object" || value === null) return false;
+  if (Object.prototype.toString.call(value) !== "[object Object]") return false;
+  const proto = Object.getPrototypeOf(value);
+  if (proto === null) return true;
+  const Ctor = Object.prototype.hasOwnProperty.call(proto, "constructor") && proto.constructor;
+  return typeof Ctor === "function" && Ctor instanceof Ctor && Function.prototype.call(Ctor) === Function.prototype.call(value);
+}
+var noop = () => "";
+async function fetchWrapper(requestOptions) {
+  const fetch2 = requestOptions.request?.fetch || globalThis.fetch;
+  if (!fetch2) {
+    throw new Error(
+      "fetch is not set. Please pass a fetch implementation as new Octokit({ request: { fetch }}). Learn more at https://github.com/octokit/octokit.js/#fetch-missing"
+    );
+  }
+  const log = requestOptions.request?.log || console;
+  const parseSuccessResponseBody = requestOptions.request?.parseSuccessResponseBody !== false;
+  const body = isPlainObject2(requestOptions.body) || Array.isArray(requestOptions.body) ? JSONStringify(requestOptions.body) : requestOptions.body;
+  const requestHeaders = Object.fromEntries(
+    Object.entries(requestOptions.headers).map(([name, value]) => [
+      name,
+      String(value)
+    ])
+  );
+  let fetchResponse;
+  try {
+    fetchResponse = await fetch2(requestOptions.url, {
+      method: requestOptions.method,
+      body,
+      redirect: requestOptions.request?.redirect,
+      headers: requestHeaders,
+      signal: requestOptions.request?.signal,
+      // duplex must be set if request.body is ReadableStream or Async Iterables.
+      // See https://fetch.spec.whatwg.org/#dom-requestinit-duplex.
+      ...requestOptions.body && { duplex: "half" }
+    });
+  } catch (error62) {
+    let message = "Unknown Error";
+    if (error62 instanceof Error) {
+      if (error62.name === "AbortError") {
+        error62.status = 500;
+        throw error62;
+      }
+      message = error62.message;
+      if (error62.name === "TypeError" && "cause" in error62) {
+        if (error62.cause instanceof Error) {
+          message = error62.cause.message;
+        } else if (typeof error62.cause === "string") {
+          message = error62.cause;
+        }
+      }
+    }
+    const requestError = new RequestError(message, 500, {
+      request: requestOptions
+    });
+    requestError.cause = error62;
+    throw requestError;
+  }
+  const status = fetchResponse.status;
+  const url2 = fetchResponse.url;
+  const responseHeaders = {};
+  for (const [key, value] of fetchResponse.headers) {
+    responseHeaders[key] = value;
+  }
+  const octokitResponse = {
+    url: url2,
+    status,
+    headers: responseHeaders,
+    data: ""
+  };
+  if ("deprecation" in responseHeaders) {
+    const matches = responseHeaders.link && responseHeaders.link.match(/<([^<>]+)>; rel="deprecation"/);
+    const deprecationLink = matches && matches.pop();
+    log.warn(
+      `[@octokit/request] "${requestOptions.method} ${requestOptions.url}" is deprecated. It is scheduled to be removed on ${responseHeaders.sunset}${deprecationLink ? `. See ${deprecationLink}` : ""}`
+    );
+  }
+  if (status === 204 || status === 205) {
+    return octokitResponse;
+  }
+  if (requestOptions.method === "HEAD") {
+    if (status < 400) {
+      return octokitResponse;
+    }
+    throw new RequestError(fetchResponse.statusText, status, {
+      response: octokitResponse,
+      request: requestOptions
+    });
+  }
+  if (status === 304) {
+    octokitResponse.data = await getResponseData(fetchResponse);
+    throw new RequestError("Not modified", status, {
+      response: octokitResponse,
+      request: requestOptions
+    });
+  }
+  if (status >= 400) {
+    octokitResponse.data = await getResponseData(fetchResponse);
+    throw new RequestError(toErrorMessage(octokitResponse.data), status, {
+      response: octokitResponse,
+      request: requestOptions
+    });
+  }
+  octokitResponse.data = parseSuccessResponseBody ? await getResponseData(fetchResponse) : fetchResponse.body;
+  return octokitResponse;
+}
+async function getResponseData(response) {
+  const contentType = response.headers.get("content-type");
+  if (!contentType) {
+    return response.text().catch(noop);
+  }
+  const mimetype = parse2(contentType);
+  if (isJSONResponse(mimetype)) {
+    let text = "";
+    try {
+      text = await response.text();
+      return JSONParse(text);
+    } catch (err) {
+      return text;
+    }
+  } else if (mimetype.type.startsWith("text/") || // `application/octet-stream` is the canonical "arbitrary binary" type
+  // (RFC 2046) and must never be decoded as text, even when the response
+  // carries a (misleading) `charset=utf-8` parameter — see #751.
+  mimetype.parameters.charset?.toLowerCase() === "utf-8" && mimetype.type !== "application/octet-stream") {
+    return response.text().catch(noop);
+  } else {
+    return response.arrayBuffer().catch(
+      /* v8 ignore next -- @preserve */
+      () => new ArrayBuffer(0)
+    );
+  }
+}
+function isJSONResponse(mimetype) {
+  return mimetype.type === "application/json" || mimetype.type === "application/scim+json";
+}
+function toErrorMessage(data) {
+  if (typeof data === "string") {
+    return data;
+  }
+  if (data instanceof ArrayBuffer) {
+    return "Unknown error";
+  }
+  if (typeof data === "object" && data !== null && "message" in data) {
+    const objectData = data;
+    const suffix = "documentation_url" in objectData ? ` - ${objectData.documentation_url}` : "";
+    return Array.isArray(objectData.errors) ? `${objectData.message}: ${objectData.errors.map((v) => JSON.stringify(v)).join(", ")}${suffix}` : `${objectData.message}${suffix}`;
+  }
+  return `Unknown error: ${JSON.stringify(data)}`;
+}
+function withDefaults2(oldEndpoint, newDefaults) {
+  const endpoint2 = oldEndpoint.defaults(newDefaults);
+  const newApi = function(route, parameters) {
+    const endpointOptions = endpoint2.merge(route, parameters);
+    if (!endpointOptions.request || !endpointOptions.request.hook) {
+      return fetchWrapper(endpoint2.parse(endpointOptions));
+    }
+    const request2 = (route2, parameters2) => {
+      return fetchWrapper(
+        endpoint2.parse(endpoint2.merge(route2, parameters2))
+      );
+    };
+    Object.assign(request2, {
+      endpoint: endpoint2,
+      defaults: withDefaults2.bind(null, endpoint2)
+    });
+    return endpointOptions.request.hook(request2, endpointOptions);
+  };
+  return Object.assign(newApi, {
+    endpoint: endpoint2,
+    defaults: withDefaults2.bind(null, endpoint2)
+  });
+}
+var request = withDefaults2(endpoint, defaults_default);
+
+// node_modules/@octokit/graphql/dist-bundle/index.js
+var VERSION3 = "0.0.0-development";
+function _buildMessageForResponseErrors(data) {
+  return `Request failed due to following response errors:
+` + data.errors.map((e) => ` - ${e.message}`).join("\n");
+}
+var GraphqlResponseError = class extends Error {
+  constructor(request2, headers, response) {
+    super(_buildMessageForResponseErrors(response));
+    this.request = request2;
+    this.headers = headers;
+    this.response = response;
+    this.errors = response.errors;
+    this.data = response.data;
+    if (Error.captureStackTrace) {
+      Error.captureStackTrace(this, this.constructor);
+    }
+  }
+  request;
+  headers;
+  response;
+  name = "GraphqlResponseError";
+  errors;
+  data;
+};
+var NON_VARIABLE_OPTIONS = [
+  "method",
+  "baseUrl",
+  "url",
+  "headers",
+  "request",
+  "query",
+  "mediaType",
+  "operationName"
+];
+var FORBIDDEN_VARIABLE_OPTIONS = ["query", "method", "url"];
+var GHES_V3_SUFFIX_REGEX = /\/api\/v3\/?$/;
+function graphql(request2, query, options) {
+  if (options) {
+    if (typeof query === "string" && "query" in options) {
+      return Promise.reject(
+        new Error(`[@octokit/graphql] "query" cannot be used as variable name`)
+      );
+    }
+    for (const key in options) {
+      if (!FORBIDDEN_VARIABLE_OPTIONS.includes(key)) continue;
+      return Promise.reject(
+        new Error(
+          `[@octokit/graphql] "${key}" cannot be used as variable name`
+        )
+      );
+    }
+  }
+  const parsedOptions = typeof query === "string" ? Object.assign({ query }, options) : query;
+  const requestOptions = Object.keys(
+    parsedOptions
+  ).reduce((result, key) => {
+    if (NON_VARIABLE_OPTIONS.includes(key)) {
+      result[key] = parsedOptions[key];
+      return result;
+    }
+    if (!result.variables) {
+      result.variables = {};
+    }
+    result.variables[key] = parsedOptions[key];
+    return result;
+  }, {});
+  const baseUrl = parsedOptions.baseUrl || request2.endpoint.DEFAULTS.baseUrl;
+  if (GHES_V3_SUFFIX_REGEX.test(baseUrl)) {
+    requestOptions.url = baseUrl.replace(GHES_V3_SUFFIX_REGEX, "/api/graphql");
+  }
+  return request2(requestOptions).then((response) => {
+    if (response.data.errors) {
+      const headers = {};
+      for (const key of Object.keys(response.headers)) {
+        headers[key] = response.headers[key];
+      }
+      throw new GraphqlResponseError(
+        requestOptions,
+        headers,
+        response.data
+      );
+    }
+    return response.data.data;
+  });
+}
+function withDefaults3(request2, newDefaults) {
+  const newRequest = request2.defaults(newDefaults);
+  const newApi = (query, options) => {
+    return graphql(newRequest, query, options);
+  };
+  return Object.assign(newApi, {
+    defaults: withDefaults3.bind(null, newRequest),
+    endpoint: newRequest.endpoint
+  });
+}
+var graphql2 = withDefaults3(request, {
+  headers: {
+    "user-agent": `octokit-graphql.js/${VERSION3} ${getUserAgent()}`
+  },
+  method: "POST",
+  url: "/graphql"
+});
+function withCustomRequest(customRequest) {
+  return withDefaults3(customRequest, {
+    method: "POST",
+    url: "/graphql"
+  });
+}
+
+// node_modules/@octokit/auth-token/dist-bundle/index.js
+var b64url = "(?:[a-zA-Z0-9_-]+)";
+var sep = "\\.";
+var jwtRE = new RegExp(`^${b64url}${sep}${b64url}${sep}${b64url}$`);
+var isJWT = jwtRE.test.bind(jwtRE);
+async function auth(token) {
+  const isApp = isJWT(token);
+  const isInstallation = token.startsWith("v1.") || token.startsWith("ghs_");
+  const isUserToServer = token.startsWith("ghu_");
+  const tokenType = isApp ? "app" : isInstallation ? "installation" : isUserToServer ? "user-to-server" : "oauth";
+  return {
+    type: "token",
+    token,
+    tokenType
+  };
+}
+function withAuthorizationPrefix(token) {
+  if (token.split(/\./).length === 3) {
+    return `bearer ${token}`;
+  }
+  return `token ${token}`;
+}
+async function hook(token, request2, route, parameters) {
+  const endpoint2 = request2.endpoint.merge(
+    route,
+    parameters
+  );
+  endpoint2.headers.authorization = withAuthorizationPrefix(token);
+  return request2(endpoint2);
+}
+var createTokenAuth = function createTokenAuth2(token) {
+  if (!token) {
+    throw new Error("[@octokit/auth-token] No token passed to createTokenAuth");
+  }
+  if (typeof token !== "string") {
+    throw new Error(
+      "[@octokit/auth-token] Token passed to createTokenAuth is not a string"
+    );
+  }
+  token = token.replace(/^(token|bearer) +/i, "");
+  return Object.assign(auth.bind(null, token), {
+    hook: hook.bind(null, token)
+  });
+};
+
+// node_modules/@octokit/core/dist-src/version.js
+var VERSION4 = "7.0.8";
+
+// node_modules/@octokit/core/dist-src/index.js
+var noop2 = () => {
+};
+var consoleWarn = console.warn.bind(console);
+var consoleError = console.error.bind(console);
+function createLogger(logger = {}) {
+  if (typeof logger.debug !== "function") {
+    logger.debug = noop2;
+  }
+  if (typeof logger.info !== "function") {
+    logger.info = noop2;
+  }
+  if (typeof logger.warn !== "function") {
+    logger.warn = consoleWarn;
+  }
+  if (typeof logger.error !== "function") {
+    logger.error = consoleError;
+  }
+  return logger;
+}
+var userAgentTrail = `octokit-core.js/${VERSION4} ${getUserAgent()}`;
+var Octokit = class {
+  static VERSION = VERSION4;
+  static defaults(defaults2) {
+    const OctokitWithDefaults = class extends this {
+      constructor(...args) {
+        const options = args[0] || {};
+        if (typeof defaults2 === "function") {
+          super(defaults2(options));
           return;
         }
-        wrappedLines.push(sumChunks.join(""));
-        const nextChunk = chunk.trimStart();
-        sumChunks = [nextChunk];
-        sumWidth = this.displayWidth(nextChunk);
-      });
-      wrappedLines.push(sumChunks.join(""));
-    });
-    return wrappedLines.join("\n");
-  }
-};
-
-// node_modules/commander/lib/option.js
-var Option = class {
-  /**
-   * Initialize a new `Option` with the given `flags` and `description`.
-   *
-   * @param {string} flags
-   * @param {string} [description]
-   */
-  constructor(flags, description) {
-    this.flags = flags;
-    this.description = description || "";
-    this.required = flags.includes("<");
-    this.optional = flags.includes("[");
-    this.variadic = /\w\.\.\.[>\]]$/.test(flags);
-    this.mandatory = false;
-    const optionFlags = splitOptionFlags(flags);
-    this.short = optionFlags.shortFlag;
-    this.long = optionFlags.longFlag;
-    this.negate = false;
-    if (this.long) {
-      this.negate = this.long.startsWith("--no-");
-    }
-    this.defaultValue = void 0;
-    this.defaultValueDescription = void 0;
-    this.presetArg = void 0;
-    this.envVar = void 0;
-    this.parseArg = void 0;
-    this.hidden = false;
-    this.argChoices = void 0;
-    this.conflictsWith = [];
-    this.implied = void 0;
-    this.helpGroupHeading = void 0;
-  }
-  /**
-   * Set the default value, and optionally supply the description to be displayed in the help.
-   *
-   * @param {*} value
-   * @param {string} [description]
-   * @return {Option}
-   */
-  default(value, description) {
-    this.defaultValue = value;
-    this.defaultValueDescription = description;
-    return this;
-  }
-  /**
-   * Preset to use when option used without option-argument, especially optional but also boolean and negated.
-   * The custom processing (parseArg) is called.
-   *
-   * @example
-   * new Option('--color').default('GREYSCALE').preset('RGB');
-   * new Option('--donate [amount]').preset('20').argParser(parseFloat);
-   *
-   * @param {*} arg
-   * @return {Option}
-   */
-  preset(arg) {
-    this.presetArg = arg;
-    return this;
-  }
-  /**
-   * Add option name(s) that conflict with this option.
-   * An error will be displayed if conflicting options are found during parsing.
-   *
-   * @example
-   * new Option('--rgb').conflicts('cmyk');
-   * new Option('--js').conflicts(['ts', 'jsx']);
-   *
-   * @param {(string | string[])} names
-   * @return {Option}
-   */
-  conflicts(names) {
-    this.conflictsWith = this.conflictsWith.concat(names);
-    return this;
-  }
-  /**
-   * Specify implied option values for when this option is set and the implied options are not.
-   *
-   * The custom processing (parseArg) is not called on the implied values.
-   *
-   * @example
-   * program
-   *   .addOption(new Option('--log', 'write logging information to file'))
-   *   .addOption(new Option('--trace', 'log extra details').implies({ log: 'trace.txt' }));
-   *
-   * @param {object} impliedOptionValues
-   * @return {Option}
-   */
-  implies(impliedOptionValues) {
-    let newImplied = impliedOptionValues;
-    if (typeof impliedOptionValues === "string") {
-      newImplied = { [impliedOptionValues]: true };
-    }
-    this.implied = Object.assign(this.implied || {}, newImplied);
-    return this;
-  }
-  /**
-   * Set environment variable to check for option value.
-   *
-   * An environment variable is only used if when processed the current option value is
-   * undefined, or the source of the current value is 'default' or 'config' or 'env'.
-   *
-   * @param {string} name
-   * @return {Option}
-   */
-  env(name) {
-    this.envVar = name;
-    return this;
-  }
-  /**
-   * Set the custom handler for processing CLI option arguments into option values.
-   *
-   * @param {Function} [fn]
-   * @return {Option}
-   */
-  argParser(fn) {
-    this.parseArg = fn;
-    return this;
-  }
-  /**
-   * Whether the option is mandatory and must have a value after parsing.
-   *
-   * @param {boolean} [mandatory=true]
-   * @return {Option}
-   */
-  makeOptionMandatory(mandatory = true) {
-    this.mandatory = !!mandatory;
-    return this;
-  }
-  /**
-   * Hide option in help.
-   *
-   * @param {boolean} [hide=true]
-   * @return {Option}
-   */
-  hideHelp(hide2 = true) {
-    this.hidden = !!hide2;
-    return this;
-  }
-  /**
-   * @package
-   */
-  _collectValue(value, previous) {
-    if (previous === this.defaultValue || !Array.isArray(previous)) {
-      return [value];
-    }
-    previous.push(value);
-    return previous;
-  }
-  /**
-   * Only allow option value to be one of choices.
-   *
-   * @param {string[]} values
-   * @return {Option}
-   */
-  choices(values) {
-    this.argChoices = values.slice();
-    this.parseArg = (arg, previous) => {
-      if (!this.argChoices.includes(arg)) {
-        throw new InvalidArgumentError(
-          `Allowed choices are ${this.argChoices.join(", ")}.`
-        );
-      }
-      if (this.variadic) {
-        return this._collectValue(arg, previous);
-      }
-      return arg;
-    };
-    return this;
-  }
-  /**
-   * Return option name.
-   *
-   * @return {string}
-   */
-  name() {
-    if (this.long) {
-      return this.long.replace(/^--/, "");
-    }
-    return this.short.replace(/^-/, "");
-  }
-  /**
-   * Return option name, in a camelcase format that can be used
-   * as an object attribute key.
-   *
-   * @return {string}
-   */
-  attributeName() {
-    if (this.negate) {
-      return camelcase(this.name().replace(/^no-/, ""));
-    }
-    return camelcase(this.name());
-  }
-  /**
-   * Set the help group heading.
-   *
-   * @param {string} heading
-   * @return {Option}
-   */
-  helpGroup(heading) {
-    this.helpGroupHeading = heading;
-    return this;
-  }
-  /**
-   * Check if `arg` matches the short or long flag.
-   *
-   * @param {string} arg
-   * @return {boolean}
-   * @package
-   */
-  is(arg) {
-    return this.short === arg || this.long === arg;
-  }
-  /**
-   * Return whether a boolean option.
-   *
-   * Options are one of boolean, negated, required argument, or optional argument.
-   *
-   * @return {boolean}
-   * @package
-   */
-  isBoolean() {
-    return !this.required && !this.optional && !this.negate;
-  }
-};
-var DualOptions = class {
-  /**
-   * @param {Option[]} options
-   */
-  constructor(options) {
-    this.positiveOptions = /* @__PURE__ */ new Map();
-    this.negativeOptions = /* @__PURE__ */ new Map();
-    this.dualOptions = /* @__PURE__ */ new Set();
-    options.forEach((option) => {
-      if (option.negate) {
-        this.negativeOptions.set(option.attributeName(), option);
-      } else {
-        this.positiveOptions.set(option.attributeName(), option);
-      }
-    });
-    this.negativeOptions.forEach((value, key) => {
-      if (this.positiveOptions.has(key)) {
-        this.dualOptions.add(key);
-      }
-    });
-  }
-  /**
-   * Did the value come from the option, and not from possible matching dual option?
-   *
-   * @param {*} value
-   * @param {Option} option
-   * @returns {boolean}
-   */
-  valueFromOption(value, option) {
-    const optionKey = option.attributeName();
-    if (!this.dualOptions.has(optionKey)) return true;
-    const preset = this.negativeOptions.get(optionKey).presetArg;
-    const negativeValue = preset !== void 0 ? preset : false;
-    return option.negate === (negativeValue === value);
-  }
-};
-function camelcase(str) {
-  return str.split("-").reduce((str2, word) => {
-    return str2 + word[0].toUpperCase() + word.slice(1);
-  });
-}
-function splitOptionFlags(flags) {
-  let shortFlag;
-  let longFlag;
-  const shortFlagExp = /^-[^-]$/;
-  const longFlagExp = /^--[^-]/;
-  const flagParts = flags.split(/[ |,]+/).concat("guard");
-  if (shortFlagExp.test(flagParts[0])) shortFlag = flagParts.shift();
-  if (longFlagExp.test(flagParts[0])) longFlag = flagParts.shift();
-  if (!shortFlag && shortFlagExp.test(flagParts[0]))
-    shortFlag = flagParts.shift();
-  if (!shortFlag && longFlagExp.test(flagParts[0])) {
-    shortFlag = longFlag;
-    longFlag = flagParts.shift();
-  }
-  if (flagParts[0].startsWith("-")) {
-    const unsupportedFlag = flagParts[0];
-    const baseError = `option creation failed due to '${unsupportedFlag}' in option flags '${flags}'`;
-    if (/^-[^-][^-]/.test(unsupportedFlag))
-      throw new Error(
-        `${baseError}
-- a short flag is a single dash and a single character
-  - either use a single dash and a single character (for a short flag)
-  - or use a double dash for a long option (and can have two, like '--ws, --workspace')`
-      );
-    if (shortFlagExp.test(unsupportedFlag))
-      throw new Error(`${baseError}
-- too many short flags`);
-    if (longFlagExp.test(unsupportedFlag))
-      throw new Error(`${baseError}
-- too many long flags`);
-    throw new Error(`${baseError}
-- unrecognised flag format`);
-  }
-  if (shortFlag === void 0 && longFlag === void 0)
-    throw new Error(
-      `option creation failed due to no flags found in '${flags}'.`
-    );
-  return { shortFlag, longFlag };
-}
-
-// node_modules/commander/lib/suggestSimilar.js
-var maxDistance = 3;
-function editDistance(a, b) {
-  if (Math.abs(a.length - b.length) > maxDistance)
-    return Math.max(a.length, b.length);
-  const d = [];
-  for (let i = 0; i <= a.length; i++) {
-    d[i] = [i];
-  }
-  for (let j = 0; j <= b.length; j++) {
-    d[0][j] = j;
-  }
-  for (let j = 1; j <= b.length; j++) {
-    for (let i = 1; i <= a.length; i++) {
-      let cost;
-      if (a[i - 1] === b[j - 1]) {
-        cost = 0;
-      } else {
-        cost = 1;
-      }
-      d[i][j] = Math.min(
-        d[i - 1][j] + 1,
-        // deletion
-        d[i][j - 1] + 1,
-        // insertion
-        d[i - 1][j - 1] + cost
-        // substitution
-      );
-      if (i > 1 && j > 1 && a[i - 1] === b[j - 2] && a[i - 2] === b[j - 1]) {
-        d[i][j] = Math.min(d[i][j], d[i - 2][j - 2] + 1);
-      }
-    }
-  }
-  return d[a.length][b.length];
-}
-function suggestSimilar(word, candidates) {
-  if (!candidates || candidates.length === 0) return "";
-  candidates = Array.from(new Set(candidates));
-  const searchingOptions = word.startsWith("--");
-  if (searchingOptions) {
-    word = word.slice(2);
-    candidates = candidates.map((candidate2) => candidate2.slice(2));
-  }
-  let similar = [];
-  let bestDistance = maxDistance;
-  const minSimilarity = 0.4;
-  candidates.forEach((candidate2) => {
-    if (candidate2.length <= 1) return;
-    const distance = editDistance(word, candidate2);
-    const length = Math.max(word.length, candidate2.length);
-    const similarity = (length - distance) / length;
-    if (similarity > minSimilarity) {
-      if (distance < bestDistance) {
-        bestDistance = distance;
-        similar = [candidate2];
-      } else if (distance === bestDistance) {
-        similar.push(candidate2);
-      }
-    }
-  });
-  similar.sort((a, b) => a.localeCompare(b));
-  if (searchingOptions) {
-    similar = similar.map((candidate2) => `--${candidate2}`);
-  }
-  if (similar.length > 1) {
-    return `
-(Did you mean one of ${similar.join(", ")}?)`;
-  }
-  if (similar.length === 1) {
-    return `
-(Did you mean ${similar[0]}?)`;
-  }
-  return "";
-}
-
-// node_modules/commander/lib/command.js
-var Command = class _Command extends import_node_events.EventEmitter {
-  /**
-   * Initialize a new `Command`.
-   *
-   * @param {string} [name]
-   */
-  constructor(name) {
-    super();
-    this.commands = [];
-    this.options = [];
-    this.parent = null;
-    this._allowUnknownOption = false;
-    this._allowExcessArguments = false;
-    this.registeredArguments = [];
-    this._args = this.registeredArguments;
-    this.args = [];
-    this.rawArgs = [];
-    this.processedArgs = [];
-    this._scriptPath = null;
-    this._name = name || "";
-    this._optionValues = {};
-    this._optionValueSources = {};
-    this._storeOptionsAsProperties = false;
-    this._actionHandler = null;
-    this._executableHandler = false;
-    this._executableFile = null;
-    this._executableDir = null;
-    this._defaultCommandName = null;
-    this._exitCallback = null;
-    this._aliases = [];
-    this._combineFlagAndOptionalValue = true;
-    this._description = "";
-    this._summary = "";
-    this._argsDescription = void 0;
-    this._enablePositionalOptions = false;
-    this._passThroughOptions = false;
-    this._lifeCycleHooks = {};
-    this._showHelpAfterError = false;
-    this._showSuggestionAfterError = true;
-    this._savedState = null;
-    this._outputConfiguration = {
-      writeOut: (str) => import_node_process.default.stdout.write(str),
-      writeErr: (str) => import_node_process.default.stderr.write(str),
-      outputError: (str, write) => write(str),
-      getOutHelpWidth: () => import_node_process.default.stdout.isTTY ? import_node_process.default.stdout.columns : void 0,
-      getErrHelpWidth: () => import_node_process.default.stderr.isTTY ? import_node_process.default.stderr.columns : void 0,
-      getOutHasColors: () => useColor() ?? (import_node_process.default.stdout.isTTY && import_node_process.default.stdout.hasColors?.()),
-      getErrHasColors: () => useColor() ?? (import_node_process.default.stderr.isTTY && import_node_process.default.stderr.hasColors?.()),
-      stripColor: (str) => (0, import_node_util2.stripVTControlCharacters)(str)
-    };
-    this._hidden = false;
-    this._helpOption = void 0;
-    this._addImplicitHelpCommand = void 0;
-    this._helpCommand = void 0;
-    this._helpConfiguration = {};
-    this._helpGroupHeading = void 0;
-    this._defaultCommandGroup = void 0;
-    this._defaultOptionGroup = void 0;
-  }
-  /**
-   * Copy settings that are useful to have in common across root command and subcommands.
-   *
-   * (Used internally when adding a command using `.command()` so subcommands inherit parent settings.)
-   *
-   * @param {Command} sourceCommand
-   * @return {Command} `this` command for chaining
-   */
-  copyInheritedSettings(sourceCommand) {
-    this._outputConfiguration = sourceCommand._outputConfiguration;
-    this._helpOption = sourceCommand._helpOption;
-    this._helpCommand = sourceCommand._helpCommand;
-    this._helpConfiguration = sourceCommand._helpConfiguration;
-    this._exitCallback = sourceCommand._exitCallback;
-    this._storeOptionsAsProperties = sourceCommand._storeOptionsAsProperties;
-    this._combineFlagAndOptionalValue = sourceCommand._combineFlagAndOptionalValue;
-    this._allowExcessArguments = sourceCommand._allowExcessArguments;
-    this._enablePositionalOptions = sourceCommand._enablePositionalOptions;
-    this._showHelpAfterError = sourceCommand._showHelpAfterError;
-    this._showSuggestionAfterError = sourceCommand._showSuggestionAfterError;
-    return this;
-  }
-  /**
-   * @returns {Command[]}
-   * @private
-   */
-  _getCommandAndAncestors() {
-    const result = [];
-    for (let command = this; command; command = command.parent) {
-      result.push(command);
-    }
-    return result;
-  }
-  /**
-   * Define a command.
-   *
-   * There are two styles of command: pay attention to where to put the description.
-   *
-   * @example
-   * // Command implemented using action handler (description is supplied separately to `.command`)
-   * program
-   *   .command('clone <source> [destination]')
-   *   .description('clone a repository into a newly created directory')
-   *   .action((source, destination) => {
-   *     console.log('clone command called');
-   *   });
-   *
-   * // Command implemented using separate executable file (description is second parameter to `.command`)
-   * program
-   *   .command('start <service>', 'start named service')
-   *   .command('stop [service]', 'stop named service, or all if no name supplied');
-   *
-   * @param {string} nameAndArgs - command name and arguments, args are `<required>` or `[optional]` and last may also be `variadic...`
-   * @param {(object | string)} [actionOptsOrExecDesc] - configuration options (for action), or description (for executable)
-   * @param {object} [execOpts] - configuration options (for executable)
-   * @return {Command} returns new command for action handler, or `this` for executable command
-   */
-  command(nameAndArgs, actionOptsOrExecDesc, execOpts) {
-    let desc = actionOptsOrExecDesc;
-    let opts = execOpts;
-    if (typeof desc === "object" && desc !== null) {
-      opts = desc;
-      desc = null;
-    }
-    opts = opts || {};
-    const [, name, args] = nameAndArgs.match(/([^ ]+) *(.*)/);
-    const cmd = this.createCommand(name);
-    if (desc) {
-      cmd.description(desc);
-      cmd._executableHandler = true;
-    }
-    if (opts.isDefault) this._defaultCommandName = cmd._name;
-    cmd._hidden = !!(opts.noHelp || opts.hidden);
-    cmd._executableFile = opts.executableFile || null;
-    if (args) cmd.arguments(args);
-    this._registerCommand(cmd);
-    cmd.parent = this;
-    cmd.copyInheritedSettings(this);
-    if (desc) return this;
-    return cmd;
-  }
-  /**
-   * Factory routine to create a new unattached command.
-   *
-   * See .command() for creating an attached subcommand, which uses this routine to
-   * create the command. You can override createCommand to customise subcommands.
-   *
-   * @param {string} [name]
-   * @return {Command} new command
-   */
-  createCommand(name) {
-    return new _Command(name);
-  }
-  /**
-   * You can customise the help with a subclass of Help by overriding createHelp,
-   * or by overriding Help properties using configureHelp().
-   *
-   * @return {Help}
-   */
-  createHelp() {
-    return Object.assign(new Help(), this.configureHelp());
-  }
-  /**
-   * You can customise the help by overriding Help properties using configureHelp(),
-   * or with a subclass of Help by overriding createHelp().
-   *
-   * @param {object} [configuration] - configuration options
-   * @return {(Command | object)} `this` command for chaining, or stored configuration
-   */
-  configureHelp(configuration) {
-    if (configuration === void 0) return this._helpConfiguration;
-    this._helpConfiguration = configuration;
-    return this;
-  }
-  /**
-   * The default output goes to stdout and stderr. You can customise this for special
-   * applications. You can also customise the display of errors by overriding outputError.
-   *
-   * The configuration properties are all functions:
-   *
-   *     // change how output being written, defaults to stdout and stderr
-   *     writeOut(str)
-   *     writeErr(str)
-   *     // change how output being written for errors, defaults to writeErr
-   *     outputError(str, write) // used for displaying errors and not used for displaying help
-   *     // specify width for wrapping help
-   *     getOutHelpWidth()
-   *     getErrHelpWidth()
-   *     // color support, currently only used with Help
-   *     getOutHasColors()
-   *     getErrHasColors()
-   *     stripColor() // used to remove ANSI escape codes if output does not have colors
-   *
-   * @param {object} [configuration] - configuration options
-   * @return {(Command | object)} `this` command for chaining, or stored configuration
-   */
-  configureOutput(configuration) {
-    if (configuration === void 0) return this._outputConfiguration;
-    this._outputConfiguration = {
-      ...this._outputConfiguration,
-      ...configuration
-    };
-    return this;
-  }
-  /**
-   * Display the help or a custom message after an error occurs.
-   *
-   * @param {(boolean|string)} [displayHelp]
-   * @return {Command} `this` command for chaining
-   */
-  showHelpAfterError(displayHelp = true) {
-    if (typeof displayHelp !== "string") displayHelp = !!displayHelp;
-    this._showHelpAfterError = displayHelp;
-    return this;
-  }
-  /**
-   * Display suggestion of similar commands for unknown commands, or options for unknown options.
-   *
-   * @param {boolean} [displaySuggestion]
-   * @return {Command} `this` command for chaining
-   */
-  showSuggestionAfterError(displaySuggestion = true) {
-    this._showSuggestionAfterError = !!displaySuggestion;
-    return this;
-  }
-  /**
-   * Add a prepared subcommand.
-   *
-   * See .command() for creating an attached subcommand which inherits settings from its parent.
-   *
-   * @param {Command} cmd - new subcommand
-   * @param {object} [opts] - configuration options
-   * @return {Command} `this` command for chaining
-   */
-  addCommand(cmd, opts) {
-    if (!cmd._name) {
-      throw new Error(`Command passed to .addCommand() must have a name
-- specify the name in Command constructor or using .name()`);
-    }
-    opts = opts || {};
-    if (opts.isDefault) this._defaultCommandName = cmd._name;
-    if (opts.noHelp || opts.hidden) cmd._hidden = true;
-    this._registerCommand(cmd);
-    cmd.parent = this;
-    cmd._checkForBrokenPassThrough();
-    return this;
-  }
-  /**
-   * Factory routine to create a new unattached argument.
-   *
-   * See .argument() for creating an attached argument, which uses this routine to
-   * create the argument. You can override createArgument to return a custom argument.
-   *
-   * @param {string} name
-   * @param {string} [description]
-   * @return {Argument} new argument
-   */
-  createArgument(name, description) {
-    return new Argument(name, description);
-  }
-  /**
-   * Define argument syntax for command.
-   *
-   * The default is that the argument is required, and you can explicitly
-   * indicate this with <> around the name. Put [] around the name for an optional argument.
-   *
-   * @example
-   * program.argument('<input-file>');
-   * program.argument('[output-file]');
-   *
-   * @param {string} name
-   * @param {string} [description]
-   * @param {(Function|*)} [parseArg] - custom argument processing function or default value
-   * @param {*} [defaultValue]
-   * @return {Command} `this` command for chaining
-   */
-  argument(name, description, parseArg, defaultValue) {
-    const argument = this.createArgument(name, description);
-    if (typeof parseArg === "function") {
-      argument.default(defaultValue).argParser(parseArg);
-    } else {
-      argument.default(parseArg);
-    }
-    this.addArgument(argument);
-    return this;
-  }
-  /**
-   * Define argument syntax for command, adding multiple at once (without descriptions).
-   *
-   * See also .argument().
-   *
-   * @example
-   * program.arguments('<cmd> [env]');
-   *
-   * @param {string} names
-   * @return {Command} `this` command for chaining
-   */
-  arguments(names) {
-    names.trim().split(/ +/).forEach((detail) => {
-      this.argument(detail);
-    });
-    return this;
-  }
-  /**
-   * Define argument syntax for command, adding a prepared argument.
-   *
-   * @param {Argument} argument
-   * @return {Command} `this` command for chaining
-   */
-  addArgument(argument) {
-    const previousArgument = this.registeredArguments.slice(-1)[0];
-    if (previousArgument?.variadic) {
-      throw new Error(
-        `only the last argument can be variadic '${previousArgument.name()}'`
-      );
-    }
-    if (argument.required && argument.defaultValue !== void 0 && argument.parseArg === void 0) {
-      throw new Error(
-        `a default value for a required argument is never used: '${argument.name()}'`
-      );
-    }
-    this.registeredArguments.push(argument);
-    return this;
-  }
-  /**
-   * Customise or override default help command. By default a help command is automatically added if your command has subcommands.
-   *
-   * @example
-   *    program.helpCommand('help [cmd]');
-   *    program.helpCommand('help [cmd]', 'show help');
-   *    program.helpCommand(false); // suppress default help command
-   *    program.helpCommand(true); // add help command even if no subcommands
-   *
-   * @param {string|boolean} enableOrNameAndArgs - enable with custom name and/or arguments, or boolean to override whether added
-   * @param {string} [description] - custom description
-   * @return {Command} `this` command for chaining
-   */
-  helpCommand(enableOrNameAndArgs, description) {
-    if (typeof enableOrNameAndArgs === "boolean") {
-      this._addImplicitHelpCommand = enableOrNameAndArgs;
-      if (enableOrNameAndArgs && this._defaultCommandGroup) {
-        this._initCommandGroup(this._getHelpCommand());
-      }
-      return this;
-    }
-    const nameAndArgs = enableOrNameAndArgs ?? "help [command]";
-    const [, helpName, helpArgs] = nameAndArgs.match(/([^ ]+) *(.*)/);
-    const helpDescription = description ?? "display help for command";
-    const helpCommand = this.createCommand(helpName);
-    helpCommand.helpOption(false);
-    if (helpArgs) helpCommand.arguments(helpArgs);
-    if (helpDescription) helpCommand.description(helpDescription);
-    this._addImplicitHelpCommand = true;
-    this._helpCommand = helpCommand;
-    if (enableOrNameAndArgs || description) this._initCommandGroup(helpCommand);
-    return this;
-  }
-  /**
-   * Add prepared custom help command.
-   *
-   * @param {(Command|string|boolean)} helpCommand - custom help command, or deprecated enableOrNameAndArgs as for `.helpCommand()`
-   * @param {string} [deprecatedDescription] - deprecated custom description used with custom name only
-   * @return {Command} `this` command for chaining
-   */
-  addHelpCommand(helpCommand, deprecatedDescription) {
-    if (typeof helpCommand !== "object") {
-      this.helpCommand(helpCommand, deprecatedDescription);
-      return this;
-    }
-    this._addImplicitHelpCommand = true;
-    this._helpCommand = helpCommand;
-    this._initCommandGroup(helpCommand);
-    return this;
-  }
-  /**
-   * Lazy create help command.
-   *
-   * @return {(Command|null)}
-   * @package
-   */
-  _getHelpCommand() {
-    const hasImplicitHelpCommand = this._addImplicitHelpCommand ?? (this.commands.length && !this._actionHandler && !this._findCommand("help"));
-    if (hasImplicitHelpCommand) {
-      if (this._helpCommand === void 0) {
-        this.helpCommand(void 0, void 0);
-      }
-      return this._helpCommand;
-    }
-    return null;
-  }
-  /**
-   * Add hook for life cycle event.
-   *
-   * @param {string} event
-   * @param {Function} listener
-   * @return {Command} `this` command for chaining
-   */
-  hook(event, listener) {
-    const allowedValues = ["preSubcommand", "preAction", "postAction"];
-    if (!allowedValues.includes(event)) {
-      throw new Error(`Unexpected value for event passed to hook : '${event}'.
-Expecting one of '${allowedValues.join("', '")}'`);
-    }
-    if (this._lifeCycleHooks[event]) {
-      this._lifeCycleHooks[event].push(listener);
-    } else {
-      this._lifeCycleHooks[event] = [listener];
-    }
-    return this;
-  }
-  /**
-   * Register callback to use as replacement for calling process.exit.
-   *
-   * @param {Function} [fn] optional callback which will be passed a CommanderError, defaults to throwing
-   * @return {Command} `this` command for chaining
-   */
-  exitOverride(fn) {
-    if (fn) {
-      this._exitCallback = fn;
-    } else {
-      this._exitCallback = (err) => {
-        if (err.code !== "commander.executeSubCommandAsync") {
-          throw err;
-        } else {
-        }
-      };
-    }
-    return this;
-  }
-  /**
-   * Call process.exit, and _exitCallback if defined.
-   *
-   * @param {number} exitCode exit code for using with process.exit
-   * @param {string} code an id string representing the error
-   * @param {string} message human-readable description of the error
-   * @return never
-   * @private
-   */
-  _exit(exitCode, code, message) {
-    if (this._exitCallback) {
-      this._exitCallback(new CommanderError(exitCode, code, message));
-    }
-    import_node_process.default.exit(exitCode);
-  }
-  /**
-   * Register callback `fn` for the command.
-   *
-   * @example
-   * program
-   *   .command('serve')
-   *   .description('start service')
-   *   .action(function() {
-   *      // do work here
-   *   });
-   *
-   * @param {Function} fn
-   * @return {Command} `this` command for chaining
-   */
-  action(fn) {
-    const listener = (args) => {
-      const expectedArgsCount = this.registeredArguments.length;
-      const actionArgs = args.slice(0, expectedArgsCount);
-      if (this._storeOptionsAsProperties) {
-        actionArgs[expectedArgsCount] = this;
-      } else {
-        actionArgs[expectedArgsCount] = this.opts();
-      }
-      actionArgs.push(this);
-      return fn.apply(this, actionArgs);
-    };
-    this._actionHandler = listener;
-    return this;
-  }
-  /**
-   * Factory routine to create a new unattached option.
-   *
-   * See .option() for creating an attached option, which uses this routine to
-   * create the option. You can override createOption to return a custom option.
-   *
-   * @param {string} flags
-   * @param {string} [description]
-   * @return {Option} new option
-   */
-  createOption(flags, description) {
-    return new Option(flags, description);
-  }
-  /**
-   * Wrap parseArgs to catch 'commander.invalidArgument'.
-   *
-   * @param {(Option | Argument)} target
-   * @param {string} value
-   * @param {*} previous
-   * @param {string} invalidArgumentMessage
-   * @private
-   */
-  _callParseArg(target, value, previous, invalidArgumentMessage) {
-    try {
-      return target.parseArg(value, previous);
-    } catch (err) {
-      if (err.code === "commander.invalidArgument") {
-        const message = `${invalidArgumentMessage} ${err.message}`;
-        this.error(message, { exitCode: err.exitCode, code: err.code });
-      }
-      throw err;
-    }
-  }
-  /**
-   * Check for option flag conflicts.
-   * Register option if no conflicts found, or throw on conflict.
-   *
-   * @param {Option} option
-   * @private
-   */
-  _registerOption(option) {
-    const matchingOption = option.short && this._findOption(option.short) || option.long && this._findOption(option.long);
-    if (matchingOption) {
-      const matchingFlag = option.long && this._findOption(option.long) ? option.long : option.short;
-      throw new Error(`Cannot add option '${option.flags}'${this._name && ` to command '${this._name}'`} due to conflicting flag '${matchingFlag}'
--  already used by option '${matchingOption.flags}'`);
-    }
-    this._initOptionGroup(option);
-    this.options.push(option);
-  }
-  /**
-   * Check for command name and alias conflicts with existing commands.
-   * Register command if no conflicts found, or throw on conflict.
-   *
-   * @param {Command} command
-   * @private
-   */
-  _registerCommand(command) {
-    const knownBy = (cmd) => {
-      return [cmd.name()].concat(cmd.aliases());
-    };
-    const alreadyUsed = knownBy(command).find(
-      (name) => this._findCommand(name)
-    );
-    if (alreadyUsed) {
-      const existingCmd = knownBy(this._findCommand(alreadyUsed)).join("|");
-      const newCmd = knownBy(command).join("|");
-      throw new Error(
-        `cannot add command '${newCmd}' as already have command '${existingCmd}'`
-      );
-    }
-    this._initCommandGroup(command);
-    this.commands.push(command);
-  }
-  /**
-   * Add an option.
-   *
-   * @param {Option} option
-   * @return {Command} `this` command for chaining
-   */
-  addOption(option) {
-    this._registerOption(option);
-    const oname = option.name();
-    const name = option.attributeName();
-    if (option.defaultValue !== void 0) {
-      this.setOptionValueWithSource(name, option.defaultValue, "default");
-    }
-    const handleOptionValue = (val, invalidValueMessage, valueSource) => {
-      if (val == null && option.presetArg !== void 0) {
-        val = option.presetArg;
-      }
-      const oldValue = this.getOptionValue(name);
-      if (val !== null && option.parseArg) {
-        val = this._callParseArg(option, val, oldValue, invalidValueMessage);
-      } else if (val !== null && option.variadic) {
-        val = option._collectValue(val, oldValue);
-      }
-      if (val == null) {
-        if (option.negate) {
-          val = false;
-        } else if (option.isBoolean() || option.optional) {
-          val = true;
-        } else {
-          val = "";
-        }
-      }
-      this.setOptionValueWithSource(name, val, valueSource);
-    };
-    this.on("option:" + oname, (val) => {
-      const invalidValueMessage = `error: option '${option.flags}' argument '${val}' is invalid.`;
-      handleOptionValue(val, invalidValueMessage, "cli");
-    });
-    if (option.envVar) {
-      this.on("optionEnv:" + oname, (val) => {
-        const invalidValueMessage = `error: option '${option.flags}' value '${val}' from env '${option.envVar}' is invalid.`;
-        handleOptionValue(val, invalidValueMessage, "env");
-      });
-    }
-    return this;
-  }
-  /**
-   * Internal implementation shared by .option() and .requiredOption()
-   *
-   * @return {Command} `this` command for chaining
-   * @private
-   */
-  _optionEx(config2, flags, description, fn, defaultValue) {
-    if (typeof flags === "object" && flags instanceof Option) {
-      throw new Error(
-        "To add an Option object use addOption() instead of option() or requiredOption()"
-      );
-    }
-    const option = this.createOption(flags, description);
-    option.makeOptionMandatory(!!config2.mandatory);
-    if (typeof fn === "function") {
-      option.default(defaultValue).argParser(fn);
-    } else if (fn instanceof RegExp) {
-      const regex = fn;
-      fn = (val, def) => {
-        const m = regex.exec(val);
-        return m ? m[0] : def;
-      };
-      option.default(defaultValue).argParser(fn);
-    } else {
-      option.default(fn);
-    }
-    return this.addOption(option);
-  }
-  /**
-   * Define option with `flags`, `description`, and optional argument parsing function or `defaultValue` or both.
-   *
-   * The `flags` string contains the short and/or long flags, separated by comma, a pipe or space. A required
-   * option-argument is indicated by `<>` and an optional option-argument by `[]`.
-   *
-   * See the README for more details, and see also addOption() and requiredOption().
-   *
-   * @example
-   * program
-   *     .option('-p, --pepper', 'add pepper')
-   *     .option('--pt, --pizza-type <TYPE>', 'type of pizza') // required option-argument
-   *     .option('-c, --cheese [CHEESE]', 'add extra cheese', 'mozzarella') // optional option-argument with default
-   *     .option('-t, --tip <VALUE>', 'add tip to purchase cost', parseFloat) // custom parse function
-   *
-   * @param {string} flags
-   * @param {string} [description]
-   * @param {(Function|*)} [parseArg] - custom option processing function or default value
-   * @param {*} [defaultValue]
-   * @return {Command} `this` command for chaining
-   */
-  option(flags, description, parseArg, defaultValue) {
-    return this._optionEx({}, flags, description, parseArg, defaultValue);
-  }
-  /**
-   * Add a required option which must have a value after parsing. This usually means
-   * the option must be specified on the command line. (Otherwise the same as .option().)
-   *
-   * The `flags` string contains the short and/or long flags, separated by comma, a pipe or space.
-   *
-   * @param {string} flags
-   * @param {string} [description]
-   * @param {(Function|*)} [parseArg] - custom option processing function or default value
-   * @param {*} [defaultValue]
-   * @return {Command} `this` command for chaining
-   */
-  requiredOption(flags, description, parseArg, defaultValue) {
-    return this._optionEx(
-      { mandatory: true },
-      flags,
-      description,
-      parseArg,
-      defaultValue
-    );
-  }
-  /**
-   * Alter parsing of short flags with optional values.
-   *
-   * @example
-   * // for `.option('-f,--flag [value]'):
-   * program.combineFlagAndOptionalValue(true);  // `-f80` is treated like `--flag=80`, this is the default behaviour
-   * program.combineFlagAndOptionalValue(false) // `-fb` is treated like `-f -b`
-   *
-   * @param {boolean} [combine] - if `true` or omitted, an optional value can be specified directly after the flag.
-   * @return {Command} `this` command for chaining
-   */
-  combineFlagAndOptionalValue(combine = true) {
-    this._combineFlagAndOptionalValue = !!combine;
-    return this;
-  }
-  /**
-   * Allow unknown options on the command line.
-   *
-   * @param {boolean} [allowUnknown] - if `true` or omitted, no error will be thrown for unknown options.
-   * @return {Command} `this` command for chaining
-   */
-  allowUnknownOption(allowUnknown = true) {
-    this._allowUnknownOption = !!allowUnknown;
-    return this;
-  }
-  /**
-   * Allow excess command-arguments on the command line. Pass false to make excess arguments an error.
-   *
-   * @param {boolean} [allowExcess] - if `true` or omitted, no error will be thrown for excess arguments.
-   * @return {Command} `this` command for chaining
-   */
-  allowExcessArguments(allowExcess = true) {
-    this._allowExcessArguments = !!allowExcess;
-    return this;
-  }
-  /**
-   * Enable positional options. Positional means global options are specified before subcommands which lets
-   * subcommands reuse the same option names, and also enables subcommands to turn on passThroughOptions.
-   * The default behaviour is non-positional and global options may appear anywhere on the command line.
-   *
-   * @param {boolean} [positional]
-   * @return {Command} `this` command for chaining
-   */
-  enablePositionalOptions(positional = true) {
-    this._enablePositionalOptions = !!positional;
-    return this;
-  }
-  /**
-   * Pass through options that come after command-arguments rather than treat them as command-options,
-   * so actual command-options come before command-arguments. Turning this on for a subcommand requires
-   * positional options to have been enabled on the program (parent commands).
-   * The default behaviour is non-positional and options may appear before or after command-arguments.
-   *
-   * @param {boolean} [passThrough] for unknown options.
-   * @return {Command} `this` command for chaining
-   */
-  passThroughOptions(passThrough = true) {
-    this._passThroughOptions = !!passThrough;
-    this._checkForBrokenPassThrough();
-    return this;
-  }
-  /**
-   * @private
-   */
-  _checkForBrokenPassThrough() {
-    if (this.parent && this._passThroughOptions && !this.parent._enablePositionalOptions) {
-      throw new Error(
-        `passThroughOptions cannot be used for '${this._name}' without turning on enablePositionalOptions for parent command(s)`
-      );
-    }
-  }
-  /**
-   * Whether to store option values as properties on command object,
-   * or store separately (specify false). In both cases the option values can be accessed using .opts().
-   *
-   * @param {boolean} [storeAsProperties=true]
-   * @return {Command} `this` command for chaining
-   */
-  storeOptionsAsProperties(storeAsProperties = true) {
-    if (this.options.length) {
-      throw new Error("call .storeOptionsAsProperties() before adding options");
-    }
-    if (Object.keys(this._optionValues).length) {
-      throw new Error(
-        "call .storeOptionsAsProperties() before setting option values"
-      );
-    }
-    this._storeOptionsAsProperties = !!storeAsProperties;
-    return this;
-  }
-  /**
-   * Retrieve option value.
-   *
-   * @param {string} key
-   * @return {object} value
-   */
-  getOptionValue(key) {
-    if (this._storeOptionsAsProperties) {
-      return this[key];
-    }
-    return this._optionValues[key];
-  }
-  /**
-   * Store option value.
-   *
-   * @param {string} key
-   * @param {object} value
-   * @return {Command} `this` command for chaining
-   */
-  setOptionValue(key, value) {
-    return this.setOptionValueWithSource(key, value, void 0);
-  }
-  /**
-   * Store option value and where the value came from.
-   *
-   * @param {string} key
-   * @param {object} value
-   * @param {string} source - expected values are default/config/env/cli/implied
-   * @return {Command} `this` command for chaining
-   */
-  setOptionValueWithSource(key, value, source) {
-    if (this._storeOptionsAsProperties) {
-      this[key] = value;
-    } else {
-      this._optionValues[key] = value;
-    }
-    this._optionValueSources[key] = source;
-    return this;
-  }
-  /**
-   * Get source of option value.
-   * Expected values are default | config | env | cli | implied
-   *
-   * @param {string} key
-   * @return {string}
-   */
-  getOptionValueSource(key) {
-    return this._optionValueSources[key];
-  }
-  /**
-   * Get source of option value. See also .optsWithGlobals().
-   * Expected values are default | config | env | cli | implied
-   *
-   * @param {string} key
-   * @return {string}
-   */
-  getOptionValueSourceWithGlobals(key) {
-    let source;
-    this._getCommandAndAncestors().forEach((cmd) => {
-      if (cmd.getOptionValueSource(key) !== void 0) {
-        source = cmd.getOptionValueSource(key);
-      }
-    });
-    return source;
-  }
-  /**
-   * Get user arguments from implied or explicit arguments.
-   * Side-effects: set _scriptPath if args included script. Used for default program name, and subcommand searches.
-   *
-   * @private
-   */
-  _prepareUserArgs(argv, parseOptions) {
-    if (argv !== void 0 && !Array.isArray(argv)) {
-      throw new Error("first parameter to parse must be array or undefined");
-    }
-    parseOptions = parseOptions || {};
-    if (argv === void 0 && parseOptions.from === void 0) {
-      if (import_node_process.default.versions?.electron) {
-        parseOptions.from = "electron";
-      }
-      const execArgv = import_node_process.default.execArgv ?? [];
-      if (execArgv.includes("-e") || execArgv.includes("--eval") || execArgv.includes("-p") || execArgv.includes("--print")) {
-        parseOptions.from = "eval";
-      }
-    }
-    if (argv === void 0) {
-      argv = import_node_process.default.argv;
-    }
-    this.rawArgs = argv.slice();
-    let userArgs;
-    switch (parseOptions.from) {
-      case void 0:
-      case "node":
-        this._scriptPath = argv[1];
-        userArgs = argv.slice(2);
-        break;
-      case "electron":
-        if (import_node_process.default.defaultApp) {
-          this._scriptPath = argv[1];
-          userArgs = argv.slice(2);
-        } else {
-          userArgs = argv.slice(1);
-        }
-        break;
-      case "user":
-        userArgs = argv.slice(0);
-        break;
-      case "eval":
-        userArgs = argv.slice(1);
-        break;
-      default:
-        throw new Error(
-          `unexpected parse option { from: '${parseOptions.from}' }`
-        );
-    }
-    if (!this._name && this._scriptPath)
-      this.nameFromFilename(this._scriptPath);
-    this._name = this._name || "program";
-    return userArgs;
-  }
-  /**
-   * Parse `argv`, setting options and invoking commands when defined.
-   *
-   * Use parseAsync instead of parse if any of your action handlers are async.
-   *
-   * Call with no parameters to parse `process.argv`. Detects Electron and special node options like `node --eval`. Easy mode!
-   *
-   * Or call with an array of strings to parse, and optionally where the user arguments start by specifying where the arguments are `from`:
-   * - `'node'`: default, `argv[0]` is the application and `argv[1]` is the script being run, with user arguments after that
-   * - `'electron'`: `argv[0]` is the application and `argv[1]` varies depending on whether the electron application is packaged
-   * - `'user'`: just user arguments
-   *
-   * @example
-   * program.parse(); // parse process.argv and auto-detect electron and special node flags
-   * program.parse(process.argv); // assume argv[0] is app and argv[1] is script
-   * program.parse(my-args, { from: 'user' }); // just user supplied arguments, nothing special about argv[0]
-   *
-   * @param {string[]} [argv] - optional, defaults to process.argv
-   * @param {object} [parseOptions] - optionally specify style of options with from: node/user/electron
-   * @param {string} [parseOptions.from] - where the args are from: 'node', 'user', 'electron'
-   * @return {Command} `this` command for chaining
-   */
-  parse(argv, parseOptions) {
-    this._prepareForParse();
-    const userArgs = this._prepareUserArgs(argv, parseOptions);
-    this._parseCommand([], userArgs);
-    return this;
-  }
-  /**
-   * Parse `argv`, setting options and invoking commands when defined.
-   *
-   * Call with no parameters to parse `process.argv`. Detects Electron and special node options like `node --eval`. Easy mode!
-   *
-   * Or call with an array of strings to parse, and optionally where the user arguments start by specifying where the arguments are `from`:
-   * - `'node'`: default, `argv[0]` is the application and `argv[1]` is the script being run, with user arguments after that
-   * - `'electron'`: `argv[0]` is the application and `argv[1]` varies depending on whether the electron application is packaged
-   * - `'user'`: just user arguments
-   *
-   * @example
-   * await program.parseAsync(); // parse process.argv and auto-detect electron and special node flags
-   * await program.parseAsync(process.argv); // assume argv[0] is app and argv[1] is script
-   * await program.parseAsync(my-args, { from: 'user' }); // just user supplied arguments, nothing special about argv[0]
-   *
-   * @param {string[]} [argv]
-   * @param {object} [parseOptions]
-   * @param {string} parseOptions.from - where the args are from: 'node', 'user', 'electron'
-   * @return {Promise}
-   */
-  async parseAsync(argv, parseOptions) {
-    this._prepareForParse();
-    const userArgs = this._prepareUserArgs(argv, parseOptions);
-    await this._parseCommand([], userArgs);
-    return this;
-  }
-  _prepareForParse() {
-    if (this._savedState === null) {
-      this.options.filter(
-        (option) => option.negate && option.defaultValue === void 0 && this.getOptionValue(option.attributeName()) === void 0
-      ).forEach((option) => {
-        const positiveLongFlag = option.long.replace(/^--no-/, "--");
-        if (!this._findOption(positiveLongFlag)) {
-          this.setOptionValueWithSource(
-            option.attributeName(),
-            true,
-            "default"
-          );
-        }
-      });
-      this.saveStateBeforeParse();
-    } else {
-      this.restoreStateBeforeParse();
-    }
-  }
-  /**
-   * Called the first time parse is called to save state and allow a restore before subsequent calls to parse.
-   * Not usually called directly, but available for subclasses to save their custom state.
-   *
-   * This is called in a lazy way. Only commands used in parsing chain will have state saved.
-   */
-  saveStateBeforeParse() {
-    this._savedState = {
-      // name is stable if supplied by author, but may be unspecified for root command and deduced during parsing
-      _name: this._name,
-      // option values before parse have default values (including false for negated options)
-      // shallow clones
-      _optionValues: { ...this._optionValues },
-      _optionValueSources: { ...this._optionValueSources }
-    };
-  }
-  /**
-   * Restore state before parse for calls after the first.
-   * Not usually called directly, but available for subclasses to save their custom state.
-   *
-   * This is called in a lazy way. Only commands used in parsing chain will have state restored.
-   */
-  restoreStateBeforeParse() {
-    if (this._storeOptionsAsProperties)
-      throw new Error(`Can not call parse again when storeOptionsAsProperties is true.
-- either make a new Command for each call to parse, or stop storing options as properties`);
-    this._name = this._savedState._name;
-    this._scriptPath = null;
-    this.rawArgs = [];
-    this._optionValues = { ...this._savedState._optionValues };
-    this._optionValueSources = { ...this._savedState._optionValueSources };
-    this.args = [];
-    this.processedArgs = [];
-  }
-  /**
-   * Throw if expected executable is missing. Add lots of help for author.
-   *
-   * @param {string} executableFile
-   * @param {string} executableDir
-   * @param {string} subcommandName
-   */
-  _checkForMissingExecutable(executableFile, executableDir, subcommandName) {
-    if (import_node_fs.default.existsSync(executableFile)) return;
-    const executableDirMessage = executableDir ? `searched for local subcommand relative to directory '${executableDir}'` : "no directory for search for local subcommand, use .executableDir() to supply a custom directory";
-    const executableMissing = `'${executableFile}' does not exist
- - if '${subcommandName}' is not meant to be an executable command, remove description parameter from '.command()' and use '.description()' instead
- - if the default executable name is not suitable, use the executableFile option to supply a custom name or path
- - ${executableDirMessage}`;
-    throw new Error(executableMissing);
-  }
-  /**
-   * Execute a sub-command executable.
-   *
-   * @private
-   */
-  _executeSubCommand(subcommand, args) {
-    args = args.slice();
-    const sourceExt = [".js", ".ts", ".tsx", ".mjs", ".cjs"];
-    function findFile(baseDir, baseName) {
-      const localBin = import_node_path.default.resolve(baseDir, baseName);
-      if (import_node_fs.default.existsSync(localBin)) return localBin;
-      if (sourceExt.includes(import_node_path.default.extname(baseName))) return void 0;
-      const foundExt = sourceExt.find(
-        (ext) => import_node_fs.default.existsSync(`${localBin}${ext}`)
-      );
-      if (foundExt) return `${localBin}${foundExt}`;
-      return void 0;
-    }
-    this._checkForMissingMandatoryOptions();
-    this._checkForConflictingOptions();
-    let executableFile = subcommand._executableFile || `${this._name}-${subcommand._name}`;
-    let executableDir = this._executableDir || "";
-    if (this._scriptPath) {
-      let resolvedScriptPath;
-      try {
-        resolvedScriptPath = import_node_fs.default.realpathSync(this._scriptPath);
-      } catch {
-        resolvedScriptPath = this._scriptPath;
-      }
-      executableDir = import_node_path.default.resolve(
-        import_node_path.default.dirname(resolvedScriptPath),
-        executableDir
-      );
-    }
-    if (executableDir) {
-      let localFile = findFile(executableDir, executableFile);
-      if (!localFile && !subcommand._executableFile && this._scriptPath) {
-        const legacyName = import_node_path.default.basename(
-          this._scriptPath,
-          import_node_path.default.extname(this._scriptPath)
-        );
-        if (legacyName !== this._name) {
-          localFile = findFile(
-            executableDir,
-            `${legacyName}-${subcommand._name}`
-          );
-        }
-      }
-      executableFile = localFile || executableFile;
-    }
-    const launchWithNode = sourceExt.includes(import_node_path.default.extname(executableFile));
-    let proc;
-    if (import_node_process.default.platform !== "win32") {
-      if (launchWithNode) {
-        args.unshift(executableFile);
-        args = incrementNodeInspectorPort(import_node_process.default.execArgv).concat(args);
-        proc = import_node_child_process.default.spawn(import_node_process.default.argv[0], args, { stdio: "inherit" });
-      } else {
-        proc = import_node_child_process.default.spawn(executableFile, args, { stdio: "inherit" });
-      }
-    } else {
-      this._checkForMissingExecutable(
-        executableFile,
-        executableDir,
-        subcommand._name
-      );
-      args.unshift(executableFile);
-      args = incrementNodeInspectorPort(import_node_process.default.execArgv).concat(args);
-      proc = import_node_child_process.default.spawn(import_node_process.default.execPath, args, { stdio: "inherit" });
-    }
-    if (!proc.killed) {
-      const signals = ["SIGUSR1", "SIGUSR2", "SIGTERM", "SIGINT", "SIGHUP"];
-      signals.forEach((signal) => {
-        import_node_process.default.on(signal, () => {
-          if (proc.killed === false && proc.exitCode === null) {
-            proc.kill(signal);
-          }
-        });
-      });
-    }
-    const exitCallback = this._exitCallback;
-    proc.on("close", (code) => {
-      code = code ?? 1;
-      if (!exitCallback) {
-        import_node_process.default.exit(code);
-      } else {
-        exitCallback(
-          new CommanderError(
-            code,
-            "commander.executeSubCommandAsync",
-            "(close)"
+        super(
+          Object.assign(
+            {},
+            defaults2,
+            options,
+            options.userAgent && defaults2.userAgent ? {
+              userAgent: `${options.userAgent} ${defaults2.userAgent}`
+            } : null
           )
         );
       }
-    });
-    proc.on("error", (err) => {
-      if (err.code === "ENOENT") {
-        this._checkForMissingExecutable(
-          executableFile,
-          executableDir,
-          subcommand._name
-        );
-      } else if (err.code === "EACCES") {
-        throw new Error(`'${executableFile}' not executable`);
-      }
-      if (!exitCallback) {
-        import_node_process.default.exit(1);
-      } else {
-        const wrappedError = new CommanderError(
-          1,
-          "commander.executeSubCommandAsync",
-          "(error)"
-        );
-        wrappedError.nestedError = err;
-        exitCallback(wrappedError);
-      }
-    });
-    this.runningCommand = proc;
-  }
-  /**
-   * @private
-   */
-  _dispatchSubcommand(commandName, operands, unknown2) {
-    const subCommand = this._findCommand(commandName);
-    if (!subCommand) this.help({ error: true });
-    subCommand._prepareForParse();
-    let promiseChain;
-    promiseChain = this._chainOrCallSubCommandHook(
-      promiseChain,
-      subCommand,
-      "preSubcommand"
-    );
-    promiseChain = this._chainOrCall(promiseChain, () => {
-      if (subCommand._executableHandler) {
-        this._executeSubCommand(subCommand, operands.concat(unknown2));
-      } else {
-        return subCommand._parseCommand(operands, unknown2);
-      }
-    });
-    return promiseChain;
-  }
-  /**
-   * Invoke help directly if possible, or dispatch if necessary.
-   * e.g. help foo
-   *
-   * @private
-   */
-  _dispatchHelpCommand(subcommandName) {
-    if (!subcommandName) {
-      this.help();
-    }
-    const subCommand = this._findCommand(subcommandName);
-    if (subCommand && !subCommand._executableHandler) {
-      subCommand.help();
-    }
-    return this._dispatchSubcommand(
-      subcommandName,
-      [],
-      [this._getHelpOption()?.long ?? this._getHelpOption()?.short ?? "--help"]
-    );
-  }
-  /**
-   * Check this.args against expected this.registeredArguments.
-   *
-   * @private
-   */
-  _checkNumberOfArguments() {
-    this.registeredArguments.forEach((arg, i) => {
-      if (arg.required && this.args[i] == null) {
-        this.missingArgument(arg.name());
-      }
-    });
-    if (this.registeredArguments.length > 0 && this.registeredArguments[this.registeredArguments.length - 1].variadic) {
-      return;
-    }
-    if (this.args.length > this.registeredArguments.length) {
-      this._excessArguments(this.args);
-    }
-  }
-  /**
-   * Process this.args using this.registeredArguments and save as this.processedArgs!
-   *
-   * @private
-   */
-  _processArguments() {
-    const myParseArg = (argument, value, previous) => {
-      let parsedValue = value;
-      if (value !== null && argument.parseArg) {
-        const invalidValueMessage = `error: command-argument value '${value}' is invalid for argument '${argument.name()}'.`;
-        parsedValue = this._callParseArg(
-          argument,
-          value,
-          previous,
-          invalidValueMessage
-        );
-      }
-      return parsedValue;
     };
-    this._checkNumberOfArguments();
-    const processedArgs = [];
-    this.registeredArguments.forEach((declaredArg, index) => {
-      let value = declaredArg.defaultValue;
-      if (declaredArg.variadic) {
-        if (index < this.args.length) {
-          value = this.args.slice(index);
-          if (declaredArg.parseArg) {
-            value = value.reduce((processed, v) => {
-              return myParseArg(declaredArg, v, processed);
-            }, declaredArg.defaultValue);
-          }
-        } else if (value === void 0) {
-          value = [];
-        }
-      } else if (index < this.args.length) {
-        value = this.args[index];
-        if (declaredArg.parseArg) {
-          value = myParseArg(declaredArg, value, declaredArg.defaultValue);
-        }
+    return OctokitWithDefaults;
+  }
+  static plugins = [];
+  /**
+   * Attach a plugin (or many) to your Octokit instance.
+   *
+   * @example
+   * const API = Octokit.plugin(plugin1, plugin2, plugin3, ...)
+   */
+  static plugin(...newPlugins) {
+    const currentPlugins = this.plugins;
+    const NewOctokit = class extends this {
+      static plugins = currentPlugins.concat(
+        newPlugins.filter((plugin) => !currentPlugins.includes(plugin))
+      );
+    };
+    return NewOctokit;
+  }
+  constructor(options = {}) {
+    const hook2 = new before_after_hook_default.Collection();
+    const requestDefaults = {
+      baseUrl: request.endpoint.DEFAULTS.baseUrl,
+      headers: {},
+      request: Object.assign({}, options.request, {
+        // @ts-ignore internal usage only, no need to type
+        hook: hook2.bind(null, "request")
+      }),
+      mediaType: {
+        previews: [],
+        format: ""
       }
-      processedArgs[index] = value;
-    });
-    this.processedArgs = processedArgs;
-  }
-  /**
-   * Once we have a promise we chain, but call synchronously until then.
-   *
-   * @param {(Promise|undefined)} promise
-   * @param {Function} fn
-   * @return {(Promise|undefined)}
-   * @private
-   */
-  _chainOrCall(promise2, fn) {
-    if (promise2?.then && typeof promise2.then === "function") {
-      return promise2.then(() => fn());
+    };
+    requestDefaults.headers["user-agent"] = options.userAgent ? `${options.userAgent} ${userAgentTrail}` : userAgentTrail;
+    if (options.baseUrl) {
+      requestDefaults.baseUrl = options.baseUrl;
     }
-    return fn();
-  }
-  /**
-   *
-   * @param {(Promise|undefined)} promise
-   * @param {string} event
-   * @return {(Promise|undefined)}
-   * @private
-   */
-  _chainOrCallHooks(promise2, event) {
-    let result = promise2;
-    const hooks = [];
-    this._getCommandAndAncestors().reverse().filter((cmd) => cmd._lifeCycleHooks[event] !== void 0).forEach((hookedCommand) => {
-      hookedCommand._lifeCycleHooks[event].forEach((callback) => {
-        hooks.push({ hookedCommand, callback });
-      });
-    });
-    if (event === "postAction") {
-      hooks.reverse();
+    if (options.previews) {
+      requestDefaults.mediaType.previews = options.previews;
     }
-    hooks.forEach((hookDetail) => {
-      result = this._chainOrCall(result, () => {
-        return hookDetail.callback(hookDetail.hookedCommand, this);
-      });
-    });
-    return result;
-  }
-  /**
-   *
-   * @param {(Promise|undefined)} promise
-   * @param {Command} subCommand
-   * @param {string} event
-   * @return {(Promise|undefined)}
-   * @private
-   */
-  _chainOrCallSubCommandHook(promise2, subCommand, event) {
-    let result = promise2;
-    if (this._lifeCycleHooks[event] !== void 0) {
-      this._lifeCycleHooks[event].forEach((hook2) => {
-        result = this._chainOrCall(result, () => {
-          return hook2(this, subCommand);
+    if (options.timeZone) {
+      requestDefaults.headers["time-zone"] = options.timeZone;
+    }
+    this.request = request.defaults(requestDefaults);
+    this.graphql = withCustomRequest(this.request).defaults(requestDefaults);
+    this.log = createLogger(options.log);
+    this.hook = hook2;
+    if (!options.authStrategy) {
+      if (!options.auth) {
+        this.auth = async () => ({
+          type: "unauthenticated"
         });
-      });
-    }
-    return result;
-  }
-  /**
-   * Process arguments in context of this command.
-   * Returns action result, in case it is a promise.
-   *
-   * @private
-   */
-  _parseCommand(operands, unknown2) {
-    const parsed = this.parseOptions(unknown2);
-    this._parseOptionsEnv();
-    this._parseOptionsImplied();
-    operands = operands.concat(parsed.operands);
-    unknown2 = parsed.unknown;
-    this.args = operands.concat(unknown2);
-    if (operands && this._findCommand(operands[0])) {
-      return this._dispatchSubcommand(operands[0], operands.slice(1), unknown2);
-    }
-    if (this._getHelpCommand() && operands[0] === this._getHelpCommand().name()) {
-      return this._dispatchHelpCommand(operands[1]);
-    }
-    if (this._defaultCommandName) {
-      this._outputHelpIfRequested(unknown2);
-      return this._dispatchSubcommand(
-        this._defaultCommandName,
-        operands,
-        unknown2
-      );
-    }
-    if (this.commands.length && this.args.length === 0 && !this._actionHandler && !this._defaultCommandName) {
-      this.help({ error: true });
-    }
-    this._outputHelpIfRequested(parsed.unknown);
-    this._checkForMissingMandatoryOptions();
-    this._checkForConflictingOptions();
-    const checkForUnknownOptions = () => {
-      if (parsed.unknown.length > 0) {
-        this.unknownOption(parsed.unknown[0]);
-      }
-    };
-    const commandEvent = `command:${this.name()}`;
-    if (this._actionHandler) {
-      checkForUnknownOptions();
-      this._processArguments();
-      let promiseChain;
-      promiseChain = this._chainOrCallHooks(promiseChain, "preAction");
-      promiseChain = this._chainOrCall(
-        promiseChain,
-        () => this._actionHandler(this.processedArgs)
-      );
-      if (this.parent) {
-        promiseChain = this._chainOrCall(promiseChain, () => {
-          this.parent.emit(commandEvent, operands, unknown2);
-        });
-      }
-      promiseChain = this._chainOrCallHooks(promiseChain, "postAction");
-      return promiseChain;
-    }
-    if (this.parent?.listenerCount(commandEvent)) {
-      checkForUnknownOptions();
-      this._processArguments();
-      this.parent.emit(commandEvent, operands, unknown2);
-    } else if (operands.length) {
-      if (this._findCommand("*")) {
-        return this._dispatchSubcommand("*", operands, unknown2);
-      }
-      if (this.listenerCount("command:*")) {
-        this.emit("command:*", operands, unknown2);
-      } else if (this.commands.length) {
-        this.unknownCommand();
       } else {
-        checkForUnknownOptions();
-        this._processArguments();
+        const auth2 = createTokenAuth(options.auth);
+        hook2.wrap("request", auth2.hook);
+        this.auth = auth2;
       }
-    } else if (this.commands.length) {
-      checkForUnknownOptions();
-      this.help({ error: true });
     } else {
-      checkForUnknownOptions();
-      this._processArguments();
-    }
-  }
-  /**
-   * Find matching command.
-   *
-   * @private
-   * @return {Command | undefined}
-   */
-  _findCommand(name) {
-    if (!name) return void 0;
-    return this.commands.find(
-      (cmd) => cmd._name === name || cmd._aliases.includes(name)
-    );
-  }
-  /**
-   * Return an option matching `arg` if any.
-   *
-   * @param {string} arg
-   * @return {Option}
-   * @package
-   */
-  _findOption(arg) {
-    return this.options.find((option) => option.is(arg));
-  }
-  /**
-   * Display an error message if a mandatory option does not have a value.
-   * Called after checking for help flags in leaf subcommand.
-   *
-   * @private
-   */
-  _checkForMissingMandatoryOptions() {
-    this._getCommandAndAncestors().forEach((cmd) => {
-      cmd.options.forEach((anOption) => {
-        if (anOption.mandatory && cmd.getOptionValue(anOption.attributeName()) === void 0) {
-          cmd.missingMandatoryOptionValue(anOption);
-        }
-      });
-    });
-  }
-  /**
-   * Display an error message if conflicting options are used together in this.
-   *
-   * @private
-   */
-  _checkForConflictingLocalOptions() {
-    const definedNonDefaultOptions = this.options.filter((option) => {
-      const optionKey = option.attributeName();
-      if (this.getOptionValue(optionKey) === void 0) {
-        return false;
-      }
-      return this.getOptionValueSource(optionKey) !== "default";
-    });
-    const optionsWithConflicting = definedNonDefaultOptions.filter(
-      (option) => option.conflictsWith.length > 0
-    );
-    optionsWithConflicting.forEach((option) => {
-      const conflictingAndDefined = definedNonDefaultOptions.find(
-        (defined) => option.conflictsWith.includes(defined.attributeName())
+      const { authStrategy, ...otherOptions } = options;
+      const auth2 = authStrategy(
+        Object.assign(
+          {
+            request: this.request,
+            log: this.log,
+            // we pass the current octokit instance as well as its constructor options
+            // to allow for authentication strategies that return a new octokit instance
+            // that shares the same internal state as the current one. The original
+            // requirement for this was the "event-octokit" authentication strategy
+            // of https://github.com/probot/octokit-auth-probot.
+            octokit: this,
+            octokitOptions: otherOptions
+          },
+          options.auth
+        )
       );
-      if (conflictingAndDefined) {
-        this._conflictingOption(option, conflictingAndDefined);
-      }
-    });
-  }
-  /**
-   * Display an error message if conflicting options are used together.
-   * Called after checking for help flags in leaf subcommand.
-   *
-   * @private
-   */
-  _checkForConflictingOptions() {
-    this._getCommandAndAncestors().forEach((cmd) => {
-      cmd._checkForConflictingLocalOptions();
-    });
-  }
-  /**
-   * Parse options from `argv` removing known options,
-   * and return argv split into operands and unknown arguments.
-   *
-   * Side effects: modifies command by storing options. Does not reset state if called again.
-   *
-   * Examples:
-   *
-   *     argv => operands, unknown
-   *     --known kkk op => [op], []
-   *     op --known kkk => [op], []
-   *     sub --unknown uuu op => [sub], [--unknown uuu op]
-   *     sub -- --unknown uuu op => [sub --unknown uuu op], []
-   *
-   * @param {string[]} args
-   * @return {{operands: string[], unknown: string[]}}
-   */
-  parseOptions(args) {
-    const operands = [];
-    const unknown2 = [];
-    let dest = operands;
-    function maybeOption(arg) {
-      return arg.length > 1 && arg[0] === "-";
+      hook2.wrap("request", auth2.hook);
+      this.auth = auth2;
     }
-    const negativeNumberArg = (arg) => {
-      if (!/^-(\d+|\d*\.\d+)(e[+-]?\d+)?$/.test(arg)) return false;
-      return !this._getCommandAndAncestors().some(
-        (cmd) => cmd.options.map((opt) => opt.short).some((short) => /^-\d$/.test(short))
-      );
-    };
-    let activeVariadicOption = null;
-    let activeGroup = null;
-    let i = 0;
-    while (i < args.length || activeGroup) {
-      const arg = activeGroup ?? args[i++];
-      activeGroup = null;
-      if (arg === "--") {
-        if (dest === unknown2) dest.push(arg);
-        dest.push(...args.slice(i));
-        break;
-      }
-      if (activeVariadicOption && (!maybeOption(arg) || negativeNumberArg(arg))) {
-        this.emit(`option:${activeVariadicOption.name()}`, arg);
-        continue;
-      }
-      activeVariadicOption = null;
-      if (maybeOption(arg)) {
-        const option = this._findOption(arg);
-        if (option) {
-          if (option.required) {
-            const value = args[i++];
-            if (value === void 0) this.optionMissingArgument(option);
-            this.emit(`option:${option.name()}`, value);
-          } else if (option.optional) {
-            let value = null;
-            if (i < args.length && (!maybeOption(args[i]) || negativeNumberArg(args[i]))) {
-              value = args[i++];
-            }
-            this.emit(`option:${option.name()}`, value);
-          } else {
-            this.emit(`option:${option.name()}`);
-          }
-          activeVariadicOption = option.variadic ? option : null;
-          continue;
-        }
-      }
-      if (arg.length > 2 && arg[0] === "-" && arg[1] !== "-") {
-        const option = this._findOption(`-${arg[1]}`);
-        if (option) {
-          if (option.required || option.optional && this._combineFlagAndOptionalValue) {
-            this.emit(`option:${option.name()}`, arg.slice(2));
-          } else {
-            this.emit(`option:${option.name()}`);
-            activeGroup = `-${arg.slice(2)}`;
-          }
-          continue;
-        }
-      }
-      if (/^--[^=]+=/.test(arg)) {
-        const index = arg.indexOf("=");
-        const option = this._findOption(arg.slice(0, index));
-        if (option && (option.required || option.optional)) {
-          this.emit(`option:${option.name()}`, arg.slice(index + 1));
-          continue;
-        }
-      }
-      if (dest === operands && maybeOption(arg) && !(this.commands.length === 0 && negativeNumberArg(arg))) {
-        dest = unknown2;
-      }
-      if ((this._enablePositionalOptions || this._passThroughOptions) && operands.length === 0 && unknown2.length === 0) {
-        if (this._findCommand(arg)) {
-          operands.push(arg);
-          unknown2.push(...args.slice(i));
-          break;
-        } else if (this._getHelpCommand() && arg === this._getHelpCommand().name()) {
-          operands.push(arg, ...args.slice(i));
-          break;
-        } else if (this._defaultCommandName) {
-          unknown2.push(arg, ...args.slice(i));
-          break;
-        }
-      }
-      if (this._passThroughOptions) {
-        dest.push(arg, ...args.slice(i));
-        break;
-      }
-      dest.push(arg);
-    }
-    return { operands, unknown: unknown2 };
-  }
-  /**
-   * Return an object containing local option values as key-value pairs.
-   *
-   * @return {object}
-   */
-  opts() {
-    if (this._storeOptionsAsProperties) {
-      const result = {};
-      const len = this.options.length;
-      for (let i = 0; i < len; i++) {
-        const key = this.options[i].attributeName();
-        result[key] = key === this._versionOptionName ? this._version : this[key];
-      }
-      return result;
-    }
-    return this._optionValues;
-  }
-  /**
-   * Return an object containing merged local and global option values as key-value pairs.
-   *
-   * @return {object}
-   */
-  optsWithGlobals() {
-    return this._getCommandAndAncestors().reduce(
-      (combinedOptions, cmd) => Object.assign(combinedOptions, cmd.opts()),
-      {}
-    );
-  }
-  /**
-   * Display error message and exit (or call exitOverride).
-   *
-   * @param {string} message
-   * @param {object} [errorOptions]
-   * @param {string} [errorOptions.code] - an id string representing the error
-   * @param {number} [errorOptions.exitCode] - used with process.exit
-   */
-  error(message, errorOptions) {
-    this._outputConfiguration.outputError(
-      `${message}
-`,
-      this._outputConfiguration.writeErr
-    );
-    if (typeof this._showHelpAfterError === "string") {
-      this._outputConfiguration.writeErr(`${this._showHelpAfterError}
-`);
-    } else if (this._showHelpAfterError) {
-      this._outputConfiguration.writeErr("\n");
-      this.outputHelp({ error: true });
-    }
-    const config2 = errorOptions || {};
-    const exitCode = config2.exitCode || 1;
-    const code = config2.code || "commander.error";
-    this._exit(exitCode, code, message);
-  }
-  /**
-   * Apply any option related environment variables, if option does
-   * not have a value from cli or client code.
-   *
-   * @private
-   */
-  _parseOptionsEnv() {
-    this.options.forEach((option) => {
-      if (option.envVar && option.envVar in import_node_process.default.env) {
-        const optionKey = option.attributeName();
-        if (this.getOptionValue(optionKey) === void 0 || ["default", "config", "env"].includes(
-          this.getOptionValueSource(optionKey)
-        )) {
-          if (option.required || option.optional) {
-            this.emit(`optionEnv:${option.name()}`, import_node_process.default.env[option.envVar]);
-          } else {
-            this.emit(`optionEnv:${option.name()}`);
-          }
-        }
-      }
-    });
-  }
-  /**
-   * Apply any implied option values, if option is undefined or default value.
-   *
-   * @private
-   */
-  _parseOptionsImplied() {
-    const dualHelper = new DualOptions(this.options);
-    const hasCustomOptionValue = (optionKey) => {
-      return this.getOptionValue(optionKey) !== void 0 && !["default", "implied"].includes(this.getOptionValueSource(optionKey));
-    };
-    this.options.filter(
-      (option) => option.implied !== void 0 && hasCustomOptionValue(option.attributeName()) && dualHelper.valueFromOption(
-        this.getOptionValue(option.attributeName()),
-        option
-      )
-    ).forEach((option) => {
-      Object.keys(option.implied).filter((impliedKey) => !hasCustomOptionValue(impliedKey)).forEach((impliedKey) => {
-        this.setOptionValueWithSource(
-          impliedKey,
-          option.implied[impliedKey],
-          "implied"
-        );
-      });
-    });
-  }
-  /**
-   * Argument `name` is missing.
-   *
-   * @param {string} name
-   * @private
-   */
-  missingArgument(name) {
-    const message = `error: missing required argument '${name}'`;
-    this.error(message, { code: "commander.missingArgument" });
-  }
-  /**
-   * `Option` is missing an argument.
-   *
-   * @param {Option} option
-   * @private
-   */
-  optionMissingArgument(option) {
-    const message = `error: option '${option.flags}' argument missing`;
-    this.error(message, { code: "commander.optionMissingArgument" });
-  }
-  /**
-   * `Option` does not have a value, and is a mandatory option.
-   *
-   * @param {Option} option
-   * @private
-   */
-  missingMandatoryOptionValue(option) {
-    const message = `error: required option '${option.flags}' not specified`;
-    this.error(message, { code: "commander.missingMandatoryOptionValue" });
-  }
-  /**
-   * `Option` conflicts with another option.
-   *
-   * @param {Option} option
-   * @param {Option} conflictingOption
-   * @private
-   */
-  _conflictingOption(option, conflictingOption) {
-    const findBestOptionFromValue = (option2) => {
-      const optionKey = option2.attributeName();
-      const optionValue = this.getOptionValue(optionKey);
-      const negativeOption = this.options.find(
-        (target) => target.negate && optionKey === target.attributeName()
-      );
-      const positiveOption = this.options.find(
-        (target) => !target.negate && optionKey === target.attributeName()
-      );
-      if (negativeOption && (negativeOption.presetArg === void 0 && optionValue === false || negativeOption.presetArg !== void 0 && optionValue === negativeOption.presetArg)) {
-        return negativeOption;
-      }
-      return positiveOption || option2;
-    };
-    const getErrorMessage = (option2) => {
-      const bestOption = findBestOptionFromValue(option2);
-      const optionKey = bestOption.attributeName();
-      const source = this.getOptionValueSource(optionKey);
-      if (source === "env") {
-        return `environment variable '${bestOption.envVar}'`;
-      }
-      return `option '${bestOption.flags}'`;
-    };
-    const message = `error: ${getErrorMessage(option)} cannot be used with ${getErrorMessage(conflictingOption)}`;
-    this.error(message, { code: "commander.conflictingOption" });
-  }
-  /**
-   * Unknown option `flag`.
-   *
-   * @param {string} flag
-   * @private
-   */
-  unknownOption(flag) {
-    if (this._allowUnknownOption) return;
-    let suggestion = "";
-    if (flag.startsWith("--") && this._showSuggestionAfterError) {
-      let candidateFlags = [];
-      let command = this;
-      do {
-        const moreFlags = command.createHelp().visibleOptions(command).filter((option) => option.long).map((option) => option.long);
-        candidateFlags = candidateFlags.concat(moreFlags);
-        command = command.parent;
-      } while (command && !command._enablePositionalOptions);
-      suggestion = suggestSimilar(flag, candidateFlags);
-    }
-    const message = `error: unknown option '${flag}'${suggestion}`;
-    this.error(message, { code: "commander.unknownOption" });
-  }
-  /**
-   * Excess arguments, more than expected.
-   *
-   * @param {string[]} receivedArgs
-   * @private
-   */
-  _excessArguments(receivedArgs) {
-    if (this._allowExcessArguments) return;
-    const expected = this.registeredArguments.length;
-    const s = expected === 1 ? "" : "s";
-    const received = receivedArgs.length;
-    const forSubcommand = this.parent ? ` for '${this.name()}'` : "";
-    const details = receivedArgs.join(", ");
-    const message = `error: too many arguments${forSubcommand}. Expected ${expected} argument${s} but got ${received}: ${details}.`;
-    this.error(message, { code: "commander.excessArguments" });
-  }
-  /**
-   * Unknown command.
-   *
-   * @private
-   */
-  unknownCommand() {
-    const unknownName = this.args[0];
-    let suggestion = "";
-    if (this._showSuggestionAfterError) {
-      const candidateNames = [];
-      this.createHelp().visibleCommands(this).forEach((command) => {
-        candidateNames.push(command.name());
-        if (command.alias()) candidateNames.push(command.alias());
-      });
-      suggestion = suggestSimilar(unknownName, candidateNames);
-    }
-    const message = `error: unknown command '${unknownName}'${suggestion}`;
-    this.error(message, { code: "commander.unknownCommand" });
-  }
-  /**
-   * Get or set the program version.
-   *
-   * This method auto-registers the "-V, --version" option which will print the version number.
-   *
-   * You can optionally supply the flags and description to override the defaults.
-   *
-   * @param {string} [str]
-   * @param {string} [flags]
-   * @param {string} [description]
-   * @return {(this | string | undefined)} `this` command for chaining, or version string if no arguments
-   */
-  version(str, flags, description) {
-    if (str === void 0) return this._version;
-    this._version = str;
-    flags = flags || "-V, --version";
-    description = description || "output the version number";
-    const versionOption = this.createOption(flags, description);
-    this._versionOptionName = versionOption.attributeName();
-    this._registerOption(versionOption);
-    this.on("option:" + versionOption.name(), () => {
-      this._outputConfiguration.writeOut(`${str}
-`);
-      this._exit(0, "commander.version", str);
-    });
-    return this;
-  }
-  /**
-   * Set the description.
-   *
-   * @param {string} [str]
-   * @param {object} [argsDescription]
-   * @return {(string|Command)}
-   */
-  description(str, argsDescription) {
-    if (str === void 0 && argsDescription === void 0)
-      return this._description;
-    this._description = str;
-    if (argsDescription) {
-      this._argsDescription = argsDescription;
-    }
-    return this;
-  }
-  /**
-   * Set the summary. Used when listed as subcommand of parent.
-   *
-   * @param {string} [str]
-   * @return {(string|Command)}
-   */
-  summary(str) {
-    if (str === void 0) return this._summary;
-    this._summary = str;
-    return this;
-  }
-  /**
-   * Set an alias for the command.
-   *
-   * You may call more than once to add multiple aliases. Only the first alias is shown in the auto-generated help.
-   *
-   * @param {string} [alias]
-   * @return {(string|Command)}
-   */
-  alias(alias) {
-    if (alias === void 0) return this._aliases[0];
-    let command = this;
-    if (this.commands.length !== 0 && this.commands[this.commands.length - 1]._executableHandler) {
-      command = this.commands[this.commands.length - 1];
-    }
-    if (alias === command._name)
-      throw new Error("Command alias can't be the same as its name");
-    const matchingCommand = this.parent?._findCommand(alias);
-    if (matchingCommand) {
-      const existingCmd = [matchingCommand.name()].concat(matchingCommand.aliases()).join("|");
-      throw new Error(
-        `cannot add alias '${alias}' to command '${this.name()}' as already have command '${existingCmd}'`
-      );
-    }
-    command._aliases.push(alias);
-    return this;
-  }
-  /**
-   * Set aliases for the command.
-   *
-   * Only the first alias is shown in the auto-generated help.
-   *
-   * @param {string[]} [aliases]
-   * @return {(string[]|Command)}
-   */
-  aliases(aliases) {
-    if (aliases === void 0) return this._aliases;
-    aliases.forEach((alias) => this.alias(alias));
-    return this;
-  }
-  /**
-   * Set / get the command usage `str`.
-   *
-   * @param {string} [str]
-   * @return {(string|Command)}
-   */
-  usage(str) {
-    if (str === void 0) {
-      if (this._usage) return this._usage;
-      const args = this.registeredArguments.map((arg) => {
-        return humanReadableArgName(arg);
-      });
-      return [].concat(
-        this.options.length || this._helpOption !== null ? "[options]" : [],
-        this.commands.length ? "[command]" : [],
-        this.registeredArguments.length ? args : []
-      ).join(" ");
-    }
-    this._usage = str;
-    return this;
-  }
-  /**
-   * Get or set the name of the command.
-   *
-   * @param {string} [str]
-   * @return {(string|Command)}
-   */
-  name(str) {
-    if (str === void 0) return this._name;
-    this._name = str;
-    return this;
-  }
-  /**
-   * Set/get the help group heading for this subcommand in parent command's help.
-   *
-   * @param {string} [heading]
-   * @return {Command | string}
-   */
-  helpGroup(heading) {
-    if (heading === void 0) return this._helpGroupHeading ?? "";
-    this._helpGroupHeading = heading;
-    return this;
-  }
-  /**
-   * Set/get the default help group heading for subcommands added to this command.
-   * (This does not override a group set directly on the subcommand using .helpGroup().)
-   *
-   * @example
-   * program.commandsGroup('Development Commands:);
-   * program.command('watch')...
-   * program.command('lint')...
-   * ...
-   *
-   * @param {string} [heading]
-   * @returns {Command | string}
-   */
-  commandsGroup(heading) {
-    if (heading === void 0) return this._defaultCommandGroup ?? "";
-    this._defaultCommandGroup = heading;
-    return this;
-  }
-  /**
-   * Set/get the default help group heading for options added to this command.
-   * (This does not override a group set directly on the option using .helpGroup().)
-   *
-   * @example
-   * program
-   *   .optionsGroup('Development Options:')
-   *   .option('-d, --debug', 'output extra debugging')
-   *   .option('-p, --profile', 'output profiling information')
-   *
-   * @param {string} [heading]
-   * @returns {Command | string}
-   */
-  optionsGroup(heading) {
-    if (heading === void 0) return this._defaultOptionGroup ?? "";
-    this._defaultOptionGroup = heading;
-    return this;
-  }
-  /**
-   * @param {Option} option
-   * @private
-   */
-  _initOptionGroup(option) {
-    if (this._defaultOptionGroup && !option.helpGroupHeading)
-      option.helpGroup(this._defaultOptionGroup);
-  }
-  /**
-   * @param {Command} cmd
-   * @private
-   */
-  _initCommandGroup(cmd) {
-    if (this._defaultCommandGroup && !cmd.helpGroup())
-      cmd.helpGroup(this._defaultCommandGroup);
-  }
-  /**
-   * Set the name of the command from script filename, such as process.argv[1],
-   * or import.meta.filename.
-   *
-   * (Used internally and public although not documented in README.)
-   *
-   * @example
-   * program.nameFromFilename(import.meta.filename);
-   *
-   * @param {string} filename
-   * @return {Command}
-   */
-  nameFromFilename(filename) {
-    this._name = import_node_path.default.basename(filename, import_node_path.default.extname(filename));
-    return this;
-  }
-  /**
-   * Get or set the directory for searching for executable subcommands of this command.
-   *
-   * @example
-   * program.executableDir(import.meta.dirname);
-   * // or
-   * program.executableDir('subcommands');
-   *
-   * @param {string} [path]
-   * @return {(string|null|Command)}
-   */
-  executableDir(path3) {
-    if (path3 === void 0) return this._executableDir;
-    this._executableDir = path3;
-    return this;
-  }
-  /**
-   * Return program help documentation.
-   *
-   * @param {{ error: boolean }} [contextOptions] - pass {error:true} to wrap for stderr instead of stdout
-   * @return {string}
-   */
-  helpInformation(contextOptions) {
-    const helper = this.createHelp();
-    const context = this._getOutputContext(contextOptions);
-    helper.prepareContext({
-      error: context.error,
-      helpWidth: context.helpWidth,
-      outputHasColors: context.hasColors
-    });
-    const text = helper.formatHelp(this, helper);
-    if (context.hasColors) return text;
-    return this._outputConfiguration.stripColor(text);
-  }
-  /**
-   * @typedef HelpContext
-   * @type {object}
-   * @property {boolean} error
-   * @property {number} helpWidth
-   * @property {boolean} hasColors
-   * @property {function} write - includes stripColor if needed
-   *
-   * @returns {HelpContext}
-   * @private
-   */
-  _getOutputContext(contextOptions) {
-    contextOptions = contextOptions || {};
-    const error62 = !!contextOptions.error;
-    let baseWrite;
-    let hasColors;
-    let helpWidth;
-    if (error62) {
-      baseWrite = (str) => this._outputConfiguration.writeErr(str);
-      hasColors = this._outputConfiguration.getErrHasColors();
-      helpWidth = this._outputConfiguration.getErrHelpWidth();
-    } else {
-      baseWrite = (str) => this._outputConfiguration.writeOut(str);
-      hasColors = this._outputConfiguration.getOutHasColors();
-      helpWidth = this._outputConfiguration.getOutHelpWidth();
-    }
-    const write = (str) => {
-      if (!hasColors) str = this._outputConfiguration.stripColor(str);
-      return baseWrite(str);
-    };
-    return { error: error62, write, hasColors, helpWidth };
-  }
-  /**
-   * Output help information for this command.
-   *
-   * Outputs built-in help, and custom text added using `.addHelpText()`.
-   *
-   * @param {{ error: boolean } | Function} [contextOptions] - pass {error:true} to write to stderr instead of stdout
-   */
-  outputHelp(contextOptions) {
-    let deprecatedCallback;
-    if (typeof contextOptions === "function") {
-      deprecatedCallback = contextOptions;
-      contextOptions = void 0;
-    }
-    const outputContext = this._getOutputContext(contextOptions);
-    const eventContext = {
-      error: outputContext.error,
-      write: outputContext.write,
-      command: this
-    };
-    this._getCommandAndAncestors().reverse().forEach((command) => command.emit("beforeAllHelp", eventContext));
-    this.emit("beforeHelp", eventContext);
-    let helpInformation = this.helpInformation({ error: outputContext.error });
-    if (deprecatedCallback) {
-      helpInformation = deprecatedCallback(helpInformation);
-      if (typeof helpInformation !== "string" && !Buffer.isBuffer(helpInformation)) {
-        throw new Error("outputHelp callback must return a string or a Buffer");
-      }
-    }
-    outputContext.write(helpInformation);
-    if (this._getHelpOption()?.long) {
-      this.emit(this._getHelpOption().long);
-    }
-    this.emit("afterHelp", eventContext);
-    this._getCommandAndAncestors().forEach(
-      (command) => command.emit("afterAllHelp", eventContext)
-    );
-  }
-  /**
-   * You can pass in flags and a description to customise the built-in help option.
-   * Pass in false to disable the built-in help option.
-   *
-   * @example
-   * program.helpOption('-?, --help' 'show help'); // customise
-   * program.helpOption(false); // disable
-   *
-   * @param {(string | boolean)} flags
-   * @param {string} [description]
-   * @return {Command} `this` command for chaining
-   */
-  helpOption(flags, description) {
-    if (typeof flags === "boolean") {
-      if (flags) {
-        if (this._helpOption === null) this._helpOption = void 0;
-        if (this._defaultOptionGroup) {
-          this._initOptionGroup(this._getHelpOption());
-        }
-      } else {
-        this._helpOption = null;
-      }
-      return this;
-    }
-    this._helpOption = this.createOption(
-      flags ?? "-h, --help",
-      description ?? "display help for command"
-    );
-    if (flags || description) this._initOptionGroup(this._helpOption);
-    return this;
-  }
-  /**
-   * Lazy create help option.
-   * Returns null if has been disabled with .helpOption(false).
-   *
-   * @returns {(Option | null)} the help option
-   * @package
-   */
-  _getHelpOption() {
-    if (this._helpOption === void 0) {
-      this.helpOption(void 0, void 0);
-    }
-    return this._helpOption;
-  }
-  /**
-   * Supply your own option to use for the built-in help option.
-   * This is an alternative to using helpOption() to customise the flags and description etc.
-   *
-   * @param {Option} option
-   * @return {Command} `this` command for chaining
-   */
-  addHelpOption(option) {
-    this._helpOption = option;
-    this._initOptionGroup(option);
-    return this;
-  }
-  /**
-   * Output help information and exit.
-   *
-   * Outputs built-in help, and custom text added using `.addHelpText()`.
-   *
-   * @param {{ error: boolean }} [contextOptions] - pass {error:true} to write to stderr instead of stdout
-   */
-  help(contextOptions) {
-    this.outputHelp(contextOptions);
-    let exitCode = Number(import_node_process.default.exitCode ?? 0);
-    if (exitCode === 0 && contextOptions && typeof contextOptions !== "function" && contextOptions.error) {
-      exitCode = 1;
-    }
-    this._exit(exitCode, "commander.help", "(outputHelp)");
-  }
-  /**
-   * // Do a little typing to coordinate emit and listener for the help text events.
-   * @typedef HelpTextEventContext
-   * @type {object}
-   * @property {boolean} error
-   * @property {Command} command
-   * @property {function} write
-   */
-  /**
-   * Add additional text to be displayed with the built-in help.
-   *
-   * Position is 'before' or 'after' to affect just this command,
-   * and 'beforeAll' or 'afterAll' to affect this command and all its subcommands.
-   *
-   * @param {string} position - before or after built-in help
-   * @param {(string | Function)} text - string to add, or a function returning a string
-   * @return {Command} `this` command for chaining
-   */
-  addHelpText(position, text) {
-    const allowedValues = ["beforeAll", "before", "after", "afterAll"];
-    if (!allowedValues.includes(position)) {
-      throw new Error(`Unexpected value for position to addHelpText.
-Expecting one of '${allowedValues.join("', '")}'`);
-    }
-    const helpEvent = `${position}Help`;
-    this.on(helpEvent, (context) => {
-      let helpStr;
-      if (typeof text === "function") {
-        helpStr = text({ error: context.error, command: context.command });
-      } else {
-        helpStr = text;
-      }
-      if (helpStr) {
-        context.write(`${helpStr}
-`);
-      }
-    });
-    return this;
-  }
-  /**
-   * Output help information if help flags specified
-   *
-   * @param {Array} args - array of options to search for help flags
-   * @private
-   */
-  _outputHelpIfRequested(args) {
-    const helpOption = this._getHelpOption();
-    const helpRequested = helpOption && args.find((arg) => helpOption.is(arg));
-    if (helpRequested) {
-      this.outputHelp();
-      this._exit(0, "commander.helpDisplayed", "(outputHelp)");
+    const classConstructor = this.constructor;
+    for (let i = 0; i < classConstructor.plugins.length; ++i) {
+      Object.assign(this, classConstructor.plugins[i](this, options));
     }
   }
+  // assigned during constructor
+  request;
+  graphql;
+  log;
+  hook;
+  // TODO: type `octokit.auth` based on passed options.authStrategy
+  auth;
 };
-function incrementNodeInspectorPort(args) {
-  return args.map((arg) => {
-    if (!arg.startsWith("--inspect")) {
-      return arg;
-    }
-    let debugOption;
-    let debugHost = "127.0.0.1";
-    let debugPort = "9229";
-    let match;
-    if ((match = arg.match(/^(--inspect(-brk)?)$/)) !== null) {
-      debugOption = match[1];
-    } else if ((match = arg.match(/^(--inspect(-brk|-port)?)=([^:]+)$/)) !== null) {
-      debugOption = match[1];
-      if (/^\d+$/.test(match[3])) {
-        debugPort = match[3];
-      } else {
-        debugHost = match[3];
-      }
-    } else if ((match = arg.match(/^(--inspect(-brk|-port)?)=([^:]+):(\d+)$/)) !== null) {
-      debugOption = match[1];
-      debugHost = match[3];
-      debugPort = match[4];
-    }
-    if (debugOption && debugPort !== "0") {
-      return `${debugOption}=${debugHost}:${parseInt(debugPort) + 1}`;
-    }
-    return arg;
+
+// node_modules/@octokit/plugin-request-log/dist-src/version.js
+var VERSION5 = "6.0.0";
+
+// node_modules/@octokit/plugin-request-log/dist-src/index.js
+function requestLog(octokit) {
+  octokit.hook.wrap("request", (request2, options) => {
+    octokit.log.debug("request", options);
+    const start = Date.now();
+    const requestOptions = octokit.request.endpoint.parse(options);
+    const path3 = requestOptions.url.replace(options.baseUrl, "");
+    return request2(options).then((response) => {
+      const requestId = response.headers["x-github-request-id"];
+      octokit.log.info(
+        `${requestOptions.method} ${path3} - ${response.status} with id ${requestId} in ${Date.now() - start}ms`
+      );
+      return response;
+    }).catch((error62) => {
+      const requestId = error62.response?.headers["x-github-request-id"] || "UNKNOWN";
+      octokit.log.error(
+        `${requestOptions.method} ${path3} - ${error62.status} with id ${requestId} in ${Date.now() - start}ms`
+      );
+      throw error62;
+    });
   });
 }
-function useColor() {
-  if (import_node_process.default.env.NO_COLOR || import_node_process.default.env.FORCE_COLOR === "0" || import_node_process.default.env.FORCE_COLOR === "false")
-    return false;
-  if (import_node_process.default.env.FORCE_COLOR || import_node_process.default.env.CLICOLOR_FORCE !== void 0)
+requestLog.VERSION = VERSION5;
+
+// node_modules/@octokit/plugin-paginate-rest/dist-bundle/index.js
+var VERSION6 = "0.0.0-development";
+function normalizePaginatedListResponse(response) {
+  if (!response.data) {
+    return {
+      ...response,
+      data: []
+    };
+  }
+  const responseNeedsNormalization = ("total_count" in response.data || "total_commits" in response.data) && !("url" in response.data);
+  if (!responseNeedsNormalization) return response;
+  const incompleteResults = response.data.incomplete_results;
+  const repositorySelection = response.data.repository_selection;
+  const totalCount = response.data.total_count;
+  const totalCommits = response.data.total_commits;
+  delete response.data.incomplete_results;
+  delete response.data.repository_selection;
+  delete response.data.total_count;
+  delete response.data.total_commits;
+  const namespaceKey = Object.keys(response.data)[0];
+  const data = response.data[namespaceKey];
+  response.data = data;
+  if (typeof incompleteResults !== "undefined") {
+    response.data.incomplete_results = incompleteResults;
+  }
+  if (typeof repositorySelection !== "undefined") {
+    response.data.repository_selection = repositorySelection;
+  }
+  response.data.total_count = totalCount;
+  response.data.total_commits = totalCommits;
+  return response;
+}
+function iterator(octokit, route, parameters) {
+  const options = typeof route === "function" ? route.endpoint(parameters) : octokit.request.endpoint(route, parameters);
+  const requestMethod = typeof route === "function" ? route : octokit.request;
+  const method = options.method;
+  const headers = options.headers;
+  let url2 = options.url;
+  return {
+    [Symbol.asyncIterator]: () => ({
+      async next() {
+        if (!url2) return { done: true };
+        try {
+          const response = await requestMethod({ method, url: url2, headers });
+          const normalizedResponse = normalizePaginatedListResponse(response);
+          url2 = ((normalizedResponse.headers.link || "").match(
+            /<([^<>]+)>;\s*rel="next"/
+          ) || [])[1];
+          if (!url2 && "total_commits" in normalizedResponse.data) {
+            const parsedUrl = new URL(normalizedResponse.url);
+            const params = parsedUrl.searchParams;
+            const page = parseInt(params.get("page") || "1", 10);
+            const per_page = parseInt(params.get("per_page") || "250", 10);
+            if (page * per_page < normalizedResponse.data.total_commits) {
+              params.set("page", String(page + 1));
+              url2 = parsedUrl.toString();
+            }
+          }
+          return { value: normalizedResponse };
+        } catch (error62) {
+          if (error62.status !== 409) throw error62;
+          url2 = "";
+          return {
+            value: {
+              status: 200,
+              headers: {},
+              data: []
+            }
+          };
+        }
+      }
+    })
+  };
+}
+function paginate(octokit, route, parameters, mapFn) {
+  if (typeof parameters === "function") {
+    mapFn = parameters;
+    parameters = void 0;
+  }
+  return gather(
+    octokit,
+    [],
+    iterator(octokit, route, parameters)[Symbol.asyncIterator](),
+    mapFn
+  );
+}
+function gather(octokit, results, iterator2, mapFn) {
+  return iterator2.next().then((result) => {
+    if (result.done) {
+      return results;
+    }
+    let earlyExit = false;
+    function done() {
+      earlyExit = true;
+    }
+    results = results.concat(
+      mapFn ? mapFn(result.value, done) : result.value.data
+    );
+    if (earlyExit) {
+      return results;
+    }
+    return gather(octokit, results, iterator2, mapFn);
+  });
+}
+var composePaginateRest = Object.assign(paginate, {
+  iterator
+});
+function paginateRest(octokit) {
+  return {
+    paginate: Object.assign(paginate.bind(null, octokit), {
+      iterator: iterator.bind(null, octokit)
+    })
+  };
+}
+paginateRest.VERSION = VERSION6;
+
+// node_modules/@octokit/plugin-rest-endpoint-methods/dist-src/version.js
+var VERSION7 = "17.0.0";
+
+// node_modules/@octokit/plugin-rest-endpoint-methods/dist-src/generated/endpoints.js
+var Endpoints = {
+  actions: {
+    addCustomLabelsToSelfHostedRunnerForOrg: [
+      "POST /orgs/{org}/actions/runners/{runner_id}/labels"
+    ],
+    addCustomLabelsToSelfHostedRunnerForRepo: [
+      "POST /repos/{owner}/{repo}/actions/runners/{runner_id}/labels"
+    ],
+    addRepoAccessToSelfHostedRunnerGroupInOrg: [
+      "PUT /orgs/{org}/actions/runner-groups/{runner_group_id}/repositories/{repository_id}"
+    ],
+    addSelectedRepoToOrgSecret: [
+      "PUT /orgs/{org}/actions/secrets/{secret_name}/repositories/{repository_id}"
+    ],
+    addSelectedRepoToOrgVariable: [
+      "PUT /orgs/{org}/actions/variables/{name}/repositories/{repository_id}"
+    ],
+    approveWorkflowRun: [
+      "POST /repos/{owner}/{repo}/actions/runs/{run_id}/approve"
+    ],
+    cancelWorkflowRun: [
+      "POST /repos/{owner}/{repo}/actions/runs/{run_id}/cancel"
+    ],
+    createEnvironmentVariable: [
+      "POST /repos/{owner}/{repo}/environments/{environment_name}/variables"
+    ],
+    createHostedRunnerForOrg: ["POST /orgs/{org}/actions/hosted-runners"],
+    createOrUpdateEnvironmentSecret: [
+      "PUT /repos/{owner}/{repo}/environments/{environment_name}/secrets/{secret_name}"
+    ],
+    createOrUpdateOrgSecret: ["PUT /orgs/{org}/actions/secrets/{secret_name}"],
+    createOrUpdateRepoSecret: [
+      "PUT /repos/{owner}/{repo}/actions/secrets/{secret_name}"
+    ],
+    createOrgVariable: ["POST /orgs/{org}/actions/variables"],
+    createRegistrationTokenForOrg: [
+      "POST /orgs/{org}/actions/runners/registration-token"
+    ],
+    createRegistrationTokenForRepo: [
+      "POST /repos/{owner}/{repo}/actions/runners/registration-token"
+    ],
+    createRemoveTokenForOrg: ["POST /orgs/{org}/actions/runners/remove-token"],
+    createRemoveTokenForRepo: [
+      "POST /repos/{owner}/{repo}/actions/runners/remove-token"
+    ],
+    createRepoVariable: ["POST /repos/{owner}/{repo}/actions/variables"],
+    createWorkflowDispatch: [
+      "POST /repos/{owner}/{repo}/actions/workflows/{workflow_id}/dispatches"
+    ],
+    deleteActionsCacheById: [
+      "DELETE /repos/{owner}/{repo}/actions/caches/{cache_id}"
+    ],
+    deleteActionsCacheByKey: [
+      "DELETE /repos/{owner}/{repo}/actions/caches{?key,ref}"
+    ],
+    deleteArtifact: [
+      "DELETE /repos/{owner}/{repo}/actions/artifacts/{artifact_id}"
+    ],
+    deleteCustomImageFromOrg: [
+      "DELETE /orgs/{org}/actions/hosted-runners/images/custom/{image_definition_id}"
+    ],
+    deleteCustomImageVersionFromOrg: [
+      "DELETE /orgs/{org}/actions/hosted-runners/images/custom/{image_definition_id}/versions/{version}"
+    ],
+    deleteEnvironmentSecret: [
+      "DELETE /repos/{owner}/{repo}/environments/{environment_name}/secrets/{secret_name}"
+    ],
+    deleteEnvironmentVariable: [
+      "DELETE /repos/{owner}/{repo}/environments/{environment_name}/variables/{name}"
+    ],
+    deleteHostedRunnerForOrg: [
+      "DELETE /orgs/{org}/actions/hosted-runners/{hosted_runner_id}"
+    ],
+    deleteOrgSecret: ["DELETE /orgs/{org}/actions/secrets/{secret_name}"],
+    deleteOrgVariable: ["DELETE /orgs/{org}/actions/variables/{name}"],
+    deleteRepoSecret: [
+      "DELETE /repos/{owner}/{repo}/actions/secrets/{secret_name}"
+    ],
+    deleteRepoVariable: [
+      "DELETE /repos/{owner}/{repo}/actions/variables/{name}"
+    ],
+    deleteSelfHostedRunnerFromOrg: [
+      "DELETE /orgs/{org}/actions/runners/{runner_id}"
+    ],
+    deleteSelfHostedRunnerFromRepo: [
+      "DELETE /repos/{owner}/{repo}/actions/runners/{runner_id}"
+    ],
+    deleteWorkflowRun: ["DELETE /repos/{owner}/{repo}/actions/runs/{run_id}"],
+    deleteWorkflowRunLogs: [
+      "DELETE /repos/{owner}/{repo}/actions/runs/{run_id}/logs"
+    ],
+    disableSelectedRepositoryGithubActionsOrganization: [
+      "DELETE /orgs/{org}/actions/permissions/repositories/{repository_id}"
+    ],
+    disableWorkflow: [
+      "PUT /repos/{owner}/{repo}/actions/workflows/{workflow_id}/disable"
+    ],
+    downloadArtifact: [
+      "GET /repos/{owner}/{repo}/actions/artifacts/{artifact_id}/{archive_format}"
+    ],
+    downloadJobLogsForWorkflowRun: [
+      "GET /repos/{owner}/{repo}/actions/jobs/{job_id}/logs"
+    ],
+    downloadWorkflowRunAttemptLogs: [
+      "GET /repos/{owner}/{repo}/actions/runs/{run_id}/attempts/{attempt_number}/logs"
+    ],
+    downloadWorkflowRunLogs: [
+      "GET /repos/{owner}/{repo}/actions/runs/{run_id}/logs"
+    ],
+    enableSelectedRepositoryGithubActionsOrganization: [
+      "PUT /orgs/{org}/actions/permissions/repositories/{repository_id}"
+    ],
+    enableWorkflow: [
+      "PUT /repos/{owner}/{repo}/actions/workflows/{workflow_id}/enable"
+    ],
+    forceCancelWorkflowRun: [
+      "POST /repos/{owner}/{repo}/actions/runs/{run_id}/force-cancel"
+    ],
+    generateRunnerJitconfigForOrg: [
+      "POST /orgs/{org}/actions/runners/generate-jitconfig"
+    ],
+    generateRunnerJitconfigForRepo: [
+      "POST /repos/{owner}/{repo}/actions/runners/generate-jitconfig"
+    ],
+    getActionsCacheList: ["GET /repos/{owner}/{repo}/actions/caches"],
+    getActionsCacheUsage: ["GET /repos/{owner}/{repo}/actions/cache/usage"],
+    getActionsCacheUsageByRepoForOrg: [
+      "GET /orgs/{org}/actions/cache/usage-by-repository"
+    ],
+    getActionsCacheUsageForOrg: ["GET /orgs/{org}/actions/cache/usage"],
+    getAllowedActionsOrganization: [
+      "GET /orgs/{org}/actions/permissions/selected-actions"
+    ],
+    getAllowedActionsRepository: [
+      "GET /repos/{owner}/{repo}/actions/permissions/selected-actions"
+    ],
+    getArtifact: ["GET /repos/{owner}/{repo}/actions/artifacts/{artifact_id}"],
+    getCustomImageForOrg: [
+      "GET /orgs/{org}/actions/hosted-runners/images/custom/{image_definition_id}"
+    ],
+    getCustomImageVersionForOrg: [
+      "GET /orgs/{org}/actions/hosted-runners/images/custom/{image_definition_id}/versions/{version}"
+    ],
+    getCustomOidcSubClaimForRepo: [
+      "GET /repos/{owner}/{repo}/actions/oidc/customization/sub"
+    ],
+    getEnvironmentPublicKey: [
+      "GET /repos/{owner}/{repo}/environments/{environment_name}/secrets/public-key"
+    ],
+    getEnvironmentSecret: [
+      "GET /repos/{owner}/{repo}/environments/{environment_name}/secrets/{secret_name}"
+    ],
+    getEnvironmentVariable: [
+      "GET /repos/{owner}/{repo}/environments/{environment_name}/variables/{name}"
+    ],
+    getGithubActionsDefaultWorkflowPermissionsOrganization: [
+      "GET /orgs/{org}/actions/permissions/workflow"
+    ],
+    getGithubActionsDefaultWorkflowPermissionsRepository: [
+      "GET /repos/{owner}/{repo}/actions/permissions/workflow"
+    ],
+    getGithubActionsPermissionsOrganization: [
+      "GET /orgs/{org}/actions/permissions"
+    ],
+    getGithubActionsPermissionsRepository: [
+      "GET /repos/{owner}/{repo}/actions/permissions"
+    ],
+    getHostedRunnerForOrg: [
+      "GET /orgs/{org}/actions/hosted-runners/{hosted_runner_id}"
+    ],
+    getHostedRunnersGithubOwnedImagesForOrg: [
+      "GET /orgs/{org}/actions/hosted-runners/images/github-owned"
+    ],
+    getHostedRunnersLimitsForOrg: [
+      "GET /orgs/{org}/actions/hosted-runners/limits"
+    ],
+    getHostedRunnersMachineSpecsForOrg: [
+      "GET /orgs/{org}/actions/hosted-runners/machine-sizes"
+    ],
+    getHostedRunnersPartnerImagesForOrg: [
+      "GET /orgs/{org}/actions/hosted-runners/images/partner"
+    ],
+    getHostedRunnersPlatformsForOrg: [
+      "GET /orgs/{org}/actions/hosted-runners/platforms"
+    ],
+    getJobForWorkflowRun: ["GET /repos/{owner}/{repo}/actions/jobs/{job_id}"],
+    getOrgPublicKey: ["GET /orgs/{org}/actions/secrets/public-key"],
+    getOrgSecret: ["GET /orgs/{org}/actions/secrets/{secret_name}"],
+    getOrgVariable: ["GET /orgs/{org}/actions/variables/{name}"],
+    getPendingDeploymentsForRun: [
+      "GET /repos/{owner}/{repo}/actions/runs/{run_id}/pending_deployments"
+    ],
+    getRepoPermissions: [
+      "GET /repos/{owner}/{repo}/actions/permissions",
+      {},
+      { renamed: ["actions", "getGithubActionsPermissionsRepository"] }
+    ],
+    getRepoPublicKey: ["GET /repos/{owner}/{repo}/actions/secrets/public-key"],
+    getRepoSecret: ["GET /repos/{owner}/{repo}/actions/secrets/{secret_name}"],
+    getRepoVariable: ["GET /repos/{owner}/{repo}/actions/variables/{name}"],
+    getReviewsForRun: [
+      "GET /repos/{owner}/{repo}/actions/runs/{run_id}/approvals"
+    ],
+    getSelfHostedRunnerForOrg: ["GET /orgs/{org}/actions/runners/{runner_id}"],
+    getSelfHostedRunnerForRepo: [
+      "GET /repos/{owner}/{repo}/actions/runners/{runner_id}"
+    ],
+    getWorkflow: ["GET /repos/{owner}/{repo}/actions/workflows/{workflow_id}"],
+    getWorkflowAccessToRepository: [
+      "GET /repos/{owner}/{repo}/actions/permissions/access"
+    ],
+    getWorkflowRun: ["GET /repos/{owner}/{repo}/actions/runs/{run_id}"],
+    getWorkflowRunAttempt: [
+      "GET /repos/{owner}/{repo}/actions/runs/{run_id}/attempts/{attempt_number}"
+    ],
+    getWorkflowRunUsage: [
+      "GET /repos/{owner}/{repo}/actions/runs/{run_id}/timing"
+    ],
+    getWorkflowUsage: [
+      "GET /repos/{owner}/{repo}/actions/workflows/{workflow_id}/timing"
+    ],
+    listArtifactsForRepo: ["GET /repos/{owner}/{repo}/actions/artifacts"],
+    listCustomImageVersionsForOrg: [
+      "GET /orgs/{org}/actions/hosted-runners/images/custom/{image_definition_id}/versions"
+    ],
+    listCustomImagesForOrg: [
+      "GET /orgs/{org}/actions/hosted-runners/images/custom"
+    ],
+    listEnvironmentSecrets: [
+      "GET /repos/{owner}/{repo}/environments/{environment_name}/secrets"
+    ],
+    listEnvironmentVariables: [
+      "GET /repos/{owner}/{repo}/environments/{environment_name}/variables"
+    ],
+    listGithubHostedRunnersInGroupForOrg: [
+      "GET /orgs/{org}/actions/runner-groups/{runner_group_id}/hosted-runners"
+    ],
+    listHostedRunnersForOrg: ["GET /orgs/{org}/actions/hosted-runners"],
+    listJobsForWorkflowRun: [
+      "GET /repos/{owner}/{repo}/actions/runs/{run_id}/jobs"
+    ],
+    listJobsForWorkflowRunAttempt: [
+      "GET /repos/{owner}/{repo}/actions/runs/{run_id}/attempts/{attempt_number}/jobs"
+    ],
+    listLabelsForSelfHostedRunnerForOrg: [
+      "GET /orgs/{org}/actions/runners/{runner_id}/labels"
+    ],
+    listLabelsForSelfHostedRunnerForRepo: [
+      "GET /repos/{owner}/{repo}/actions/runners/{runner_id}/labels"
+    ],
+    listOrgSecrets: ["GET /orgs/{org}/actions/secrets"],
+    listOrgVariables: ["GET /orgs/{org}/actions/variables"],
+    listRepoOrganizationSecrets: [
+      "GET /repos/{owner}/{repo}/actions/organization-secrets"
+    ],
+    listRepoOrganizationVariables: [
+      "GET /repos/{owner}/{repo}/actions/organization-variables"
+    ],
+    listRepoSecrets: ["GET /repos/{owner}/{repo}/actions/secrets"],
+    listRepoVariables: ["GET /repos/{owner}/{repo}/actions/variables"],
+    listRepoWorkflows: ["GET /repos/{owner}/{repo}/actions/workflows"],
+    listRunnerApplicationsForOrg: ["GET /orgs/{org}/actions/runners/downloads"],
+    listRunnerApplicationsForRepo: [
+      "GET /repos/{owner}/{repo}/actions/runners/downloads"
+    ],
+    listSelectedReposForOrgSecret: [
+      "GET /orgs/{org}/actions/secrets/{secret_name}/repositories"
+    ],
+    listSelectedReposForOrgVariable: [
+      "GET /orgs/{org}/actions/variables/{name}/repositories"
+    ],
+    listSelectedRepositoriesEnabledGithubActionsOrganization: [
+      "GET /orgs/{org}/actions/permissions/repositories"
+    ],
+    listSelfHostedRunnersForOrg: ["GET /orgs/{org}/actions/runners"],
+    listSelfHostedRunnersForRepo: ["GET /repos/{owner}/{repo}/actions/runners"],
+    listWorkflowRunArtifacts: [
+      "GET /repos/{owner}/{repo}/actions/runs/{run_id}/artifacts"
+    ],
+    listWorkflowRuns: [
+      "GET /repos/{owner}/{repo}/actions/workflows/{workflow_id}/runs"
+    ],
+    listWorkflowRunsForRepo: ["GET /repos/{owner}/{repo}/actions/runs"],
+    reRunJobForWorkflowRun: [
+      "POST /repos/{owner}/{repo}/actions/jobs/{job_id}/rerun"
+    ],
+    reRunWorkflow: ["POST /repos/{owner}/{repo}/actions/runs/{run_id}/rerun"],
+    reRunWorkflowFailedJobs: [
+      "POST /repos/{owner}/{repo}/actions/runs/{run_id}/rerun-failed-jobs"
+    ],
+    removeAllCustomLabelsFromSelfHostedRunnerForOrg: [
+      "DELETE /orgs/{org}/actions/runners/{runner_id}/labels"
+    ],
+    removeAllCustomLabelsFromSelfHostedRunnerForRepo: [
+      "DELETE /repos/{owner}/{repo}/actions/runners/{runner_id}/labels"
+    ],
+    removeCustomLabelFromSelfHostedRunnerForOrg: [
+      "DELETE /orgs/{org}/actions/runners/{runner_id}/labels/{name}"
+    ],
+    removeCustomLabelFromSelfHostedRunnerForRepo: [
+      "DELETE /repos/{owner}/{repo}/actions/runners/{runner_id}/labels/{name}"
+    ],
+    removeSelectedRepoFromOrgSecret: [
+      "DELETE /orgs/{org}/actions/secrets/{secret_name}/repositories/{repository_id}"
+    ],
+    removeSelectedRepoFromOrgVariable: [
+      "DELETE /orgs/{org}/actions/variables/{name}/repositories/{repository_id}"
+    ],
+    reviewCustomGatesForRun: [
+      "POST /repos/{owner}/{repo}/actions/runs/{run_id}/deployment_protection_rule"
+    ],
+    reviewPendingDeploymentsForRun: [
+      "POST /repos/{owner}/{repo}/actions/runs/{run_id}/pending_deployments"
+    ],
+    setAllowedActionsOrganization: [
+      "PUT /orgs/{org}/actions/permissions/selected-actions"
+    ],
+    setAllowedActionsRepository: [
+      "PUT /repos/{owner}/{repo}/actions/permissions/selected-actions"
+    ],
+    setCustomLabelsForSelfHostedRunnerForOrg: [
+      "PUT /orgs/{org}/actions/runners/{runner_id}/labels"
+    ],
+    setCustomLabelsForSelfHostedRunnerForRepo: [
+      "PUT /repos/{owner}/{repo}/actions/runners/{runner_id}/labels"
+    ],
+    setCustomOidcSubClaimForRepo: [
+      "PUT /repos/{owner}/{repo}/actions/oidc/customization/sub"
+    ],
+    setGithubActionsDefaultWorkflowPermissionsOrganization: [
+      "PUT /orgs/{org}/actions/permissions/workflow"
+    ],
+    setGithubActionsDefaultWorkflowPermissionsRepository: [
+      "PUT /repos/{owner}/{repo}/actions/permissions/workflow"
+    ],
+    setGithubActionsPermissionsOrganization: [
+      "PUT /orgs/{org}/actions/permissions"
+    ],
+    setGithubActionsPermissionsRepository: [
+      "PUT /repos/{owner}/{repo}/actions/permissions"
+    ],
+    setSelectedReposForOrgSecret: [
+      "PUT /orgs/{org}/actions/secrets/{secret_name}/repositories"
+    ],
+    setSelectedReposForOrgVariable: [
+      "PUT /orgs/{org}/actions/variables/{name}/repositories"
+    ],
+    setSelectedRepositoriesEnabledGithubActionsOrganization: [
+      "PUT /orgs/{org}/actions/permissions/repositories"
+    ],
+    setWorkflowAccessToRepository: [
+      "PUT /repos/{owner}/{repo}/actions/permissions/access"
+    ],
+    updateEnvironmentVariable: [
+      "PATCH /repos/{owner}/{repo}/environments/{environment_name}/variables/{name}"
+    ],
+    updateHostedRunnerForOrg: [
+      "PATCH /orgs/{org}/actions/hosted-runners/{hosted_runner_id}"
+    ],
+    updateOrgVariable: ["PATCH /orgs/{org}/actions/variables/{name}"],
+    updateRepoVariable: [
+      "PATCH /repos/{owner}/{repo}/actions/variables/{name}"
+    ]
+  },
+  activity: {
+    checkRepoIsStarredByAuthenticatedUser: ["GET /user/starred/{owner}/{repo}"],
+    deleteRepoSubscription: ["DELETE /repos/{owner}/{repo}/subscription"],
+    deleteThreadSubscription: [
+      "DELETE /notifications/threads/{thread_id}/subscription"
+    ],
+    getFeeds: ["GET /feeds"],
+    getRepoSubscription: ["GET /repos/{owner}/{repo}/subscription"],
+    getThread: ["GET /notifications/threads/{thread_id}"],
+    getThreadSubscriptionForAuthenticatedUser: [
+      "GET /notifications/threads/{thread_id}/subscription"
+    ],
+    listEventsForAuthenticatedUser: ["GET /users/{username}/events"],
+    listNotificationsForAuthenticatedUser: ["GET /notifications"],
+    listOrgEventsForAuthenticatedUser: [
+      "GET /users/{username}/events/orgs/{org}"
+    ],
+    listPublicEvents: ["GET /events"],
+    listPublicEventsForRepoNetwork: ["GET /networks/{owner}/{repo}/events"],
+    listPublicEventsForUser: ["GET /users/{username}/events/public"],
+    listPublicOrgEvents: ["GET /orgs/{org}/events"],
+    listReceivedEventsForUser: ["GET /users/{username}/received_events"],
+    listReceivedPublicEventsForUser: [
+      "GET /users/{username}/received_events/public"
+    ],
+    listRepoEvents: ["GET /repos/{owner}/{repo}/events"],
+    listRepoNotificationsForAuthenticatedUser: [
+      "GET /repos/{owner}/{repo}/notifications"
+    ],
+    listReposStarredByAuthenticatedUser: ["GET /user/starred"],
+    listReposStarredByUser: ["GET /users/{username}/starred"],
+    listReposWatchedByUser: ["GET /users/{username}/subscriptions"],
+    listStargazersForRepo: ["GET /repos/{owner}/{repo}/stargazers"],
+    listWatchedReposForAuthenticatedUser: ["GET /user/subscriptions"],
+    listWatchersForRepo: ["GET /repos/{owner}/{repo}/subscribers"],
+    markNotificationsAsRead: ["PUT /notifications"],
+    markRepoNotificationsAsRead: ["PUT /repos/{owner}/{repo}/notifications"],
+    markThreadAsDone: ["DELETE /notifications/threads/{thread_id}"],
+    markThreadAsRead: ["PATCH /notifications/threads/{thread_id}"],
+    setRepoSubscription: ["PUT /repos/{owner}/{repo}/subscription"],
+    setThreadSubscription: [
+      "PUT /notifications/threads/{thread_id}/subscription"
+    ],
+    starRepoForAuthenticatedUser: ["PUT /user/starred/{owner}/{repo}"],
+    unstarRepoForAuthenticatedUser: ["DELETE /user/starred/{owner}/{repo}"]
+  },
+  apps: {
+    addRepoToInstallation: [
+      "PUT /user/installations/{installation_id}/repositories/{repository_id}",
+      {},
+      { renamed: ["apps", "addRepoToInstallationForAuthenticatedUser"] }
+    ],
+    addRepoToInstallationForAuthenticatedUser: [
+      "PUT /user/installations/{installation_id}/repositories/{repository_id}"
+    ],
+    checkToken: ["POST /applications/{client_id}/token"],
+    createFromManifest: ["POST /app-manifests/{code}/conversions"],
+    createInstallationAccessToken: [
+      "POST /app/installations/{installation_id}/access_tokens"
+    ],
+    deleteAuthorization: ["DELETE /applications/{client_id}/grant"],
+    deleteInstallation: ["DELETE /app/installations/{installation_id}"],
+    deleteToken: ["DELETE /applications/{client_id}/token"],
+    getAuthenticated: ["GET /app"],
+    getBySlug: ["GET /apps/{app_slug}"],
+    getInstallation: ["GET /app/installations/{installation_id}"],
+    getOrgInstallation: ["GET /orgs/{org}/installation"],
+    getRepoInstallation: ["GET /repos/{owner}/{repo}/installation"],
+    getSubscriptionPlanForAccount: [
+      "GET /marketplace_listing/accounts/{account_id}"
+    ],
+    getSubscriptionPlanForAccountStubbed: [
+      "GET /marketplace_listing/stubbed/accounts/{account_id}"
+    ],
+    getUserInstallation: ["GET /users/{username}/installation"],
+    getWebhookConfigForApp: ["GET /app/hook/config"],
+    getWebhookDelivery: ["GET /app/hook/deliveries/{delivery_id}"],
+    listAccountsForPlan: ["GET /marketplace_listing/plans/{plan_id}/accounts"],
+    listAccountsForPlanStubbed: [
+      "GET /marketplace_listing/stubbed/plans/{plan_id}/accounts"
+    ],
+    listInstallationReposForAuthenticatedUser: [
+      "GET /user/installations/{installation_id}/repositories"
+    ],
+    listInstallationRequestsForAuthenticatedApp: [
+      "GET /app/installation-requests"
+    ],
+    listInstallations: ["GET /app/installations"],
+    listInstallationsForAuthenticatedUser: ["GET /user/installations"],
+    listPlans: ["GET /marketplace_listing/plans"],
+    listPlansStubbed: ["GET /marketplace_listing/stubbed/plans"],
+    listReposAccessibleToInstallation: ["GET /installation/repositories"],
+    listSubscriptionsForAuthenticatedUser: ["GET /user/marketplace_purchases"],
+    listSubscriptionsForAuthenticatedUserStubbed: [
+      "GET /user/marketplace_purchases/stubbed"
+    ],
+    listWebhookDeliveries: ["GET /app/hook/deliveries"],
+    redeliverWebhookDelivery: [
+      "POST /app/hook/deliveries/{delivery_id}/attempts"
+    ],
+    removeRepoFromInstallation: [
+      "DELETE /user/installations/{installation_id}/repositories/{repository_id}",
+      {},
+      { renamed: ["apps", "removeRepoFromInstallationForAuthenticatedUser"] }
+    ],
+    removeRepoFromInstallationForAuthenticatedUser: [
+      "DELETE /user/installations/{installation_id}/repositories/{repository_id}"
+    ],
+    resetToken: ["PATCH /applications/{client_id}/token"],
+    revokeInstallationAccessToken: ["DELETE /installation/token"],
+    scopeToken: ["POST /applications/{client_id}/token/scoped"],
+    suspendInstallation: ["PUT /app/installations/{installation_id}/suspended"],
+    unsuspendInstallation: [
+      "DELETE /app/installations/{installation_id}/suspended"
+    ],
+    updateWebhookConfigForApp: ["PATCH /app/hook/config"]
+  },
+  billing: {
+    getGithubActionsBillingOrg: ["GET /orgs/{org}/settings/billing/actions"],
+    getGithubActionsBillingUser: [
+      "GET /users/{username}/settings/billing/actions"
+    ],
+    getGithubBillingPremiumRequestUsageReportOrg: [
+      "GET /organizations/{org}/settings/billing/premium_request/usage"
+    ],
+    getGithubBillingPremiumRequestUsageReportUser: [
+      "GET /users/{username}/settings/billing/premium_request/usage"
+    ],
+    getGithubBillingUsageReportOrg: [
+      "GET /organizations/{org}/settings/billing/usage"
+    ],
+    getGithubBillingUsageReportUser: [
+      "GET /users/{username}/settings/billing/usage"
+    ],
+    getGithubPackagesBillingOrg: ["GET /orgs/{org}/settings/billing/packages"],
+    getGithubPackagesBillingUser: [
+      "GET /users/{username}/settings/billing/packages"
+    ],
+    getSharedStorageBillingOrg: [
+      "GET /orgs/{org}/settings/billing/shared-storage"
+    ],
+    getSharedStorageBillingUser: [
+      "GET /users/{username}/settings/billing/shared-storage"
+    ]
+  },
+  campaigns: {
+    createCampaign: ["POST /orgs/{org}/campaigns"],
+    deleteCampaign: ["DELETE /orgs/{org}/campaigns/{campaign_number}"],
+    getCampaignSummary: ["GET /orgs/{org}/campaigns/{campaign_number}"],
+    listOrgCampaigns: ["GET /orgs/{org}/campaigns"],
+    updateCampaign: ["PATCH /orgs/{org}/campaigns/{campaign_number}"]
+  },
+  checks: {
+    create: ["POST /repos/{owner}/{repo}/check-runs"],
+    createSuite: ["POST /repos/{owner}/{repo}/check-suites"],
+    get: ["GET /repos/{owner}/{repo}/check-runs/{check_run_id}"],
+    getSuite: ["GET /repos/{owner}/{repo}/check-suites/{check_suite_id}"],
+    listAnnotations: [
+      "GET /repos/{owner}/{repo}/check-runs/{check_run_id}/annotations"
+    ],
+    listForRef: ["GET /repos/{owner}/{repo}/commits/{ref}/check-runs"],
+    listForSuite: [
+      "GET /repos/{owner}/{repo}/check-suites/{check_suite_id}/check-runs"
+    ],
+    listSuitesForRef: ["GET /repos/{owner}/{repo}/commits/{ref}/check-suites"],
+    rerequestRun: [
+      "POST /repos/{owner}/{repo}/check-runs/{check_run_id}/rerequest"
+    ],
+    rerequestSuite: [
+      "POST /repos/{owner}/{repo}/check-suites/{check_suite_id}/rerequest"
+    ],
+    setSuitesPreferences: [
+      "PATCH /repos/{owner}/{repo}/check-suites/preferences"
+    ],
+    update: ["PATCH /repos/{owner}/{repo}/check-runs/{check_run_id}"]
+  },
+  codeScanning: {
+    commitAutofix: [
+      "POST /repos/{owner}/{repo}/code-scanning/alerts/{alert_number}/autofix/commits"
+    ],
+    createAutofix: [
+      "POST /repos/{owner}/{repo}/code-scanning/alerts/{alert_number}/autofix"
+    ],
+    createVariantAnalysis: [
+      "POST /repos/{owner}/{repo}/code-scanning/codeql/variant-analyses"
+    ],
+    deleteAnalysis: [
+      "DELETE /repos/{owner}/{repo}/code-scanning/analyses/{analysis_id}{?confirm_delete}"
+    ],
+    deleteCodeqlDatabase: [
+      "DELETE /repos/{owner}/{repo}/code-scanning/codeql/databases/{language}"
+    ],
+    getAlert: [
+      "GET /repos/{owner}/{repo}/code-scanning/alerts/{alert_number}",
+      {},
+      { renamedParameters: { alert_id: "alert_number" } }
+    ],
+    getAnalysis: [
+      "GET /repos/{owner}/{repo}/code-scanning/analyses/{analysis_id}"
+    ],
+    getAutofix: [
+      "GET /repos/{owner}/{repo}/code-scanning/alerts/{alert_number}/autofix"
+    ],
+    getCodeqlDatabase: [
+      "GET /repos/{owner}/{repo}/code-scanning/codeql/databases/{language}"
+    ],
+    getDefaultSetup: ["GET /repos/{owner}/{repo}/code-scanning/default-setup"],
+    getSarif: ["GET /repos/{owner}/{repo}/code-scanning/sarifs/{sarif_id}"],
+    getVariantAnalysis: [
+      "GET /repos/{owner}/{repo}/code-scanning/codeql/variant-analyses/{codeql_variant_analysis_id}"
+    ],
+    getVariantAnalysisRepoTask: [
+      "GET /repos/{owner}/{repo}/code-scanning/codeql/variant-analyses/{codeql_variant_analysis_id}/repos/{repo_owner}/{repo_name}"
+    ],
+    listAlertInstances: [
+      "GET /repos/{owner}/{repo}/code-scanning/alerts/{alert_number}/instances"
+    ],
+    listAlertsForOrg: ["GET /orgs/{org}/code-scanning/alerts"],
+    listAlertsForRepo: ["GET /repos/{owner}/{repo}/code-scanning/alerts"],
+    listAlertsInstances: [
+      "GET /repos/{owner}/{repo}/code-scanning/alerts/{alert_number}/instances",
+      {},
+      { renamed: ["codeScanning", "listAlertInstances"] }
+    ],
+    listCodeqlDatabases: [
+      "GET /repos/{owner}/{repo}/code-scanning/codeql/databases"
+    ],
+    listRecentAnalyses: ["GET /repos/{owner}/{repo}/code-scanning/analyses"],
+    updateAlert: [
+      "PATCH /repos/{owner}/{repo}/code-scanning/alerts/{alert_number}"
+    ],
+    updateDefaultSetup: [
+      "PATCH /repos/{owner}/{repo}/code-scanning/default-setup"
+    ],
+    uploadSarif: ["POST /repos/{owner}/{repo}/code-scanning/sarifs"]
+  },
+  codeSecurity: {
+    attachConfiguration: [
+      "POST /orgs/{org}/code-security/configurations/{configuration_id}/attach"
+    ],
+    attachEnterpriseConfiguration: [
+      "POST /enterprises/{enterprise}/code-security/configurations/{configuration_id}/attach"
+    ],
+    createConfiguration: ["POST /orgs/{org}/code-security/configurations"],
+    createConfigurationForEnterprise: [
+      "POST /enterprises/{enterprise}/code-security/configurations"
+    ],
+    deleteConfiguration: [
+      "DELETE /orgs/{org}/code-security/configurations/{configuration_id}"
+    ],
+    deleteConfigurationForEnterprise: [
+      "DELETE /enterprises/{enterprise}/code-security/configurations/{configuration_id}"
+    ],
+    detachConfiguration: [
+      "DELETE /orgs/{org}/code-security/configurations/detach"
+    ],
+    getConfiguration: [
+      "GET /orgs/{org}/code-security/configurations/{configuration_id}"
+    ],
+    getConfigurationForRepository: [
+      "GET /repos/{owner}/{repo}/code-security-configuration"
+    ],
+    getConfigurationsForEnterprise: [
+      "GET /enterprises/{enterprise}/code-security/configurations"
+    ],
+    getConfigurationsForOrg: ["GET /orgs/{org}/code-security/configurations"],
+    getDefaultConfigurations: [
+      "GET /orgs/{org}/code-security/configurations/defaults"
+    ],
+    getDefaultConfigurationsForEnterprise: [
+      "GET /enterprises/{enterprise}/code-security/configurations/defaults"
+    ],
+    getRepositoriesForConfiguration: [
+      "GET /orgs/{org}/code-security/configurations/{configuration_id}/repositories"
+    ],
+    getRepositoriesForEnterpriseConfiguration: [
+      "GET /enterprises/{enterprise}/code-security/configurations/{configuration_id}/repositories"
+    ],
+    getSingleConfigurationForEnterprise: [
+      "GET /enterprises/{enterprise}/code-security/configurations/{configuration_id}"
+    ],
+    setConfigurationAsDefault: [
+      "PUT /orgs/{org}/code-security/configurations/{configuration_id}/defaults"
+    ],
+    setConfigurationAsDefaultForEnterprise: [
+      "PUT /enterprises/{enterprise}/code-security/configurations/{configuration_id}/defaults"
+    ],
+    updateConfiguration: [
+      "PATCH /orgs/{org}/code-security/configurations/{configuration_id}"
+    ],
+    updateEnterpriseConfiguration: [
+      "PATCH /enterprises/{enterprise}/code-security/configurations/{configuration_id}"
+    ]
+  },
+  codesOfConduct: {
+    getAllCodesOfConduct: ["GET /codes_of_conduct"],
+    getConductCode: ["GET /codes_of_conduct/{key}"]
+  },
+  codespaces: {
+    addRepositoryForSecretForAuthenticatedUser: [
+      "PUT /user/codespaces/secrets/{secret_name}/repositories/{repository_id}"
+    ],
+    addSelectedRepoToOrgSecret: [
+      "PUT /orgs/{org}/codespaces/secrets/{secret_name}/repositories/{repository_id}"
+    ],
+    checkPermissionsForDevcontainer: [
+      "GET /repos/{owner}/{repo}/codespaces/permissions_check"
+    ],
+    codespaceMachinesForAuthenticatedUser: [
+      "GET /user/codespaces/{codespace_name}/machines"
+    ],
+    createForAuthenticatedUser: ["POST /user/codespaces"],
+    createOrUpdateOrgSecret: [
+      "PUT /orgs/{org}/codespaces/secrets/{secret_name}"
+    ],
+    createOrUpdateRepoSecret: [
+      "PUT /repos/{owner}/{repo}/codespaces/secrets/{secret_name}"
+    ],
+    createOrUpdateSecretForAuthenticatedUser: [
+      "PUT /user/codespaces/secrets/{secret_name}"
+    ],
+    createWithPrForAuthenticatedUser: [
+      "POST /repos/{owner}/{repo}/pulls/{pull_number}/codespaces"
+    ],
+    createWithRepoForAuthenticatedUser: [
+      "POST /repos/{owner}/{repo}/codespaces"
+    ],
+    deleteForAuthenticatedUser: ["DELETE /user/codespaces/{codespace_name}"],
+    deleteFromOrganization: [
+      "DELETE /orgs/{org}/members/{username}/codespaces/{codespace_name}"
+    ],
+    deleteOrgSecret: ["DELETE /orgs/{org}/codespaces/secrets/{secret_name}"],
+    deleteRepoSecret: [
+      "DELETE /repos/{owner}/{repo}/codespaces/secrets/{secret_name}"
+    ],
+    deleteSecretForAuthenticatedUser: [
+      "DELETE /user/codespaces/secrets/{secret_name}"
+    ],
+    exportForAuthenticatedUser: [
+      "POST /user/codespaces/{codespace_name}/exports"
+    ],
+    getCodespacesForUserInOrg: [
+      "GET /orgs/{org}/members/{username}/codespaces"
+    ],
+    getExportDetailsForAuthenticatedUser: [
+      "GET /user/codespaces/{codespace_name}/exports/{export_id}"
+    ],
+    getForAuthenticatedUser: ["GET /user/codespaces/{codespace_name}"],
+    getOrgPublicKey: ["GET /orgs/{org}/codespaces/secrets/public-key"],
+    getOrgSecret: ["GET /orgs/{org}/codespaces/secrets/{secret_name}"],
+    getPublicKeyForAuthenticatedUser: [
+      "GET /user/codespaces/secrets/public-key"
+    ],
+    getRepoPublicKey: [
+      "GET /repos/{owner}/{repo}/codespaces/secrets/public-key"
+    ],
+    getRepoSecret: [
+      "GET /repos/{owner}/{repo}/codespaces/secrets/{secret_name}"
+    ],
+    getSecretForAuthenticatedUser: [
+      "GET /user/codespaces/secrets/{secret_name}"
+    ],
+    listDevcontainersInRepositoryForAuthenticatedUser: [
+      "GET /repos/{owner}/{repo}/codespaces/devcontainers"
+    ],
+    listForAuthenticatedUser: ["GET /user/codespaces"],
+    listInOrganization: [
+      "GET /orgs/{org}/codespaces",
+      {},
+      { renamedParameters: { org_id: "org" } }
+    ],
+    listInRepositoryForAuthenticatedUser: [
+      "GET /repos/{owner}/{repo}/codespaces"
+    ],
+    listOrgSecrets: ["GET /orgs/{org}/codespaces/secrets"],
+    listRepoSecrets: ["GET /repos/{owner}/{repo}/codespaces/secrets"],
+    listRepositoriesForSecretForAuthenticatedUser: [
+      "GET /user/codespaces/secrets/{secret_name}/repositories"
+    ],
+    listSecretsForAuthenticatedUser: ["GET /user/codespaces/secrets"],
+    listSelectedReposForOrgSecret: [
+      "GET /orgs/{org}/codespaces/secrets/{secret_name}/repositories"
+    ],
+    preFlightWithRepoForAuthenticatedUser: [
+      "GET /repos/{owner}/{repo}/codespaces/new"
+    ],
+    publishForAuthenticatedUser: [
+      "POST /user/codespaces/{codespace_name}/publish"
+    ],
+    removeRepositoryForSecretForAuthenticatedUser: [
+      "DELETE /user/codespaces/secrets/{secret_name}/repositories/{repository_id}"
+    ],
+    removeSelectedRepoFromOrgSecret: [
+      "DELETE /orgs/{org}/codespaces/secrets/{secret_name}/repositories/{repository_id}"
+    ],
+    repoMachinesForAuthenticatedUser: [
+      "GET /repos/{owner}/{repo}/codespaces/machines"
+    ],
+    setRepositoriesForSecretForAuthenticatedUser: [
+      "PUT /user/codespaces/secrets/{secret_name}/repositories"
+    ],
+    setSelectedReposForOrgSecret: [
+      "PUT /orgs/{org}/codespaces/secrets/{secret_name}/repositories"
+    ],
+    startForAuthenticatedUser: ["POST /user/codespaces/{codespace_name}/start"],
+    stopForAuthenticatedUser: ["POST /user/codespaces/{codespace_name}/stop"],
+    stopInOrganization: [
+      "POST /orgs/{org}/members/{username}/codespaces/{codespace_name}/stop"
+    ],
+    updateForAuthenticatedUser: ["PATCH /user/codespaces/{codespace_name}"]
+  },
+  copilot: {
+    addCopilotSeatsForTeams: [
+      "POST /orgs/{org}/copilot/billing/selected_teams"
+    ],
+    addCopilotSeatsForUsers: [
+      "POST /orgs/{org}/copilot/billing/selected_users"
+    ],
+    cancelCopilotSeatAssignmentForTeams: [
+      "DELETE /orgs/{org}/copilot/billing/selected_teams"
+    ],
+    cancelCopilotSeatAssignmentForUsers: [
+      "DELETE /orgs/{org}/copilot/billing/selected_users"
+    ],
+    copilotMetricsForOrganization: ["GET /orgs/{org}/copilot/metrics"],
+    copilotMetricsForTeam: ["GET /orgs/{org}/team/{team_slug}/copilot/metrics"],
+    getCopilotOrganizationDetails: ["GET /orgs/{org}/copilot/billing"],
+    getCopilotSeatDetailsForUser: [
+      "GET /orgs/{org}/members/{username}/copilot"
+    ],
+    listCopilotSeats: ["GET /orgs/{org}/copilot/billing/seats"]
+  },
+  credentials: { revoke: ["POST /credentials/revoke"] },
+  dependabot: {
+    addSelectedRepoToOrgSecret: [
+      "PUT /orgs/{org}/dependabot/secrets/{secret_name}/repositories/{repository_id}"
+    ],
+    createOrUpdateOrgSecret: [
+      "PUT /orgs/{org}/dependabot/secrets/{secret_name}"
+    ],
+    createOrUpdateRepoSecret: [
+      "PUT /repos/{owner}/{repo}/dependabot/secrets/{secret_name}"
+    ],
+    deleteOrgSecret: ["DELETE /orgs/{org}/dependabot/secrets/{secret_name}"],
+    deleteRepoSecret: [
+      "DELETE /repos/{owner}/{repo}/dependabot/secrets/{secret_name}"
+    ],
+    getAlert: ["GET /repos/{owner}/{repo}/dependabot/alerts/{alert_number}"],
+    getOrgPublicKey: ["GET /orgs/{org}/dependabot/secrets/public-key"],
+    getOrgSecret: ["GET /orgs/{org}/dependabot/secrets/{secret_name}"],
+    getRepoPublicKey: [
+      "GET /repos/{owner}/{repo}/dependabot/secrets/public-key"
+    ],
+    getRepoSecret: [
+      "GET /repos/{owner}/{repo}/dependabot/secrets/{secret_name}"
+    ],
+    listAlertsForEnterprise: [
+      "GET /enterprises/{enterprise}/dependabot/alerts"
+    ],
+    listAlertsForOrg: ["GET /orgs/{org}/dependabot/alerts"],
+    listAlertsForRepo: ["GET /repos/{owner}/{repo}/dependabot/alerts"],
+    listOrgSecrets: ["GET /orgs/{org}/dependabot/secrets"],
+    listRepoSecrets: ["GET /repos/{owner}/{repo}/dependabot/secrets"],
+    listSelectedReposForOrgSecret: [
+      "GET /orgs/{org}/dependabot/secrets/{secret_name}/repositories"
+    ],
+    removeSelectedRepoFromOrgSecret: [
+      "DELETE /orgs/{org}/dependabot/secrets/{secret_name}/repositories/{repository_id}"
+    ],
+    repositoryAccessForOrg: [
+      "GET /organizations/{org}/dependabot/repository-access"
+    ],
+    setRepositoryAccessDefaultLevel: [
+      "PUT /organizations/{org}/dependabot/repository-access/default-level"
+    ],
+    setSelectedReposForOrgSecret: [
+      "PUT /orgs/{org}/dependabot/secrets/{secret_name}/repositories"
+    ],
+    updateAlert: [
+      "PATCH /repos/{owner}/{repo}/dependabot/alerts/{alert_number}"
+    ],
+    updateRepositoryAccessForOrg: [
+      "PATCH /organizations/{org}/dependabot/repository-access"
+    ]
+  },
+  dependencyGraph: {
+    createRepositorySnapshot: [
+      "POST /repos/{owner}/{repo}/dependency-graph/snapshots"
+    ],
+    diffRange: [
+      "GET /repos/{owner}/{repo}/dependency-graph/compare/{basehead}"
+    ],
+    exportSbom: ["GET /repos/{owner}/{repo}/dependency-graph/sbom"]
+  },
+  emojis: { get: ["GET /emojis"] },
+  enterpriseTeamMemberships: {
+    add: [
+      "PUT /enterprises/{enterprise}/teams/{enterprise-team}/memberships/{username}"
+    ],
+    bulkAdd: [
+      "POST /enterprises/{enterprise}/teams/{enterprise-team}/memberships/add"
+    ],
+    bulkRemove: [
+      "POST /enterprises/{enterprise}/teams/{enterprise-team}/memberships/remove"
+    ],
+    get: [
+      "GET /enterprises/{enterprise}/teams/{enterprise-team}/memberships/{username}"
+    ],
+    list: ["GET /enterprises/{enterprise}/teams/{enterprise-team}/memberships"],
+    remove: [
+      "DELETE /enterprises/{enterprise}/teams/{enterprise-team}/memberships/{username}"
+    ]
+  },
+  enterpriseTeamOrganizations: {
+    add: [
+      "PUT /enterprises/{enterprise}/teams/{enterprise-team}/organizations/{org}"
+    ],
+    bulkAdd: [
+      "POST /enterprises/{enterprise}/teams/{enterprise-team}/organizations/add"
+    ],
+    bulkRemove: [
+      "POST /enterprises/{enterprise}/teams/{enterprise-team}/organizations/remove"
+    ],
+    delete: [
+      "DELETE /enterprises/{enterprise}/teams/{enterprise-team}/organizations/{org}"
+    ],
+    getAssignment: [
+      "GET /enterprises/{enterprise}/teams/{enterprise-team}/organizations/{org}"
+    ],
+    getAssignments: [
+      "GET /enterprises/{enterprise}/teams/{enterprise-team}/organizations"
+    ]
+  },
+  enterpriseTeams: {
+    create: ["POST /enterprises/{enterprise}/teams"],
+    delete: ["DELETE /enterprises/{enterprise}/teams/{team_slug}"],
+    get: ["GET /enterprises/{enterprise}/teams/{team_slug}"],
+    list: ["GET /enterprises/{enterprise}/teams"],
+    update: ["PATCH /enterprises/{enterprise}/teams/{team_slug}"]
+  },
+  gists: {
+    checkIsStarred: ["GET /gists/{gist_id}/star"],
+    create: ["POST /gists"],
+    createComment: ["POST /gists/{gist_id}/comments"],
+    delete: ["DELETE /gists/{gist_id}"],
+    deleteComment: ["DELETE /gists/{gist_id}/comments/{comment_id}"],
+    fork: ["POST /gists/{gist_id}/forks"],
+    get: ["GET /gists/{gist_id}"],
+    getComment: ["GET /gists/{gist_id}/comments/{comment_id}"],
+    getRevision: ["GET /gists/{gist_id}/{sha}"],
+    list: ["GET /gists"],
+    listComments: ["GET /gists/{gist_id}/comments"],
+    listCommits: ["GET /gists/{gist_id}/commits"],
+    listForUser: ["GET /users/{username}/gists"],
+    listForks: ["GET /gists/{gist_id}/forks"],
+    listPublic: ["GET /gists/public"],
+    listStarred: ["GET /gists/starred"],
+    star: ["PUT /gists/{gist_id}/star"],
+    unstar: ["DELETE /gists/{gist_id}/star"],
+    update: ["PATCH /gists/{gist_id}"],
+    updateComment: ["PATCH /gists/{gist_id}/comments/{comment_id}"]
+  },
+  git: {
+    createBlob: ["POST /repos/{owner}/{repo}/git/blobs"],
+    createCommit: ["POST /repos/{owner}/{repo}/git/commits"],
+    createRef: ["POST /repos/{owner}/{repo}/git/refs"],
+    createTag: ["POST /repos/{owner}/{repo}/git/tags"],
+    createTree: ["POST /repos/{owner}/{repo}/git/trees"],
+    deleteRef: ["DELETE /repos/{owner}/{repo}/git/refs/{ref}"],
+    getBlob: ["GET /repos/{owner}/{repo}/git/blobs/{file_sha}"],
+    getCommit: ["GET /repos/{owner}/{repo}/git/commits/{commit_sha}"],
+    getRef: ["GET /repos/{owner}/{repo}/git/ref/{ref}"],
+    getTag: ["GET /repos/{owner}/{repo}/git/tags/{tag_sha}"],
+    getTree: ["GET /repos/{owner}/{repo}/git/trees/{tree_sha}"],
+    listMatchingRefs: ["GET /repos/{owner}/{repo}/git/matching-refs/{ref}"],
+    updateRef: ["PATCH /repos/{owner}/{repo}/git/refs/{ref}"]
+  },
+  gitignore: {
+    getAllTemplates: ["GET /gitignore/templates"],
+    getTemplate: ["GET /gitignore/templates/{name}"]
+  },
+  hostedCompute: {
+    createNetworkConfigurationForOrg: [
+      "POST /orgs/{org}/settings/network-configurations"
+    ],
+    deleteNetworkConfigurationFromOrg: [
+      "DELETE /orgs/{org}/settings/network-configurations/{network_configuration_id}"
+    ],
+    getNetworkConfigurationForOrg: [
+      "GET /orgs/{org}/settings/network-configurations/{network_configuration_id}"
+    ],
+    getNetworkSettingsForOrg: [
+      "GET /orgs/{org}/settings/network-settings/{network_settings_id}"
+    ],
+    listNetworkConfigurationsForOrg: [
+      "GET /orgs/{org}/settings/network-configurations"
+    ],
+    updateNetworkConfigurationForOrg: [
+      "PATCH /orgs/{org}/settings/network-configurations/{network_configuration_id}"
+    ]
+  },
+  interactions: {
+    getRestrictionsForAuthenticatedUser: ["GET /user/interaction-limits"],
+    getRestrictionsForOrg: ["GET /orgs/{org}/interaction-limits"],
+    getRestrictionsForRepo: ["GET /repos/{owner}/{repo}/interaction-limits"],
+    getRestrictionsForYourPublicRepos: [
+      "GET /user/interaction-limits",
+      {},
+      { renamed: ["interactions", "getRestrictionsForAuthenticatedUser"] }
+    ],
+    removeRestrictionsForAuthenticatedUser: ["DELETE /user/interaction-limits"],
+    removeRestrictionsForOrg: ["DELETE /orgs/{org}/interaction-limits"],
+    removeRestrictionsForRepo: [
+      "DELETE /repos/{owner}/{repo}/interaction-limits"
+    ],
+    removeRestrictionsForYourPublicRepos: [
+      "DELETE /user/interaction-limits",
+      {},
+      { renamed: ["interactions", "removeRestrictionsForAuthenticatedUser"] }
+    ],
+    setRestrictionsForAuthenticatedUser: ["PUT /user/interaction-limits"],
+    setRestrictionsForOrg: ["PUT /orgs/{org}/interaction-limits"],
+    setRestrictionsForRepo: ["PUT /repos/{owner}/{repo}/interaction-limits"],
+    setRestrictionsForYourPublicRepos: [
+      "PUT /user/interaction-limits",
+      {},
+      { renamed: ["interactions", "setRestrictionsForAuthenticatedUser"] }
+    ]
+  },
+  issues: {
+    addAssignees: [
+      "POST /repos/{owner}/{repo}/issues/{issue_number}/assignees"
+    ],
+    addBlockedByDependency: [
+      "POST /repos/{owner}/{repo}/issues/{issue_number}/dependencies/blocked_by"
+    ],
+    addLabels: ["POST /repos/{owner}/{repo}/issues/{issue_number}/labels"],
+    addSubIssue: [
+      "POST /repos/{owner}/{repo}/issues/{issue_number}/sub_issues"
+    ],
+    checkUserCanBeAssigned: ["GET /repos/{owner}/{repo}/assignees/{assignee}"],
+    checkUserCanBeAssignedToIssue: [
+      "GET /repos/{owner}/{repo}/issues/{issue_number}/assignees/{assignee}"
+    ],
+    create: ["POST /repos/{owner}/{repo}/issues"],
+    createComment: [
+      "POST /repos/{owner}/{repo}/issues/{issue_number}/comments"
+    ],
+    createLabel: ["POST /repos/{owner}/{repo}/labels"],
+    createMilestone: ["POST /repos/{owner}/{repo}/milestones"],
+    deleteComment: [
+      "DELETE /repos/{owner}/{repo}/issues/comments/{comment_id}"
+    ],
+    deleteLabel: ["DELETE /repos/{owner}/{repo}/labels/{name}"],
+    deleteMilestone: [
+      "DELETE /repos/{owner}/{repo}/milestones/{milestone_number}"
+    ],
+    get: ["GET /repos/{owner}/{repo}/issues/{issue_number}"],
+    getComment: ["GET /repos/{owner}/{repo}/issues/comments/{comment_id}"],
+    getEvent: ["GET /repos/{owner}/{repo}/issues/events/{event_id}"],
+    getLabel: ["GET /repos/{owner}/{repo}/labels/{name}"],
+    getMilestone: ["GET /repos/{owner}/{repo}/milestones/{milestone_number}"],
+    getParent: ["GET /repos/{owner}/{repo}/issues/{issue_number}/parent"],
+    list: ["GET /issues"],
+    listAssignees: ["GET /repos/{owner}/{repo}/assignees"],
+    listComments: ["GET /repos/{owner}/{repo}/issues/{issue_number}/comments"],
+    listCommentsForRepo: ["GET /repos/{owner}/{repo}/issues/comments"],
+    listDependenciesBlockedBy: [
+      "GET /repos/{owner}/{repo}/issues/{issue_number}/dependencies/blocked_by"
+    ],
+    listDependenciesBlocking: [
+      "GET /repos/{owner}/{repo}/issues/{issue_number}/dependencies/blocking"
+    ],
+    listEvents: ["GET /repos/{owner}/{repo}/issues/{issue_number}/events"],
+    listEventsForRepo: ["GET /repos/{owner}/{repo}/issues/events"],
+    listEventsForTimeline: [
+      "GET /repos/{owner}/{repo}/issues/{issue_number}/timeline"
+    ],
+    listForAuthenticatedUser: ["GET /user/issues"],
+    listForOrg: ["GET /orgs/{org}/issues"],
+    listForRepo: ["GET /repos/{owner}/{repo}/issues"],
+    listLabelsForMilestone: [
+      "GET /repos/{owner}/{repo}/milestones/{milestone_number}/labels"
+    ],
+    listLabelsForRepo: ["GET /repos/{owner}/{repo}/labels"],
+    listLabelsOnIssue: [
+      "GET /repos/{owner}/{repo}/issues/{issue_number}/labels"
+    ],
+    listMilestones: ["GET /repos/{owner}/{repo}/milestones"],
+    listSubIssues: [
+      "GET /repos/{owner}/{repo}/issues/{issue_number}/sub_issues"
+    ],
+    lock: ["PUT /repos/{owner}/{repo}/issues/{issue_number}/lock"],
+    removeAllLabels: [
+      "DELETE /repos/{owner}/{repo}/issues/{issue_number}/labels"
+    ],
+    removeAssignees: [
+      "DELETE /repos/{owner}/{repo}/issues/{issue_number}/assignees"
+    ],
+    removeDependencyBlockedBy: [
+      "DELETE /repos/{owner}/{repo}/issues/{issue_number}/dependencies/blocked_by/{issue_id}"
+    ],
+    removeLabel: [
+      "DELETE /repos/{owner}/{repo}/issues/{issue_number}/labels/{name}"
+    ],
+    removeSubIssue: [
+      "DELETE /repos/{owner}/{repo}/issues/{issue_number}/sub_issue"
+    ],
+    reprioritizeSubIssue: [
+      "PATCH /repos/{owner}/{repo}/issues/{issue_number}/sub_issues/priority"
+    ],
+    setLabels: ["PUT /repos/{owner}/{repo}/issues/{issue_number}/labels"],
+    unlock: ["DELETE /repos/{owner}/{repo}/issues/{issue_number}/lock"],
+    update: ["PATCH /repos/{owner}/{repo}/issues/{issue_number}"],
+    updateComment: ["PATCH /repos/{owner}/{repo}/issues/comments/{comment_id}"],
+    updateLabel: ["PATCH /repos/{owner}/{repo}/labels/{name}"],
+    updateMilestone: [
+      "PATCH /repos/{owner}/{repo}/milestones/{milestone_number}"
+    ]
+  },
+  licenses: {
+    get: ["GET /licenses/{license}"],
+    getAllCommonlyUsed: ["GET /licenses"],
+    getForRepo: ["GET /repos/{owner}/{repo}/license"]
+  },
+  markdown: {
+    render: ["POST /markdown"],
+    renderRaw: [
+      "POST /markdown/raw",
+      { headers: { "content-type": "text/plain; charset=utf-8" } }
+    ]
+  },
+  meta: {
+    get: ["GET /meta"],
+    getAllVersions: ["GET /versions"],
+    getOctocat: ["GET /octocat"],
+    getZen: ["GET /zen"],
+    root: ["GET /"]
+  },
+  migrations: {
+    deleteArchiveForAuthenticatedUser: [
+      "DELETE /user/migrations/{migration_id}/archive"
+    ],
+    deleteArchiveForOrg: [
+      "DELETE /orgs/{org}/migrations/{migration_id}/archive"
+    ],
+    downloadArchiveForOrg: [
+      "GET /orgs/{org}/migrations/{migration_id}/archive"
+    ],
+    getArchiveForAuthenticatedUser: [
+      "GET /user/migrations/{migration_id}/archive"
+    ],
+    getStatusForAuthenticatedUser: ["GET /user/migrations/{migration_id}"],
+    getStatusForOrg: ["GET /orgs/{org}/migrations/{migration_id}"],
+    listForAuthenticatedUser: ["GET /user/migrations"],
+    listForOrg: ["GET /orgs/{org}/migrations"],
+    listReposForAuthenticatedUser: [
+      "GET /user/migrations/{migration_id}/repositories"
+    ],
+    listReposForOrg: ["GET /orgs/{org}/migrations/{migration_id}/repositories"],
+    listReposForUser: [
+      "GET /user/migrations/{migration_id}/repositories",
+      {},
+      { renamed: ["migrations", "listReposForAuthenticatedUser"] }
+    ],
+    startForAuthenticatedUser: ["POST /user/migrations"],
+    startForOrg: ["POST /orgs/{org}/migrations"],
+    unlockRepoForAuthenticatedUser: [
+      "DELETE /user/migrations/{migration_id}/repos/{repo_name}/lock"
+    ],
+    unlockRepoForOrg: [
+      "DELETE /orgs/{org}/migrations/{migration_id}/repos/{repo_name}/lock"
+    ]
+  },
+  oidc: {
+    getOidcCustomSubTemplateForOrg: [
+      "GET /orgs/{org}/actions/oidc/customization/sub"
+    ],
+    updateOidcCustomSubTemplateForOrg: [
+      "PUT /orgs/{org}/actions/oidc/customization/sub"
+    ]
+  },
+  orgs: {
+    addSecurityManagerTeam: [
+      "PUT /orgs/{org}/security-managers/teams/{team_slug}",
+      {},
+      {
+        deprecated: "octokit.rest.orgs.addSecurityManagerTeam() is deprecated, see https://docs.github.com/rest/orgs/security-managers#add-a-security-manager-team"
+      }
+    ],
+    assignTeamToOrgRole: [
+      "PUT /orgs/{org}/organization-roles/teams/{team_slug}/{role_id}"
+    ],
+    assignUserToOrgRole: [
+      "PUT /orgs/{org}/organization-roles/users/{username}/{role_id}"
+    ],
+    blockUser: ["PUT /orgs/{org}/blocks/{username}"],
+    cancelInvitation: ["DELETE /orgs/{org}/invitations/{invitation_id}"],
+    checkBlockedUser: ["GET /orgs/{org}/blocks/{username}"],
+    checkMembershipForUser: ["GET /orgs/{org}/members/{username}"],
+    checkPublicMembershipForUser: ["GET /orgs/{org}/public_members/{username}"],
+    convertMemberToOutsideCollaborator: [
+      "PUT /orgs/{org}/outside_collaborators/{username}"
+    ],
+    createArtifactStorageRecord: [
+      "POST /orgs/{org}/artifacts/metadata/storage-record"
+    ],
+    createInvitation: ["POST /orgs/{org}/invitations"],
+    createIssueType: ["POST /orgs/{org}/issue-types"],
+    createWebhook: ["POST /orgs/{org}/hooks"],
+    customPropertiesForOrgsCreateOrUpdateOrganizationValues: [
+      "PATCH /organizations/{org}/org-properties/values"
+    ],
+    customPropertiesForOrgsGetOrganizationValues: [
+      "GET /organizations/{org}/org-properties/values"
+    ],
+    customPropertiesForReposCreateOrUpdateOrganizationDefinition: [
+      "PUT /orgs/{org}/properties/schema/{custom_property_name}"
+    ],
+    customPropertiesForReposCreateOrUpdateOrganizationDefinitions: [
+      "PATCH /orgs/{org}/properties/schema"
+    ],
+    customPropertiesForReposCreateOrUpdateOrganizationValues: [
+      "PATCH /orgs/{org}/properties/values"
+    ],
+    customPropertiesForReposDeleteOrganizationDefinition: [
+      "DELETE /orgs/{org}/properties/schema/{custom_property_name}"
+    ],
+    customPropertiesForReposGetOrganizationDefinition: [
+      "GET /orgs/{org}/properties/schema/{custom_property_name}"
+    ],
+    customPropertiesForReposGetOrganizationDefinitions: [
+      "GET /orgs/{org}/properties/schema"
+    ],
+    customPropertiesForReposGetOrganizationValues: [
+      "GET /orgs/{org}/properties/values"
+    ],
+    delete: ["DELETE /orgs/{org}"],
+    deleteAttestationsBulk: ["POST /orgs/{org}/attestations/delete-request"],
+    deleteAttestationsById: [
+      "DELETE /orgs/{org}/attestations/{attestation_id}"
+    ],
+    deleteAttestationsBySubjectDigest: [
+      "DELETE /orgs/{org}/attestations/digest/{subject_digest}"
+    ],
+    deleteIssueType: ["DELETE /orgs/{org}/issue-types/{issue_type_id}"],
+    deleteWebhook: ["DELETE /orgs/{org}/hooks/{hook_id}"],
+    disableSelectedRepositoryImmutableReleasesOrganization: [
+      "DELETE /orgs/{org}/settings/immutable-releases/repositories/{repository_id}"
+    ],
+    enableSelectedRepositoryImmutableReleasesOrganization: [
+      "PUT /orgs/{org}/settings/immutable-releases/repositories/{repository_id}"
+    ],
+    get: ["GET /orgs/{org}"],
+    getImmutableReleasesSettings: [
+      "GET /orgs/{org}/settings/immutable-releases"
+    ],
+    getImmutableReleasesSettingsRepositories: [
+      "GET /orgs/{org}/settings/immutable-releases/repositories"
+    ],
+    getMembershipForAuthenticatedUser: ["GET /user/memberships/orgs/{org}"],
+    getMembershipForUser: ["GET /orgs/{org}/memberships/{username}"],
+    getOrgRole: ["GET /orgs/{org}/organization-roles/{role_id}"],
+    getOrgRulesetHistory: ["GET /orgs/{org}/rulesets/{ruleset_id}/history"],
+    getOrgRulesetVersion: [
+      "GET /orgs/{org}/rulesets/{ruleset_id}/history/{version_id}"
+    ],
+    getWebhook: ["GET /orgs/{org}/hooks/{hook_id}"],
+    getWebhookConfigForOrg: ["GET /orgs/{org}/hooks/{hook_id}/config"],
+    getWebhookDelivery: [
+      "GET /orgs/{org}/hooks/{hook_id}/deliveries/{delivery_id}"
+    ],
+    list: ["GET /organizations"],
+    listAppInstallations: ["GET /orgs/{org}/installations"],
+    listArtifactStorageRecords: [
+      "GET /orgs/{org}/artifacts/{subject_digest}/metadata/storage-records"
+    ],
+    listAttestationRepositories: ["GET /orgs/{org}/attestations/repositories"],
+    listAttestations: ["GET /orgs/{org}/attestations/{subject_digest}"],
+    listAttestationsBulk: [
+      "POST /orgs/{org}/attestations/bulk-list{?per_page,before,after}"
+    ],
+    listBlockedUsers: ["GET /orgs/{org}/blocks"],
+    listFailedInvitations: ["GET /orgs/{org}/failed_invitations"],
+    listForAuthenticatedUser: ["GET /user/orgs"],
+    listForUser: ["GET /users/{username}/orgs"],
+    listInvitationTeams: ["GET /orgs/{org}/invitations/{invitation_id}/teams"],
+    listIssueTypes: ["GET /orgs/{org}/issue-types"],
+    listMembers: ["GET /orgs/{org}/members"],
+    listMembershipsForAuthenticatedUser: ["GET /user/memberships/orgs"],
+    listOrgRoleTeams: ["GET /orgs/{org}/organization-roles/{role_id}/teams"],
+    listOrgRoleUsers: ["GET /orgs/{org}/organization-roles/{role_id}/users"],
+    listOrgRoles: ["GET /orgs/{org}/organization-roles"],
+    listOrganizationFineGrainedPermissions: [
+      "GET /orgs/{org}/organization-fine-grained-permissions"
+    ],
+    listOutsideCollaborators: ["GET /orgs/{org}/outside_collaborators"],
+    listPatGrantRepositories: [
+      "GET /orgs/{org}/personal-access-tokens/{pat_id}/repositories"
+    ],
+    listPatGrantRequestRepositories: [
+      "GET /orgs/{org}/personal-access-token-requests/{pat_request_id}/repositories"
+    ],
+    listPatGrantRequests: ["GET /orgs/{org}/personal-access-token-requests"],
+    listPatGrants: ["GET /orgs/{org}/personal-access-tokens"],
+    listPendingInvitations: ["GET /orgs/{org}/invitations"],
+    listPublicMembers: ["GET /orgs/{org}/public_members"],
+    listSecurityManagerTeams: [
+      "GET /orgs/{org}/security-managers",
+      {},
+      {
+        deprecated: "octokit.rest.orgs.listSecurityManagerTeams() is deprecated, see https://docs.github.com/rest/orgs/security-managers#list-security-manager-teams"
+      }
+    ],
+    listWebhookDeliveries: ["GET /orgs/{org}/hooks/{hook_id}/deliveries"],
+    listWebhooks: ["GET /orgs/{org}/hooks"],
+    pingWebhook: ["POST /orgs/{org}/hooks/{hook_id}/pings"],
+    redeliverWebhookDelivery: [
+      "POST /orgs/{org}/hooks/{hook_id}/deliveries/{delivery_id}/attempts"
+    ],
+    removeMember: ["DELETE /orgs/{org}/members/{username}"],
+    removeMembershipForUser: ["DELETE /orgs/{org}/memberships/{username}"],
+    removeOutsideCollaborator: [
+      "DELETE /orgs/{org}/outside_collaborators/{username}"
+    ],
+    removePublicMembershipForAuthenticatedUser: [
+      "DELETE /orgs/{org}/public_members/{username}"
+    ],
+    removeSecurityManagerTeam: [
+      "DELETE /orgs/{org}/security-managers/teams/{team_slug}",
+      {},
+      {
+        deprecated: "octokit.rest.orgs.removeSecurityManagerTeam() is deprecated, see https://docs.github.com/rest/orgs/security-managers#remove-a-security-manager-team"
+      }
+    ],
+    reviewPatGrantRequest: [
+      "POST /orgs/{org}/personal-access-token-requests/{pat_request_id}"
+    ],
+    reviewPatGrantRequestsInBulk: [
+      "POST /orgs/{org}/personal-access-token-requests"
+    ],
+    revokeAllOrgRolesTeam: [
+      "DELETE /orgs/{org}/organization-roles/teams/{team_slug}"
+    ],
+    revokeAllOrgRolesUser: [
+      "DELETE /orgs/{org}/organization-roles/users/{username}"
+    ],
+    revokeOrgRoleTeam: [
+      "DELETE /orgs/{org}/organization-roles/teams/{team_slug}/{role_id}"
+    ],
+    revokeOrgRoleUser: [
+      "DELETE /orgs/{org}/organization-roles/users/{username}/{role_id}"
+    ],
+    setImmutableReleasesSettings: [
+      "PUT /orgs/{org}/settings/immutable-releases"
+    ],
+    setImmutableReleasesSettingsRepositories: [
+      "PUT /orgs/{org}/settings/immutable-releases/repositories"
+    ],
+    setMembershipForUser: ["PUT /orgs/{org}/memberships/{username}"],
+    setPublicMembershipForAuthenticatedUser: [
+      "PUT /orgs/{org}/public_members/{username}"
+    ],
+    unblockUser: ["DELETE /orgs/{org}/blocks/{username}"],
+    update: ["PATCH /orgs/{org}"],
+    updateIssueType: ["PUT /orgs/{org}/issue-types/{issue_type_id}"],
+    updateMembershipForAuthenticatedUser: [
+      "PATCH /user/memberships/orgs/{org}"
+    ],
+    updatePatAccess: ["POST /orgs/{org}/personal-access-tokens/{pat_id}"],
+    updatePatAccesses: ["POST /orgs/{org}/personal-access-tokens"],
+    updateWebhook: ["PATCH /orgs/{org}/hooks/{hook_id}"],
+    updateWebhookConfigForOrg: ["PATCH /orgs/{org}/hooks/{hook_id}/config"]
+  },
+  packages: {
+    deletePackageForAuthenticatedUser: [
+      "DELETE /user/packages/{package_type}/{package_name}"
+    ],
+    deletePackageForOrg: [
+      "DELETE /orgs/{org}/packages/{package_type}/{package_name}"
+    ],
+    deletePackageForUser: [
+      "DELETE /users/{username}/packages/{package_type}/{package_name}"
+    ],
+    deletePackageVersionForAuthenticatedUser: [
+      "DELETE /user/packages/{package_type}/{package_name}/versions/{package_version_id}"
+    ],
+    deletePackageVersionForOrg: [
+      "DELETE /orgs/{org}/packages/{package_type}/{package_name}/versions/{package_version_id}"
+    ],
+    deletePackageVersionForUser: [
+      "DELETE /users/{username}/packages/{package_type}/{package_name}/versions/{package_version_id}"
+    ],
+    getAllPackageVersionsForAPackageOwnedByAnOrg: [
+      "GET /orgs/{org}/packages/{package_type}/{package_name}/versions",
+      {},
+      { renamed: ["packages", "getAllPackageVersionsForPackageOwnedByOrg"] }
+    ],
+    getAllPackageVersionsForAPackageOwnedByTheAuthenticatedUser: [
+      "GET /user/packages/{package_type}/{package_name}/versions",
+      {},
+      {
+        renamed: [
+          "packages",
+          "getAllPackageVersionsForPackageOwnedByAuthenticatedUser"
+        ]
+      }
+    ],
+    getAllPackageVersionsForPackageOwnedByAuthenticatedUser: [
+      "GET /user/packages/{package_type}/{package_name}/versions"
+    ],
+    getAllPackageVersionsForPackageOwnedByOrg: [
+      "GET /orgs/{org}/packages/{package_type}/{package_name}/versions"
+    ],
+    getAllPackageVersionsForPackageOwnedByUser: [
+      "GET /users/{username}/packages/{package_type}/{package_name}/versions"
+    ],
+    getPackageForAuthenticatedUser: [
+      "GET /user/packages/{package_type}/{package_name}"
+    ],
+    getPackageForOrganization: [
+      "GET /orgs/{org}/packages/{package_type}/{package_name}"
+    ],
+    getPackageForUser: [
+      "GET /users/{username}/packages/{package_type}/{package_name}"
+    ],
+    getPackageVersionForAuthenticatedUser: [
+      "GET /user/packages/{package_type}/{package_name}/versions/{package_version_id}"
+    ],
+    getPackageVersionForOrganization: [
+      "GET /orgs/{org}/packages/{package_type}/{package_name}/versions/{package_version_id}"
+    ],
+    getPackageVersionForUser: [
+      "GET /users/{username}/packages/{package_type}/{package_name}/versions/{package_version_id}"
+    ],
+    listDockerMigrationConflictingPackagesForAuthenticatedUser: [
+      "GET /user/docker/conflicts"
+    ],
+    listDockerMigrationConflictingPackagesForOrganization: [
+      "GET /orgs/{org}/docker/conflicts"
+    ],
+    listDockerMigrationConflictingPackagesForUser: [
+      "GET /users/{username}/docker/conflicts"
+    ],
+    listPackagesForAuthenticatedUser: ["GET /user/packages"],
+    listPackagesForOrganization: ["GET /orgs/{org}/packages"],
+    listPackagesForUser: ["GET /users/{username}/packages"],
+    restorePackageForAuthenticatedUser: [
+      "POST /user/packages/{package_type}/{package_name}/restore{?token}"
+    ],
+    restorePackageForOrg: [
+      "POST /orgs/{org}/packages/{package_type}/{package_name}/restore{?token}"
+    ],
+    restorePackageForUser: [
+      "POST /users/{username}/packages/{package_type}/{package_name}/restore{?token}"
+    ],
+    restorePackageVersionForAuthenticatedUser: [
+      "POST /user/packages/{package_type}/{package_name}/versions/{package_version_id}/restore"
+    ],
+    restorePackageVersionForOrg: [
+      "POST /orgs/{org}/packages/{package_type}/{package_name}/versions/{package_version_id}/restore"
+    ],
+    restorePackageVersionForUser: [
+      "POST /users/{username}/packages/{package_type}/{package_name}/versions/{package_version_id}/restore"
+    ]
+  },
+  privateRegistries: {
+    createOrgPrivateRegistry: ["POST /orgs/{org}/private-registries"],
+    deleteOrgPrivateRegistry: [
+      "DELETE /orgs/{org}/private-registries/{secret_name}"
+    ],
+    getOrgPrivateRegistry: ["GET /orgs/{org}/private-registries/{secret_name}"],
+    getOrgPublicKey: ["GET /orgs/{org}/private-registries/public-key"],
+    listOrgPrivateRegistries: ["GET /orgs/{org}/private-registries"],
+    updateOrgPrivateRegistry: [
+      "PATCH /orgs/{org}/private-registries/{secret_name}"
+    ]
+  },
+  projects: {
+    addItemForOrg: ["POST /orgs/{org}/projectsV2/{project_number}/items"],
+    addItemForUser: [
+      "POST /users/{username}/projectsV2/{project_number}/items"
+    ],
+    deleteItemForOrg: [
+      "DELETE /orgs/{org}/projectsV2/{project_number}/items/{item_id}"
+    ],
+    deleteItemForUser: [
+      "DELETE /users/{username}/projectsV2/{project_number}/items/{item_id}"
+    ],
+    getFieldForOrg: [
+      "GET /orgs/{org}/projectsV2/{project_number}/fields/{field_id}"
+    ],
+    getFieldForUser: [
+      "GET /users/{username}/projectsV2/{project_number}/fields/{field_id}"
+    ],
+    getForOrg: ["GET /orgs/{org}/projectsV2/{project_number}"],
+    getForUser: ["GET /users/{username}/projectsV2/{project_number}"],
+    getOrgItem: ["GET /orgs/{org}/projectsV2/{project_number}/items/{item_id}"],
+    getUserItem: [
+      "GET /users/{username}/projectsV2/{project_number}/items/{item_id}"
+    ],
+    listFieldsForOrg: ["GET /orgs/{org}/projectsV2/{project_number}/fields"],
+    listFieldsForUser: [
+      "GET /users/{username}/projectsV2/{project_number}/fields"
+    ],
+    listForOrg: ["GET /orgs/{org}/projectsV2"],
+    listForUser: ["GET /users/{username}/projectsV2"],
+    listItemsForOrg: ["GET /orgs/{org}/projectsV2/{project_number}/items"],
+    listItemsForUser: [
+      "GET /users/{username}/projectsV2/{project_number}/items"
+    ],
+    updateItemForOrg: [
+      "PATCH /orgs/{org}/projectsV2/{project_number}/items/{item_id}"
+    ],
+    updateItemForUser: [
+      "PATCH /users/{username}/projectsV2/{project_number}/items/{item_id}"
+    ]
+  },
+  pulls: {
+    checkIfMerged: ["GET /repos/{owner}/{repo}/pulls/{pull_number}/merge"],
+    create: ["POST /repos/{owner}/{repo}/pulls"],
+    createReplyForReviewComment: [
+      "POST /repos/{owner}/{repo}/pulls/{pull_number}/comments/{comment_id}/replies"
+    ],
+    createReview: ["POST /repos/{owner}/{repo}/pulls/{pull_number}/reviews"],
+    createReviewComment: [
+      "POST /repos/{owner}/{repo}/pulls/{pull_number}/comments"
+    ],
+    deletePendingReview: [
+      "DELETE /repos/{owner}/{repo}/pulls/{pull_number}/reviews/{review_id}"
+    ],
+    deleteReviewComment: [
+      "DELETE /repos/{owner}/{repo}/pulls/comments/{comment_id}"
+    ],
+    dismissReview: [
+      "PUT /repos/{owner}/{repo}/pulls/{pull_number}/reviews/{review_id}/dismissals"
+    ],
+    get: ["GET /repos/{owner}/{repo}/pulls/{pull_number}"],
+    getReview: [
+      "GET /repos/{owner}/{repo}/pulls/{pull_number}/reviews/{review_id}"
+    ],
+    getReviewComment: ["GET /repos/{owner}/{repo}/pulls/comments/{comment_id}"],
+    list: ["GET /repos/{owner}/{repo}/pulls"],
+    listCommentsForReview: [
+      "GET /repos/{owner}/{repo}/pulls/{pull_number}/reviews/{review_id}/comments"
+    ],
+    listCommits: ["GET /repos/{owner}/{repo}/pulls/{pull_number}/commits"],
+    listFiles: ["GET /repos/{owner}/{repo}/pulls/{pull_number}/files"],
+    listRequestedReviewers: [
+      "GET /repos/{owner}/{repo}/pulls/{pull_number}/requested_reviewers"
+    ],
+    listReviewComments: [
+      "GET /repos/{owner}/{repo}/pulls/{pull_number}/comments"
+    ],
+    listReviewCommentsForRepo: ["GET /repos/{owner}/{repo}/pulls/comments"],
+    listReviews: ["GET /repos/{owner}/{repo}/pulls/{pull_number}/reviews"],
+    merge: ["PUT /repos/{owner}/{repo}/pulls/{pull_number}/merge"],
+    removeRequestedReviewers: [
+      "DELETE /repos/{owner}/{repo}/pulls/{pull_number}/requested_reviewers"
+    ],
+    requestReviewers: [
+      "POST /repos/{owner}/{repo}/pulls/{pull_number}/requested_reviewers"
+    ],
+    submitReview: [
+      "POST /repos/{owner}/{repo}/pulls/{pull_number}/reviews/{review_id}/events"
+    ],
+    update: ["PATCH /repos/{owner}/{repo}/pulls/{pull_number}"],
+    updateBranch: [
+      "PUT /repos/{owner}/{repo}/pulls/{pull_number}/update-branch"
+    ],
+    updateReview: [
+      "PUT /repos/{owner}/{repo}/pulls/{pull_number}/reviews/{review_id}"
+    ],
+    updateReviewComment: [
+      "PATCH /repos/{owner}/{repo}/pulls/comments/{comment_id}"
+    ]
+  },
+  rateLimit: { get: ["GET /rate_limit"] },
+  reactions: {
+    createForCommitComment: [
+      "POST /repos/{owner}/{repo}/comments/{comment_id}/reactions"
+    ],
+    createForIssue: [
+      "POST /repos/{owner}/{repo}/issues/{issue_number}/reactions"
+    ],
+    createForIssueComment: [
+      "POST /repos/{owner}/{repo}/issues/comments/{comment_id}/reactions"
+    ],
+    createForPullRequestReviewComment: [
+      "POST /repos/{owner}/{repo}/pulls/comments/{comment_id}/reactions"
+    ],
+    createForRelease: [
+      "POST /repos/{owner}/{repo}/releases/{release_id}/reactions"
+    ],
+    createForTeamDiscussionCommentInOrg: [
+      "POST /orgs/{org}/teams/{team_slug}/discussions/{discussion_number}/comments/{comment_number}/reactions"
+    ],
+    createForTeamDiscussionInOrg: [
+      "POST /orgs/{org}/teams/{team_slug}/discussions/{discussion_number}/reactions"
+    ],
+    deleteForCommitComment: [
+      "DELETE /repos/{owner}/{repo}/comments/{comment_id}/reactions/{reaction_id}"
+    ],
+    deleteForIssue: [
+      "DELETE /repos/{owner}/{repo}/issues/{issue_number}/reactions/{reaction_id}"
+    ],
+    deleteForIssueComment: [
+      "DELETE /repos/{owner}/{repo}/issues/comments/{comment_id}/reactions/{reaction_id}"
+    ],
+    deleteForPullRequestComment: [
+      "DELETE /repos/{owner}/{repo}/pulls/comments/{comment_id}/reactions/{reaction_id}"
+    ],
+    deleteForRelease: [
+      "DELETE /repos/{owner}/{repo}/releases/{release_id}/reactions/{reaction_id}"
+    ],
+    deleteForTeamDiscussion: [
+      "DELETE /orgs/{org}/teams/{team_slug}/discussions/{discussion_number}/reactions/{reaction_id}"
+    ],
+    deleteForTeamDiscussionComment: [
+      "DELETE /orgs/{org}/teams/{team_slug}/discussions/{discussion_number}/comments/{comment_number}/reactions/{reaction_id}"
+    ],
+    listForCommitComment: [
+      "GET /repos/{owner}/{repo}/comments/{comment_id}/reactions"
+    ],
+    listForIssue: ["GET /repos/{owner}/{repo}/issues/{issue_number}/reactions"],
+    listForIssueComment: [
+      "GET /repos/{owner}/{repo}/issues/comments/{comment_id}/reactions"
+    ],
+    listForPullRequestReviewComment: [
+      "GET /repos/{owner}/{repo}/pulls/comments/{comment_id}/reactions"
+    ],
+    listForRelease: [
+      "GET /repos/{owner}/{repo}/releases/{release_id}/reactions"
+    ],
+    listForTeamDiscussionCommentInOrg: [
+      "GET /orgs/{org}/teams/{team_slug}/discussions/{discussion_number}/comments/{comment_number}/reactions"
+    ],
+    listForTeamDiscussionInOrg: [
+      "GET /orgs/{org}/teams/{team_slug}/discussions/{discussion_number}/reactions"
+    ]
+  },
+  repos: {
+    acceptInvitation: [
+      "PATCH /user/repository_invitations/{invitation_id}",
+      {},
+      { renamed: ["repos", "acceptInvitationForAuthenticatedUser"] }
+    ],
+    acceptInvitationForAuthenticatedUser: [
+      "PATCH /user/repository_invitations/{invitation_id}"
+    ],
+    addAppAccessRestrictions: [
+      "POST /repos/{owner}/{repo}/branches/{branch}/protection/restrictions/apps",
+      {},
+      { mapToData: "apps" }
+    ],
+    addCollaborator: ["PUT /repos/{owner}/{repo}/collaborators/{username}"],
+    addStatusCheckContexts: [
+      "POST /repos/{owner}/{repo}/branches/{branch}/protection/required_status_checks/contexts",
+      {},
+      { mapToData: "contexts" }
+    ],
+    addTeamAccessRestrictions: [
+      "POST /repos/{owner}/{repo}/branches/{branch}/protection/restrictions/teams",
+      {},
+      { mapToData: "teams" }
+    ],
+    addUserAccessRestrictions: [
+      "POST /repos/{owner}/{repo}/branches/{branch}/protection/restrictions/users",
+      {},
+      { mapToData: "users" }
+    ],
+    cancelPagesDeployment: [
+      "POST /repos/{owner}/{repo}/pages/deployments/{pages_deployment_id}/cancel"
+    ],
+    checkAutomatedSecurityFixes: [
+      "GET /repos/{owner}/{repo}/automated-security-fixes"
+    ],
+    checkCollaborator: ["GET /repos/{owner}/{repo}/collaborators/{username}"],
+    checkImmutableReleases: ["GET /repos/{owner}/{repo}/immutable-releases"],
+    checkPrivateVulnerabilityReporting: [
+      "GET /repos/{owner}/{repo}/private-vulnerability-reporting"
+    ],
+    checkVulnerabilityAlerts: [
+      "GET /repos/{owner}/{repo}/vulnerability-alerts"
+    ],
+    codeownersErrors: ["GET /repos/{owner}/{repo}/codeowners/errors"],
+    compareCommits: ["GET /repos/{owner}/{repo}/compare/{base}...{head}"],
+    compareCommitsWithBasehead: [
+      "GET /repos/{owner}/{repo}/compare/{basehead}"
+    ],
+    createAttestation: ["POST /repos/{owner}/{repo}/attestations"],
+    createAutolink: ["POST /repos/{owner}/{repo}/autolinks"],
+    createCommitComment: [
+      "POST /repos/{owner}/{repo}/commits/{commit_sha}/comments"
+    ],
+    createCommitSignatureProtection: [
+      "POST /repos/{owner}/{repo}/branches/{branch}/protection/required_signatures"
+    ],
+    createCommitStatus: ["POST /repos/{owner}/{repo}/statuses/{sha}"],
+    createDeployKey: ["POST /repos/{owner}/{repo}/keys"],
+    createDeployment: ["POST /repos/{owner}/{repo}/deployments"],
+    createDeploymentBranchPolicy: [
+      "POST /repos/{owner}/{repo}/environments/{environment_name}/deployment-branch-policies"
+    ],
+    createDeploymentProtectionRule: [
+      "POST /repos/{owner}/{repo}/environments/{environment_name}/deployment_protection_rules"
+    ],
+    createDeploymentStatus: [
+      "POST /repos/{owner}/{repo}/deployments/{deployment_id}/statuses"
+    ],
+    createDispatchEvent: ["POST /repos/{owner}/{repo}/dispatches"],
+    createForAuthenticatedUser: ["POST /user/repos"],
+    createFork: ["POST /repos/{owner}/{repo}/forks"],
+    createInOrg: ["POST /orgs/{org}/repos"],
+    createOrUpdateEnvironment: [
+      "PUT /repos/{owner}/{repo}/environments/{environment_name}"
+    ],
+    createOrUpdateFileContents: ["PUT /repos/{owner}/{repo}/contents/{path}"],
+    createOrgRuleset: ["POST /orgs/{org}/rulesets"],
+    createPagesDeployment: ["POST /repos/{owner}/{repo}/pages/deployments"],
+    createPagesSite: ["POST /repos/{owner}/{repo}/pages"],
+    createRelease: ["POST /repos/{owner}/{repo}/releases"],
+    createRepoRuleset: ["POST /repos/{owner}/{repo}/rulesets"],
+    createUsingTemplate: [
+      "POST /repos/{template_owner}/{template_repo}/generate"
+    ],
+    createWebhook: ["POST /repos/{owner}/{repo}/hooks"],
+    customPropertiesForReposCreateOrUpdateRepositoryValues: [
+      "PATCH /repos/{owner}/{repo}/properties/values"
+    ],
+    customPropertiesForReposGetRepositoryValues: [
+      "GET /repos/{owner}/{repo}/properties/values"
+    ],
+    declineInvitation: [
+      "DELETE /user/repository_invitations/{invitation_id}",
+      {},
+      { renamed: ["repos", "declineInvitationForAuthenticatedUser"] }
+    ],
+    declineInvitationForAuthenticatedUser: [
+      "DELETE /user/repository_invitations/{invitation_id}"
+    ],
+    delete: ["DELETE /repos/{owner}/{repo}"],
+    deleteAccessRestrictions: [
+      "DELETE /repos/{owner}/{repo}/branches/{branch}/protection/restrictions"
+    ],
+    deleteAdminBranchProtection: [
+      "DELETE /repos/{owner}/{repo}/branches/{branch}/protection/enforce_admins"
+    ],
+    deleteAnEnvironment: [
+      "DELETE /repos/{owner}/{repo}/environments/{environment_name}"
+    ],
+    deleteAutolink: ["DELETE /repos/{owner}/{repo}/autolinks/{autolink_id}"],
+    deleteBranchProtection: [
+      "DELETE /repos/{owner}/{repo}/branches/{branch}/protection"
+    ],
+    deleteCommitComment: ["DELETE /repos/{owner}/{repo}/comments/{comment_id}"],
+    deleteCommitSignatureProtection: [
+      "DELETE /repos/{owner}/{repo}/branches/{branch}/protection/required_signatures"
+    ],
+    deleteDeployKey: ["DELETE /repos/{owner}/{repo}/keys/{key_id}"],
+    deleteDeployment: [
+      "DELETE /repos/{owner}/{repo}/deployments/{deployment_id}"
+    ],
+    deleteDeploymentBranchPolicy: [
+      "DELETE /repos/{owner}/{repo}/environments/{environment_name}/deployment-branch-policies/{branch_policy_id}"
+    ],
+    deleteFile: ["DELETE /repos/{owner}/{repo}/contents/{path}"],
+    deleteInvitation: [
+      "DELETE /repos/{owner}/{repo}/invitations/{invitation_id}"
+    ],
+    deleteOrgRuleset: ["DELETE /orgs/{org}/rulesets/{ruleset_id}"],
+    deletePagesSite: ["DELETE /repos/{owner}/{repo}/pages"],
+    deletePullRequestReviewProtection: [
+      "DELETE /repos/{owner}/{repo}/branches/{branch}/protection/required_pull_request_reviews"
+    ],
+    deleteRelease: ["DELETE /repos/{owner}/{repo}/releases/{release_id}"],
+    deleteReleaseAsset: [
+      "DELETE /repos/{owner}/{repo}/releases/assets/{asset_id}"
+    ],
+    deleteRepoRuleset: ["DELETE /repos/{owner}/{repo}/rulesets/{ruleset_id}"],
+    deleteWebhook: ["DELETE /repos/{owner}/{repo}/hooks/{hook_id}"],
+    disableAutomatedSecurityFixes: [
+      "DELETE /repos/{owner}/{repo}/automated-security-fixes"
+    ],
+    disableDeploymentProtectionRule: [
+      "DELETE /repos/{owner}/{repo}/environments/{environment_name}/deployment_protection_rules/{protection_rule_id}"
+    ],
+    disableImmutableReleases: [
+      "DELETE /repos/{owner}/{repo}/immutable-releases"
+    ],
+    disablePrivateVulnerabilityReporting: [
+      "DELETE /repos/{owner}/{repo}/private-vulnerability-reporting"
+    ],
+    disableVulnerabilityAlerts: [
+      "DELETE /repos/{owner}/{repo}/vulnerability-alerts"
+    ],
+    downloadArchive: [
+      "GET /repos/{owner}/{repo}/zipball/{ref}",
+      {},
+      { renamed: ["repos", "downloadZipballArchive"] }
+    ],
+    downloadTarballArchive: ["GET /repos/{owner}/{repo}/tarball/{ref}"],
+    downloadZipballArchive: ["GET /repos/{owner}/{repo}/zipball/{ref}"],
+    enableAutomatedSecurityFixes: [
+      "PUT /repos/{owner}/{repo}/automated-security-fixes"
+    ],
+    enableImmutableReleases: ["PUT /repos/{owner}/{repo}/immutable-releases"],
+    enablePrivateVulnerabilityReporting: [
+      "PUT /repos/{owner}/{repo}/private-vulnerability-reporting"
+    ],
+    enableVulnerabilityAlerts: [
+      "PUT /repos/{owner}/{repo}/vulnerability-alerts"
+    ],
+    generateReleaseNotes: [
+      "POST /repos/{owner}/{repo}/releases/generate-notes"
+    ],
+    get: ["GET /repos/{owner}/{repo}"],
+    getAccessRestrictions: [
+      "GET /repos/{owner}/{repo}/branches/{branch}/protection/restrictions"
+    ],
+    getAdminBranchProtection: [
+      "GET /repos/{owner}/{repo}/branches/{branch}/protection/enforce_admins"
+    ],
+    getAllDeploymentProtectionRules: [
+      "GET /repos/{owner}/{repo}/environments/{environment_name}/deployment_protection_rules"
+    ],
+    getAllEnvironments: ["GET /repos/{owner}/{repo}/environments"],
+    getAllStatusCheckContexts: [
+      "GET /repos/{owner}/{repo}/branches/{branch}/protection/required_status_checks/contexts"
+    ],
+    getAllTopics: ["GET /repos/{owner}/{repo}/topics"],
+    getAppsWithAccessToProtectedBranch: [
+      "GET /repos/{owner}/{repo}/branches/{branch}/protection/restrictions/apps"
+    ],
+    getAutolink: ["GET /repos/{owner}/{repo}/autolinks/{autolink_id}"],
+    getBranch: ["GET /repos/{owner}/{repo}/branches/{branch}"],
+    getBranchProtection: [
+      "GET /repos/{owner}/{repo}/branches/{branch}/protection"
+    ],
+    getBranchRules: ["GET /repos/{owner}/{repo}/rules/branches/{branch}"],
+    getClones: ["GET /repos/{owner}/{repo}/traffic/clones"],
+    getCodeFrequencyStats: ["GET /repos/{owner}/{repo}/stats/code_frequency"],
+    getCollaboratorPermissionLevel: [
+      "GET /repos/{owner}/{repo}/collaborators/{username}/permission"
+    ],
+    getCombinedStatusForRef: ["GET /repos/{owner}/{repo}/commits/{ref}/status"],
+    getCommit: ["GET /repos/{owner}/{repo}/commits/{ref}"],
+    getCommitActivityStats: ["GET /repos/{owner}/{repo}/stats/commit_activity"],
+    getCommitComment: ["GET /repos/{owner}/{repo}/comments/{comment_id}"],
+    getCommitSignatureProtection: [
+      "GET /repos/{owner}/{repo}/branches/{branch}/protection/required_signatures"
+    ],
+    getCommunityProfileMetrics: ["GET /repos/{owner}/{repo}/community/profile"],
+    getContent: ["GET /repos/{owner}/{repo}/contents/{path}"],
+    getContributorsStats: ["GET /repos/{owner}/{repo}/stats/contributors"],
+    getCustomDeploymentProtectionRule: [
+      "GET /repos/{owner}/{repo}/environments/{environment_name}/deployment_protection_rules/{protection_rule_id}"
+    ],
+    getDeployKey: ["GET /repos/{owner}/{repo}/keys/{key_id}"],
+    getDeployment: ["GET /repos/{owner}/{repo}/deployments/{deployment_id}"],
+    getDeploymentBranchPolicy: [
+      "GET /repos/{owner}/{repo}/environments/{environment_name}/deployment-branch-policies/{branch_policy_id}"
+    ],
+    getDeploymentStatus: [
+      "GET /repos/{owner}/{repo}/deployments/{deployment_id}/statuses/{status_id}"
+    ],
+    getEnvironment: [
+      "GET /repos/{owner}/{repo}/environments/{environment_name}"
+    ],
+    getLatestPagesBuild: ["GET /repos/{owner}/{repo}/pages/builds/latest"],
+    getLatestRelease: ["GET /repos/{owner}/{repo}/releases/latest"],
+    getOrgRuleSuite: ["GET /orgs/{org}/rulesets/rule-suites/{rule_suite_id}"],
+    getOrgRuleSuites: ["GET /orgs/{org}/rulesets/rule-suites"],
+    getOrgRuleset: ["GET /orgs/{org}/rulesets/{ruleset_id}"],
+    getOrgRulesets: ["GET /orgs/{org}/rulesets"],
+    getPages: ["GET /repos/{owner}/{repo}/pages"],
+    getPagesBuild: ["GET /repos/{owner}/{repo}/pages/builds/{build_id}"],
+    getPagesDeployment: [
+      "GET /repos/{owner}/{repo}/pages/deployments/{pages_deployment_id}"
+    ],
+    getPagesHealthCheck: ["GET /repos/{owner}/{repo}/pages/health"],
+    getParticipationStats: ["GET /repos/{owner}/{repo}/stats/participation"],
+    getPullRequestReviewProtection: [
+      "GET /repos/{owner}/{repo}/branches/{branch}/protection/required_pull_request_reviews"
+    ],
+    getPunchCardStats: ["GET /repos/{owner}/{repo}/stats/punch_card"],
+    getReadme: ["GET /repos/{owner}/{repo}/readme"],
+    getReadmeInDirectory: ["GET /repos/{owner}/{repo}/readme/{dir}"],
+    getRelease: ["GET /repos/{owner}/{repo}/releases/{release_id}"],
+    getReleaseAsset: ["GET /repos/{owner}/{repo}/releases/assets/{asset_id}"],
+    getReleaseByTag: ["GET /repos/{owner}/{repo}/releases/tags/{tag}"],
+    getRepoRuleSuite: [
+      "GET /repos/{owner}/{repo}/rulesets/rule-suites/{rule_suite_id}"
+    ],
+    getRepoRuleSuites: ["GET /repos/{owner}/{repo}/rulesets/rule-suites"],
+    getRepoRuleset: ["GET /repos/{owner}/{repo}/rulesets/{ruleset_id}"],
+    getRepoRulesetHistory: [
+      "GET /repos/{owner}/{repo}/rulesets/{ruleset_id}/history"
+    ],
+    getRepoRulesetVersion: [
+      "GET /repos/{owner}/{repo}/rulesets/{ruleset_id}/history/{version_id}"
+    ],
+    getRepoRulesets: ["GET /repos/{owner}/{repo}/rulesets"],
+    getStatusChecksProtection: [
+      "GET /repos/{owner}/{repo}/branches/{branch}/protection/required_status_checks"
+    ],
+    getTeamsWithAccessToProtectedBranch: [
+      "GET /repos/{owner}/{repo}/branches/{branch}/protection/restrictions/teams"
+    ],
+    getTopPaths: ["GET /repos/{owner}/{repo}/traffic/popular/paths"],
+    getTopReferrers: ["GET /repos/{owner}/{repo}/traffic/popular/referrers"],
+    getUsersWithAccessToProtectedBranch: [
+      "GET /repos/{owner}/{repo}/branches/{branch}/protection/restrictions/users"
+    ],
+    getViews: ["GET /repos/{owner}/{repo}/traffic/views"],
+    getWebhook: ["GET /repos/{owner}/{repo}/hooks/{hook_id}"],
+    getWebhookConfigForRepo: [
+      "GET /repos/{owner}/{repo}/hooks/{hook_id}/config"
+    ],
+    getWebhookDelivery: [
+      "GET /repos/{owner}/{repo}/hooks/{hook_id}/deliveries/{delivery_id}"
+    ],
+    listActivities: ["GET /repos/{owner}/{repo}/activity"],
+    listAttestations: [
+      "GET /repos/{owner}/{repo}/attestations/{subject_digest}"
+    ],
+    listAutolinks: ["GET /repos/{owner}/{repo}/autolinks"],
+    listBranches: ["GET /repos/{owner}/{repo}/branches"],
+    listBranchesForHeadCommit: [
+      "GET /repos/{owner}/{repo}/commits/{commit_sha}/branches-where-head"
+    ],
+    listCollaborators: ["GET /repos/{owner}/{repo}/collaborators"],
+    listCommentsForCommit: [
+      "GET /repos/{owner}/{repo}/commits/{commit_sha}/comments"
+    ],
+    listCommitCommentsForRepo: ["GET /repos/{owner}/{repo}/comments"],
+    listCommitStatusesForRef: [
+      "GET /repos/{owner}/{repo}/commits/{ref}/statuses"
+    ],
+    listCommits: ["GET /repos/{owner}/{repo}/commits"],
+    listContributors: ["GET /repos/{owner}/{repo}/contributors"],
+    listCustomDeploymentRuleIntegrations: [
+      "GET /repos/{owner}/{repo}/environments/{environment_name}/deployment_protection_rules/apps"
+    ],
+    listDeployKeys: ["GET /repos/{owner}/{repo}/keys"],
+    listDeploymentBranchPolicies: [
+      "GET /repos/{owner}/{repo}/environments/{environment_name}/deployment-branch-policies"
+    ],
+    listDeploymentStatuses: [
+      "GET /repos/{owner}/{repo}/deployments/{deployment_id}/statuses"
+    ],
+    listDeployments: ["GET /repos/{owner}/{repo}/deployments"],
+    listForAuthenticatedUser: ["GET /user/repos"],
+    listForOrg: ["GET /orgs/{org}/repos"],
+    listForUser: ["GET /users/{username}/repos"],
+    listForks: ["GET /repos/{owner}/{repo}/forks"],
+    listInvitations: ["GET /repos/{owner}/{repo}/invitations"],
+    listInvitationsForAuthenticatedUser: ["GET /user/repository_invitations"],
+    listLanguages: ["GET /repos/{owner}/{repo}/languages"],
+    listPagesBuilds: ["GET /repos/{owner}/{repo}/pages/builds"],
+    listPublic: ["GET /repositories"],
+    listPullRequestsAssociatedWithCommit: [
+      "GET /repos/{owner}/{repo}/commits/{commit_sha}/pulls"
+    ],
+    listReleaseAssets: [
+      "GET /repos/{owner}/{repo}/releases/{release_id}/assets"
+    ],
+    listReleases: ["GET /repos/{owner}/{repo}/releases"],
+    listTags: ["GET /repos/{owner}/{repo}/tags"],
+    listTeams: ["GET /repos/{owner}/{repo}/teams"],
+    listWebhookDeliveries: [
+      "GET /repos/{owner}/{repo}/hooks/{hook_id}/deliveries"
+    ],
+    listWebhooks: ["GET /repos/{owner}/{repo}/hooks"],
+    merge: ["POST /repos/{owner}/{repo}/merges"],
+    mergeUpstream: ["POST /repos/{owner}/{repo}/merge-upstream"],
+    pingWebhook: ["POST /repos/{owner}/{repo}/hooks/{hook_id}/pings"],
+    redeliverWebhookDelivery: [
+      "POST /repos/{owner}/{repo}/hooks/{hook_id}/deliveries/{delivery_id}/attempts"
+    ],
+    removeAppAccessRestrictions: [
+      "DELETE /repos/{owner}/{repo}/branches/{branch}/protection/restrictions/apps",
+      {},
+      { mapToData: "apps" }
+    ],
+    removeCollaborator: [
+      "DELETE /repos/{owner}/{repo}/collaborators/{username}"
+    ],
+    removeStatusCheckContexts: [
+      "DELETE /repos/{owner}/{repo}/branches/{branch}/protection/required_status_checks/contexts",
+      {},
+      { mapToData: "contexts" }
+    ],
+    removeStatusCheckProtection: [
+      "DELETE /repos/{owner}/{repo}/branches/{branch}/protection/required_status_checks"
+    ],
+    removeTeamAccessRestrictions: [
+      "DELETE /repos/{owner}/{repo}/branches/{branch}/protection/restrictions/teams",
+      {},
+      { mapToData: "teams" }
+    ],
+    removeUserAccessRestrictions: [
+      "DELETE /repos/{owner}/{repo}/branches/{branch}/protection/restrictions/users",
+      {},
+      { mapToData: "users" }
+    ],
+    renameBranch: ["POST /repos/{owner}/{repo}/branches/{branch}/rename"],
+    replaceAllTopics: ["PUT /repos/{owner}/{repo}/topics"],
+    requestPagesBuild: ["POST /repos/{owner}/{repo}/pages/builds"],
+    setAdminBranchProtection: [
+      "POST /repos/{owner}/{repo}/branches/{branch}/protection/enforce_admins"
+    ],
+    setAppAccessRestrictions: [
+      "PUT /repos/{owner}/{repo}/branches/{branch}/protection/restrictions/apps",
+      {},
+      { mapToData: "apps" }
+    ],
+    setStatusCheckContexts: [
+      "PUT /repos/{owner}/{repo}/branches/{branch}/protection/required_status_checks/contexts",
+      {},
+      { mapToData: "contexts" }
+    ],
+    setTeamAccessRestrictions: [
+      "PUT /repos/{owner}/{repo}/branches/{branch}/protection/restrictions/teams",
+      {},
+      { mapToData: "teams" }
+    ],
+    setUserAccessRestrictions: [
+      "PUT /repos/{owner}/{repo}/branches/{branch}/protection/restrictions/users",
+      {},
+      { mapToData: "users" }
+    ],
+    testPushWebhook: ["POST /repos/{owner}/{repo}/hooks/{hook_id}/tests"],
+    transfer: ["POST /repos/{owner}/{repo}/transfer"],
+    update: ["PATCH /repos/{owner}/{repo}"],
+    updateBranchProtection: [
+      "PUT /repos/{owner}/{repo}/branches/{branch}/protection"
+    ],
+    updateCommitComment: ["PATCH /repos/{owner}/{repo}/comments/{comment_id}"],
+    updateDeploymentBranchPolicy: [
+      "PUT /repos/{owner}/{repo}/environments/{environment_name}/deployment-branch-policies/{branch_policy_id}"
+    ],
+    updateInformationAboutPagesSite: ["PUT /repos/{owner}/{repo}/pages"],
+    updateInvitation: [
+      "PATCH /repos/{owner}/{repo}/invitations/{invitation_id}"
+    ],
+    updateOrgRuleset: ["PUT /orgs/{org}/rulesets/{ruleset_id}"],
+    updatePullRequestReviewProtection: [
+      "PATCH /repos/{owner}/{repo}/branches/{branch}/protection/required_pull_request_reviews"
+    ],
+    updateRelease: ["PATCH /repos/{owner}/{repo}/releases/{release_id}"],
+    updateReleaseAsset: [
+      "PATCH /repos/{owner}/{repo}/releases/assets/{asset_id}"
+    ],
+    updateRepoRuleset: ["PUT /repos/{owner}/{repo}/rulesets/{ruleset_id}"],
+    updateStatusCheckPotection: [
+      "PATCH /repos/{owner}/{repo}/branches/{branch}/protection/required_status_checks",
+      {},
+      { renamed: ["repos", "updateStatusCheckProtection"] }
+    ],
+    updateStatusCheckProtection: [
+      "PATCH /repos/{owner}/{repo}/branches/{branch}/protection/required_status_checks"
+    ],
+    updateWebhook: ["PATCH /repos/{owner}/{repo}/hooks/{hook_id}"],
+    updateWebhookConfigForRepo: [
+      "PATCH /repos/{owner}/{repo}/hooks/{hook_id}/config"
+    ],
+    uploadReleaseAsset: [
+      "POST /repos/{owner}/{repo}/releases/{release_id}/assets{?name,label}",
+      { baseUrl: "https://uploads.github.com" }
+    ]
+  },
+  search: {
+    code: ["GET /search/code"],
+    commits: ["GET /search/commits"],
+    issuesAndPullRequests: ["GET /search/issues"],
+    labels: ["GET /search/labels"],
+    repos: ["GET /search/repositories"],
+    topics: ["GET /search/topics"],
+    users: ["GET /search/users"]
+  },
+  secretScanning: {
+    createPushProtectionBypass: [
+      "POST /repos/{owner}/{repo}/secret-scanning/push-protection-bypasses"
+    ],
+    getAlert: [
+      "GET /repos/{owner}/{repo}/secret-scanning/alerts/{alert_number}"
+    ],
+    getScanHistory: ["GET /repos/{owner}/{repo}/secret-scanning/scan-history"],
+    listAlertsForOrg: ["GET /orgs/{org}/secret-scanning/alerts"],
+    listAlertsForRepo: ["GET /repos/{owner}/{repo}/secret-scanning/alerts"],
+    listLocationsForAlert: [
+      "GET /repos/{owner}/{repo}/secret-scanning/alerts/{alert_number}/locations"
+    ],
+    listOrgPatternConfigs: [
+      "GET /orgs/{org}/secret-scanning/pattern-configurations"
+    ],
+    updateAlert: [
+      "PATCH /repos/{owner}/{repo}/secret-scanning/alerts/{alert_number}"
+    ],
+    updateOrgPatternConfigs: [
+      "PATCH /orgs/{org}/secret-scanning/pattern-configurations"
+    ]
+  },
+  securityAdvisories: {
+    createFork: [
+      "POST /repos/{owner}/{repo}/security-advisories/{ghsa_id}/forks"
+    ],
+    createPrivateVulnerabilityReport: [
+      "POST /repos/{owner}/{repo}/security-advisories/reports"
+    ],
+    createRepositoryAdvisory: [
+      "POST /repos/{owner}/{repo}/security-advisories"
+    ],
+    createRepositoryAdvisoryCveRequest: [
+      "POST /repos/{owner}/{repo}/security-advisories/{ghsa_id}/cve"
+    ],
+    getGlobalAdvisory: ["GET /advisories/{ghsa_id}"],
+    getRepositoryAdvisory: [
+      "GET /repos/{owner}/{repo}/security-advisories/{ghsa_id}"
+    ],
+    listGlobalAdvisories: ["GET /advisories"],
+    listOrgRepositoryAdvisories: ["GET /orgs/{org}/security-advisories"],
+    listRepositoryAdvisories: ["GET /repos/{owner}/{repo}/security-advisories"],
+    updateRepositoryAdvisory: [
+      "PATCH /repos/{owner}/{repo}/security-advisories/{ghsa_id}"
+    ]
+  },
+  teams: {
+    addOrUpdateMembershipForUserInOrg: [
+      "PUT /orgs/{org}/teams/{team_slug}/memberships/{username}"
+    ],
+    addOrUpdateRepoPermissionsInOrg: [
+      "PUT /orgs/{org}/teams/{team_slug}/repos/{owner}/{repo}"
+    ],
+    checkPermissionsForRepoInOrg: [
+      "GET /orgs/{org}/teams/{team_slug}/repos/{owner}/{repo}"
+    ],
+    create: ["POST /orgs/{org}/teams"],
+    createDiscussionCommentInOrg: [
+      "POST /orgs/{org}/teams/{team_slug}/discussions/{discussion_number}/comments"
+    ],
+    createDiscussionInOrg: ["POST /orgs/{org}/teams/{team_slug}/discussions"],
+    deleteDiscussionCommentInOrg: [
+      "DELETE /orgs/{org}/teams/{team_slug}/discussions/{discussion_number}/comments/{comment_number}"
+    ],
+    deleteDiscussionInOrg: [
+      "DELETE /orgs/{org}/teams/{team_slug}/discussions/{discussion_number}"
+    ],
+    deleteInOrg: ["DELETE /orgs/{org}/teams/{team_slug}"],
+    getByName: ["GET /orgs/{org}/teams/{team_slug}"],
+    getDiscussionCommentInOrg: [
+      "GET /orgs/{org}/teams/{team_slug}/discussions/{discussion_number}/comments/{comment_number}"
+    ],
+    getDiscussionInOrg: [
+      "GET /orgs/{org}/teams/{team_slug}/discussions/{discussion_number}"
+    ],
+    getMembershipForUserInOrg: [
+      "GET /orgs/{org}/teams/{team_slug}/memberships/{username}"
+    ],
+    list: ["GET /orgs/{org}/teams"],
+    listChildInOrg: ["GET /orgs/{org}/teams/{team_slug}/teams"],
+    listDiscussionCommentsInOrg: [
+      "GET /orgs/{org}/teams/{team_slug}/discussions/{discussion_number}/comments"
+    ],
+    listDiscussionsInOrg: ["GET /orgs/{org}/teams/{team_slug}/discussions"],
+    listForAuthenticatedUser: ["GET /user/teams"],
+    listMembersInOrg: ["GET /orgs/{org}/teams/{team_slug}/members"],
+    listPendingInvitationsInOrg: [
+      "GET /orgs/{org}/teams/{team_slug}/invitations"
+    ],
+    listReposInOrg: ["GET /orgs/{org}/teams/{team_slug}/repos"],
+    removeMembershipForUserInOrg: [
+      "DELETE /orgs/{org}/teams/{team_slug}/memberships/{username}"
+    ],
+    removeRepoInOrg: [
+      "DELETE /orgs/{org}/teams/{team_slug}/repos/{owner}/{repo}"
+    ],
+    updateDiscussionCommentInOrg: [
+      "PATCH /orgs/{org}/teams/{team_slug}/discussions/{discussion_number}/comments/{comment_number}"
+    ],
+    updateDiscussionInOrg: [
+      "PATCH /orgs/{org}/teams/{team_slug}/discussions/{discussion_number}"
+    ],
+    updateInOrg: ["PATCH /orgs/{org}/teams/{team_slug}"]
+  },
+  users: {
+    addEmailForAuthenticated: [
+      "POST /user/emails",
+      {},
+      { renamed: ["users", "addEmailForAuthenticatedUser"] }
+    ],
+    addEmailForAuthenticatedUser: ["POST /user/emails"],
+    addSocialAccountForAuthenticatedUser: ["POST /user/social_accounts"],
+    block: ["PUT /user/blocks/{username}"],
+    checkBlocked: ["GET /user/blocks/{username}"],
+    checkFollowingForUser: ["GET /users/{username}/following/{target_user}"],
+    checkPersonIsFollowedByAuthenticated: ["GET /user/following/{username}"],
+    createGpgKeyForAuthenticated: [
+      "POST /user/gpg_keys",
+      {},
+      { renamed: ["users", "createGpgKeyForAuthenticatedUser"] }
+    ],
+    createGpgKeyForAuthenticatedUser: ["POST /user/gpg_keys"],
+    createPublicSshKeyForAuthenticated: [
+      "POST /user/keys",
+      {},
+      { renamed: ["users", "createPublicSshKeyForAuthenticatedUser"] }
+    ],
+    createPublicSshKeyForAuthenticatedUser: ["POST /user/keys"],
+    createSshSigningKeyForAuthenticatedUser: ["POST /user/ssh_signing_keys"],
+    deleteAttestationsBulk: [
+      "POST /users/{username}/attestations/delete-request"
+    ],
+    deleteAttestationsById: [
+      "DELETE /users/{username}/attestations/{attestation_id}"
+    ],
+    deleteAttestationsBySubjectDigest: [
+      "DELETE /users/{username}/attestations/digest/{subject_digest}"
+    ],
+    deleteEmailForAuthenticated: [
+      "DELETE /user/emails",
+      {},
+      { renamed: ["users", "deleteEmailForAuthenticatedUser"] }
+    ],
+    deleteEmailForAuthenticatedUser: ["DELETE /user/emails"],
+    deleteGpgKeyForAuthenticated: [
+      "DELETE /user/gpg_keys/{gpg_key_id}",
+      {},
+      { renamed: ["users", "deleteGpgKeyForAuthenticatedUser"] }
+    ],
+    deleteGpgKeyForAuthenticatedUser: ["DELETE /user/gpg_keys/{gpg_key_id}"],
+    deletePublicSshKeyForAuthenticated: [
+      "DELETE /user/keys/{key_id}",
+      {},
+      { renamed: ["users", "deletePublicSshKeyForAuthenticatedUser"] }
+    ],
+    deletePublicSshKeyForAuthenticatedUser: ["DELETE /user/keys/{key_id}"],
+    deleteSocialAccountForAuthenticatedUser: ["DELETE /user/social_accounts"],
+    deleteSshSigningKeyForAuthenticatedUser: [
+      "DELETE /user/ssh_signing_keys/{ssh_signing_key_id}"
+    ],
+    follow: ["PUT /user/following/{username}"],
+    getAuthenticated: ["GET /user"],
+    getById: ["GET /user/{account_id}"],
+    getByUsername: ["GET /users/{username}"],
+    getContextForUser: ["GET /users/{username}/hovercard"],
+    getGpgKeyForAuthenticated: [
+      "GET /user/gpg_keys/{gpg_key_id}",
+      {},
+      { renamed: ["users", "getGpgKeyForAuthenticatedUser"] }
+    ],
+    getGpgKeyForAuthenticatedUser: ["GET /user/gpg_keys/{gpg_key_id}"],
+    getPublicSshKeyForAuthenticated: [
+      "GET /user/keys/{key_id}",
+      {},
+      { renamed: ["users", "getPublicSshKeyForAuthenticatedUser"] }
+    ],
+    getPublicSshKeyForAuthenticatedUser: ["GET /user/keys/{key_id}"],
+    getSshSigningKeyForAuthenticatedUser: [
+      "GET /user/ssh_signing_keys/{ssh_signing_key_id}"
+    ],
+    list: ["GET /users"],
+    listAttestations: ["GET /users/{username}/attestations/{subject_digest}"],
+    listAttestationsBulk: [
+      "POST /users/{username}/attestations/bulk-list{?per_page,before,after}"
+    ],
+    listBlockedByAuthenticated: [
+      "GET /user/blocks",
+      {},
+      { renamed: ["users", "listBlockedByAuthenticatedUser"] }
+    ],
+    listBlockedByAuthenticatedUser: ["GET /user/blocks"],
+    listEmailsForAuthenticated: [
+      "GET /user/emails",
+      {},
+      { renamed: ["users", "listEmailsForAuthenticatedUser"] }
+    ],
+    listEmailsForAuthenticatedUser: ["GET /user/emails"],
+    listFollowedByAuthenticated: [
+      "GET /user/following",
+      {},
+      { renamed: ["users", "listFollowedByAuthenticatedUser"] }
+    ],
+    listFollowedByAuthenticatedUser: ["GET /user/following"],
+    listFollowersForAuthenticatedUser: ["GET /user/followers"],
+    listFollowersForUser: ["GET /users/{username}/followers"],
+    listFollowingForUser: ["GET /users/{username}/following"],
+    listGpgKeysForAuthenticated: [
+      "GET /user/gpg_keys",
+      {},
+      { renamed: ["users", "listGpgKeysForAuthenticatedUser"] }
+    ],
+    listGpgKeysForAuthenticatedUser: ["GET /user/gpg_keys"],
+    listGpgKeysForUser: ["GET /users/{username}/gpg_keys"],
+    listPublicEmailsForAuthenticated: [
+      "GET /user/public_emails",
+      {},
+      { renamed: ["users", "listPublicEmailsForAuthenticatedUser"] }
+    ],
+    listPublicEmailsForAuthenticatedUser: ["GET /user/public_emails"],
+    listPublicKeysForUser: ["GET /users/{username}/keys"],
+    listPublicSshKeysForAuthenticated: [
+      "GET /user/keys",
+      {},
+      { renamed: ["users", "listPublicSshKeysForAuthenticatedUser"] }
+    ],
+    listPublicSshKeysForAuthenticatedUser: ["GET /user/keys"],
+    listSocialAccountsForAuthenticatedUser: ["GET /user/social_accounts"],
+    listSocialAccountsForUser: ["GET /users/{username}/social_accounts"],
+    listSshSigningKeysForAuthenticatedUser: ["GET /user/ssh_signing_keys"],
+    listSshSigningKeysForUser: ["GET /users/{username}/ssh_signing_keys"],
+    setPrimaryEmailVisibilityForAuthenticated: [
+      "PATCH /user/email/visibility",
+      {},
+      { renamed: ["users", "setPrimaryEmailVisibilityForAuthenticatedUser"] }
+    ],
+    setPrimaryEmailVisibilityForAuthenticatedUser: [
+      "PATCH /user/email/visibility"
+    ],
+    unblock: ["DELETE /user/blocks/{username}"],
+    unfollow: ["DELETE /user/following/{username}"],
+    updateAuthenticated: ["PATCH /user"]
+  }
+};
+var endpoints_default = Endpoints;
+
+// node_modules/@octokit/plugin-rest-endpoint-methods/dist-src/endpoints-to-methods.js
+var endpointMethodsMap = /* @__PURE__ */ new Map();
+for (const [scope, endpoints2] of Object.entries(endpoints_default)) {
+  for (const [methodName, endpoint2] of Object.entries(endpoints2)) {
+    const [route, defaults2, decorations] = endpoint2;
+    const [method, url2] = route.split(/ /);
+    const endpointDefaults = Object.assign(
+      {
+        method,
+        url: url2
+      },
+      defaults2
+    );
+    if (!endpointMethodsMap.has(scope)) {
+      endpointMethodsMap.set(scope, /* @__PURE__ */ new Map());
+    }
+    endpointMethodsMap.get(scope).set(methodName, {
+      scope,
+      methodName,
+      endpointDefaults,
+      decorations
+    });
+  }
+}
+var handler = {
+  has({ scope }, methodName) {
+    return endpointMethodsMap.get(scope).has(methodName);
+  },
+  getOwnPropertyDescriptor(target, methodName) {
+    return {
+      value: this.get(target, methodName),
+      // ensures method is in the cache
+      configurable: true,
+      writable: true,
+      enumerable: true
+    };
+  },
+  defineProperty(target, methodName, descriptor) {
+    Object.defineProperty(target.cache, methodName, descriptor);
     return true;
-  return void 0;
+  },
+  deleteProperty(target, methodName) {
+    delete target.cache[methodName];
+    return true;
+  },
+  ownKeys({ scope }) {
+    return [...endpointMethodsMap.get(scope).keys()];
+  },
+  set(target, methodName, value) {
+    return target.cache[methodName] = value;
+  },
+  get({ octokit, scope, cache }, methodName) {
+    if (cache[methodName]) {
+      return cache[methodName];
+    }
+    const method = endpointMethodsMap.get(scope).get(methodName);
+    if (!method) {
+      return void 0;
+    }
+    const { endpointDefaults, decorations } = method;
+    if (decorations) {
+      cache[methodName] = decorate(
+        octokit,
+        scope,
+        methodName,
+        endpointDefaults,
+        decorations
+      );
+    } else {
+      cache[methodName] = octokit.request.defaults(endpointDefaults);
+    }
+    return cache[methodName];
+  }
+};
+function endpointsToMethods(octokit) {
+  const newMethods = {};
+  for (const scope of endpointMethodsMap.keys()) {
+    newMethods[scope] = new Proxy({ octokit, scope, cache: {} }, handler);
+  }
+  return newMethods;
+}
+function decorate(octokit, scope, methodName, defaults2, decorations) {
+  const requestWithDefaults = octokit.request.defaults(defaults2);
+  function withDecorations(...args) {
+    let options = requestWithDefaults.endpoint.merge(...args);
+    if (decorations.mapToData) {
+      options = Object.assign({}, options, {
+        data: options[decorations.mapToData],
+        [decorations.mapToData]: void 0
+      });
+      return requestWithDefaults(options);
+    }
+    if (decorations.renamed) {
+      const [newScope, newMethodName] = decorations.renamed;
+      octokit.log.warn(
+        `octokit.${scope}.${methodName}() has been renamed to octokit.${newScope}.${newMethodName}()`
+      );
+    }
+    if (decorations.deprecated) {
+      octokit.log.warn(decorations.deprecated);
+    }
+    if (decorations.renamedParameters) {
+      const options2 = requestWithDefaults.endpoint.merge(...args);
+      for (const [name, alias] of Object.entries(
+        decorations.renamedParameters
+      )) {
+        if (name in options2) {
+          octokit.log.warn(
+            `"${name}" parameter is deprecated for "octokit.${scope}.${methodName}()". Use "${alias}" instead`
+          );
+          if (!(alias in options2)) {
+            options2[alias] = options2[name];
+          }
+          delete options2[name];
+        }
+      }
+      return requestWithDefaults(options2);
+    }
+    return requestWithDefaults(...args);
+  }
+  return Object.assign(withDecorations, requestWithDefaults);
 }
 
-// node_modules/commander/index.js
-var program = new Command();
+// node_modules/@octokit/plugin-rest-endpoint-methods/dist-src/index.js
+function restEndpointMethods(octokit) {
+  const api = endpointsToMethods(octokit);
+  return {
+    rest: api
+  };
+}
+restEndpointMethods.VERSION = VERSION7;
+function legacyRestEndpointMethods(octokit) {
+  const api = endpointsToMethods(octokit);
+  return {
+    ...api,
+    rest: api
+  };
+}
+legacyRestEndpointMethods.VERSION = VERSION7;
 
-// packages/cli/src/index.ts
-var import_node_path9 = require("node:path");
-var import_node_fs10 = require("node:fs");
+// node_modules/@octokit/rest/dist-src/version.js
+var VERSION8 = "22.0.1";
 
-// packages/core/src/config.ts
-var import_node_fs2 = require("node:fs");
-var import_node_path2 = require("node:path");
-var import_yaml = __toESM(require_dist(), 1);
+// node_modules/@octokit/rest/dist-src/index.js
+var Octokit2 = Octokit.plugin(requestLog, legacyRestEndpointMethods, paginateRest).defaults(
+  {
+    userAgent: `octokit-rest.js/${VERSION8}`
+  }
+);
+
+// packages/core/src/proposal.ts
+var import_node_fs3 = require("node:fs");
+
+// packages/core/src/safety.ts
+var import_node_crypto = require("node:crypto");
+var import_node_fs = require("node:fs");
+var import_node_path = require("node:path");
 
 // node_modules/zod/v4/classic/external.js
 var external_exports = {};
@@ -252697,7 +253378,7 @@ __export(external_exports, {
   optional: () => optional,
   output: () => output,
   overwrite: () => _overwrite,
-  parse: () => parse2,
+  parse: () => parse4,
   parseAsync: () => parseAsync2,
   partialRecord: () => partialRecord,
   pipe: () => pipe,
@@ -253049,7 +253730,7 @@ __export(core_exports2, {
   memoizer: () => memoizer,
   mergeValues: () => mergeValues,
   meta: () => meta,
-  parse: () => parse,
+  parse: () => parse3,
   parseAsync: () => parseAsync,
   parseURLObject: () => parseURLObject,
   prettifyError: () => prettifyError,
@@ -253124,18 +253805,18 @@ __export(util_exports, {
   hide: () => hide,
   installLazyProp: () => installLazyProp,
   isObject: () => isObject,
-  isPlainObject: () => isPlainObject,
+  isPlainObject: () => isPlainObject3,
   issue: () => issue,
   joinValues: () => joinValues,
   jsonStringifyReplacer: () => jsonStringifyReplacer,
   members: () => members,
-  merge: () => merge,
+  merge: () => merge2,
   mergeDefs: () => mergeDefs,
   normalizeParams: () => normalizeParams,
   nullish: () => nullish,
   numKeys: () => numKeys,
   objectClone: () => objectClone,
-  omit: () => omit,
+  omit: () => omit2,
   optionalKeys: () => optionalKeys,
   own: () => own,
   parsedType: () => parsedType,
@@ -253366,7 +254047,7 @@ var allowsEval = /* @__PURE__ */ cached(() => {
     return false;
   }
 });
-function isPlainObject(o) {
+function isPlainObject3(o) {
   if (isObject(o) === false)
     return false;
   const ctor = o.constructor;
@@ -253383,7 +254064,7 @@ function isPlainObject(o) {
   return true;
 }
 function shallowClone(o) {
-  if (isPlainObject(o))
+  if (isPlainObject3(o))
     return { ...o };
   if (Array.isArray(o))
     return [...o];
@@ -253559,7 +254240,7 @@ function maskedKeys(schema2, mask) {
   }
   return keys;
 }
-function omit(schema2, mask) {
+function omit2(schema2, mask) {
   const currDef = schema2._zod.def;
   const checks = currDef.checks;
   const hasChecks = checks && checks.length > 0;
@@ -253572,7 +254253,7 @@ function omit(schema2, mask) {
   return clone(schema2, mergeDefs(currDef, { shape: newShape, checks: [] }));
 }
 function extend(schema2, shape) {
-  if (!isPlainObject(shape)) {
+  if (!isPlainObject3(shape)) {
     throw new Error("Invalid input to extend: expected a plain object");
   }
   const checks = schema2._zod.def.checks;
@@ -253594,12 +254275,12 @@ function extended(schema2, shape) {
   return newShape;
 }
 function safeExtend(schema2, shape) {
-  if (!isPlainObject(shape)) {
+  if (!isPlainObject3(shape)) {
     throw new Error("Invalid input to safeExtend: expected a plain object");
   }
   return clone(schema2, mergeDefs(schema2._zod.def, { shape: extended(schema2, shape) }));
 }
-function merge(a, b) {
+function merge2(a, b) {
   if (!b?._zod?.def) {
     throw new Error("Invalid input to merge: expected an object schema. To merge a plain shape, use `.extend()`.");
   }
@@ -254269,7 +254950,7 @@ var _parse = (_Err) => {
   };
   return fn;
 };
-var parse = /* @__PURE__ */ _parse($ZodRealError);
+var parse3 = /* @__PURE__ */ _parse($ZodRealError);
 var _parseAsync = (_Err) => {
   const fn = async (schema2, value, _ctx, params) => {
     const ctx = _ctx ? { ..._ctx, async: true } : { async: true };
@@ -256474,7 +257155,7 @@ function mergeValues(a, b) {
   if (a instanceof Date && b instanceof Date && +a === +b) {
     return { valid: true, data: a };
   }
-  if (isPlainObject(a) && isPlainObject(b)) {
+  if (isPlainObject3(a) && isPlainObject3(b)) {
     const bKeys = Object.keys(b);
     const sharedKeys = Object.keys(a).filter((key) => bKeys.indexOf(key) !== -1);
     const newObj = { ...a, ...b };
@@ -256695,7 +257376,7 @@ var $ZodRecord = /* @__PURE__ */ $constructor("$ZodRecord", (inst, def) => {
   memo2?.attach(inst);
   inst._zod.parse = (payload, ctx) => {
     const input2 = payload.value;
-    if (!isPlainObject(input2)) {
+    if (!isPlainObject3(input2)) {
       payload.issues.push({
         expected: "record",
         code: "invalid_type",
@@ -257422,10 +258103,10 @@ var $ZodFunction = /* @__PURE__ */ $constructor("$ZodFunction", (inst, def) => {
       throw new Error("implement() must be called with a function");
     }
     return Object.defineProperty(function(...args) {
-      const parsedArgs = inst._def.input ? parse(inst._def.input, args) : args;
+      const parsedArgs = inst._def.input ? parse3(inst._def.input, args) : args;
       const result = Reflect.apply(func, this, parsedArgs);
       if (inst._def.output) {
-        return parse(inst._def.output, result);
+        return parse3(inst._def.output, result);
       }
       return result;
     }, "_zod", { value: inst._zod, enumerable: false });
@@ -266784,7 +267465,7 @@ function generateIntersectionCheck(doc, ctx, schema2, accessor) {
 }
 function generateRecordCheck(doc, ctx, schema2, accessor) {
   const def = schema2._zod.def;
-  const isPlainObjectConst = addConstant(ctx, isPlainObject);
+  const isPlainObjectConst = addConstant(ctx, isPlainObject3);
   doc.write(`if (!${isPlainObjectConst}(${accessor})) return INVALID;`);
   const outputVar = newVar(ctx);
   const kVar = newVar(ctx);
@@ -269732,7 +270413,7 @@ var ZodRealError = /* @__PURE__ */ $constructor("ZodError", initializer2, void 0
 });
 
 // node_modules/zod/v4/classic/parse.js
-var parse2 = /* @__PURE__ */ _parse(ZodRealError);
+var parse4 = /* @__PURE__ */ _parse(ZodRealError);
 var parseAsync2 = /* @__PURE__ */ _parseAsync(ZodRealError);
 var safeParse2 = /* @__PURE__ */ _safeParse(ZodRealError);
 var safeParseAsync2 = /* @__PURE__ */ _safeParseAsync(ZodRealError);
@@ -269869,7 +270550,7 @@ var ZodType = /* @__PURE__ */ $constructor("ZodType", (inst, def) => {
     util_exports.own(this, "~standard", value);
   },
   parse: function _parse2(data, params) {
-    return parse2(this, data, params, { callee: _parse2 });
+    return parse4(this, data, params, { callee: _parse2 });
   },
   parseAsync: async function _parseAsync2(data, params) {
     return await parseAsync2(this, data, params, { callee: _parseAsync2 });
@@ -271790,7 +272471,7 @@ function convertBaseSchema(schema2, ctx) {
           const patterns = patternKeys.map((p) => new RegExp(p));
           const basePatternSchema = zodSchema;
           zodSchema = zodSchema.check((payload) => {
-            if (!isPlainObject(payload.value))
+            if (!isPlainObject3(payload.value))
               return;
             const unrecognized = [];
             for (const key of Object.keys(payload.value)) {
@@ -272216,81 +272897,32 @@ function date4(params) {
   return _coercedDate(ZodDate, params);
 }
 
-// packages/core/src/config.ts
-var configSchema = external_exports.object({
-  language: external_exports.enum(["typescript", "python"]).default("typescript"),
-  pythonCommand: external_exports.string().default("python"),
-  vendors: external_exports.object({ stripe: external_exports.object({ enabled: external_exports.boolean().default(true), sdkVersion: external_exports.string().regex(/^\d+\.\d+\.\d+$/).optional(), requestApiVersion: external_exports.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(), webhookVersion: external_exports.string().optional() }).strict().default({ enabled: true }) }).strict().default({ stripe: { enabled: true } }),
-  include: external_exports.array(external_exports.string()).default(["src/**/*.ts", "src/**/*.tsx"]),
-  exclude: external_exports.array(external_exports.string()).default(["**/node_modules/**", "**/*.d.ts"]),
-  verification: external_exports.array(external_exports.object({ command: external_exports.string().min(1), args: external_exports.array(external_exports.string()).default([]), timeoutMs: external_exports.number().int().min(100).max(6e5).default(12e4) }).strict()).default([]),
-  sources: external_exports.object({ timeoutMs: external_exports.number().int().min(100).max(6e4).default(1e4), retries: external_exports.number().int().min(0).max(3).default(2) }).strict().default({ timeoutMs: 1e4, retries: 2 }),
-  llm: external_exports.object({ enabled: external_exports.boolean().default(false), provider: external_exports.literal("openai"), model: external_exports.string().min(1), apiKeyEnv: external_exports.string().regex(/^[A-Z_][A-Z0-9_]*$/).default("OPENAI_API_KEY"), maxRequests: external_exports.number().int().min(1).max(3).default(1), maxInputTokens: external_exports.number().int().min(100).max(16e3).default(4e3), maxOutputTokens: external_exports.number().int().min(100).max(8e3).default(2e3), timeoutMs: external_exports.number().int().min(100).max(6e4).default(3e4), retries: external_exports.number().int().min(0).max(2).default(0) }).strict().optional(),
-  pr: external_exports.object({ base: external_exports.string().default("main"), draft: external_exports.boolean().default(true) }).strict().default({ base: "main", draft: true })
-}).strict();
-function loadConfig(root, name = "changelume.yml") {
-  const path3 = (0, import_node_path2.resolve)(root, name);
-  return configSchema.parse((0, import_node_fs2.existsSync)(path3) ? (0, import_yaml.parse)((0, import_node_fs2.readFileSync)(path3, "utf8")) : {});
-}
-var exampleConfig = `vendors:
-  stripe:
-    enabled: true
-include: ['src/**/*.ts', 'src/**/*.tsx']
-exclude: ['**/node_modules/**', '**/*.d.ts']
-# Commands execute customer code. Configure only commands you trust.
-verification: []
-pr:
-  base: main
-  draft: true
-# llm:
-#   enabled: true
-#   provider: openai
-#   model: YOUR_MODEL
-#   apiKeyEnv: OPENAI_API_KEY
-`;
-
-// packages/core/src/pipeline.ts
-var import_node_fs9 = require("node:fs");
-var import_node_crypto2 = require("node:crypto");
-var import_node_path8 = require("node:path");
-var import_node_os = require("node:os");
-var import_node_child_process4 = require("node:child_process");
-
-// fixtures/sources/stripe-python-v5-changelog.md
-var stripe_python_v5_changelog_default = "# Changelog\n\n## 5.0.0 - 2022-11-16\n\nBreaking changes that arose during code generation of the library that we postponed for the next major version. For changes to the Stripe products, read more at https://stripe.com/docs/upgrades#2022-11-15.\n\n\"\u26A0\uFE0F\" symbol highlights breaking changes.\n\n* [#895](https://github.com/stripe/stripe-python/pull/895) Next major release changes\n* [#889](https://github.com/stripe/stripe-python/pull/889) API Updates\n\n* [#888](https://github.com/stripe/stripe-python/pull/888) Do not run Coveralls if secret token is not available\n* [#875](https://github.com/stripe/stripe-python/pull/875) hide misleading ssl security warning in python>=2.7.9\n\n### \u26A0\uFE0F Changed\n- Dropped support for Python version 3.4 and 3.5 (#881). We now support Python 2.7 or 3.6+.\n- Fixed mixtyped names for two OAuth exceptions: `UnsupportedGrantTypError`->`UnsupportedGrantTypeError` and `UnsupportedResponseTypError`->`UnsupportedResponseTypeError` (#872).\n\n### Deprecated\n- Deprecate `save` method on resources (#887). Use `modify` instead.\n   ```python\n  # Before\n  customer = stripe.Customer.retrieve(\"cus_123\")\n  customer.email = \"example@test.com\"\n  customer.save()\n\n  # After\n  stripe.Customer.modify(\"cus_123\", email=\"example@test.com\")\n   ```\n\n### \u26A0\uFE0F Removed\n- Removed `Orders` resource (#882).\n- Removed `SKU` resource (#883).\n\n## 4.2.0 - 2022-09-23\n* [#877](https://github.com/stripe/stripe-python/pull/877) API Updates\n  * Add `upcoming_lines` method to the `Invoice` resource.\n* [#873](https://github.com/stripe/stripe-python/pull/873) Add abstract methods for SearchableAPIResource\n* [#867](https://github.com/stripe/stripe-python/pull/867) API Updates\n  * Update links in documentation to be absolute.\n\n## 4.1.0 - 2022-08-19\n* [#861](https://github.com/stripe/stripe-python/pull/861) API Updates\n  * Add support for new resource `CustomerCashBalanceTransaction`\n* [#860](https://github.com/stripe/stripe-python/pull/860) Add a support section to the readme\n* [#717](https://github.com/stripe/stripe-python/pull/717) Fix test TestCharge.test_is_saveable().\n\n## 4.0.2 - 2022-08-03\n* [#855](https://github.com/stripe/stripe-python/pull/855) Fix issue where auto_paging_iter failed on nested list objects.\n\n## 4.0.1 - 2022-08-02\n* [#850](https://github.com/stripe/stripe-python/pull/850) Fix incorrect handling of additional request parameters\n  * Fixes issue where using special parameter like `api_key`, `idempotency_key`, `stripe_version`, `stripe_account`, `headers` can cause a `Received unknown parameter error`.\n\n## 4.0.0 - 2022-08-02\n\nBreaking changes that arose during code generation of the library that we postponed for the next major version. For changes to the SDK, read more detailed description at https://github.com/stripe/stripe-python/wiki/Migration-guide-for-v4. For changes to the Stripe products, read more at https://stripe.com/docs/upgrades#2022-08-01.\n\n\"\u26A0\uFE0F\" symbol highlights breaking changes.\n\n* [#847](https://github.com/stripe/stripe-python/pull/847) API Updates\n* [#845](https://github.com/stripe/stripe-python/pull/845) Next major release changes\n* [#836](https://github.com/stripe/stripe-python/pull/836) API Updates. Add Price.create tests.\n* [#835](https://github.com/stripe/stripe-python/pull/835) API Updates. Use auto-generation for credit_note and invoice methods.\n\n### \u26A0\uFE0F Removed\n- Removed deprecated `AlipayAccount`, `BitcoinReceiver`, `BitcoinTransaction`, `IssuerFraudRecord`, `Recipient`, `RecipientTransfer`, and  `ThreeDSecure` classes.\n- Removed deprecated `Charge.update_dispute` and `Charge.close_dispute` methods that were using legacy REST API endpoint. Prefer [Dispute.modify](https://stripe.com/docs/api/disputes/update?lang=python) and [Dispute.close](https://stripe.com/docs/api/disputes/close?lang=python)\n- Removed deprecated `Card.details` method and `CardDetails` resource. The REST API endpoint is not longer supported.\n- Removed the deprecated `Source.source_transactions` method. Prefer `SubscriptionItem.list_source_transactions`\n- Removed the deprecated `SubscriptionItem.usage_record_summaries` method. Prefer `SubscriptionItem.list_usage_record_summaries`\n- Removed the deprecated `Charge.refund` method. Prefer [Refund.create](https://stripe.com/docs/api/refunds/create)\n\n### \u26A0\uFE0F Changed\n- To be consistent with other resource methods, `ApplicationFee.refund` returns an instance of `ApplicationFee` and doesn't mutate the instance of `ApplicationFee`.\n- To be consistent with other resource methods, the `Customer.delete_discount` no longer resets the `discount` property to `None` and returns the deleted discount instead. If you were relying on this behavior, reset the discount property manually:\n- The `LineItem` resource now inherits from `StripeObject` as it has no methods of it's own.\n- To be consistent with other resource methods, the `Subscription.delete_discount` returns an instance of deleted discount and doesn't mutate the instance of `Subscription`.\n- Update the CA certificate bundle.\n- Request sending logic unified across standard and custom methods (https://github.com/stripe/stripe-python/pull/832)\n\n## 3.5.0 - 2022-06-30\n* [#831](https://github.com/stripe/stripe-python/pull/831) API Updates\n  * Add support for `deliver_card`, `fail_card`, `return_card`, and `ship_card` test helper methods on resource `Issuing.Card`\n  * Switch from using `instance_url` to computing method path in place for custom methods.\n  * Switch from using explicit class methods for test helpers instead of using meta-programming.\n\n## 3.4.0 - 2022-06-17\n* [#824](https://github.com/stripe/stripe-python/pull/824) API Updates\n  * Add support for `fund_cash_balance` test helper method on resource `Customer`\n* [#823](https://github.com/stripe/stripe-python/pull/823) Trigger workflows on beta branches\n\n## 3.3.0 - 2022-06-08\n* [#818](https://github.com/stripe/stripe-python/pull/818) fix: Update cash balance methods to no longer require nested ID.\n\n## 3.2.0 - 2022-05-23\n* [#812](https://github.com/stripe/stripe-python/pull/812) API Updates\n  * Add support for new resource `Apps.Secret`\n\n## 3.1.0 - 2022-05-19\n* [#810](https://github.com/stripe/stripe-python/pull/810) API Updates\n  * Add support for new resources `Treasury.CreditReversal`, `Treasury.DebitReversal`, `Treasury.FinancialAccountFeatures`, `Treasury.FinancialAccount`, `Treasury.FlowDetails`, `Treasury.InboundTransfer`, `Treasury.OutboundPayment`, `Treasury.OutboundTransfer`, `Treasury.ReceivedCredit`, `Treasury.ReceivedDebit`, `Treasury.TransactionEntry`, and `Treasury.Transaction`\n  * Add support for `retrieve_payment_method` method on resource `Customer`\n  * Add support for `list_owners` and `list` methods on resource `FinancialConnections.Account`\n* [#719](https://github.com/stripe/stripe-python/pull/719) Set daemon attribute instead of using setDaemon method that was deprecated in Python 3.10\n* [#767](https://github.com/stripe/stripe-python/pull/767) Bump vendored six to 1.16.0\n* [#806](https://github.com/stripe/stripe-python/pull/806) Start testing on pypy-3.8\n* [#811](https://github.com/stripe/stripe-python/pull/811) Add sanitize_id method\n\n\n## 3.0.0 - 2022-05-09\n* [#809](https://github.com/stripe/stripe-python/pull/809) Release of major version v3.0.0. The [migration guide](https://github.com/stripe/stripe-python/wiki/Migration-Guide-for-v3) contains more information.\n  (\u26A0\uFE0F = breaking changes):\n  * \u26A0\uFE0F Replace the legacy `Order` API with the new `Order` API.\n    * New methods: `cancel`, `list_line_items`, `reopen`, and `submit`\n    * Removed methods: `pay` and `return_order`\n    * Removed resources: `OrderItem` and `OrderReturn`\n  * \u26A0\uFE0F Rename `financial_connections.account.refresh` to `financial_connections.refresh_account`\n  * Add support for `amount_discount`, `amount_tax`, and `product` on `LineItem`\n\n## 2.76.0 - 2022-05-05\n* [#808](https://github.com/stripe/stripe-python/pull/808) API Updates\n  * Add support for new resources `FinancialConnections.AccountOwner`, `FinancialConnections.AccountOwnership`, `FinancialConnections.Account`, and `FinancialConnections.Session`\n\n## 2.75.0 - 2022-05-03\n* [#805](https://github.com/stripe/stripe-python/pull/805) API Updates\n  * Add support for new resource `CashBalance`\n\n## 2.74.0 - 2022-04-21\n* [#796](https://github.com/stripe/stripe-python/pull/796) API Updates\n  * Add support for `expire` test helper method on resource `Refund`\n\n## 2.73.0 - 2022-04-18\n* [#792](https://github.com/stripe/stripe-python/pull/792) [#794](https://github.com/stripe/stripe-python/pull/794) [#795](https://github.com/stripe/stripe-python/pull/795) API Updates\n  * Add support for new resources `FundingInstructions` and `Terminal.Configuration`\n\n## 2.72.0 - 2022-04-13\n* [#791](https://github.com/stripe/stripe-python/pull/791) API Updates\n  * Add support for `increment_authorization` method on resource `PaymentIntent`\n\n## 2.71.0 - 2022-04-08\n* [#788](https://github.com/stripe/stripe-python/pull/788) API Updates\n  * Add support for `apply_customer_balance` method on resource `PaymentIntent`\n\n## 2.70.0 - 2022-03-30\n* [#785](https://github.com/stripe/stripe-python/pull/785) API Updates\n  * Add support for `cancel_action`, `process_payment_intent`, `process_setup_intent`, and `set_reader_display` methods on resource `Terminal.Reader`\n\n## 2.69.0 - 2022-03-29\n* [#783](https://github.com/stripe/stripe-python/pull/783) API Updates\n  * Add support for Search API\n    * Add support for `search` method on resources `Charge`, `Customer`, `Invoice`, `PaymentIntent`, `Price`, `Product`, and `Subscription`\n* [#784](https://github.com/stripe/stripe-python/pull/784) Pin click dependency to 8.0.4 to avoid breakage in black\n* [#773](https://github.com/stripe/stripe-python/pull/773) Add infrastructure for test-helper methods\n* [#782](https://github.com/stripe/stripe-python/pull/782) Revert Orders to use qualified name for upload_api_base\n\n## 2.68.0 - 2022-03-23\n* [#781](https://github.com/stripe/stripe-python/pull/781) API Updates\n  * Add support for `cancel` method on resource `Refund`\n* [#777](https://github.com/stripe/stripe-python/pull/777) Add support for SearchResult.\n\n## 2.67.0 - 2022-03-01\n* [#774](https://github.com/stripe/stripe-python/pull/774) API Updates\n  * Add support for new resource `TestHelpers.TestClock`\n\n## 2.66.0 - 2022-02-16\n* [#771](https://github.com/stripe/stripe-python/pull/771) API Updates\n  * Add support for `verify_microdeposits` method on resources `PaymentIntent` and `SetupIntent`\n\n## 2.65.0 - 2022-01-20\n* [#766](https://github.com/stripe/stripe-python/pull/766) API Updates\n  * Add support for new resource `PaymentLink`\n* [#763](https://github.com/stripe/stripe-python/pull/763) Start testing Python 3.10\n\n## 2.64.0 - 2021-12-21\n* [#757](https://github.com/stripe/stripe-python/pull/757) Update class custom methods to save list object parameters.\n* [#756](https://github.com/stripe/stripe-python/pull/756) Introduce custom listing methods on objects.\n* [#754](https://github.com/stripe/stripe-python/pull/754) Clarify metadata deletion message.\n\n## 2.63.0 - 2021-11-16\n* [#748](https://github.com/stripe/stripe-python/pull/748) API Updates\n  * Add support for new resource `ShippingRate`\n\n## 2.62.0 - 2021-11-11\n* [#745](https://github.com/stripe/stripe-python/pull/745) API Updates\n  * Add support for `expire` method on resource `Checkout.Session`\n\n## 2.61.0 - 2021-10-11\n* [#738](https://github.com/stripe/stripe-python/pull/738) API Updates\n  * Add support for `list_payment_methods` method on resource `Customer`\n* [#736](https://github.com/stripe/stripe-python/pull/736) Stop sending raw exception message as part of Stripe user agent.\n\n## 2.60.0 - 2021-07-14\n* [#728](https://github.com/stripe/stripe-python/pull/728) API Updates\n  * Add support for `list_computed_upfront_line_items` method on resource `Quote`\n\n## 2.59.0 - 2021-07-09\n* [#727](https://github.com/stripe/stripe-python/pull/727) [#725](https://github.com/stripe/stripe-python/pull/725) Add support for new `Quote` API.\n\n## 2.58.0 - 2021-06-04\n* [#722](https://github.com/stripe/stripe-python/pull/722) API Updates\n  * Add support for new `TaxCode` API.\n\n## 2.57.0 - 2021-05-19\n* [#720](https://github.com/stripe/stripe-python/pull/720) Add support for Identity VerificationSession and VerificationReport APIs\n\n## 2.56.0 - 2021-02-22\n* [#713](https://github.com/stripe/stripe-python/pull/713) Add support for the Billing Portal Configuration API\n\n## 2.55.2 - 2021-02-05\n* [#704](https://github.com/stripe/stripe-python/pull/704) Fix CA bundle path issue\n\n## 2.55.1 - 2020-12-01\n* [#698](https://github.com/stripe/stripe-python/pull/698) Fix issue where StripeObjects in lists would not be converted to dicts\n* [#699](https://github.com/stripe/stripe-python/pull/699) Start testing Python 3.9\n* [#691](https://github.com/stripe/stripe-python/pull/691) Include the examples in the built sources\n\n## 2.55.0 - 2020-10-14\n* [#684](https://github.com/stripe/stripe-python/pull/684) Add support for the Payout Reverse API\n\n## 2.54.0 - 2020-09-29\n* [#681](https://github.com/stripe/stripe-python/pull/681) Add support for the `SetupAttempt` resource and List API\n* 2.52.0 and 2.53.0 were empty releases that contained no additional changes.\n\n## 2.51.0 - 2020-09-02\n* [#676](https://github.com/stripe/stripe-python/pull/676) Add support for the Issuing Dispute Submit API\n\n## 2.50.0 - 2020-08-05\n* [#669](https://github.com/stripe/stripe-python/pull/669) Add support for the `PromotionCode` resource and APIs\n\n## 2.49.0 - 2020-07-17\n* [#665](https://github.com/stripe/stripe-python/pull/665) Support stripe.File.create(stripe_version='...')\n\n## 2.48.0 - 2020-05-11\n* [#655](https://github.com/stripe/stripe-python/pull/655) Add support for the `LineItem` resource and APIs\n\n## 2.47.0 - 2020-04-29\n* [#652](https://github.com/stripe/stripe-python/pull/652) Add support for the `Price` resource and APIs\n\n## 2.46.0 - 2020-04-22\n* [#651](https://github.com/stripe/stripe-python/pull/651) Add support for `billing_portal` namespace and `Session` resource and APIs\n\n## 2.45.0 - 2020-04-06\n* [#648](https://github.com/stripe/stripe-python/pull/648) Add support for Express links in `authorize_url` for `OAuth`\n\n## 2.44.0 - 2020-03-23\n* [#646](https://github.com/stripe/stripe-python/pull/646) Allow overriding API key in OAuth methods\n\n## 2.43.0 - 2020-02-26\n* [#644](https://github.com/stripe/stripe-python/pull/644) Add support for listing Checkout `Session`\n\n## 2.42.0 - 2020-01-14\n* [#640](https://github.com/stripe/stripe-python/pull/640) Add support for `CreditNoteLineItem`\n* [#639](https://github.com/stripe/stripe-python/pull/639) Pin black version\n* [#637](https://github.com/stripe/stripe-python/pull/637) Start testing Python 3.8\n\n## 2.41.1 - 2019-12-30\n* [#636](https://github.com/stripe/stripe-python/pull/636) Fix uploading files with Unicode names (Python 2.7)\n* [#635](https://github.com/stripe/stripe-python/pull/635) Update Python API docs inline link\n* [#631](https://github.com/stripe/stripe-python/pull/631) Update `proxy.py`\n\n## 2.41.0 - 2019-11-26\n* [#630](https://github.com/stripe/stripe-python/pull/630) Add support for `CreditNote` preview\n\n## 2.40.0 - 2019-11-08\n* [#627](https://github.com/stripe/stripe-python/pull/627) Add list_usage_record_summaries and list_source_transactions\n\n## 2.39.0 - 2019-11-06\n* [#625](https://github.com/stripe/stripe-python/pull/625) Add support for `Mandate`\n\n## 2.38.0 - 2019-10-29\n* [#623](https://github.com/stripe/stripe-python/pull/623) Add support for reverse pagination\n* [#624](https://github.com/stripe/stripe-python/pull/624) Contributor Convenant\n\n## 2.37.2 - 2019-10-04\n* [#621](https://github.com/stripe/stripe-python/pull/621) Implement support for stripe-should-retry and retry-after headers\n\n## 2.37.1 - 2019-09-26\n* [#620](https://github.com/stripe/stripe-python/pull/620) Check that `error` is a dict before trying to use it to create a `StripeError`\n\n## 2.37.0 - 2019-09-26\n* [#619](https://github.com/stripe/stripe-python/pull/619) Add `ErrorObject` to `StripeError` exceptions\n* [#616](https://github.com/stripe/stripe-python/pull/616) Pass `CFLAGS` and `LDFLAGS` when running tests\n\n## 2.36.2 - 2019-09-12\n* [#614](https://github.com/stripe/stripe-python/pull/614) Use `OrderedDict` to maintain key order in API requests and responses\n\n## 2.36.1 - 2019-09-11\n* [#612](https://github.com/stripe/stripe-python/pull/612) Use `ListObject` properties as default values in request methods\n\n## 2.36.0 - 2019-09-10\n* [#610](https://github.com/stripe/stripe-python/pull/610) Add support for header parameters in `ListObject` request methods\n\n## 2.35.1 - 2019-08-20\n* [#605](https://github.com/stripe/stripe-python/pull/605) Fix automatic retries of failed requests\n* [#606](https://github.com/stripe/stripe-python/pull/606) Clarify what `max_network_retries` does\n\n## 2.35.0 - 2019-08-12\n* [#607](https://github.com/stripe/stripe-python/pull/607) Add `SubscriptionItem.create_usage_record` method\n\n## 2.34.0 - 2019-08-09\n* [#604](https://github.com/stripe/stripe-python/pull/604) Remove subscription schedule revisions\n  - This is technically a breaking change. We've chosen to release it as a minor vesion bump because the associated API is unused.\n\n## 2.33.2 - 2019-08-06\n* [#601](https://github.com/stripe/stripe-python/pull/601) Add support for passing full objects instead of IDs to custom methods\n* [#603](https://github.com/stripe/stripe-python/pull/603) Bump vendored six to latest version\n\n## 2.33.1 - 2019-08-06\n* [#599](https://github.com/stripe/stripe-python/pull/599) Fix `del` statement to not raise `KeyError`\n\n## 2.33.0 - 2019-07-30\n* [#595](https://github.com/stripe/stripe-python/pull/595) Listing `BalanceTransaction` objects now uses `/v1/balance_transactions` instead of `/v1/balance/history`\n\n## 2.32.1 - 2019-07-08\n* [#592](https://github.com/stripe/stripe-python/pull/592) Fix argument name conflict\n\n## 2.32.0 - 2019-06-27\n* [#590](https://github.com/stripe/stripe-python/pull/590) Add support for the `SetupIntent` resource and APIs\n\n## 2.31.0 - 2019-06-24\n* [#587](https://github.com/stripe/stripe-python/pull/587) Enable request latency telemetry by default\n\n## 2.30.1 - 2019-06-20\n* [#589](https://github.com/stripe/stripe-python/pull/589) Fix support for `CustomerBalanceTransaction`\n\n## 2.30.0 - 2019-06-17\n* [#564](https://github.com/stripe/stripe-python/pull/564) Add support for `CustomerBalanceTransaction` resource and APIs\n\n## 2.29.4 - 2019-06-03\n* [#583](https://github.com/stripe/stripe-python/pull/583) Remove Poetry and reinstate `setup.py`\n\n## 2.29.3 - 2019-05-31\nVersion 2.29.2 was non-functional due to a bugged `version.py` file. This release is identical to 2.29.2 save for the version number.\n\n## 2.29.2 - 2019-05-31\n* [#561](https://github.com/stripe/stripe-python/pull/561) Replace pipenv with poetry\n\n## 2.29.1 - 2019-05-31\n* [#578](https://github.com/stripe/stripe-python/pull/578) Verify signatures before deserializing events\n\n## 2.29.0 - 2019-05-23\n* [#575](https://github.com/stripe/stripe-python/pull/575) Add support for `radar.early_fraud_warning` resource\n\n## 2.28.2 - 2019-05-23\n* [#574](https://github.com/stripe/stripe-python/pull/574) Fix a few more code quality issues\n\n## 2.28.1 - 2019-05-20\n* [#572](https://github.com/stripe/stripe-python/pull/572) Fix a few code quality issues\n\n## 2.28.0 - 2019-05-14\n* [#566](https://github.com/stripe/stripe-python/pull/566) Add support for the `Capability` resource and APIs\n\n## 2.27.0 - 2019-04-24\n* [#554](https://github.com/stripe/stripe-python/pull/554) Add support for the `TaxRate` resource and APIs\n\n## 2.26.0 - 2019-04-22\n* [#555](https://github.com/stripe/stripe-python/pull/555) Add support for the `TaxId` resource and APIs\n\n## 2.25.0 - 2019-04-18\n* [#551](https://github.com/stripe/stripe-python/pull/551) Add support for the `CreditNote` resource and APIs\n\n## 2.24.1 - 2019-04-08\n* [#550](https://github.com/stripe/stripe-python/pull/550) Fix encoding of nested parameters in multipart requests\n\n## 2.24.0 - 2019-04-03\n* [#543](https://github.com/stripe/stripe-python/pull/543) Add `delete` class method on deletable API resources\n* [#547](https://github.com/stripe/stripe-python/pull/547) Add class methods for all custom API requests (e.g. `Charge.capture`)\n\n## 2.23.0 - 2019-03-18\n* [#537](https://github.com/stripe/stripe-python/pull/537) Add support for the `PaymentMethod` resource and APIs\n* [#540](https://github.com/stripe/stripe-python/pull/540) Add support for retrieving a Checkout `Session`\n* [#542](https://github.com/stripe/stripe-python/pull/542) Add support for deleting a Terminal `Location` and `Reader`\n\n## 2.22.0 - 2019-03-14\n* [#541](https://github.com/stripe/stripe-python/pull/541) Add `stripe.util.convert_to_dict` method for converting `StripeObject` instances to regular `dict`s\n\n## 2.21.0 - 2019-02-12\n* [#532](https://github.com/stripe/stripe-python/pull/532) Add support for subscription schedules\n\n## 2.20.3 - 2019-01-30\n* [#530](https://github.com/stripe/stripe-python/pull/530) Fix client telemetry implementation\n\n## 2.20.2 - 2019-01-30\n* [#534](https://github.com/stripe/stripe-python/pull/534) Fix session initialization for multi-threaded environments\n\n## 2.20.1 - 2019-01-30\n* [#531](https://github.com/stripe/stripe-python/pull/531) Make `RequestsClient` thread-safe\n\n## 2.20.0 - 2019-01-29\n* [#526](https://github.com/stripe/stripe-python/pull/526) Reuse the default HTTP client by default\n\n## 2.19.0 - 2019-01-23\n* [#524](https://github.com/stripe/stripe-python/pull/524) Rename `CheckoutSession` to `Session` and move it under the `checkout` namespace. This is a breaking change, but we've reached out to affected merchants and all new merchants would use the new approach.\n\n## 2.18.1 - 2019-01-21\n* [#525](https://github.com/stripe/stripe-python/pull/525) Properly serialize `individual` on `Account` objects\n\n## 2.18.0 - 2019-01-15\n* [#518](https://github.com/stripe/stripe-python/pull/518) Add configurable telemetry to gather information on client-side request latency\n\n## 2.17.0 - 2018-12-21\n* [#510](https://github.com/stripe/stripe-python/pull/510) Add support for Checkout sessions\n\n## 2.16.0 - 2018-12-10\n* [#507](https://github.com/stripe/stripe-python/pull/507) Add support for account links\n\n## 2.15.0 - 2018-11-30\n* [#503](https://github.com/stripe/stripe-python/pull/503) Add support for providing custom CA certificate bundle\n\n## 2.14.0 - 2018-11-28\n* [#500](https://github.com/stripe/stripe-python/pull/500) Add support for `Review` for Radar\n\n## 2.13.0 - 2018-11-27\n* [#489](https://github.com/stripe/stripe-python/pull/489) Add support for `ValueList` and `ValueListItem` for Radar\n\n## 2.12.1 - 2018-11-22\n* [#495](https://github.com/stripe/stripe-python/pull/495) Make `StripeResponse` a new-style class\n\n## 2.12.0 - 2018-11-08\n* [#483](https://github.com/stripe/stripe-python/pull/483) Add new API endpoints for the `Invoice` resource.\n\n## 2.11.1 - 2018-11-08\n* [#491](https://github.com/stripe/stripe-python/pull/491) Bump minimum requests version to 2.20.0 (for [CVE-2018-18074](https://nvd.nist.gov/vuln/detail/CVE-2018-18074))\n\n## 2.11.0 - 2018-10-30\n* [#482](https://github.com/stripe/stripe-python/pull/482) Add support for the `Person` resource\n* [#484](https://github.com/stripe/stripe-python/pull/484) Add support for the `WebhookEndpoint` resource\n\n## 2.10.1 - 2018-10-02\n* [#481](https://github.com/stripe/stripe-python/pull/481) Correct behavior of `stripe.max_network_retries` if it's reset after initial use\n\n## 2.10.0 - 2018-09-24\n* [#478](https://github.com/stripe/stripe-python/pull/478) Add support for Stripe Terminal\n\n## 2.9.0 - 2018-09-24\n* [#477](https://github.com/stripe/stripe-python/pull/477) Rename `FileUpload` to `File`\n\n## 2.8.1 - 2018-09-13\n* [#474](https://github.com/stripe/stripe-python/pull/474) Don't URL-encode square brackets\n* [#473](https://github.com/stripe/stripe-python/pull/473) Integer-index encode all arrays\n\n## 2.8.0 - 2018-09-10\n* [#470](https://github.com/stripe/stripe-python/pull/470) Add support for automatic network retries\n\n## 2.7.0 - 2018-09-05\n* [#469](https://github.com/stripe/stripe-python/pull/469) Add support for reporting resources\n\n## 2.6.0 - 2018-08-23\n* [#467](https://github.com/stripe/stripe-python/pull/467) Add support for usage record summaries\n\n## 2.5.0 - 2018-08-16\n* [#463](https://github.com/stripe/stripe-python/pull/463) Remove unsupported Bitcoin endpoints (this is technically a breaking change, but we're releasing as a minor version because none of these APIs were usable anyway)\n\n## 2.4.0 - 2018-08-03\n* [#460](https://github.com/stripe/stripe-python/pull/460) Add cancel support for topups\n* [#461](https://github.com/stripe/stripe-python/pull/461) Add support for file links\n\n## 2.3.0 - 2018-07-27\n* [#456](https://github.com/stripe/stripe-python/pull/456) Add support for Sigma scheduled query run objects\n\n## 2.2.0 - 2018-07-26\n* [#455](https://github.com/stripe/stripe-python/pull/455) Add support for Stripe Issuing\n\n## 2.1.0 - 2018-07-25\n* [#452](https://github.com/stripe/stripe-python/pull/452) Add `InvoiceLineItem` class\n\n## 2.0.3 - 2018-07-19\n* [#450](https://github.com/stripe/stripe-python/pull/450) Internal improvements to `ApiResource.class_url`\n\n## 2.0.2 - 2018-07-18\n* [#448](https://github.com/stripe/stripe-python/pull/448) Avoid duplicate dependency on `requests` with Python 2.7\n\n## 2.0.1 - 2018-07-10\n* [#445](https://github.com/stripe/stripe-python/pull/445) Fix `setup.py`\n\n## 2.0.0 - 2018-07-10\nMajor version release. List of backwards incompatible changes to watch out for:\n* The minimum Python versions are now 2.7 / 3.4. If you're using Python 2.6 or 3.3, consider upgrading to a more recent version.\n* Stripe exception classes should now be accessed via `stripe.error` rather than just `stripe`\n* Some older deprecated methods have been removed\n* Trying to detach an unattached source will now raise a `stripe.error.InvalidRequestError` exception instead of a `NotImplementedError` exception\n\nFor more information, check out the [migration guide for v2](https://github.com/stripe/stripe-python/wiki/Migration-guide-for-v2)\n\nPull requests included in this release:\n* [#385](https://github.com/stripe/stripe-python/pull/385) Drop support for Python 2.6 and 3.3\n* [#384](https://github.com/stripe/stripe-python/pull/384) Use py.test for tests\n* [#399](https://github.com/stripe/stripe-python/pull/399) Remove deprecated code\n* [#402](https://github.com/stripe/stripe-python/pull/402) Remove `util.json` and use `json` module directly everywhere\n* [#403](https://github.com/stripe/stripe-python/pull/403) Update setup.py and test flow\n* [#410](https://github.com/stripe/stripe-python/pull/410) Use pipenv\n* [#415](https://github.com/stripe/stripe-python/pull/415) Change exception when detaching unattached sources from `NotImplementedError` to `stripe.error.InvalidRequestError`\n\n## 1.84.2 - 2018-07-06\n* [#441](https://github.com/stripe/stripe-python/pull/441) Better (hopefully) fix for serialization of empty `ListObject`s\n\n## 1.84.1 - 2018-07-04\n* [#439](https://github.com/stripe/stripe-python/pull/439) Fix serialization of empty `ListObject`s\n\n## 1.84.0 - 2018-06-29\n* [#436](https://github.com/stripe/stripe-python/pull/436) Add support for payment intents\n\n## 1.83.0 - 2018-06-28\n* [#437](https://github.com/stripe/stripe-python/pull/437) Add support for `partner_id` in `stripe.set_app_info()`\n\n## 1.82.2 - 2018-06-19\n* [#365](https://github.com/stripe/stripe-python/pull/365) Add `__repr__` methods to `StripeError` exception classes\n\n## 1.82.1 - 2018-05-14\n* [#430](https://github.com/stripe/stripe-python/pull/430) Handle the case where request ID is `None` when formatting errors\n\n## 1.82.0 - 2018-05-13\n* [#422](https://github.com/stripe/stripe-python/pull/422) Add `user_mesage` to `StripeError` for a way in Python 3 to avoid the \"Request req_...:\" string normally appended to error messages\n\n## 1.81.0 - 2018-05-10\n* [#425](https://github.com/stripe/stripe-python/pull/425) Add support for issuer fraud records\n\n## 1.80.0 - 2018-04-24\n* [#421](https://github.com/stripe/stripe-python/pull/421) Add support for flexible billing and usage records\n\n## 1.79.1 - 2018-02-27\n* [#401](https://github.com/stripe/stripe-python/pull/401) Drop conditional dependencies that incorrectly led to an added `simplejson` dependency in Python 3+ after switching to universal wheel\n\n## 1.79.0 - 2018-02-23\n* [#397](https://github.com/stripe/stripe-python/pull/397) Build universal wheels by default\n* [#398](https://github.com/stripe/stripe-python/pull/398) Add support for `code` attribute on all Stripe exceptions\n\n## 1.78.0 - 2018-02-21\n* [#396](https://github.com/stripe/stripe-python/pull/396) Add support for topups\n\n## 1.77.2 - 2018-02-08\n* [#394](https://github.com/stripe/stripe-python/pull/394) Make `last_response` available after calling `save()`\n\n## 1.77.1 - 2018-01-12\n* [#389](https://github.com/stripe/stripe-python/pull/389) Register unsaved attributes on assignment regardless of new value\n\n## 1.77.0 - 2017-12-21\n* [#371](https://github.com/stripe/stripe-python/pull/371) Add accessor `last_response` on `StripeObject` for accessing request ID and other metadata\n\n## 1.76.0 - 2017-12-21\n* [#382](https://github.com/stripe/stripe-python/pull/382) Add new `IdempotencyError` type\n\n## 1.75.3 - 2017-12-05\n* [#378](https://github.com/stripe/stripe-python/pull/378) Log encoded version of parameters instead of raw POST data\n\n## 1.75.2 - 2017-12-05\n* (Accidental no-op release. See 1.75.3.)\n\n## 1.75.1 - 2017-11-29\n* [#372](https://github.com/stripe/stripe-python/pull/372) Add only changed values to `_unsaved_values` in `StripeObject`\n* [#375](https://github.com/stripe/stripe-python/pull/375) Use a custom JSON encoder to handle `datetime` objects when serializing `StripeObject`s\n\n## 1.75.0 - 2017-11-08\n* [#369](https://github.com/stripe/stripe-python/pull/369) Make custom actions on various resources (e.g. `Account.reject`) more consistent with other APIs\n\n## 1.74.0 - 2017-11-07\n* [#368](https://github.com/stripe/stripe-python/pull/368) Remove API that allowed the creation of new disputes (this was an erroneous addition; it never worked because the API would not allow it)\n\n## 1.73.0 - 2017-11-02\n* [#364](https://github.com/stripe/stripe-python/pull/364) Switch to vendored version of the `six` package for compatibility between Python 2 and 3\n\n## 1.72.0 - 2017-10-31\n* [#361](https://github.com/stripe/stripe-python/pull/361) Support for exchange rates APIs\n\n## 1.71.2 - 2017-10-31\n* [#362](https://github.com/stripe/stripe-python/pull/362) Fix balance transaction and invoice item conversion into `StripeObject`s\n\n## 1.71.1 - 2017-10-27\n* [#360](https://github.com/stripe/stripe-python/pull/360) Fix `BytesWarning` being issued on logging in Python 3\n\n## 1.71.0 - 2017-10-26\n* [#359](https://github.com/stripe/stripe-python/pull/359) Support for listing source transactions\n\n## 1.70.0 - 2017-10-23\n* [#356](https://github.com/stripe/stripe-python/pull/356) Support uploading files with `StringIO` in addition to a file on disk\n\n## 1.69.0 - 2017-10-20\n* [#351](https://github.com/stripe/stripe-python/pull/351) Break resource.py module into separate ones for each type of resource\n    * Classes are still into resource.py for backwards compatibility\n* [#353](https://github.com/stripe/stripe-python/pull/353) Fix unpickling `StripeObject` in Python 3\n\n## 1.68.0 - 2017-10-19\n* [#350](https://github.com/stripe/stripe-python/pull/350) Add static methods to manipulate resources from parent\n    * `Account` gains methods for external accounts and login links (e.g. `.create_account`, `create_login_link`)\n    * `ApplicationFee` gains methods for refunds\n    * `Customer` gains methods for sources\n    * `Transfer` gains methods for reversals\n\n## 1.67.0 - 2017-10-11\n* [#349](https://github.com/stripe/stripe-python/pull/349) Rename source `delete` to `detach` (and deprecate the former)\n\n## 1.66.0 - 2017-09-29\n* Support length reads on list objects\n\n## 1.65.1 - 2017-09-21\n* Handle `bytearray` and `bytes` (in addition to string) in `Webhook.construct_event`\n\n## 1.65.0 - 2017-09-07\n* Add support for passing a `stripe_version` argument to all API requests\n\n## 1.64.0 - 2017-09-01\n* Error when an invalid type (i.e. non-string) passed as an API method argument\n\n## 1.63.1 - 2017-09-01\n* Fix serialization of `items` on Relay order creation and order return\n\n## 1.63.0 - 2017-08-29\n* Add support for `InvalidClientError` OAuth error\n\n## 1.62.1 - 2017-08-07\n* Change serialization of subscription items on update to encoded as an integer-indexed map\n\n## 1.62.0 - 2017-06-27\n* `pay` on invoice can now take parameter\n\n## 1.61.0 - 2017-06-24\n* Expose `code` on `InvalidRequestError`\n\n## 1.60.0 - 2017-06-19\n* Add support for ephemeral keys\n\n## 1.59.0 - 2017-06-07\n* Refactor OAuth implementation to have dedicated classes for errors\n\n## 1.58.0 - 2017-06-02\n* Re-use connections with Pycurl\n\n## 1.57.1 - 2017-05-31\n* Fix the pycurl client\n\n## 1.57.0 - 2017-05-26\n* Add `api_key` parameter to webhook's `construct_event`\n\n## 1.56.0 - 2017-05-25\n* Add support for account login links\n\n## 1.55.2 - 2017-05-11\n* Remove Requests constraint from 1.55.1 now that they've patched (as of 2.14.2)\n\n## 1.55.1 - 2017-05-10\n* Constrain Requests to < 2.13.0 if on setuptools < 18.0.0\n\n## 1.55.0 - 2017-04-28\n* Support for checking webhook signatures\n\n## 1.54.0 - 2017-04-28\n* Add `stripe.set_app_info` for use by plugin creators\n\n## 1.53.0 - 2017-04-06\n* Add support for payouts and recipient transfers\n\n## 1.52.0 - 2017-04-06\n* No-op release: peg test suite to a specific API version\n\n## 1.51.0 - 2017-03-20\n* Support OAuth operations (getting a token and deauthorizing)\n\n## 1.50.0 - 2017-03-17\n* Support for detaching sources from customers\n\n## 1.49.0 - 2017-03-13\n* Accept `session` argument for `RequestsClient`\n\n## 1.48.1 - 2017-02-21\n* Fix encoding of parameters when fetching upcoming invoices\n\n## 1.48.0 - 2017-02-21\n* Add `Account.modify_external_account` to modify an account in one API call\n* Add `Customer.modify_source` to modify a source in one API call\n\n## 1.47.0 - 2017-01-18\n* Allow sources to be updated\n\n## 1.46.0 - 2017-01-06\n* Use internal session for Requests for connection pooling\n\n## 1.45.0 - 2017-01-06\n* request logging goes to stderr now\n* Logs properly handle unicode\n* Format is now the same between logging logs, and console logs\n\n## 1.44.0 - 2016-12-16\n* Add request logging and some mechanisms to enable it when debugging\n\n## 1.43.0 - 2016-11-30\n* Add support for verifying sources\n\n## 1.42.0 - 2016-11-21\n* Add retrieve method for 3-D Secure resources\n\n## 1.41.1 - 2016-10-26\n* Implement __copy__ and __deepcopy__ on StripeObject to fix these operations\n\n## 1.41.0 - 2016-10-12\n* Add `Source` model for generic payment sources\n\n## 1.40.1 - 2016-10-10\n* Return subscription model instance on subscription create/modify\n\n## 1.40.0 - 2016-10-07\n* Add configurable timeout for Requests HTTP library\n\n## 1.39.0 - 2016-10-06\n* Add support for subscription items\n* Add proxy support for pycurl, Requests, urlfetch, and urllib2 libraries\n\n## 1.38.0 - 2016-09-15\n* Add support for Apple Pay domains\n\n## 1.37.0 - 2016-07-12\n* Add `ThreeDSecure` model for 3-D secure payments\n\n## 1.36.0 - 2016-06-29\n* Add `update` class method to resources that can be updated\n\n## 1.35.0 - 2016-05-24\n* Add support for returning Relay orders\n\n## 1.34.0 - 2016-05-20\n* Add support for Alipay accounts\n\n## 1.33.0 - 2016-05-04\n* Add support for the new `/v1/subscriptions` endpoint\n  * `stripe.Subscription.retrieve`\n  * `stripe.Subscription.update`\n  * `stripe.Subscription.create`\n  * `stripe.Subscription.list`\n\n## 1.32.2 - 2016-04-12\n* Fix bug where file uploads could not be properly listed\n\n## 1.32.1 - 2016-04-11\n* Fix bug where request parameters were not passed between pages with `auto_paging_iter`\n\n## 1.32.0 - 2016-03-31\n* Update CA cert bundle for compatibility with OpenSSL versions below 1.0.1\n\n## 1.31.1 - 2016-03-24\n* Fix uploading of binary files in Python 3\n\n## 1.31.0 - 2016-03-15\n* Add `reject` on `Account` to support the new API feature\n\n## 1.30.0 - 2016-02-27\n* Add `CountrySpec` model for looking up country payment information\n\n## 1.29.1 - 2016-02-01\n* Update bundled CA certs\n\n## 1.29.0 - 2016-01-26\n* Add support for deleting Relay products and SKUs\n\n## 1.28.0 - 2016-01-04\n* Add an automatic paginating iterator to lists available via `auto_paging_iter`\n* List objects are now iterable\n* Error messages set to `None` are now handled properly\n* The `all` method on list objects has been deprecated in favor of `list`\n* Calls to `instance_url` are now side effect free\n\n## 1.27.1 - 2015-10-02\n* Official Python 3.4 & 3.5 compatibility\n* Add configurable HTTP client\n* Add ability to delete attributes\n\n## 1.27.0 - 2015-09-14\n* Products, SKUs, Orders resources\n\n## 1.26.0 - 2015-09-11\n* Add support for new 429 rate limit response\n\n## 1.25.0 - 2015-08-17\n* Added refund listing, creation and retrieval\n\n## 1.24.1 - 2015-08-05\n* Fix error handling for Python 2.6\n\n## 1.24.0 - 2015-08-03\n* Managed accounts can now be deleted\n* Added dispute listing and retrieval\n\n## 1.23.0 - 2015-07-06\n* Include response headers in exceptions\n\n## 1.22.3 - 2015-06-04\n* Fix saving `additional_owners` on managed accounts\n\n## 1.22.2 - 2015-04-08\n* Fix saving manage accounts\n\n## 1.22.1 - 2015-03-30\n* Pass `stripe_account` to Balance.retrieve\n\n## 1.22.0 - 2015-03-22\n* Added methods for updating and saving arrays of objects\n\n## 1.21.0 - 2015-02-19\n* Added Bitcoin Receiver update and delete methods\n\n## 1.20.2 - 2015-01-21\n* Remove support for top-level bitcoin transactions\n\n## 1.20.1 - 2015-01-07\n* Adding bitcoin receiver and transaction objects\n\n## 1.20.0 - 2014-12-23\n* Adding support for file uploads resource\n\n## 1.19.1 - 2014-10-23\n* Remove redundant manual SSL blacklist preflight check\n\n## 1.19.0 - 2014-07-26\n* Application Fee refunds now a list instead of array\n\n## 1.18.0 - 2014-06-17\n* Add metadata for disputes and refunds\n\n## 1.17.0 - 2014-06-10\n* Remove official support for Python 2.5\n\n## 1.16.0 - 2014-05-28\n* Support for canceling transfers\n\n## 1.15.1 - 2014-05-21\n* Support cards for recipients.\n\n## 1.14.1 - 2014-05-19\n* Disable loading the ssl module on the Google App Engine dev server.\n\n## 1.14.0 - 2014-04-09\n* Use DER encoded certificate for checksumming\n* Don't rely on SNI support in integration tests\n\n## 1.13.0 - 2014-04-09\n* Update bundled ca-certificates\n* Add certificate blacklist for CVE-2014-0160 mitigation\n\n## 1.12.2 - 2014-03-13\n* Fix syntax errors in setup.py metadata\n\n## 1.12.1 - 2014-03-13\n* Added license and other metadata in setup.py\n* Fix `__repr__` in Python 3\n* Support pickling of responses\n\n## 1.12.0 - 2014-01-29\n* Added support for multiple subscriptions per customer\n\n## 1.11.0 - 2013-12-05\n* Added extensive unit tests\n* Extended functional test coverage\n* Refactored code into modules and out of stripe/__init__.py\n* Abstracted http library selection and use from the `APIRequestor` into `stripe.http_client`\n* Refactored `StripeObject` to inherit from `dict` and avoid direct access of `__dict__`.\n* PEP8ified the codebase and enforced with a test.\n* Proper encoding of timezone aware datetimes\n\n### Backwards incompatible changes\n* The `to_dict` and `values` methods on resources no longer recursively convert objects to plain `dict`s.  All resources now inherit from `dict` but are functionally different in that you cannot set a value to an empty string and cannot delete items.\n* The `previous_metadata` attribute on resources is now protected.\n* Timezone aware `datetime` objects passed to the API will now be encoded in a way that does not depend on the local system time.  If you are passing timezone-aware datetimes to our API and your server time is not already in UTC, this will change the value passed to our API.\n\n## 1.10.8 - 2013-12-02\n* Add stripe.ApplicationFee resource\n\n## 1.9.8 - 2013-10-17\n* Removed incorrect test.\n\n## 1.9.7 - 2013-10-10\n* Add support for metadata.\n\n## 1.9.6 - 2013-10-08\n* Fix issue with support for closing disputes.\n\n## 1.9.5 - 2013-09-18\n* Add support for closing disputes.\n\n## 1.9.4 - 2013-08-13\n* Add stripe.Balance and stripe.BalanceTransaction resources\n\n## 1.9.3 - 2013-08-12\n* Add support for unsetting attributes by setting to None.\n  Setting properties to a blank string is now an error.\n\n## 1.9.2 - 2013-07-12\n* Add support for multiple cards API\n\n## 1.9.1 - 2013-05-03\n* Remove 'id' from the list of permanent attributes\n\n## 1.9.0 - 2013-04-25\n* Support for Python 3 (github issue #32)\n\n## 1.8.0 - 2013-04-11\n* Allow transfers to be creatable\n* Add new stripe.Recipient resource\n\n## 1.7.10 - 2013-02-21\n* Add 'id' to the list of permanent attributes\n\n## 1.7.9 - 2013-02-01\n* Add support for passing options when retrieving Stripe objects; e.g., stripe.Charge.retrieve(\"foo\", params={\"expand\":[\"customer\"]})\n\n## 1.7.8 - 2013-01-15\n* Add support for setting a Stripe API version override\n\n## 1.7.7 - 2012-12-18\n* Update requests version check to work with requests 1.x.x (github issue #24)\n\n## 1.7.6 - 2012-11-08\n* Add support for updating charge disputes\n\n## 1.7.5 - 2012-10-30\n* Add support for creating invoices\n* Add support for new invoice lines return format\n* Add support for new List objects\n\n## 1.7.4 - 2012-08-31\n* Add update and pay methods for Invoice resource\n\n## 1.7.3 - 2012-08-15\n* Add new stripe.Account resource\n* Remove uncaptured_charge tests (this has been deprecated from the API).\n\n## 1.7.2 - 2012-05-31\n* Fix a bug that would cause nested objects to be mis-rendered in __str__ and __repr__ methods (github issues #17, #18)\n\n## 1.7.1 - 2012-05-21\n* Prefer App Engine's urlfetch over requests, as that's the only thing that will work in App Engine's environment. Previously, if requests was available in the App Engine environment, we would attempt to use it.\n\n## 1.7.0 - 2012-05-17\n* Add new delete_discount method to stripe.Customer\n* Add new stripe.Transfer resource\n* Switch from using HTTP Basic auth to Bearer auth. (Note: Stripe will support Basic auth for the indefinite future, but recommends Bearer auth when possible going forward)\n* Numerous test suite improvements\n\n## 1.6.1 - 2011-09-14\n* Parameters with value None are no longer included in API requests\n";
-
-// packages/core/src/review.ts
-var import_node_fs4 = require("node:fs");
-
 // packages/core/src/safety.ts
-var import_node_crypto = require("node:crypto");
-var import_node_fs3 = require("node:fs");
-var import_node_path3 = require("node:path");
 var hash2 = (value) => (0, import_node_crypto.createHash)("sha256").update(value).digest("hex");
 var editSchema = external_exports.object({ path: external_exports.string(), beforeHash: external_exports.string().regex(/^[a-f0-9]{64}$/), content: external_exports.string().max(2e5) }).strict();
 var outputSchema = external_exports.object({ edits: external_exports.array(editSchema).max(30) }).strict();
 function contained(root, path3) {
-  if (!path3 || path3.includes("\\") || (0, import_node_path3.isAbsolute)(path3) || path3.split("/").some((p) => p === ".." || p === "" || p === ".") || /[:\x00-\x1f]/.test(path3)) throw new Error("Unsafe path");
-  const canonical = (0, import_node_fs3.realpathSync)(root), target = (0, import_node_path3.resolve)(canonical, path3);
-  const rel = (0, import_node_path3.relative)(canonical, target);
-  if (rel.startsWith(".." + import_node_path3.sep) || (0, import_node_path3.isAbsolute)(rel)) throw new Error("Path escapes repository");
+  if (!path3 || path3.includes("\\") || (0, import_node_path.isAbsolute)(path3) || path3.split("/").some((p) => p === ".." || p === "" || p === ".") || /[:\x00-\x1f]/.test(path3)) throw new Error("Unsafe path");
+  const canonical = (0, import_node_fs.realpathSync)(root), target = (0, import_node_path.resolve)(canonical, path3);
+  const rel = (0, import_node_path.relative)(canonical, target);
+  if (rel.startsWith(".." + import_node_path.sep) || (0, import_node_path.isAbsolute)(rel)) throw new Error("Path escapes repository");
   let part = canonical;
   for (const segment of path3.split("/")) {
-    part = (0, import_node_path3.resolve)(part, segment);
-    if ((0, import_node_fs3.existsSync)(part) && (0, import_node_fs3.lstatSync)(part).isSymbolicLink()) throw new Error("Symlink paths are not allowed");
+    part = (0, import_node_path.resolve)(part, segment);
+    if ((0, import_node_fs.existsSync)(part) && (0, import_node_fs.lstatSync)(part).isSymbolicLink()) throw new Error("Symlink paths are not allowed");
   }
   return target;
 }
-function validateEdits(root, raw, allowed, baseline2 = false) {
+function validateEdits(root, raw, allowed, baseline2 = false, manifests = false) {
   const { edits } = outputSchema.parse(raw);
   let bytes = 0;
   const seen = /* @__PURE__ */ new Set();
   for (const e of edits) {
     if (seen.has(e.path)) throw new Error("Duplicate edit");
     seen.add(e.path);
-    if (!allowed.includes(e.path) || (e.path !== "changelume.lock.json" || !baseline2) && (!/\.(tsx?|py)$/.test(e.path) || e.path.startsWith(".") || e.path.split("/").some((p) => ["node_modules", ".github", ".git"].includes(p)) || /(^|\/)(vitest|vite|webpack|eslint|next)\.config\./.test(e.path))) throw new Error("Edit outside permitted source paths");
+    if (!allowed.includes(e.path) || (e.path !== "changelume.lock.json" || !baseline2) && !(manifests && ["package.json", "package-lock.json"].includes(e.path)) && (!/\.(tsx?|py)$/.test(e.path) || e.path.startsWith(".") || e.path.split("/").some((p) => ["node_modules", ".github", ".git"].includes(p)) || /(^|\/)(vitest|vite|webpack|eslint|next)\.config\./.test(e.path))) throw new Error("Edit outside permitted source paths");
     const file2 = contained(root, e.path);
-    const before = (0, import_node_fs3.existsSync)(file2) ? (0, import_node_fs3.readFileSync)(file2) : Buffer.alloc(0);
+    const before = (0, import_node_fs.existsSync)(file2) ? (0, import_node_fs.readFileSync)(file2) : Buffer.alloc(0);
     if (before.length > 2e5 || hash2(before) !== e.beforeHash) throw new Error("Edit does not match expected revision");
     bytes += before.length + Buffer.byteLength(e.content);
     if (bytes > 1e6) throw new Error("Patch size limit exceeded");
@@ -272299,11 +272931,12 @@ function validateEdits(root, raw, allowed, baseline2 = false) {
 }
 
 // packages/core/src/review.ts
+var import_node_fs2 = require("node:fs");
 var schema = external_exports.object({ schemaVersion: external_exports.literal(1), acknowledgements: external_exports.array(external_exports.object({ id: external_exports.string(), evidenceHash: external_exports.string(), note: external_exports.string().min(1).max(1e3), reviewedAt: external_exports.string() })) }).strict();
 function reviews(root) {
   const file2 = contained(root, "changelume.review.json");
   try {
-    return (0, import_node_fs4.existsSync)(file2) ? schema.parse(JSON.parse((0, import_node_fs4.readFileSync)(file2, "utf8"))) : { schemaVersion: 1, acknowledgements: [] };
+    return (0, import_node_fs2.existsSync)(file2) ? schema.parse(JSON.parse((0, import_node_fs2.readFileSync)(file2, "utf8"))) : { schemaVersion: 1, acknowledgements: [] };
   } catch {
     throw new Error("Invalid changelume.review.json; restore a valid schema-1 review file before continuing");
   }
@@ -272325,12 +272958,3493 @@ function acknowledge(root, p, id, note) {
   state2.acknowledgements = state2.acknowledgements.filter((a) => a.id !== id);
   state2.acknowledgements.push({ id, evidenceHash: item.evidenceHash, note, reviewedAt: (/* @__PURE__ */ new Date()).toISOString() });
   schema.parse(state2);
-  (0, import_node_fs4.writeFileSync)(contained(root, "changelume.review.json"), JSON.stringify(state2, null, 2) + "\n");
+  (0, import_node_fs2.writeFileSync)(contained(root, "changelume.review.json"), JSON.stringify(state2, null, 2) + "\n");
+}
+
+// packages/core/src/proposal.ts
+function saveProposal(root, p, v = { status: "skipped", results: [] }, pr) {
+  const files = p.edits.map((e) => ({ path: e.path, beforeHash: e.beforeHash, afterHash: hash2(e.content) }));
+  const id = hash2(JSON.stringify({ language: p.id, upgrade: p.upgrade, files, verification: p.verification }));
+  const path3 = contained(root, ".changelume/proposal.json");
+  let previous;
+  try {
+    previous = JSON.parse((0, import_node_fs3.readFileSync)((0, import_node_fs3.existsSync)(path3) ? path3 : contained(root, ".changelume/monitor/proposal.json"), "utf8"));
+  } catch {
+  }
+  const same = previous?.id === id;
+  const queue = reviewQueue(root, p);
+  const current = p.upgrade ? p.inventory.declared === p.upgrade.to ? p.upgrade.to : p.upgrade.from : p.inventory.resolved;
+  const newer = p.observedReleases.filter((version2) => {
+    if (!current) return false;
+    const a = version2.split(".").map(Number), b = (current ?? "0.0.0").split(".").map(Number);
+    return a[0] > b[0] || a[0] === b[0] && a[1] > b[1] || a[0] === b[0] && a[1] === b[1] && a[2] > b[2];
+  });
+  const proposal = { schemaVersion: 1, id, revision: p.revision, currentVersion: current, targetVersion: p.upgrade?.to, availableUpgrade: current === "11.18.0" ? { from: current, to: "12.0.0", configuration: "upgrade: {from: '11.18.0', to: '12.0.0'}", requires: "Review unresolved API changes and configure installation plus behavioral checks" } : null, newerObservedReleases: newer, affected: p.findings.filter((f) => f.location), recipes: [...new Set(p.inventory.usages.filter((u) => u.editPlanned).map((u) => u.changeId ?? p.id))], files, review: { pending: queue.filter((i) => !i.acknowledged).length, unresolved: p.unclassified }, verification: v.status === "skipped" && same ? previous.verification : v.status, pr: pr ?? (same ? previous.pr : void 0) };
+  (0, import_node_fs3.mkdirSync)(contained(root, ".changelume/monitor"), { recursive: true });
+  (0, import_node_fs3.writeFileSync)(path3, JSON.stringify(proposal, null, 2) + "\n");
+  (0, import_node_fs3.writeFileSync)(contained(root, ".changelume/monitor/proposal.json"), JSON.stringify(proposal, null, 2) + "\n");
+  return proposal;
+}
+async function refreshProposal(root, client = new Octokit2({ auth: process.env.GITHUB_TOKEN })) {
+  const path3 = contained(root, ".changelume/proposal.json");
+  const proposal = JSON.parse((0, import_node_fs3.readFileSync)(path3, "utf8"));
+  if (!proposal.pr?.url) throw new Error("No published proposal PR to refresh");
+  const url2 = new URL(proposal.pr.url);
+  const match = /^\/([\w.-]+)\/([\w.-]+)\/pull\/(\d+)$/.exec(url2.pathname);
+  if (url2.hostname !== "github.com" || !match) throw new Error("Invalid proposal PR URL");
+  const { data } = await client.rest.pulls.get({ owner: match[1], repo: match[2], pull_number: Number(match[3]) });
+  proposal.pr = { ...proposal.pr, state: data.merged ? "merged" : data.state, draft: data.draft, head: data.head.sha };
+  (0, import_node_fs3.writeFileSync)(path3, JSON.stringify(proposal, null, 2) + "\n");
+  (0, import_node_fs3.mkdirSync)(contained(root, ".changelume/monitor"), { recursive: true });
+  (0, import_node_fs3.writeFileSync)(contained(root, ".changelume/monitor/proposal.json"), JSON.stringify(proposal, null, 2) + "\n");
+  return proposal;
+}
+
+// node_modules/commander/lib/error.js
+var CommanderError = class extends Error {
+  /**
+   * Constructs the CommanderError class
+   * @param {number} exitCode suggested exit code which could be used with process.exit
+   * @param {string} code an id string representing the error
+   * @param {string} message human-readable description of the error
+   */
+  constructor(exitCode, code, message) {
+    super(message);
+    Error.captureStackTrace(this, this.constructor);
+    this.name = this.constructor.name;
+    this.code = code;
+    this.exitCode = exitCode;
+    this.nestedError = void 0;
+  }
+};
+var InvalidArgumentError = class extends CommanderError {
+  /**
+   * Constructs the InvalidArgumentError class
+   * @param {string} [message] explanation of why argument is invalid
+   */
+  constructor(message) {
+    super(1, "commander.invalidArgument", message);
+    Error.captureStackTrace(this, this.constructor);
+    this.name = this.constructor.name;
+  }
+};
+
+// node_modules/commander/lib/argument.js
+var Argument = class {
+  /**
+   * Initialize a new command argument with the given name and description.
+   * The default is that the argument is required, and you can explicitly
+   * indicate this with <> around the name. Put [] around the name for an optional argument.
+   *
+   * @param {string} name
+   * @param {string} [description]
+   */
+  constructor(name, description) {
+    this.description = description || "";
+    this.variadic = false;
+    this.parseArg = void 0;
+    this.defaultValue = void 0;
+    this.defaultValueDescription = void 0;
+    this.argChoices = void 0;
+    switch (name[0]) {
+      case "<":
+        this.required = true;
+        this._name = name.slice(1, -1);
+        break;
+      case "[":
+        this.required = false;
+        this._name = name.slice(1, -1);
+        break;
+      default:
+        this.required = true;
+        this._name = name;
+        break;
+    }
+    if (this._name.endsWith("...")) {
+      this.variadic = true;
+      this._name = this._name.slice(0, -3);
+    }
+  }
+  /**
+   * Return argument name.
+   *
+   * @return {string}
+   */
+  name() {
+    return this._name;
+  }
+  /**
+   * @package
+   */
+  _collectValue(value, previous) {
+    if (previous === this.defaultValue || !Array.isArray(previous)) {
+      return [value];
+    }
+    previous.push(value);
+    return previous;
+  }
+  /**
+   * Set the default value, and optionally supply the description to be displayed in the help.
+   *
+   * @param {*} value
+   * @param {string} [description]
+   * @return {Argument}
+   */
+  default(value, description) {
+    this.defaultValue = value;
+    this.defaultValueDescription = description;
+    return this;
+  }
+  /**
+   * Set the custom handler for processing CLI command arguments into argument values.
+   *
+   * @param {Function} [fn]
+   * @return {Argument}
+   */
+  argParser(fn) {
+    this.parseArg = fn;
+    return this;
+  }
+  /**
+   * Only allow argument value to be one of choices.
+   *
+   * @param {string[]} values
+   * @return {Argument}
+   */
+  choices(values) {
+    this.argChoices = values.slice();
+    this.parseArg = (arg, previous) => {
+      if (!this.argChoices.includes(arg)) {
+        throw new InvalidArgumentError(
+          `Allowed choices are ${this.argChoices.join(", ")}.`
+        );
+      }
+      if (this.variadic) {
+        return this._collectValue(arg, previous);
+      }
+      return arg;
+    };
+    return this;
+  }
+  /**
+   * Make argument required.
+   *
+   * @returns {Argument}
+   */
+  argRequired() {
+    this.required = true;
+    return this;
+  }
+  /**
+   * Make argument optional.
+   *
+   * @returns {Argument}
+   */
+  argOptional() {
+    this.required = false;
+    return this;
+  }
+};
+function humanReadableArgName(arg) {
+  const nameOutput = arg.name() + (arg.variadic === true ? "..." : "");
+  return arg.required ? "<" + nameOutput + ">" : "[" + nameOutput + "]";
+}
+
+// node_modules/commander/lib/command.js
+var import_node_events = require("node:events");
+var import_node_child_process = __toESM(require("node:child_process"), 1);
+var import_node_path2 = __toESM(require("node:path"), 1);
+var import_node_fs4 = __toESM(require("node:fs"), 1);
+var import_node_process = __toESM(require("node:process"), 1);
+var import_node_util2 = require("node:util");
+
+// node_modules/commander/lib/help.js
+var import_node_util = require("node:util");
+var Help = class {
+  constructor() {
+    this.helpWidth = void 0;
+    this.minWidthToWrap = 40;
+    this.sortSubcommands = false;
+    this.sortOptions = false;
+    this.showGlobalOptions = false;
+  }
+  /**
+   * prepareContext is called by Commander after applying overrides from `Command.configureHelp()`
+   * and just before calling `formatHelp()`.
+   *
+   * Commander just uses the helpWidth and the rest is provided for optional use by more complex subclasses.
+   *
+   * @param {{ error?: boolean, helpWidth?: number, outputHasColors?: boolean }} contextOptions
+   */
+  prepareContext(contextOptions) {
+    this.helpWidth = this.helpWidth ?? contextOptions.helpWidth ?? 80;
+  }
+  /**
+   * Get an array of the visible subcommands. Includes a placeholder for the implicit help command, if there is one.
+   *
+   * @param {Command} cmd
+   * @returns {Command[]}
+   */
+  visibleCommands(cmd) {
+    const visibleCommands = cmd.commands.filter((cmd2) => !cmd2._hidden);
+    const helpCommand = cmd._getHelpCommand();
+    if (helpCommand && !helpCommand._hidden) {
+      visibleCommands.push(helpCommand);
+    }
+    if (this.sortSubcommands) {
+      visibleCommands.sort((a, b) => {
+        return a.name().localeCompare(b.name());
+      });
+    }
+    return visibleCommands;
+  }
+  /**
+   * Compare options for sort.
+   *
+   * @param {Option} a
+   * @param {Option} b
+   * @returns {number}
+   */
+  compareOptions(a, b) {
+    const getSortKey = (option) => {
+      return option.short ? option.short.replace(/^-/, "") : option.long.replace(/^--/, "");
+    };
+    return getSortKey(a).localeCompare(getSortKey(b));
+  }
+  /**
+   * Get an array of the visible options. Includes a placeholder for the implicit help option, if there is one.
+   *
+   * @param {Command} cmd
+   * @returns {Option[]}
+   */
+  visibleOptions(cmd) {
+    const visibleOptions = cmd.options.filter((option) => !option.hidden);
+    const helpOption = cmd._getHelpOption();
+    if (helpOption && !helpOption.hidden) {
+      const removeShort = helpOption.short && cmd._findOption(helpOption.short);
+      const removeLong = helpOption.long && cmd._findOption(helpOption.long);
+      if (!removeShort && !removeLong) {
+        visibleOptions.push(helpOption);
+      } else if (helpOption.long && !removeLong) {
+        visibleOptions.push(
+          cmd.createOption(helpOption.long, helpOption.description)
+        );
+      } else if (helpOption.short && !removeShort) {
+        visibleOptions.push(
+          cmd.createOption(helpOption.short, helpOption.description)
+        );
+      }
+    }
+    if (this.sortOptions) {
+      visibleOptions.sort(this.compareOptions);
+    }
+    return visibleOptions;
+  }
+  /**
+   * Get an array of the visible global options. (Not including help.)
+   *
+   * @param {Command} cmd
+   * @returns {Option[]}
+   */
+  visibleGlobalOptions(cmd) {
+    if (!this.showGlobalOptions) return [];
+    const globalOptions = [];
+    for (let ancestorCmd = cmd.parent; ancestorCmd; ancestorCmd = ancestorCmd.parent) {
+      const visibleOptions = ancestorCmd.options.filter(
+        (option) => !option.hidden
+      );
+      globalOptions.push(...visibleOptions);
+    }
+    if (this.sortOptions) {
+      globalOptions.sort(this.compareOptions);
+    }
+    return globalOptions;
+  }
+  /**
+   * Get an array of the arguments if any have a description.
+   *
+   * @param {Command} cmd
+   * @returns {Argument[]}
+   */
+  visibleArguments(cmd) {
+    if (cmd._argsDescription) {
+      cmd.registeredArguments.forEach((argument) => {
+        argument.description = argument.description || cmd._argsDescription[argument.name()] || "";
+      });
+    }
+    if (cmd.registeredArguments.find((argument) => argument.description)) {
+      return cmd.registeredArguments;
+    }
+    return [];
+  }
+  /**
+   * Get the command term to show in the list of subcommands.
+   *
+   * @param {Command} cmd
+   * @returns {string}
+   */
+  subcommandTerm(cmd) {
+    const args = cmd.registeredArguments.map((arg) => humanReadableArgName(arg)).join(" ");
+    return cmd._name + (cmd._aliases[0] ? "|" + cmd._aliases[0] : "") + (cmd.options.length ? " [options]" : "") + // simplistic check for non-help option
+    (args ? " " + args : "");
+  }
+  /**
+   * Get the option term to show in the list of options.
+   *
+   * @param {Option} option
+   * @returns {string}
+   */
+  optionTerm(option) {
+    return option.flags;
+  }
+  /**
+   * Get the argument term to show in the list of arguments.
+   *
+   * @param {Argument} argument
+   * @returns {string}
+   */
+  argumentTerm(argument) {
+    return argument.name();
+  }
+  /**
+   * Get the longest command term length.
+   *
+   * @param {Command} cmd
+   * @param {Help} helper
+   * @returns {number}
+   */
+  longestSubcommandTermLength(cmd, helper) {
+    return helper.visibleCommands(cmd).reduce((max, command) => {
+      return Math.max(
+        max,
+        this.displayWidth(
+          helper.styleSubcommandTerm(helper.subcommandTerm(command))
+        )
+      );
+    }, 0);
+  }
+  /**
+   * Get the longest option term length.
+   *
+   * @param {Command} cmd
+   * @param {Help} helper
+   * @returns {number}
+   */
+  longestOptionTermLength(cmd, helper) {
+    return helper.visibleOptions(cmd).reduce((max, option) => {
+      return Math.max(
+        max,
+        this.displayWidth(helper.styleOptionTerm(helper.optionTerm(option)))
+      );
+    }, 0);
+  }
+  /**
+   * Get the longest global option term length.
+   *
+   * @param {Command} cmd
+   * @param {Help} helper
+   * @returns {number}
+   */
+  longestGlobalOptionTermLength(cmd, helper) {
+    return helper.visibleGlobalOptions(cmd).reduce((max, option) => {
+      return Math.max(
+        max,
+        this.displayWidth(helper.styleOptionTerm(helper.optionTerm(option)))
+      );
+    }, 0);
+  }
+  /**
+   * Get the longest argument term length.
+   *
+   * @param {Command} cmd
+   * @param {Help} helper
+   * @returns {number}
+   */
+  longestArgumentTermLength(cmd, helper) {
+    return helper.visibleArguments(cmd).reduce((max, argument) => {
+      return Math.max(
+        max,
+        this.displayWidth(
+          helper.styleArgumentTerm(helper.argumentTerm(argument))
+        )
+      );
+    }, 0);
+  }
+  /**
+   * Get the command usage to be displayed at the top of the built-in help.
+   *
+   * @param {Command} cmd
+   * @returns {string}
+   */
+  commandUsage(cmd) {
+    let cmdName = cmd._name;
+    if (cmd._aliases[0]) {
+      cmdName = cmdName + "|" + cmd._aliases[0];
+    }
+    let ancestorCmdNames = "";
+    for (let ancestorCmd = cmd.parent; ancestorCmd; ancestorCmd = ancestorCmd.parent) {
+      ancestorCmdNames = ancestorCmd.name() + " " + ancestorCmdNames;
+    }
+    return ancestorCmdNames + cmdName + " " + cmd.usage();
+  }
+  /**
+   * Get the description for the command.
+   *
+   * @param {Command} cmd
+   * @returns {string}
+   */
+  commandDescription(cmd) {
+    return cmd.description();
+  }
+  /**
+   * Get the subcommand summary to show in the list of subcommands.
+   * (Fallback to description for backwards compatibility.)
+   *
+   * @param {Command} cmd
+   * @returns {string}
+   */
+  subcommandDescription(cmd) {
+    return cmd.summary() || cmd.description();
+  }
+  /**
+   * Get the option description to show in the list of options.
+   *
+   * @param {Option} option
+   * @return {string}
+   */
+  optionDescription(option) {
+    const extraInfo = [];
+    if (option.argChoices) {
+      extraInfo.push(
+        // use stringify to match the display of the default value
+        `choices: ${option.argChoices.map((choice) => JSON.stringify(choice)).join(", ")}`
+      );
+    }
+    if (option.defaultValue !== void 0) {
+      const showDefault = option.required || option.optional || option.isBoolean() && typeof option.defaultValue === "boolean";
+      if (showDefault) {
+        extraInfo.push(
+          `default: ${option.defaultValueDescription || JSON.stringify(option.defaultValue)}`
+        );
+      }
+    }
+    if (option.presetArg !== void 0 && option.optional) {
+      extraInfo.push(`preset: ${JSON.stringify(option.presetArg)}`);
+    }
+    if (option.envVar !== void 0) {
+      extraInfo.push(`env: ${option.envVar}`);
+    }
+    if (extraInfo.length > 0) {
+      const extraDescription = `(${extraInfo.join(", ")})`;
+      if (option.description) {
+        return `${option.description} ${extraDescription}`;
+      }
+      return extraDescription;
+    }
+    return option.description;
+  }
+  /**
+   * Get the argument description to show in the list of arguments.
+   *
+   * @param {Argument} argument
+   * @return {string}
+   */
+  argumentDescription(argument) {
+    const extraInfo = [];
+    if (argument.argChoices) {
+      extraInfo.push(
+        // use stringify to match the display of the default value
+        `choices: ${argument.argChoices.map((choice) => JSON.stringify(choice)).join(", ")}`
+      );
+    }
+    if (argument.defaultValue !== void 0) {
+      extraInfo.push(
+        `default: ${argument.defaultValueDescription || JSON.stringify(argument.defaultValue)}`
+      );
+    }
+    if (extraInfo.length > 0) {
+      const extraDescription = `(${extraInfo.join(", ")})`;
+      if (argument.description) {
+        return `${argument.description} ${extraDescription}`;
+      }
+      return extraDescription;
+    }
+    return argument.description;
+  }
+  /**
+   * Format a list of items, given a heading and an array of formatted items.
+   *
+   * @param {string} heading
+   * @param {string[]} items
+   * @param {Help} helper
+   * @returns string[]
+   */
+  formatItemList(heading, items, helper) {
+    if (items.length === 0) return [];
+    return [helper.styleTitle(heading), ...items, ""];
+  }
+  /**
+   * Group items by their help group heading.
+   *
+   * @param {Command[] | Option[]} unsortedItems
+   * @param {Command[] | Option[]} visibleItems
+   * @param {Function} getGroup
+   * @returns {Map<string, Command[] | Option[]>}
+   */
+  groupItems(unsortedItems, visibleItems, getGroup) {
+    const result = /* @__PURE__ */ new Map();
+    unsortedItems.forEach((item) => {
+      const group = getGroup(item);
+      if (!result.has(group)) result.set(group, []);
+    });
+    visibleItems.forEach((item) => {
+      const group = getGroup(item);
+      if (!result.has(group)) {
+        result.set(group, []);
+      }
+      result.get(group).push(item);
+    });
+    return result;
+  }
+  /**
+   * Generate the built-in help text.
+   *
+   * @param {Command} cmd
+   * @param {Help} helper
+   * @returns {string}
+   */
+  formatHelp(cmd, helper) {
+    const termWidth = helper.padWidth(cmd, helper);
+    const helpWidth = helper.helpWidth ?? 80;
+    function callFormatItem(term, description) {
+      return helper.formatItem(term, termWidth, description, helper);
+    }
+    let output2 = [
+      `${helper.styleTitle("Usage:")} ${helper.styleUsage(helper.commandUsage(cmd))}`,
+      ""
+    ];
+    const commandDescription = helper.commandDescription(cmd);
+    if (commandDescription.length > 0) {
+      output2 = output2.concat([
+        helper.boxWrap(
+          helper.styleCommandDescription(commandDescription),
+          helpWidth
+        ),
+        ""
+      ]);
+    }
+    const argumentList = helper.visibleArguments(cmd).map((argument) => {
+      return callFormatItem(
+        helper.styleArgumentTerm(helper.argumentTerm(argument)),
+        helper.styleArgumentDescription(helper.argumentDescription(argument))
+      );
+    });
+    output2 = output2.concat(
+      this.formatItemList("Arguments:", argumentList, helper)
+    );
+    const optionGroups = this.groupItems(
+      cmd.options,
+      helper.visibleOptions(cmd),
+      (option) => option.helpGroupHeading ?? "Options:"
+    );
+    optionGroups.forEach((options, group) => {
+      const optionList = options.map((option) => {
+        return callFormatItem(
+          helper.styleOptionTerm(helper.optionTerm(option)),
+          helper.styleOptionDescription(helper.optionDescription(option))
+        );
+      });
+      output2 = output2.concat(this.formatItemList(group, optionList, helper));
+    });
+    if (helper.showGlobalOptions) {
+      const globalOptionList = helper.visibleGlobalOptions(cmd).map((option) => {
+        return callFormatItem(
+          helper.styleOptionTerm(helper.optionTerm(option)),
+          helper.styleOptionDescription(helper.optionDescription(option))
+        );
+      });
+      output2 = output2.concat(
+        this.formatItemList("Global Options:", globalOptionList, helper)
+      );
+    }
+    const commandGroups = this.groupItems(
+      cmd.commands,
+      helper.visibleCommands(cmd),
+      (sub) => sub.helpGroup() || "Commands:"
+    );
+    commandGroups.forEach((commands, group) => {
+      const commandList = commands.map((sub) => {
+        return callFormatItem(
+          helper.styleSubcommandTerm(helper.subcommandTerm(sub)),
+          helper.styleSubcommandDescription(helper.subcommandDescription(sub))
+        );
+      });
+      output2 = output2.concat(this.formatItemList(group, commandList, helper));
+    });
+    return output2.join("\n");
+  }
+  /**
+   * Return display width of string, ignoring ANSI escape sequences. Used in padding and wrapping calculations.
+   *
+   * @param {string} str
+   * @returns {number}
+   */
+  displayWidth(str) {
+    return (0, import_node_util.stripVTControlCharacters)(str).length;
+  }
+  /**
+   * Style the title for displaying in the help. Called with 'Usage:', 'Options:', etc.
+   *
+   * @param {string} str
+   * @returns {string}
+   */
+  styleTitle(str) {
+    return str;
+  }
+  styleUsage(str) {
+    return str.split(" ").map((word) => {
+      if (word === "[options]") return this.styleOptionText(word);
+      if (word === "[command]") return this.styleSubcommandText(word);
+      if (word[0] === "[" || word[0] === "<")
+        return this.styleArgumentText(word);
+      return this.styleCommandText(word);
+    }).join(" ");
+  }
+  styleCommandDescription(str) {
+    return this.styleDescriptionText(str);
+  }
+  styleOptionDescription(str) {
+    return this.styleDescriptionText(str);
+  }
+  styleSubcommandDescription(str) {
+    return this.styleDescriptionText(str);
+  }
+  styleArgumentDescription(str) {
+    return this.styleDescriptionText(str);
+  }
+  styleDescriptionText(str) {
+    return str;
+  }
+  styleOptionTerm(str) {
+    return this.styleOptionText(str);
+  }
+  styleSubcommandTerm(str) {
+    return str.split(" ").map((word) => {
+      if (word === "[options]") return this.styleOptionText(word);
+      if (word[0] === "[" || word[0] === "<")
+        return this.styleArgumentText(word);
+      return this.styleSubcommandText(word);
+    }).join(" ");
+  }
+  styleArgumentTerm(str) {
+    return this.styleArgumentText(str);
+  }
+  styleOptionText(str) {
+    return str;
+  }
+  styleArgumentText(str) {
+    return str;
+  }
+  styleSubcommandText(str) {
+    return str;
+  }
+  styleCommandText(str) {
+    return str;
+  }
+  /**
+   * Calculate the pad width from the maximum term length.
+   *
+   * @param {Command} cmd
+   * @param {Help} helper
+   * @returns {number}
+   */
+  padWidth(cmd, helper) {
+    return Math.max(
+      helper.longestOptionTermLength(cmd, helper),
+      helper.longestGlobalOptionTermLength(cmd, helper),
+      helper.longestSubcommandTermLength(cmd, helper),
+      helper.longestArgumentTermLength(cmd, helper)
+    );
+  }
+  /**
+   * Detect manually wrapped and indented strings by checking for line break followed by whitespace.
+   *
+   * @param {string} str
+   * @returns {boolean}
+   */
+  preformatted(str) {
+    return /\n[^\S\r\n]/.test(str);
+  }
+  /**
+   * Format the "item", which consists of a term and description. Pad the term and wrap the description, indenting the following lines.
+   *
+   * So "TTT", 5, "DDD DDDD DD DDD" might be formatted for this.helpWidth=17 like so:
+   *   TTT  DDD DDDD
+   *        DD DDD
+   *
+   * @param {string} term
+   * @param {number} termWidth
+   * @param {string} description
+   * @param {Help} helper
+   * @returns {string}
+   */
+  formatItem(term, termWidth, description, helper) {
+    const itemIndent = 2;
+    const itemIndentStr = " ".repeat(itemIndent);
+    if (!description) return itemIndentStr + term;
+    const paddedTerm = term.padEnd(
+      termWidth + term.length - helper.displayWidth(term)
+    );
+    const spacerWidth = 2;
+    const helpWidth = this.helpWidth ?? 80;
+    const remainingWidth = helpWidth - termWidth - spacerWidth - itemIndent;
+    let formattedDescription;
+    if (remainingWidth < this.minWidthToWrap || helper.preformatted(description)) {
+      formattedDescription = description;
+    } else {
+      const wrappedDescription = helper.boxWrap(description, remainingWidth);
+      formattedDescription = wrappedDescription.replace(
+        /\n/g,
+        "\n" + " ".repeat(termWidth + spacerWidth)
+      );
+    }
+    return itemIndentStr + paddedTerm + " ".repeat(spacerWidth) + formattedDescription.replace(/\n/g, `
+${itemIndentStr}`);
+  }
+  /**
+   * Wrap a string at whitespace, preserving existing line breaks.
+   * Wrapping is skipped if the width is less than `minWidthToWrap`.
+   *
+   * @param {string} str
+   * @param {number} width
+   * @returns {string}
+   */
+  boxWrap(str, width) {
+    if (width < this.minWidthToWrap) return str;
+    const rawLines = str.split(/\r\n|\n/);
+    const chunkPattern = /[\s]*[^\s]+/g;
+    const wrappedLines = [];
+    rawLines.forEach((line) => {
+      const chunks = line.match(chunkPattern);
+      if (chunks === null) {
+        wrappedLines.push("");
+        return;
+      }
+      let sumChunks = [chunks.shift()];
+      let sumWidth = this.displayWidth(sumChunks[0]);
+      chunks.forEach((chunk) => {
+        const visibleWidth = this.displayWidth(chunk);
+        if (sumWidth + visibleWidth <= width) {
+          sumChunks.push(chunk);
+          sumWidth += visibleWidth;
+          return;
+        }
+        wrappedLines.push(sumChunks.join(""));
+        const nextChunk = chunk.trimStart();
+        sumChunks = [nextChunk];
+        sumWidth = this.displayWidth(nextChunk);
+      });
+      wrappedLines.push(sumChunks.join(""));
+    });
+    return wrappedLines.join("\n");
+  }
+};
+
+// node_modules/commander/lib/option.js
+var Option = class {
+  /**
+   * Initialize a new `Option` with the given `flags` and `description`.
+   *
+   * @param {string} flags
+   * @param {string} [description]
+   */
+  constructor(flags, description) {
+    this.flags = flags;
+    this.description = description || "";
+    this.required = flags.includes("<");
+    this.optional = flags.includes("[");
+    this.variadic = /\w\.\.\.[>\]]$/.test(flags);
+    this.mandatory = false;
+    const optionFlags = splitOptionFlags(flags);
+    this.short = optionFlags.shortFlag;
+    this.long = optionFlags.longFlag;
+    this.negate = false;
+    if (this.long) {
+      this.negate = this.long.startsWith("--no-");
+    }
+    this.defaultValue = void 0;
+    this.defaultValueDescription = void 0;
+    this.presetArg = void 0;
+    this.envVar = void 0;
+    this.parseArg = void 0;
+    this.hidden = false;
+    this.argChoices = void 0;
+    this.conflictsWith = [];
+    this.implied = void 0;
+    this.helpGroupHeading = void 0;
+  }
+  /**
+   * Set the default value, and optionally supply the description to be displayed in the help.
+   *
+   * @param {*} value
+   * @param {string} [description]
+   * @return {Option}
+   */
+  default(value, description) {
+    this.defaultValue = value;
+    this.defaultValueDescription = description;
+    return this;
+  }
+  /**
+   * Preset to use when option used without option-argument, especially optional but also boolean and negated.
+   * The custom processing (parseArg) is called.
+   *
+   * @example
+   * new Option('--color').default('GREYSCALE').preset('RGB');
+   * new Option('--donate [amount]').preset('20').argParser(parseFloat);
+   *
+   * @param {*} arg
+   * @return {Option}
+   */
+  preset(arg) {
+    this.presetArg = arg;
+    return this;
+  }
+  /**
+   * Add option name(s) that conflict with this option.
+   * An error will be displayed if conflicting options are found during parsing.
+   *
+   * @example
+   * new Option('--rgb').conflicts('cmyk');
+   * new Option('--js').conflicts(['ts', 'jsx']);
+   *
+   * @param {(string | string[])} names
+   * @return {Option}
+   */
+  conflicts(names) {
+    this.conflictsWith = this.conflictsWith.concat(names);
+    return this;
+  }
+  /**
+   * Specify implied option values for when this option is set and the implied options are not.
+   *
+   * The custom processing (parseArg) is not called on the implied values.
+   *
+   * @example
+   * program
+   *   .addOption(new Option('--log', 'write logging information to file'))
+   *   .addOption(new Option('--trace', 'log extra details').implies({ log: 'trace.txt' }));
+   *
+   * @param {object} impliedOptionValues
+   * @return {Option}
+   */
+  implies(impliedOptionValues) {
+    let newImplied = impliedOptionValues;
+    if (typeof impliedOptionValues === "string") {
+      newImplied = { [impliedOptionValues]: true };
+    }
+    this.implied = Object.assign(this.implied || {}, newImplied);
+    return this;
+  }
+  /**
+   * Set environment variable to check for option value.
+   *
+   * An environment variable is only used if when processed the current option value is
+   * undefined, or the source of the current value is 'default' or 'config' or 'env'.
+   *
+   * @param {string} name
+   * @return {Option}
+   */
+  env(name) {
+    this.envVar = name;
+    return this;
+  }
+  /**
+   * Set the custom handler for processing CLI option arguments into option values.
+   *
+   * @param {Function} [fn]
+   * @return {Option}
+   */
+  argParser(fn) {
+    this.parseArg = fn;
+    return this;
+  }
+  /**
+   * Whether the option is mandatory and must have a value after parsing.
+   *
+   * @param {boolean} [mandatory=true]
+   * @return {Option}
+   */
+  makeOptionMandatory(mandatory = true) {
+    this.mandatory = !!mandatory;
+    return this;
+  }
+  /**
+   * Hide option in help.
+   *
+   * @param {boolean} [hide=true]
+   * @return {Option}
+   */
+  hideHelp(hide2 = true) {
+    this.hidden = !!hide2;
+    return this;
+  }
+  /**
+   * @package
+   */
+  _collectValue(value, previous) {
+    if (previous === this.defaultValue || !Array.isArray(previous)) {
+      return [value];
+    }
+    previous.push(value);
+    return previous;
+  }
+  /**
+   * Only allow option value to be one of choices.
+   *
+   * @param {string[]} values
+   * @return {Option}
+   */
+  choices(values) {
+    this.argChoices = values.slice();
+    this.parseArg = (arg, previous) => {
+      if (!this.argChoices.includes(arg)) {
+        throw new InvalidArgumentError(
+          `Allowed choices are ${this.argChoices.join(", ")}.`
+        );
+      }
+      if (this.variadic) {
+        return this._collectValue(arg, previous);
+      }
+      return arg;
+    };
+    return this;
+  }
+  /**
+   * Return option name.
+   *
+   * @return {string}
+   */
+  name() {
+    if (this.long) {
+      return this.long.replace(/^--/, "");
+    }
+    return this.short.replace(/^-/, "");
+  }
+  /**
+   * Return option name, in a camelcase format that can be used
+   * as an object attribute key.
+   *
+   * @return {string}
+   */
+  attributeName() {
+    if (this.negate) {
+      return camelcase(this.name().replace(/^no-/, ""));
+    }
+    return camelcase(this.name());
+  }
+  /**
+   * Set the help group heading.
+   *
+   * @param {string} heading
+   * @return {Option}
+   */
+  helpGroup(heading) {
+    this.helpGroupHeading = heading;
+    return this;
+  }
+  /**
+   * Check if `arg` matches the short or long flag.
+   *
+   * @param {string} arg
+   * @return {boolean}
+   * @package
+   */
+  is(arg) {
+    return this.short === arg || this.long === arg;
+  }
+  /**
+   * Return whether a boolean option.
+   *
+   * Options are one of boolean, negated, required argument, or optional argument.
+   *
+   * @return {boolean}
+   * @package
+   */
+  isBoolean() {
+    return !this.required && !this.optional && !this.negate;
+  }
+};
+var DualOptions = class {
+  /**
+   * @param {Option[]} options
+   */
+  constructor(options) {
+    this.positiveOptions = /* @__PURE__ */ new Map();
+    this.negativeOptions = /* @__PURE__ */ new Map();
+    this.dualOptions = /* @__PURE__ */ new Set();
+    options.forEach((option) => {
+      if (option.negate) {
+        this.negativeOptions.set(option.attributeName(), option);
+      } else {
+        this.positiveOptions.set(option.attributeName(), option);
+      }
+    });
+    this.negativeOptions.forEach((value, key) => {
+      if (this.positiveOptions.has(key)) {
+        this.dualOptions.add(key);
+      }
+    });
+  }
+  /**
+   * Did the value come from the option, and not from possible matching dual option?
+   *
+   * @param {*} value
+   * @param {Option} option
+   * @returns {boolean}
+   */
+  valueFromOption(value, option) {
+    const optionKey = option.attributeName();
+    if (!this.dualOptions.has(optionKey)) return true;
+    const preset = this.negativeOptions.get(optionKey).presetArg;
+    const negativeValue = preset !== void 0 ? preset : false;
+    return option.negate === (negativeValue === value);
+  }
+};
+function camelcase(str) {
+  return str.split("-").reduce((str2, word) => {
+    return str2 + word[0].toUpperCase() + word.slice(1);
+  });
+}
+function splitOptionFlags(flags) {
+  let shortFlag;
+  let longFlag;
+  const shortFlagExp = /^-[^-]$/;
+  const longFlagExp = /^--[^-]/;
+  const flagParts = flags.split(/[ |,]+/).concat("guard");
+  if (shortFlagExp.test(flagParts[0])) shortFlag = flagParts.shift();
+  if (longFlagExp.test(flagParts[0])) longFlag = flagParts.shift();
+  if (!shortFlag && shortFlagExp.test(flagParts[0]))
+    shortFlag = flagParts.shift();
+  if (!shortFlag && longFlagExp.test(flagParts[0])) {
+    shortFlag = longFlag;
+    longFlag = flagParts.shift();
+  }
+  if (flagParts[0].startsWith("-")) {
+    const unsupportedFlag = flagParts[0];
+    const baseError = `option creation failed due to '${unsupportedFlag}' in option flags '${flags}'`;
+    if (/^-[^-][^-]/.test(unsupportedFlag))
+      throw new Error(
+        `${baseError}
+- a short flag is a single dash and a single character
+  - either use a single dash and a single character (for a short flag)
+  - or use a double dash for a long option (and can have two, like '--ws, --workspace')`
+      );
+    if (shortFlagExp.test(unsupportedFlag))
+      throw new Error(`${baseError}
+- too many short flags`);
+    if (longFlagExp.test(unsupportedFlag))
+      throw new Error(`${baseError}
+- too many long flags`);
+    throw new Error(`${baseError}
+- unrecognised flag format`);
+  }
+  if (shortFlag === void 0 && longFlag === void 0)
+    throw new Error(
+      `option creation failed due to no flags found in '${flags}'.`
+    );
+  return { shortFlag, longFlag };
+}
+
+// node_modules/commander/lib/suggestSimilar.js
+var maxDistance = 3;
+function editDistance(a, b) {
+  if (Math.abs(a.length - b.length) > maxDistance)
+    return Math.max(a.length, b.length);
+  const d = [];
+  for (let i = 0; i <= a.length; i++) {
+    d[i] = [i];
+  }
+  for (let j = 0; j <= b.length; j++) {
+    d[0][j] = j;
+  }
+  for (let j = 1; j <= b.length; j++) {
+    for (let i = 1; i <= a.length; i++) {
+      let cost;
+      if (a[i - 1] === b[j - 1]) {
+        cost = 0;
+      } else {
+        cost = 1;
+      }
+      d[i][j] = Math.min(
+        d[i - 1][j] + 1,
+        // deletion
+        d[i][j - 1] + 1,
+        // insertion
+        d[i - 1][j - 1] + cost
+        // substitution
+      );
+      if (i > 1 && j > 1 && a[i - 1] === b[j - 2] && a[i - 2] === b[j - 1]) {
+        d[i][j] = Math.min(d[i][j], d[i - 2][j - 2] + 1);
+      }
+    }
+  }
+  return d[a.length][b.length];
+}
+function suggestSimilar(word, candidates) {
+  if (!candidates || candidates.length === 0) return "";
+  candidates = Array.from(new Set(candidates));
+  const searchingOptions = word.startsWith("--");
+  if (searchingOptions) {
+    word = word.slice(2);
+    candidates = candidates.map((candidate2) => candidate2.slice(2));
+  }
+  let similar = [];
+  let bestDistance = maxDistance;
+  const minSimilarity = 0.4;
+  candidates.forEach((candidate2) => {
+    if (candidate2.length <= 1) return;
+    const distance = editDistance(word, candidate2);
+    const length = Math.max(word.length, candidate2.length);
+    const similarity = (length - distance) / length;
+    if (similarity > minSimilarity) {
+      if (distance < bestDistance) {
+        bestDistance = distance;
+        similar = [candidate2];
+      } else if (distance === bestDistance) {
+        similar.push(candidate2);
+      }
+    }
+  });
+  similar.sort((a, b) => a.localeCompare(b));
+  if (searchingOptions) {
+    similar = similar.map((candidate2) => `--${candidate2}`);
+  }
+  if (similar.length > 1) {
+    return `
+(Did you mean one of ${similar.join(", ")}?)`;
+  }
+  if (similar.length === 1) {
+    return `
+(Did you mean ${similar[0]}?)`;
+  }
+  return "";
+}
+
+// node_modules/commander/lib/command.js
+var Command = class _Command extends import_node_events.EventEmitter {
+  /**
+   * Initialize a new `Command`.
+   *
+   * @param {string} [name]
+   */
+  constructor(name) {
+    super();
+    this.commands = [];
+    this.options = [];
+    this.parent = null;
+    this._allowUnknownOption = false;
+    this._allowExcessArguments = false;
+    this.registeredArguments = [];
+    this._args = this.registeredArguments;
+    this.args = [];
+    this.rawArgs = [];
+    this.processedArgs = [];
+    this._scriptPath = null;
+    this._name = name || "";
+    this._optionValues = {};
+    this._optionValueSources = {};
+    this._storeOptionsAsProperties = false;
+    this._actionHandler = null;
+    this._executableHandler = false;
+    this._executableFile = null;
+    this._executableDir = null;
+    this._defaultCommandName = null;
+    this._exitCallback = null;
+    this._aliases = [];
+    this._combineFlagAndOptionalValue = true;
+    this._description = "";
+    this._summary = "";
+    this._argsDescription = void 0;
+    this._enablePositionalOptions = false;
+    this._passThroughOptions = false;
+    this._lifeCycleHooks = {};
+    this._showHelpAfterError = false;
+    this._showSuggestionAfterError = true;
+    this._savedState = null;
+    this._outputConfiguration = {
+      writeOut: (str) => import_node_process.default.stdout.write(str),
+      writeErr: (str) => import_node_process.default.stderr.write(str),
+      outputError: (str, write) => write(str),
+      getOutHelpWidth: () => import_node_process.default.stdout.isTTY ? import_node_process.default.stdout.columns : void 0,
+      getErrHelpWidth: () => import_node_process.default.stderr.isTTY ? import_node_process.default.stderr.columns : void 0,
+      getOutHasColors: () => useColor() ?? (import_node_process.default.stdout.isTTY && import_node_process.default.stdout.hasColors?.()),
+      getErrHasColors: () => useColor() ?? (import_node_process.default.stderr.isTTY && import_node_process.default.stderr.hasColors?.()),
+      stripColor: (str) => (0, import_node_util2.stripVTControlCharacters)(str)
+    };
+    this._hidden = false;
+    this._helpOption = void 0;
+    this._addImplicitHelpCommand = void 0;
+    this._helpCommand = void 0;
+    this._helpConfiguration = {};
+    this._helpGroupHeading = void 0;
+    this._defaultCommandGroup = void 0;
+    this._defaultOptionGroup = void 0;
+  }
+  /**
+   * Copy settings that are useful to have in common across root command and subcommands.
+   *
+   * (Used internally when adding a command using `.command()` so subcommands inherit parent settings.)
+   *
+   * @param {Command} sourceCommand
+   * @return {Command} `this` command for chaining
+   */
+  copyInheritedSettings(sourceCommand) {
+    this._outputConfiguration = sourceCommand._outputConfiguration;
+    this._helpOption = sourceCommand._helpOption;
+    this._helpCommand = sourceCommand._helpCommand;
+    this._helpConfiguration = sourceCommand._helpConfiguration;
+    this._exitCallback = sourceCommand._exitCallback;
+    this._storeOptionsAsProperties = sourceCommand._storeOptionsAsProperties;
+    this._combineFlagAndOptionalValue = sourceCommand._combineFlagAndOptionalValue;
+    this._allowExcessArguments = sourceCommand._allowExcessArguments;
+    this._enablePositionalOptions = sourceCommand._enablePositionalOptions;
+    this._showHelpAfterError = sourceCommand._showHelpAfterError;
+    this._showSuggestionAfterError = sourceCommand._showSuggestionAfterError;
+    return this;
+  }
+  /**
+   * @returns {Command[]}
+   * @private
+   */
+  _getCommandAndAncestors() {
+    const result = [];
+    for (let command = this; command; command = command.parent) {
+      result.push(command);
+    }
+    return result;
+  }
+  /**
+   * Define a command.
+   *
+   * There are two styles of command: pay attention to where to put the description.
+   *
+   * @example
+   * // Command implemented using action handler (description is supplied separately to `.command`)
+   * program
+   *   .command('clone <source> [destination]')
+   *   .description('clone a repository into a newly created directory')
+   *   .action((source, destination) => {
+   *     console.log('clone command called');
+   *   });
+   *
+   * // Command implemented using separate executable file (description is second parameter to `.command`)
+   * program
+   *   .command('start <service>', 'start named service')
+   *   .command('stop [service]', 'stop named service, or all if no name supplied');
+   *
+   * @param {string} nameAndArgs - command name and arguments, args are `<required>` or `[optional]` and last may also be `variadic...`
+   * @param {(object | string)} [actionOptsOrExecDesc] - configuration options (for action), or description (for executable)
+   * @param {object} [execOpts] - configuration options (for executable)
+   * @return {Command} returns new command for action handler, or `this` for executable command
+   */
+  command(nameAndArgs, actionOptsOrExecDesc, execOpts) {
+    let desc = actionOptsOrExecDesc;
+    let opts = execOpts;
+    if (typeof desc === "object" && desc !== null) {
+      opts = desc;
+      desc = null;
+    }
+    opts = opts || {};
+    const [, name, args] = nameAndArgs.match(/([^ ]+) *(.*)/);
+    const cmd = this.createCommand(name);
+    if (desc) {
+      cmd.description(desc);
+      cmd._executableHandler = true;
+    }
+    if (opts.isDefault) this._defaultCommandName = cmd._name;
+    cmd._hidden = !!(opts.noHelp || opts.hidden);
+    cmd._executableFile = opts.executableFile || null;
+    if (args) cmd.arguments(args);
+    this._registerCommand(cmd);
+    cmd.parent = this;
+    cmd.copyInheritedSettings(this);
+    if (desc) return this;
+    return cmd;
+  }
+  /**
+   * Factory routine to create a new unattached command.
+   *
+   * See .command() for creating an attached subcommand, which uses this routine to
+   * create the command. You can override createCommand to customise subcommands.
+   *
+   * @param {string} [name]
+   * @return {Command} new command
+   */
+  createCommand(name) {
+    return new _Command(name);
+  }
+  /**
+   * You can customise the help with a subclass of Help by overriding createHelp,
+   * or by overriding Help properties using configureHelp().
+   *
+   * @return {Help}
+   */
+  createHelp() {
+    return Object.assign(new Help(), this.configureHelp());
+  }
+  /**
+   * You can customise the help by overriding Help properties using configureHelp(),
+   * or with a subclass of Help by overriding createHelp().
+   *
+   * @param {object} [configuration] - configuration options
+   * @return {(Command | object)} `this` command for chaining, or stored configuration
+   */
+  configureHelp(configuration) {
+    if (configuration === void 0) return this._helpConfiguration;
+    this._helpConfiguration = configuration;
+    return this;
+  }
+  /**
+   * The default output goes to stdout and stderr. You can customise this for special
+   * applications. You can also customise the display of errors by overriding outputError.
+   *
+   * The configuration properties are all functions:
+   *
+   *     // change how output being written, defaults to stdout and stderr
+   *     writeOut(str)
+   *     writeErr(str)
+   *     // change how output being written for errors, defaults to writeErr
+   *     outputError(str, write) // used for displaying errors and not used for displaying help
+   *     // specify width for wrapping help
+   *     getOutHelpWidth()
+   *     getErrHelpWidth()
+   *     // color support, currently only used with Help
+   *     getOutHasColors()
+   *     getErrHasColors()
+   *     stripColor() // used to remove ANSI escape codes if output does not have colors
+   *
+   * @param {object} [configuration] - configuration options
+   * @return {(Command | object)} `this` command for chaining, or stored configuration
+   */
+  configureOutput(configuration) {
+    if (configuration === void 0) return this._outputConfiguration;
+    this._outputConfiguration = {
+      ...this._outputConfiguration,
+      ...configuration
+    };
+    return this;
+  }
+  /**
+   * Display the help or a custom message after an error occurs.
+   *
+   * @param {(boolean|string)} [displayHelp]
+   * @return {Command} `this` command for chaining
+   */
+  showHelpAfterError(displayHelp = true) {
+    if (typeof displayHelp !== "string") displayHelp = !!displayHelp;
+    this._showHelpAfterError = displayHelp;
+    return this;
+  }
+  /**
+   * Display suggestion of similar commands for unknown commands, or options for unknown options.
+   *
+   * @param {boolean} [displaySuggestion]
+   * @return {Command} `this` command for chaining
+   */
+  showSuggestionAfterError(displaySuggestion = true) {
+    this._showSuggestionAfterError = !!displaySuggestion;
+    return this;
+  }
+  /**
+   * Add a prepared subcommand.
+   *
+   * See .command() for creating an attached subcommand which inherits settings from its parent.
+   *
+   * @param {Command} cmd - new subcommand
+   * @param {object} [opts] - configuration options
+   * @return {Command} `this` command for chaining
+   */
+  addCommand(cmd, opts) {
+    if (!cmd._name) {
+      throw new Error(`Command passed to .addCommand() must have a name
+- specify the name in Command constructor or using .name()`);
+    }
+    opts = opts || {};
+    if (opts.isDefault) this._defaultCommandName = cmd._name;
+    if (opts.noHelp || opts.hidden) cmd._hidden = true;
+    this._registerCommand(cmd);
+    cmd.parent = this;
+    cmd._checkForBrokenPassThrough();
+    return this;
+  }
+  /**
+   * Factory routine to create a new unattached argument.
+   *
+   * See .argument() for creating an attached argument, which uses this routine to
+   * create the argument. You can override createArgument to return a custom argument.
+   *
+   * @param {string} name
+   * @param {string} [description]
+   * @return {Argument} new argument
+   */
+  createArgument(name, description) {
+    return new Argument(name, description);
+  }
+  /**
+   * Define argument syntax for command.
+   *
+   * The default is that the argument is required, and you can explicitly
+   * indicate this with <> around the name. Put [] around the name for an optional argument.
+   *
+   * @example
+   * program.argument('<input-file>');
+   * program.argument('[output-file]');
+   *
+   * @param {string} name
+   * @param {string} [description]
+   * @param {(Function|*)} [parseArg] - custom argument processing function or default value
+   * @param {*} [defaultValue]
+   * @return {Command} `this` command for chaining
+   */
+  argument(name, description, parseArg, defaultValue) {
+    const argument = this.createArgument(name, description);
+    if (typeof parseArg === "function") {
+      argument.default(defaultValue).argParser(parseArg);
+    } else {
+      argument.default(parseArg);
+    }
+    this.addArgument(argument);
+    return this;
+  }
+  /**
+   * Define argument syntax for command, adding multiple at once (without descriptions).
+   *
+   * See also .argument().
+   *
+   * @example
+   * program.arguments('<cmd> [env]');
+   *
+   * @param {string} names
+   * @return {Command} `this` command for chaining
+   */
+  arguments(names) {
+    names.trim().split(/ +/).forEach((detail) => {
+      this.argument(detail);
+    });
+    return this;
+  }
+  /**
+   * Define argument syntax for command, adding a prepared argument.
+   *
+   * @param {Argument} argument
+   * @return {Command} `this` command for chaining
+   */
+  addArgument(argument) {
+    const previousArgument = this.registeredArguments.slice(-1)[0];
+    if (previousArgument?.variadic) {
+      throw new Error(
+        `only the last argument can be variadic '${previousArgument.name()}'`
+      );
+    }
+    if (argument.required && argument.defaultValue !== void 0 && argument.parseArg === void 0) {
+      throw new Error(
+        `a default value for a required argument is never used: '${argument.name()}'`
+      );
+    }
+    this.registeredArguments.push(argument);
+    return this;
+  }
+  /**
+   * Customise or override default help command. By default a help command is automatically added if your command has subcommands.
+   *
+   * @example
+   *    program.helpCommand('help [cmd]');
+   *    program.helpCommand('help [cmd]', 'show help');
+   *    program.helpCommand(false); // suppress default help command
+   *    program.helpCommand(true); // add help command even if no subcommands
+   *
+   * @param {string|boolean} enableOrNameAndArgs - enable with custom name and/or arguments, or boolean to override whether added
+   * @param {string} [description] - custom description
+   * @return {Command} `this` command for chaining
+   */
+  helpCommand(enableOrNameAndArgs, description) {
+    if (typeof enableOrNameAndArgs === "boolean") {
+      this._addImplicitHelpCommand = enableOrNameAndArgs;
+      if (enableOrNameAndArgs && this._defaultCommandGroup) {
+        this._initCommandGroup(this._getHelpCommand());
+      }
+      return this;
+    }
+    const nameAndArgs = enableOrNameAndArgs ?? "help [command]";
+    const [, helpName, helpArgs] = nameAndArgs.match(/([^ ]+) *(.*)/);
+    const helpDescription = description ?? "display help for command";
+    const helpCommand = this.createCommand(helpName);
+    helpCommand.helpOption(false);
+    if (helpArgs) helpCommand.arguments(helpArgs);
+    if (helpDescription) helpCommand.description(helpDescription);
+    this._addImplicitHelpCommand = true;
+    this._helpCommand = helpCommand;
+    if (enableOrNameAndArgs || description) this._initCommandGroup(helpCommand);
+    return this;
+  }
+  /**
+   * Add prepared custom help command.
+   *
+   * @param {(Command|string|boolean)} helpCommand - custom help command, or deprecated enableOrNameAndArgs as for `.helpCommand()`
+   * @param {string} [deprecatedDescription] - deprecated custom description used with custom name only
+   * @return {Command} `this` command for chaining
+   */
+  addHelpCommand(helpCommand, deprecatedDescription) {
+    if (typeof helpCommand !== "object") {
+      this.helpCommand(helpCommand, deprecatedDescription);
+      return this;
+    }
+    this._addImplicitHelpCommand = true;
+    this._helpCommand = helpCommand;
+    this._initCommandGroup(helpCommand);
+    return this;
+  }
+  /**
+   * Lazy create help command.
+   *
+   * @return {(Command|null)}
+   * @package
+   */
+  _getHelpCommand() {
+    const hasImplicitHelpCommand = this._addImplicitHelpCommand ?? (this.commands.length && !this._actionHandler && !this._findCommand("help"));
+    if (hasImplicitHelpCommand) {
+      if (this._helpCommand === void 0) {
+        this.helpCommand(void 0, void 0);
+      }
+      return this._helpCommand;
+    }
+    return null;
+  }
+  /**
+   * Add hook for life cycle event.
+   *
+   * @param {string} event
+   * @param {Function} listener
+   * @return {Command} `this` command for chaining
+   */
+  hook(event, listener) {
+    const allowedValues = ["preSubcommand", "preAction", "postAction"];
+    if (!allowedValues.includes(event)) {
+      throw new Error(`Unexpected value for event passed to hook : '${event}'.
+Expecting one of '${allowedValues.join("', '")}'`);
+    }
+    if (this._lifeCycleHooks[event]) {
+      this._lifeCycleHooks[event].push(listener);
+    } else {
+      this._lifeCycleHooks[event] = [listener];
+    }
+    return this;
+  }
+  /**
+   * Register callback to use as replacement for calling process.exit.
+   *
+   * @param {Function} [fn] optional callback which will be passed a CommanderError, defaults to throwing
+   * @return {Command} `this` command for chaining
+   */
+  exitOverride(fn) {
+    if (fn) {
+      this._exitCallback = fn;
+    } else {
+      this._exitCallback = (err) => {
+        if (err.code !== "commander.executeSubCommandAsync") {
+          throw err;
+        } else {
+        }
+      };
+    }
+    return this;
+  }
+  /**
+   * Call process.exit, and _exitCallback if defined.
+   *
+   * @param {number} exitCode exit code for using with process.exit
+   * @param {string} code an id string representing the error
+   * @param {string} message human-readable description of the error
+   * @return never
+   * @private
+   */
+  _exit(exitCode, code, message) {
+    if (this._exitCallback) {
+      this._exitCallback(new CommanderError(exitCode, code, message));
+    }
+    import_node_process.default.exit(exitCode);
+  }
+  /**
+   * Register callback `fn` for the command.
+   *
+   * @example
+   * program
+   *   .command('serve')
+   *   .description('start service')
+   *   .action(function() {
+   *      // do work here
+   *   });
+   *
+   * @param {Function} fn
+   * @return {Command} `this` command for chaining
+   */
+  action(fn) {
+    const listener = (args) => {
+      const expectedArgsCount = this.registeredArguments.length;
+      const actionArgs = args.slice(0, expectedArgsCount);
+      if (this._storeOptionsAsProperties) {
+        actionArgs[expectedArgsCount] = this;
+      } else {
+        actionArgs[expectedArgsCount] = this.opts();
+      }
+      actionArgs.push(this);
+      return fn.apply(this, actionArgs);
+    };
+    this._actionHandler = listener;
+    return this;
+  }
+  /**
+   * Factory routine to create a new unattached option.
+   *
+   * See .option() for creating an attached option, which uses this routine to
+   * create the option. You can override createOption to return a custom option.
+   *
+   * @param {string} flags
+   * @param {string} [description]
+   * @return {Option} new option
+   */
+  createOption(flags, description) {
+    return new Option(flags, description);
+  }
+  /**
+   * Wrap parseArgs to catch 'commander.invalidArgument'.
+   *
+   * @param {(Option | Argument)} target
+   * @param {string} value
+   * @param {*} previous
+   * @param {string} invalidArgumentMessage
+   * @private
+   */
+  _callParseArg(target, value, previous, invalidArgumentMessage) {
+    try {
+      return target.parseArg(value, previous);
+    } catch (err) {
+      if (err.code === "commander.invalidArgument") {
+        const message = `${invalidArgumentMessage} ${err.message}`;
+        this.error(message, { exitCode: err.exitCode, code: err.code });
+      }
+      throw err;
+    }
+  }
+  /**
+   * Check for option flag conflicts.
+   * Register option if no conflicts found, or throw on conflict.
+   *
+   * @param {Option} option
+   * @private
+   */
+  _registerOption(option) {
+    const matchingOption = option.short && this._findOption(option.short) || option.long && this._findOption(option.long);
+    if (matchingOption) {
+      const matchingFlag = option.long && this._findOption(option.long) ? option.long : option.short;
+      throw new Error(`Cannot add option '${option.flags}'${this._name && ` to command '${this._name}'`} due to conflicting flag '${matchingFlag}'
+-  already used by option '${matchingOption.flags}'`);
+    }
+    this._initOptionGroup(option);
+    this.options.push(option);
+  }
+  /**
+   * Check for command name and alias conflicts with existing commands.
+   * Register command if no conflicts found, or throw on conflict.
+   *
+   * @param {Command} command
+   * @private
+   */
+  _registerCommand(command) {
+    const knownBy = (cmd) => {
+      return [cmd.name()].concat(cmd.aliases());
+    };
+    const alreadyUsed = knownBy(command).find(
+      (name) => this._findCommand(name)
+    );
+    if (alreadyUsed) {
+      const existingCmd = knownBy(this._findCommand(alreadyUsed)).join("|");
+      const newCmd = knownBy(command).join("|");
+      throw new Error(
+        `cannot add command '${newCmd}' as already have command '${existingCmd}'`
+      );
+    }
+    this._initCommandGroup(command);
+    this.commands.push(command);
+  }
+  /**
+   * Add an option.
+   *
+   * @param {Option} option
+   * @return {Command} `this` command for chaining
+   */
+  addOption(option) {
+    this._registerOption(option);
+    const oname = option.name();
+    const name = option.attributeName();
+    if (option.defaultValue !== void 0) {
+      this.setOptionValueWithSource(name, option.defaultValue, "default");
+    }
+    const handleOptionValue = (val, invalidValueMessage, valueSource) => {
+      if (val == null && option.presetArg !== void 0) {
+        val = option.presetArg;
+      }
+      const oldValue = this.getOptionValue(name);
+      if (val !== null && option.parseArg) {
+        val = this._callParseArg(option, val, oldValue, invalidValueMessage);
+      } else if (val !== null && option.variadic) {
+        val = option._collectValue(val, oldValue);
+      }
+      if (val == null) {
+        if (option.negate) {
+          val = false;
+        } else if (option.isBoolean() || option.optional) {
+          val = true;
+        } else {
+          val = "";
+        }
+      }
+      this.setOptionValueWithSource(name, val, valueSource);
+    };
+    this.on("option:" + oname, (val) => {
+      const invalidValueMessage = `error: option '${option.flags}' argument '${val}' is invalid.`;
+      handleOptionValue(val, invalidValueMessage, "cli");
+    });
+    if (option.envVar) {
+      this.on("optionEnv:" + oname, (val) => {
+        const invalidValueMessage = `error: option '${option.flags}' value '${val}' from env '${option.envVar}' is invalid.`;
+        handleOptionValue(val, invalidValueMessage, "env");
+      });
+    }
+    return this;
+  }
+  /**
+   * Internal implementation shared by .option() and .requiredOption()
+   *
+   * @return {Command} `this` command for chaining
+   * @private
+   */
+  _optionEx(config2, flags, description, fn, defaultValue) {
+    if (typeof flags === "object" && flags instanceof Option) {
+      throw new Error(
+        "To add an Option object use addOption() instead of option() or requiredOption()"
+      );
+    }
+    const option = this.createOption(flags, description);
+    option.makeOptionMandatory(!!config2.mandatory);
+    if (typeof fn === "function") {
+      option.default(defaultValue).argParser(fn);
+    } else if (fn instanceof RegExp) {
+      const regex = fn;
+      fn = (val, def) => {
+        const m = regex.exec(val);
+        return m ? m[0] : def;
+      };
+      option.default(defaultValue).argParser(fn);
+    } else {
+      option.default(fn);
+    }
+    return this.addOption(option);
+  }
+  /**
+   * Define option with `flags`, `description`, and optional argument parsing function or `defaultValue` or both.
+   *
+   * The `flags` string contains the short and/or long flags, separated by comma, a pipe or space. A required
+   * option-argument is indicated by `<>` and an optional option-argument by `[]`.
+   *
+   * See the README for more details, and see also addOption() and requiredOption().
+   *
+   * @example
+   * program
+   *     .option('-p, --pepper', 'add pepper')
+   *     .option('--pt, --pizza-type <TYPE>', 'type of pizza') // required option-argument
+   *     .option('-c, --cheese [CHEESE]', 'add extra cheese', 'mozzarella') // optional option-argument with default
+   *     .option('-t, --tip <VALUE>', 'add tip to purchase cost', parseFloat) // custom parse function
+   *
+   * @param {string} flags
+   * @param {string} [description]
+   * @param {(Function|*)} [parseArg] - custom option processing function or default value
+   * @param {*} [defaultValue]
+   * @return {Command} `this` command for chaining
+   */
+  option(flags, description, parseArg, defaultValue) {
+    return this._optionEx({}, flags, description, parseArg, defaultValue);
+  }
+  /**
+   * Add a required option which must have a value after parsing. This usually means
+   * the option must be specified on the command line. (Otherwise the same as .option().)
+   *
+   * The `flags` string contains the short and/or long flags, separated by comma, a pipe or space.
+   *
+   * @param {string} flags
+   * @param {string} [description]
+   * @param {(Function|*)} [parseArg] - custom option processing function or default value
+   * @param {*} [defaultValue]
+   * @return {Command} `this` command for chaining
+   */
+  requiredOption(flags, description, parseArg, defaultValue) {
+    return this._optionEx(
+      { mandatory: true },
+      flags,
+      description,
+      parseArg,
+      defaultValue
+    );
+  }
+  /**
+   * Alter parsing of short flags with optional values.
+   *
+   * @example
+   * // for `.option('-f,--flag [value]'):
+   * program.combineFlagAndOptionalValue(true);  // `-f80` is treated like `--flag=80`, this is the default behaviour
+   * program.combineFlagAndOptionalValue(false) // `-fb` is treated like `-f -b`
+   *
+   * @param {boolean} [combine] - if `true` or omitted, an optional value can be specified directly after the flag.
+   * @return {Command} `this` command for chaining
+   */
+  combineFlagAndOptionalValue(combine = true) {
+    this._combineFlagAndOptionalValue = !!combine;
+    return this;
+  }
+  /**
+   * Allow unknown options on the command line.
+   *
+   * @param {boolean} [allowUnknown] - if `true` or omitted, no error will be thrown for unknown options.
+   * @return {Command} `this` command for chaining
+   */
+  allowUnknownOption(allowUnknown = true) {
+    this._allowUnknownOption = !!allowUnknown;
+    return this;
+  }
+  /**
+   * Allow excess command-arguments on the command line. Pass false to make excess arguments an error.
+   *
+   * @param {boolean} [allowExcess] - if `true` or omitted, no error will be thrown for excess arguments.
+   * @return {Command} `this` command for chaining
+   */
+  allowExcessArguments(allowExcess = true) {
+    this._allowExcessArguments = !!allowExcess;
+    return this;
+  }
+  /**
+   * Enable positional options. Positional means global options are specified before subcommands which lets
+   * subcommands reuse the same option names, and also enables subcommands to turn on passThroughOptions.
+   * The default behaviour is non-positional and global options may appear anywhere on the command line.
+   *
+   * @param {boolean} [positional]
+   * @return {Command} `this` command for chaining
+   */
+  enablePositionalOptions(positional = true) {
+    this._enablePositionalOptions = !!positional;
+    return this;
+  }
+  /**
+   * Pass through options that come after command-arguments rather than treat them as command-options,
+   * so actual command-options come before command-arguments. Turning this on for a subcommand requires
+   * positional options to have been enabled on the program (parent commands).
+   * The default behaviour is non-positional and options may appear before or after command-arguments.
+   *
+   * @param {boolean} [passThrough] for unknown options.
+   * @return {Command} `this` command for chaining
+   */
+  passThroughOptions(passThrough = true) {
+    this._passThroughOptions = !!passThrough;
+    this._checkForBrokenPassThrough();
+    return this;
+  }
+  /**
+   * @private
+   */
+  _checkForBrokenPassThrough() {
+    if (this.parent && this._passThroughOptions && !this.parent._enablePositionalOptions) {
+      throw new Error(
+        `passThroughOptions cannot be used for '${this._name}' without turning on enablePositionalOptions for parent command(s)`
+      );
+    }
+  }
+  /**
+   * Whether to store option values as properties on command object,
+   * or store separately (specify false). In both cases the option values can be accessed using .opts().
+   *
+   * @param {boolean} [storeAsProperties=true]
+   * @return {Command} `this` command for chaining
+   */
+  storeOptionsAsProperties(storeAsProperties = true) {
+    if (this.options.length) {
+      throw new Error("call .storeOptionsAsProperties() before adding options");
+    }
+    if (Object.keys(this._optionValues).length) {
+      throw new Error(
+        "call .storeOptionsAsProperties() before setting option values"
+      );
+    }
+    this._storeOptionsAsProperties = !!storeAsProperties;
+    return this;
+  }
+  /**
+   * Retrieve option value.
+   *
+   * @param {string} key
+   * @return {object} value
+   */
+  getOptionValue(key) {
+    if (this._storeOptionsAsProperties) {
+      return this[key];
+    }
+    return this._optionValues[key];
+  }
+  /**
+   * Store option value.
+   *
+   * @param {string} key
+   * @param {object} value
+   * @return {Command} `this` command for chaining
+   */
+  setOptionValue(key, value) {
+    return this.setOptionValueWithSource(key, value, void 0);
+  }
+  /**
+   * Store option value and where the value came from.
+   *
+   * @param {string} key
+   * @param {object} value
+   * @param {string} source - expected values are default/config/env/cli/implied
+   * @return {Command} `this` command for chaining
+   */
+  setOptionValueWithSource(key, value, source) {
+    if (this._storeOptionsAsProperties) {
+      this[key] = value;
+    } else {
+      this._optionValues[key] = value;
+    }
+    this._optionValueSources[key] = source;
+    return this;
+  }
+  /**
+   * Get source of option value.
+   * Expected values are default | config | env | cli | implied
+   *
+   * @param {string} key
+   * @return {string}
+   */
+  getOptionValueSource(key) {
+    return this._optionValueSources[key];
+  }
+  /**
+   * Get source of option value. See also .optsWithGlobals().
+   * Expected values are default | config | env | cli | implied
+   *
+   * @param {string} key
+   * @return {string}
+   */
+  getOptionValueSourceWithGlobals(key) {
+    let source;
+    this._getCommandAndAncestors().forEach((cmd) => {
+      if (cmd.getOptionValueSource(key) !== void 0) {
+        source = cmd.getOptionValueSource(key);
+      }
+    });
+    return source;
+  }
+  /**
+   * Get user arguments from implied or explicit arguments.
+   * Side-effects: set _scriptPath if args included script. Used for default program name, and subcommand searches.
+   *
+   * @private
+   */
+  _prepareUserArgs(argv, parseOptions) {
+    if (argv !== void 0 && !Array.isArray(argv)) {
+      throw new Error("first parameter to parse must be array or undefined");
+    }
+    parseOptions = parseOptions || {};
+    if (argv === void 0 && parseOptions.from === void 0) {
+      if (import_node_process.default.versions?.electron) {
+        parseOptions.from = "electron";
+      }
+      const execArgv = import_node_process.default.execArgv ?? [];
+      if (execArgv.includes("-e") || execArgv.includes("--eval") || execArgv.includes("-p") || execArgv.includes("--print")) {
+        parseOptions.from = "eval";
+      }
+    }
+    if (argv === void 0) {
+      argv = import_node_process.default.argv;
+    }
+    this.rawArgs = argv.slice();
+    let userArgs;
+    switch (parseOptions.from) {
+      case void 0:
+      case "node":
+        this._scriptPath = argv[1];
+        userArgs = argv.slice(2);
+        break;
+      case "electron":
+        if (import_node_process.default.defaultApp) {
+          this._scriptPath = argv[1];
+          userArgs = argv.slice(2);
+        } else {
+          userArgs = argv.slice(1);
+        }
+        break;
+      case "user":
+        userArgs = argv.slice(0);
+        break;
+      case "eval":
+        userArgs = argv.slice(1);
+        break;
+      default:
+        throw new Error(
+          `unexpected parse option { from: '${parseOptions.from}' }`
+        );
+    }
+    if (!this._name && this._scriptPath)
+      this.nameFromFilename(this._scriptPath);
+    this._name = this._name || "program";
+    return userArgs;
+  }
+  /**
+   * Parse `argv`, setting options and invoking commands when defined.
+   *
+   * Use parseAsync instead of parse if any of your action handlers are async.
+   *
+   * Call with no parameters to parse `process.argv`. Detects Electron and special node options like `node --eval`. Easy mode!
+   *
+   * Or call with an array of strings to parse, and optionally where the user arguments start by specifying where the arguments are `from`:
+   * - `'node'`: default, `argv[0]` is the application and `argv[1]` is the script being run, with user arguments after that
+   * - `'electron'`: `argv[0]` is the application and `argv[1]` varies depending on whether the electron application is packaged
+   * - `'user'`: just user arguments
+   *
+   * @example
+   * program.parse(); // parse process.argv and auto-detect electron and special node flags
+   * program.parse(process.argv); // assume argv[0] is app and argv[1] is script
+   * program.parse(my-args, { from: 'user' }); // just user supplied arguments, nothing special about argv[0]
+   *
+   * @param {string[]} [argv] - optional, defaults to process.argv
+   * @param {object} [parseOptions] - optionally specify style of options with from: node/user/electron
+   * @param {string} [parseOptions.from] - where the args are from: 'node', 'user', 'electron'
+   * @return {Command} `this` command for chaining
+   */
+  parse(argv, parseOptions) {
+    this._prepareForParse();
+    const userArgs = this._prepareUserArgs(argv, parseOptions);
+    this._parseCommand([], userArgs);
+    return this;
+  }
+  /**
+   * Parse `argv`, setting options and invoking commands when defined.
+   *
+   * Call with no parameters to parse `process.argv`. Detects Electron and special node options like `node --eval`. Easy mode!
+   *
+   * Or call with an array of strings to parse, and optionally where the user arguments start by specifying where the arguments are `from`:
+   * - `'node'`: default, `argv[0]` is the application and `argv[1]` is the script being run, with user arguments after that
+   * - `'electron'`: `argv[0]` is the application and `argv[1]` varies depending on whether the electron application is packaged
+   * - `'user'`: just user arguments
+   *
+   * @example
+   * await program.parseAsync(); // parse process.argv and auto-detect electron and special node flags
+   * await program.parseAsync(process.argv); // assume argv[0] is app and argv[1] is script
+   * await program.parseAsync(my-args, { from: 'user' }); // just user supplied arguments, nothing special about argv[0]
+   *
+   * @param {string[]} [argv]
+   * @param {object} [parseOptions]
+   * @param {string} parseOptions.from - where the args are from: 'node', 'user', 'electron'
+   * @return {Promise}
+   */
+  async parseAsync(argv, parseOptions) {
+    this._prepareForParse();
+    const userArgs = this._prepareUserArgs(argv, parseOptions);
+    await this._parseCommand([], userArgs);
+    return this;
+  }
+  _prepareForParse() {
+    if (this._savedState === null) {
+      this.options.filter(
+        (option) => option.negate && option.defaultValue === void 0 && this.getOptionValue(option.attributeName()) === void 0
+      ).forEach((option) => {
+        const positiveLongFlag = option.long.replace(/^--no-/, "--");
+        if (!this._findOption(positiveLongFlag)) {
+          this.setOptionValueWithSource(
+            option.attributeName(),
+            true,
+            "default"
+          );
+        }
+      });
+      this.saveStateBeforeParse();
+    } else {
+      this.restoreStateBeforeParse();
+    }
+  }
+  /**
+   * Called the first time parse is called to save state and allow a restore before subsequent calls to parse.
+   * Not usually called directly, but available for subclasses to save their custom state.
+   *
+   * This is called in a lazy way. Only commands used in parsing chain will have state saved.
+   */
+  saveStateBeforeParse() {
+    this._savedState = {
+      // name is stable if supplied by author, but may be unspecified for root command and deduced during parsing
+      _name: this._name,
+      // option values before parse have default values (including false for negated options)
+      // shallow clones
+      _optionValues: { ...this._optionValues },
+      _optionValueSources: { ...this._optionValueSources }
+    };
+  }
+  /**
+   * Restore state before parse for calls after the first.
+   * Not usually called directly, but available for subclasses to save their custom state.
+   *
+   * This is called in a lazy way. Only commands used in parsing chain will have state restored.
+   */
+  restoreStateBeforeParse() {
+    if (this._storeOptionsAsProperties)
+      throw new Error(`Can not call parse again when storeOptionsAsProperties is true.
+- either make a new Command for each call to parse, or stop storing options as properties`);
+    this._name = this._savedState._name;
+    this._scriptPath = null;
+    this.rawArgs = [];
+    this._optionValues = { ...this._savedState._optionValues };
+    this._optionValueSources = { ...this._savedState._optionValueSources };
+    this.args = [];
+    this.processedArgs = [];
+  }
+  /**
+   * Throw if expected executable is missing. Add lots of help for author.
+   *
+   * @param {string} executableFile
+   * @param {string} executableDir
+   * @param {string} subcommandName
+   */
+  _checkForMissingExecutable(executableFile, executableDir, subcommandName) {
+    if (import_node_fs4.default.existsSync(executableFile)) return;
+    const executableDirMessage = executableDir ? `searched for local subcommand relative to directory '${executableDir}'` : "no directory for search for local subcommand, use .executableDir() to supply a custom directory";
+    const executableMissing = `'${executableFile}' does not exist
+ - if '${subcommandName}' is not meant to be an executable command, remove description parameter from '.command()' and use '.description()' instead
+ - if the default executable name is not suitable, use the executableFile option to supply a custom name or path
+ - ${executableDirMessage}`;
+    throw new Error(executableMissing);
+  }
+  /**
+   * Execute a sub-command executable.
+   *
+   * @private
+   */
+  _executeSubCommand(subcommand, args) {
+    args = args.slice();
+    const sourceExt = [".js", ".ts", ".tsx", ".mjs", ".cjs"];
+    function findFile(baseDir, baseName) {
+      const localBin = import_node_path2.default.resolve(baseDir, baseName);
+      if (import_node_fs4.default.existsSync(localBin)) return localBin;
+      if (sourceExt.includes(import_node_path2.default.extname(baseName))) return void 0;
+      const foundExt = sourceExt.find(
+        (ext) => import_node_fs4.default.existsSync(`${localBin}${ext}`)
+      );
+      if (foundExt) return `${localBin}${foundExt}`;
+      return void 0;
+    }
+    this._checkForMissingMandatoryOptions();
+    this._checkForConflictingOptions();
+    let executableFile = subcommand._executableFile || `${this._name}-${subcommand._name}`;
+    let executableDir = this._executableDir || "";
+    if (this._scriptPath) {
+      let resolvedScriptPath;
+      try {
+        resolvedScriptPath = import_node_fs4.default.realpathSync(this._scriptPath);
+      } catch {
+        resolvedScriptPath = this._scriptPath;
+      }
+      executableDir = import_node_path2.default.resolve(
+        import_node_path2.default.dirname(resolvedScriptPath),
+        executableDir
+      );
+    }
+    if (executableDir) {
+      let localFile = findFile(executableDir, executableFile);
+      if (!localFile && !subcommand._executableFile && this._scriptPath) {
+        const legacyName = import_node_path2.default.basename(
+          this._scriptPath,
+          import_node_path2.default.extname(this._scriptPath)
+        );
+        if (legacyName !== this._name) {
+          localFile = findFile(
+            executableDir,
+            `${legacyName}-${subcommand._name}`
+          );
+        }
+      }
+      executableFile = localFile || executableFile;
+    }
+    const launchWithNode = sourceExt.includes(import_node_path2.default.extname(executableFile));
+    let proc;
+    if (import_node_process.default.platform !== "win32") {
+      if (launchWithNode) {
+        args.unshift(executableFile);
+        args = incrementNodeInspectorPort(import_node_process.default.execArgv).concat(args);
+        proc = import_node_child_process.default.spawn(import_node_process.default.argv[0], args, { stdio: "inherit" });
+      } else {
+        proc = import_node_child_process.default.spawn(executableFile, args, { stdio: "inherit" });
+      }
+    } else {
+      this._checkForMissingExecutable(
+        executableFile,
+        executableDir,
+        subcommand._name
+      );
+      args.unshift(executableFile);
+      args = incrementNodeInspectorPort(import_node_process.default.execArgv).concat(args);
+      proc = import_node_child_process.default.spawn(import_node_process.default.execPath, args, { stdio: "inherit" });
+    }
+    if (!proc.killed) {
+      const signals = ["SIGUSR1", "SIGUSR2", "SIGTERM", "SIGINT", "SIGHUP"];
+      signals.forEach((signal) => {
+        import_node_process.default.on(signal, () => {
+          if (proc.killed === false && proc.exitCode === null) {
+            proc.kill(signal);
+          }
+        });
+      });
+    }
+    const exitCallback = this._exitCallback;
+    proc.on("close", (code) => {
+      code = code ?? 1;
+      if (!exitCallback) {
+        import_node_process.default.exit(code);
+      } else {
+        exitCallback(
+          new CommanderError(
+            code,
+            "commander.executeSubCommandAsync",
+            "(close)"
+          )
+        );
+      }
+    });
+    proc.on("error", (err) => {
+      if (err.code === "ENOENT") {
+        this._checkForMissingExecutable(
+          executableFile,
+          executableDir,
+          subcommand._name
+        );
+      } else if (err.code === "EACCES") {
+        throw new Error(`'${executableFile}' not executable`);
+      }
+      if (!exitCallback) {
+        import_node_process.default.exit(1);
+      } else {
+        const wrappedError = new CommanderError(
+          1,
+          "commander.executeSubCommandAsync",
+          "(error)"
+        );
+        wrappedError.nestedError = err;
+        exitCallback(wrappedError);
+      }
+    });
+    this.runningCommand = proc;
+  }
+  /**
+   * @private
+   */
+  _dispatchSubcommand(commandName, operands, unknown2) {
+    const subCommand = this._findCommand(commandName);
+    if (!subCommand) this.help({ error: true });
+    subCommand._prepareForParse();
+    let promiseChain;
+    promiseChain = this._chainOrCallSubCommandHook(
+      promiseChain,
+      subCommand,
+      "preSubcommand"
+    );
+    promiseChain = this._chainOrCall(promiseChain, () => {
+      if (subCommand._executableHandler) {
+        this._executeSubCommand(subCommand, operands.concat(unknown2));
+      } else {
+        return subCommand._parseCommand(operands, unknown2);
+      }
+    });
+    return promiseChain;
+  }
+  /**
+   * Invoke help directly if possible, or dispatch if necessary.
+   * e.g. help foo
+   *
+   * @private
+   */
+  _dispatchHelpCommand(subcommandName) {
+    if (!subcommandName) {
+      this.help();
+    }
+    const subCommand = this._findCommand(subcommandName);
+    if (subCommand && !subCommand._executableHandler) {
+      subCommand.help();
+    }
+    return this._dispatchSubcommand(
+      subcommandName,
+      [],
+      [this._getHelpOption()?.long ?? this._getHelpOption()?.short ?? "--help"]
+    );
+  }
+  /**
+   * Check this.args against expected this.registeredArguments.
+   *
+   * @private
+   */
+  _checkNumberOfArguments() {
+    this.registeredArguments.forEach((arg, i) => {
+      if (arg.required && this.args[i] == null) {
+        this.missingArgument(arg.name());
+      }
+    });
+    if (this.registeredArguments.length > 0 && this.registeredArguments[this.registeredArguments.length - 1].variadic) {
+      return;
+    }
+    if (this.args.length > this.registeredArguments.length) {
+      this._excessArguments(this.args);
+    }
+  }
+  /**
+   * Process this.args using this.registeredArguments and save as this.processedArgs!
+   *
+   * @private
+   */
+  _processArguments() {
+    const myParseArg = (argument, value, previous) => {
+      let parsedValue = value;
+      if (value !== null && argument.parseArg) {
+        const invalidValueMessage = `error: command-argument value '${value}' is invalid for argument '${argument.name()}'.`;
+        parsedValue = this._callParseArg(
+          argument,
+          value,
+          previous,
+          invalidValueMessage
+        );
+      }
+      return parsedValue;
+    };
+    this._checkNumberOfArguments();
+    const processedArgs = [];
+    this.registeredArguments.forEach((declaredArg, index) => {
+      let value = declaredArg.defaultValue;
+      if (declaredArg.variadic) {
+        if (index < this.args.length) {
+          value = this.args.slice(index);
+          if (declaredArg.parseArg) {
+            value = value.reduce((processed, v) => {
+              return myParseArg(declaredArg, v, processed);
+            }, declaredArg.defaultValue);
+          }
+        } else if (value === void 0) {
+          value = [];
+        }
+      } else if (index < this.args.length) {
+        value = this.args[index];
+        if (declaredArg.parseArg) {
+          value = myParseArg(declaredArg, value, declaredArg.defaultValue);
+        }
+      }
+      processedArgs[index] = value;
+    });
+    this.processedArgs = processedArgs;
+  }
+  /**
+   * Once we have a promise we chain, but call synchronously until then.
+   *
+   * @param {(Promise|undefined)} promise
+   * @param {Function} fn
+   * @return {(Promise|undefined)}
+   * @private
+   */
+  _chainOrCall(promise2, fn) {
+    if (promise2?.then && typeof promise2.then === "function") {
+      return promise2.then(() => fn());
+    }
+    return fn();
+  }
+  /**
+   *
+   * @param {(Promise|undefined)} promise
+   * @param {string} event
+   * @return {(Promise|undefined)}
+   * @private
+   */
+  _chainOrCallHooks(promise2, event) {
+    let result = promise2;
+    const hooks = [];
+    this._getCommandAndAncestors().reverse().filter((cmd) => cmd._lifeCycleHooks[event] !== void 0).forEach((hookedCommand) => {
+      hookedCommand._lifeCycleHooks[event].forEach((callback) => {
+        hooks.push({ hookedCommand, callback });
+      });
+    });
+    if (event === "postAction") {
+      hooks.reverse();
+    }
+    hooks.forEach((hookDetail) => {
+      result = this._chainOrCall(result, () => {
+        return hookDetail.callback(hookDetail.hookedCommand, this);
+      });
+    });
+    return result;
+  }
+  /**
+   *
+   * @param {(Promise|undefined)} promise
+   * @param {Command} subCommand
+   * @param {string} event
+   * @return {(Promise|undefined)}
+   * @private
+   */
+  _chainOrCallSubCommandHook(promise2, subCommand, event) {
+    let result = promise2;
+    if (this._lifeCycleHooks[event] !== void 0) {
+      this._lifeCycleHooks[event].forEach((hook2) => {
+        result = this._chainOrCall(result, () => {
+          return hook2(this, subCommand);
+        });
+      });
+    }
+    return result;
+  }
+  /**
+   * Process arguments in context of this command.
+   * Returns action result, in case it is a promise.
+   *
+   * @private
+   */
+  _parseCommand(operands, unknown2) {
+    const parsed = this.parseOptions(unknown2);
+    this._parseOptionsEnv();
+    this._parseOptionsImplied();
+    operands = operands.concat(parsed.operands);
+    unknown2 = parsed.unknown;
+    this.args = operands.concat(unknown2);
+    if (operands && this._findCommand(operands[0])) {
+      return this._dispatchSubcommand(operands[0], operands.slice(1), unknown2);
+    }
+    if (this._getHelpCommand() && operands[0] === this._getHelpCommand().name()) {
+      return this._dispatchHelpCommand(operands[1]);
+    }
+    if (this._defaultCommandName) {
+      this._outputHelpIfRequested(unknown2);
+      return this._dispatchSubcommand(
+        this._defaultCommandName,
+        operands,
+        unknown2
+      );
+    }
+    if (this.commands.length && this.args.length === 0 && !this._actionHandler && !this._defaultCommandName) {
+      this.help({ error: true });
+    }
+    this._outputHelpIfRequested(parsed.unknown);
+    this._checkForMissingMandatoryOptions();
+    this._checkForConflictingOptions();
+    const checkForUnknownOptions = () => {
+      if (parsed.unknown.length > 0) {
+        this.unknownOption(parsed.unknown[0]);
+      }
+    };
+    const commandEvent = `command:${this.name()}`;
+    if (this._actionHandler) {
+      checkForUnknownOptions();
+      this._processArguments();
+      let promiseChain;
+      promiseChain = this._chainOrCallHooks(promiseChain, "preAction");
+      promiseChain = this._chainOrCall(
+        promiseChain,
+        () => this._actionHandler(this.processedArgs)
+      );
+      if (this.parent) {
+        promiseChain = this._chainOrCall(promiseChain, () => {
+          this.parent.emit(commandEvent, operands, unknown2);
+        });
+      }
+      promiseChain = this._chainOrCallHooks(promiseChain, "postAction");
+      return promiseChain;
+    }
+    if (this.parent?.listenerCount(commandEvent)) {
+      checkForUnknownOptions();
+      this._processArguments();
+      this.parent.emit(commandEvent, operands, unknown2);
+    } else if (operands.length) {
+      if (this._findCommand("*")) {
+        return this._dispatchSubcommand("*", operands, unknown2);
+      }
+      if (this.listenerCount("command:*")) {
+        this.emit("command:*", operands, unknown2);
+      } else if (this.commands.length) {
+        this.unknownCommand();
+      } else {
+        checkForUnknownOptions();
+        this._processArguments();
+      }
+    } else if (this.commands.length) {
+      checkForUnknownOptions();
+      this.help({ error: true });
+    } else {
+      checkForUnknownOptions();
+      this._processArguments();
+    }
+  }
+  /**
+   * Find matching command.
+   *
+   * @private
+   * @return {Command | undefined}
+   */
+  _findCommand(name) {
+    if (!name) return void 0;
+    return this.commands.find(
+      (cmd) => cmd._name === name || cmd._aliases.includes(name)
+    );
+  }
+  /**
+   * Return an option matching `arg` if any.
+   *
+   * @param {string} arg
+   * @return {Option}
+   * @package
+   */
+  _findOption(arg) {
+    return this.options.find((option) => option.is(arg));
+  }
+  /**
+   * Display an error message if a mandatory option does not have a value.
+   * Called after checking for help flags in leaf subcommand.
+   *
+   * @private
+   */
+  _checkForMissingMandatoryOptions() {
+    this._getCommandAndAncestors().forEach((cmd) => {
+      cmd.options.forEach((anOption) => {
+        if (anOption.mandatory && cmd.getOptionValue(anOption.attributeName()) === void 0) {
+          cmd.missingMandatoryOptionValue(anOption);
+        }
+      });
+    });
+  }
+  /**
+   * Display an error message if conflicting options are used together in this.
+   *
+   * @private
+   */
+  _checkForConflictingLocalOptions() {
+    const definedNonDefaultOptions = this.options.filter((option) => {
+      const optionKey = option.attributeName();
+      if (this.getOptionValue(optionKey) === void 0) {
+        return false;
+      }
+      return this.getOptionValueSource(optionKey) !== "default";
+    });
+    const optionsWithConflicting = definedNonDefaultOptions.filter(
+      (option) => option.conflictsWith.length > 0
+    );
+    optionsWithConflicting.forEach((option) => {
+      const conflictingAndDefined = definedNonDefaultOptions.find(
+        (defined) => option.conflictsWith.includes(defined.attributeName())
+      );
+      if (conflictingAndDefined) {
+        this._conflictingOption(option, conflictingAndDefined);
+      }
+    });
+  }
+  /**
+   * Display an error message if conflicting options are used together.
+   * Called after checking for help flags in leaf subcommand.
+   *
+   * @private
+   */
+  _checkForConflictingOptions() {
+    this._getCommandAndAncestors().forEach((cmd) => {
+      cmd._checkForConflictingLocalOptions();
+    });
+  }
+  /**
+   * Parse options from `argv` removing known options,
+   * and return argv split into operands and unknown arguments.
+   *
+   * Side effects: modifies command by storing options. Does not reset state if called again.
+   *
+   * Examples:
+   *
+   *     argv => operands, unknown
+   *     --known kkk op => [op], []
+   *     op --known kkk => [op], []
+   *     sub --unknown uuu op => [sub], [--unknown uuu op]
+   *     sub -- --unknown uuu op => [sub --unknown uuu op], []
+   *
+   * @param {string[]} args
+   * @return {{operands: string[], unknown: string[]}}
+   */
+  parseOptions(args) {
+    const operands = [];
+    const unknown2 = [];
+    let dest = operands;
+    function maybeOption(arg) {
+      return arg.length > 1 && arg[0] === "-";
+    }
+    const negativeNumberArg = (arg) => {
+      if (!/^-(\d+|\d*\.\d+)(e[+-]?\d+)?$/.test(arg)) return false;
+      return !this._getCommandAndAncestors().some(
+        (cmd) => cmd.options.map((opt) => opt.short).some((short) => /^-\d$/.test(short))
+      );
+    };
+    let activeVariadicOption = null;
+    let activeGroup = null;
+    let i = 0;
+    while (i < args.length || activeGroup) {
+      const arg = activeGroup ?? args[i++];
+      activeGroup = null;
+      if (arg === "--") {
+        if (dest === unknown2) dest.push(arg);
+        dest.push(...args.slice(i));
+        break;
+      }
+      if (activeVariadicOption && (!maybeOption(arg) || negativeNumberArg(arg))) {
+        this.emit(`option:${activeVariadicOption.name()}`, arg);
+        continue;
+      }
+      activeVariadicOption = null;
+      if (maybeOption(arg)) {
+        const option = this._findOption(arg);
+        if (option) {
+          if (option.required) {
+            const value = args[i++];
+            if (value === void 0) this.optionMissingArgument(option);
+            this.emit(`option:${option.name()}`, value);
+          } else if (option.optional) {
+            let value = null;
+            if (i < args.length && (!maybeOption(args[i]) || negativeNumberArg(args[i]))) {
+              value = args[i++];
+            }
+            this.emit(`option:${option.name()}`, value);
+          } else {
+            this.emit(`option:${option.name()}`);
+          }
+          activeVariadicOption = option.variadic ? option : null;
+          continue;
+        }
+      }
+      if (arg.length > 2 && arg[0] === "-" && arg[1] !== "-") {
+        const option = this._findOption(`-${arg[1]}`);
+        if (option) {
+          if (option.required || option.optional && this._combineFlagAndOptionalValue) {
+            this.emit(`option:${option.name()}`, arg.slice(2));
+          } else {
+            this.emit(`option:${option.name()}`);
+            activeGroup = `-${arg.slice(2)}`;
+          }
+          continue;
+        }
+      }
+      if (/^--[^=]+=/.test(arg)) {
+        const index = arg.indexOf("=");
+        const option = this._findOption(arg.slice(0, index));
+        if (option && (option.required || option.optional)) {
+          this.emit(`option:${option.name()}`, arg.slice(index + 1));
+          continue;
+        }
+      }
+      if (dest === operands && maybeOption(arg) && !(this.commands.length === 0 && negativeNumberArg(arg))) {
+        dest = unknown2;
+      }
+      if ((this._enablePositionalOptions || this._passThroughOptions) && operands.length === 0 && unknown2.length === 0) {
+        if (this._findCommand(arg)) {
+          operands.push(arg);
+          unknown2.push(...args.slice(i));
+          break;
+        } else if (this._getHelpCommand() && arg === this._getHelpCommand().name()) {
+          operands.push(arg, ...args.slice(i));
+          break;
+        } else if (this._defaultCommandName) {
+          unknown2.push(arg, ...args.slice(i));
+          break;
+        }
+      }
+      if (this._passThroughOptions) {
+        dest.push(arg, ...args.slice(i));
+        break;
+      }
+      dest.push(arg);
+    }
+    return { operands, unknown: unknown2 };
+  }
+  /**
+   * Return an object containing local option values as key-value pairs.
+   *
+   * @return {object}
+   */
+  opts() {
+    if (this._storeOptionsAsProperties) {
+      const result = {};
+      const len = this.options.length;
+      for (let i = 0; i < len; i++) {
+        const key = this.options[i].attributeName();
+        result[key] = key === this._versionOptionName ? this._version : this[key];
+      }
+      return result;
+    }
+    return this._optionValues;
+  }
+  /**
+   * Return an object containing merged local and global option values as key-value pairs.
+   *
+   * @return {object}
+   */
+  optsWithGlobals() {
+    return this._getCommandAndAncestors().reduce(
+      (combinedOptions, cmd) => Object.assign(combinedOptions, cmd.opts()),
+      {}
+    );
+  }
+  /**
+   * Display error message and exit (or call exitOverride).
+   *
+   * @param {string} message
+   * @param {object} [errorOptions]
+   * @param {string} [errorOptions.code] - an id string representing the error
+   * @param {number} [errorOptions.exitCode] - used with process.exit
+   */
+  error(message, errorOptions) {
+    this._outputConfiguration.outputError(
+      `${message}
+`,
+      this._outputConfiguration.writeErr
+    );
+    if (typeof this._showHelpAfterError === "string") {
+      this._outputConfiguration.writeErr(`${this._showHelpAfterError}
+`);
+    } else if (this._showHelpAfterError) {
+      this._outputConfiguration.writeErr("\n");
+      this.outputHelp({ error: true });
+    }
+    const config2 = errorOptions || {};
+    const exitCode = config2.exitCode || 1;
+    const code = config2.code || "commander.error";
+    this._exit(exitCode, code, message);
+  }
+  /**
+   * Apply any option related environment variables, if option does
+   * not have a value from cli or client code.
+   *
+   * @private
+   */
+  _parseOptionsEnv() {
+    this.options.forEach((option) => {
+      if (option.envVar && option.envVar in import_node_process.default.env) {
+        const optionKey = option.attributeName();
+        if (this.getOptionValue(optionKey) === void 0 || ["default", "config", "env"].includes(
+          this.getOptionValueSource(optionKey)
+        )) {
+          if (option.required || option.optional) {
+            this.emit(`optionEnv:${option.name()}`, import_node_process.default.env[option.envVar]);
+          } else {
+            this.emit(`optionEnv:${option.name()}`);
+          }
+        }
+      }
+    });
+  }
+  /**
+   * Apply any implied option values, if option is undefined or default value.
+   *
+   * @private
+   */
+  _parseOptionsImplied() {
+    const dualHelper = new DualOptions(this.options);
+    const hasCustomOptionValue = (optionKey) => {
+      return this.getOptionValue(optionKey) !== void 0 && !["default", "implied"].includes(this.getOptionValueSource(optionKey));
+    };
+    this.options.filter(
+      (option) => option.implied !== void 0 && hasCustomOptionValue(option.attributeName()) && dualHelper.valueFromOption(
+        this.getOptionValue(option.attributeName()),
+        option
+      )
+    ).forEach((option) => {
+      Object.keys(option.implied).filter((impliedKey) => !hasCustomOptionValue(impliedKey)).forEach((impliedKey) => {
+        this.setOptionValueWithSource(
+          impliedKey,
+          option.implied[impliedKey],
+          "implied"
+        );
+      });
+    });
+  }
+  /**
+   * Argument `name` is missing.
+   *
+   * @param {string} name
+   * @private
+   */
+  missingArgument(name) {
+    const message = `error: missing required argument '${name}'`;
+    this.error(message, { code: "commander.missingArgument" });
+  }
+  /**
+   * `Option` is missing an argument.
+   *
+   * @param {Option} option
+   * @private
+   */
+  optionMissingArgument(option) {
+    const message = `error: option '${option.flags}' argument missing`;
+    this.error(message, { code: "commander.optionMissingArgument" });
+  }
+  /**
+   * `Option` does not have a value, and is a mandatory option.
+   *
+   * @param {Option} option
+   * @private
+   */
+  missingMandatoryOptionValue(option) {
+    const message = `error: required option '${option.flags}' not specified`;
+    this.error(message, { code: "commander.missingMandatoryOptionValue" });
+  }
+  /**
+   * `Option` conflicts with another option.
+   *
+   * @param {Option} option
+   * @param {Option} conflictingOption
+   * @private
+   */
+  _conflictingOption(option, conflictingOption) {
+    const findBestOptionFromValue = (option2) => {
+      const optionKey = option2.attributeName();
+      const optionValue = this.getOptionValue(optionKey);
+      const negativeOption = this.options.find(
+        (target) => target.negate && optionKey === target.attributeName()
+      );
+      const positiveOption = this.options.find(
+        (target) => !target.negate && optionKey === target.attributeName()
+      );
+      if (negativeOption && (negativeOption.presetArg === void 0 && optionValue === false || negativeOption.presetArg !== void 0 && optionValue === negativeOption.presetArg)) {
+        return negativeOption;
+      }
+      return positiveOption || option2;
+    };
+    const getErrorMessage = (option2) => {
+      const bestOption = findBestOptionFromValue(option2);
+      const optionKey = bestOption.attributeName();
+      const source = this.getOptionValueSource(optionKey);
+      if (source === "env") {
+        return `environment variable '${bestOption.envVar}'`;
+      }
+      return `option '${bestOption.flags}'`;
+    };
+    const message = `error: ${getErrorMessage(option)} cannot be used with ${getErrorMessage(conflictingOption)}`;
+    this.error(message, { code: "commander.conflictingOption" });
+  }
+  /**
+   * Unknown option `flag`.
+   *
+   * @param {string} flag
+   * @private
+   */
+  unknownOption(flag) {
+    if (this._allowUnknownOption) return;
+    let suggestion = "";
+    if (flag.startsWith("--") && this._showSuggestionAfterError) {
+      let candidateFlags = [];
+      let command = this;
+      do {
+        const moreFlags = command.createHelp().visibleOptions(command).filter((option) => option.long).map((option) => option.long);
+        candidateFlags = candidateFlags.concat(moreFlags);
+        command = command.parent;
+      } while (command && !command._enablePositionalOptions);
+      suggestion = suggestSimilar(flag, candidateFlags);
+    }
+    const message = `error: unknown option '${flag}'${suggestion}`;
+    this.error(message, { code: "commander.unknownOption" });
+  }
+  /**
+   * Excess arguments, more than expected.
+   *
+   * @param {string[]} receivedArgs
+   * @private
+   */
+  _excessArguments(receivedArgs) {
+    if (this._allowExcessArguments) return;
+    const expected = this.registeredArguments.length;
+    const s = expected === 1 ? "" : "s";
+    const received = receivedArgs.length;
+    const forSubcommand = this.parent ? ` for '${this.name()}'` : "";
+    const details = receivedArgs.join(", ");
+    const message = `error: too many arguments${forSubcommand}. Expected ${expected} argument${s} but got ${received}: ${details}.`;
+    this.error(message, { code: "commander.excessArguments" });
+  }
+  /**
+   * Unknown command.
+   *
+   * @private
+   */
+  unknownCommand() {
+    const unknownName = this.args[0];
+    let suggestion = "";
+    if (this._showSuggestionAfterError) {
+      const candidateNames = [];
+      this.createHelp().visibleCommands(this).forEach((command) => {
+        candidateNames.push(command.name());
+        if (command.alias()) candidateNames.push(command.alias());
+      });
+      suggestion = suggestSimilar(unknownName, candidateNames);
+    }
+    const message = `error: unknown command '${unknownName}'${suggestion}`;
+    this.error(message, { code: "commander.unknownCommand" });
+  }
+  /**
+   * Get or set the program version.
+   *
+   * This method auto-registers the "-V, --version" option which will print the version number.
+   *
+   * You can optionally supply the flags and description to override the defaults.
+   *
+   * @param {string} [str]
+   * @param {string} [flags]
+   * @param {string} [description]
+   * @return {(this | string | undefined)} `this` command for chaining, or version string if no arguments
+   */
+  version(str, flags, description) {
+    if (str === void 0) return this._version;
+    this._version = str;
+    flags = flags || "-V, --version";
+    description = description || "output the version number";
+    const versionOption = this.createOption(flags, description);
+    this._versionOptionName = versionOption.attributeName();
+    this._registerOption(versionOption);
+    this.on("option:" + versionOption.name(), () => {
+      this._outputConfiguration.writeOut(`${str}
+`);
+      this._exit(0, "commander.version", str);
+    });
+    return this;
+  }
+  /**
+   * Set the description.
+   *
+   * @param {string} [str]
+   * @param {object} [argsDescription]
+   * @return {(string|Command)}
+   */
+  description(str, argsDescription) {
+    if (str === void 0 && argsDescription === void 0)
+      return this._description;
+    this._description = str;
+    if (argsDescription) {
+      this._argsDescription = argsDescription;
+    }
+    return this;
+  }
+  /**
+   * Set the summary. Used when listed as subcommand of parent.
+   *
+   * @param {string} [str]
+   * @return {(string|Command)}
+   */
+  summary(str) {
+    if (str === void 0) return this._summary;
+    this._summary = str;
+    return this;
+  }
+  /**
+   * Set an alias for the command.
+   *
+   * You may call more than once to add multiple aliases. Only the first alias is shown in the auto-generated help.
+   *
+   * @param {string} [alias]
+   * @return {(string|Command)}
+   */
+  alias(alias) {
+    if (alias === void 0) return this._aliases[0];
+    let command = this;
+    if (this.commands.length !== 0 && this.commands[this.commands.length - 1]._executableHandler) {
+      command = this.commands[this.commands.length - 1];
+    }
+    if (alias === command._name)
+      throw new Error("Command alias can't be the same as its name");
+    const matchingCommand = this.parent?._findCommand(alias);
+    if (matchingCommand) {
+      const existingCmd = [matchingCommand.name()].concat(matchingCommand.aliases()).join("|");
+      throw new Error(
+        `cannot add alias '${alias}' to command '${this.name()}' as already have command '${existingCmd}'`
+      );
+    }
+    command._aliases.push(alias);
+    return this;
+  }
+  /**
+   * Set aliases for the command.
+   *
+   * Only the first alias is shown in the auto-generated help.
+   *
+   * @param {string[]} [aliases]
+   * @return {(string[]|Command)}
+   */
+  aliases(aliases) {
+    if (aliases === void 0) return this._aliases;
+    aliases.forEach((alias) => this.alias(alias));
+    return this;
+  }
+  /**
+   * Set / get the command usage `str`.
+   *
+   * @param {string} [str]
+   * @return {(string|Command)}
+   */
+  usage(str) {
+    if (str === void 0) {
+      if (this._usage) return this._usage;
+      const args = this.registeredArguments.map((arg) => {
+        return humanReadableArgName(arg);
+      });
+      return [].concat(
+        this.options.length || this._helpOption !== null ? "[options]" : [],
+        this.commands.length ? "[command]" : [],
+        this.registeredArguments.length ? args : []
+      ).join(" ");
+    }
+    this._usage = str;
+    return this;
+  }
+  /**
+   * Get or set the name of the command.
+   *
+   * @param {string} [str]
+   * @return {(string|Command)}
+   */
+  name(str) {
+    if (str === void 0) return this._name;
+    this._name = str;
+    return this;
+  }
+  /**
+   * Set/get the help group heading for this subcommand in parent command's help.
+   *
+   * @param {string} [heading]
+   * @return {Command | string}
+   */
+  helpGroup(heading) {
+    if (heading === void 0) return this._helpGroupHeading ?? "";
+    this._helpGroupHeading = heading;
+    return this;
+  }
+  /**
+   * Set/get the default help group heading for subcommands added to this command.
+   * (This does not override a group set directly on the subcommand using .helpGroup().)
+   *
+   * @example
+   * program.commandsGroup('Development Commands:);
+   * program.command('watch')...
+   * program.command('lint')...
+   * ...
+   *
+   * @param {string} [heading]
+   * @returns {Command | string}
+   */
+  commandsGroup(heading) {
+    if (heading === void 0) return this._defaultCommandGroup ?? "";
+    this._defaultCommandGroup = heading;
+    return this;
+  }
+  /**
+   * Set/get the default help group heading for options added to this command.
+   * (This does not override a group set directly on the option using .helpGroup().)
+   *
+   * @example
+   * program
+   *   .optionsGroup('Development Options:')
+   *   .option('-d, --debug', 'output extra debugging')
+   *   .option('-p, --profile', 'output profiling information')
+   *
+   * @param {string} [heading]
+   * @returns {Command | string}
+   */
+  optionsGroup(heading) {
+    if (heading === void 0) return this._defaultOptionGroup ?? "";
+    this._defaultOptionGroup = heading;
+    return this;
+  }
+  /**
+   * @param {Option} option
+   * @private
+   */
+  _initOptionGroup(option) {
+    if (this._defaultOptionGroup && !option.helpGroupHeading)
+      option.helpGroup(this._defaultOptionGroup);
+  }
+  /**
+   * @param {Command} cmd
+   * @private
+   */
+  _initCommandGroup(cmd) {
+    if (this._defaultCommandGroup && !cmd.helpGroup())
+      cmd.helpGroup(this._defaultCommandGroup);
+  }
+  /**
+   * Set the name of the command from script filename, such as process.argv[1],
+   * or import.meta.filename.
+   *
+   * (Used internally and public although not documented in README.)
+   *
+   * @example
+   * program.nameFromFilename(import.meta.filename);
+   *
+   * @param {string} filename
+   * @return {Command}
+   */
+  nameFromFilename(filename) {
+    this._name = import_node_path2.default.basename(filename, import_node_path2.default.extname(filename));
+    return this;
+  }
+  /**
+   * Get or set the directory for searching for executable subcommands of this command.
+   *
+   * @example
+   * program.executableDir(import.meta.dirname);
+   * // or
+   * program.executableDir('subcommands');
+   *
+   * @param {string} [path]
+   * @return {(string|null|Command)}
+   */
+  executableDir(path3) {
+    if (path3 === void 0) return this._executableDir;
+    this._executableDir = path3;
+    return this;
+  }
+  /**
+   * Return program help documentation.
+   *
+   * @param {{ error: boolean }} [contextOptions] - pass {error:true} to wrap for stderr instead of stdout
+   * @return {string}
+   */
+  helpInformation(contextOptions) {
+    const helper = this.createHelp();
+    const context = this._getOutputContext(contextOptions);
+    helper.prepareContext({
+      error: context.error,
+      helpWidth: context.helpWidth,
+      outputHasColors: context.hasColors
+    });
+    const text = helper.formatHelp(this, helper);
+    if (context.hasColors) return text;
+    return this._outputConfiguration.stripColor(text);
+  }
+  /**
+   * @typedef HelpContext
+   * @type {object}
+   * @property {boolean} error
+   * @property {number} helpWidth
+   * @property {boolean} hasColors
+   * @property {function} write - includes stripColor if needed
+   *
+   * @returns {HelpContext}
+   * @private
+   */
+  _getOutputContext(contextOptions) {
+    contextOptions = contextOptions || {};
+    const error62 = !!contextOptions.error;
+    let baseWrite;
+    let hasColors;
+    let helpWidth;
+    if (error62) {
+      baseWrite = (str) => this._outputConfiguration.writeErr(str);
+      hasColors = this._outputConfiguration.getErrHasColors();
+      helpWidth = this._outputConfiguration.getErrHelpWidth();
+    } else {
+      baseWrite = (str) => this._outputConfiguration.writeOut(str);
+      hasColors = this._outputConfiguration.getOutHasColors();
+      helpWidth = this._outputConfiguration.getOutHelpWidth();
+    }
+    const write = (str) => {
+      if (!hasColors) str = this._outputConfiguration.stripColor(str);
+      return baseWrite(str);
+    };
+    return { error: error62, write, hasColors, helpWidth };
+  }
+  /**
+   * Output help information for this command.
+   *
+   * Outputs built-in help, and custom text added using `.addHelpText()`.
+   *
+   * @param {{ error: boolean } | Function} [contextOptions] - pass {error:true} to write to stderr instead of stdout
+   */
+  outputHelp(contextOptions) {
+    let deprecatedCallback;
+    if (typeof contextOptions === "function") {
+      deprecatedCallback = contextOptions;
+      contextOptions = void 0;
+    }
+    const outputContext = this._getOutputContext(contextOptions);
+    const eventContext = {
+      error: outputContext.error,
+      write: outputContext.write,
+      command: this
+    };
+    this._getCommandAndAncestors().reverse().forEach((command) => command.emit("beforeAllHelp", eventContext));
+    this.emit("beforeHelp", eventContext);
+    let helpInformation = this.helpInformation({ error: outputContext.error });
+    if (deprecatedCallback) {
+      helpInformation = deprecatedCallback(helpInformation);
+      if (typeof helpInformation !== "string" && !Buffer.isBuffer(helpInformation)) {
+        throw new Error("outputHelp callback must return a string or a Buffer");
+      }
+    }
+    outputContext.write(helpInformation);
+    if (this._getHelpOption()?.long) {
+      this.emit(this._getHelpOption().long);
+    }
+    this.emit("afterHelp", eventContext);
+    this._getCommandAndAncestors().forEach(
+      (command) => command.emit("afterAllHelp", eventContext)
+    );
+  }
+  /**
+   * You can pass in flags and a description to customise the built-in help option.
+   * Pass in false to disable the built-in help option.
+   *
+   * @example
+   * program.helpOption('-?, --help' 'show help'); // customise
+   * program.helpOption(false); // disable
+   *
+   * @param {(string | boolean)} flags
+   * @param {string} [description]
+   * @return {Command} `this` command for chaining
+   */
+  helpOption(flags, description) {
+    if (typeof flags === "boolean") {
+      if (flags) {
+        if (this._helpOption === null) this._helpOption = void 0;
+        if (this._defaultOptionGroup) {
+          this._initOptionGroup(this._getHelpOption());
+        }
+      } else {
+        this._helpOption = null;
+      }
+      return this;
+    }
+    this._helpOption = this.createOption(
+      flags ?? "-h, --help",
+      description ?? "display help for command"
+    );
+    if (flags || description) this._initOptionGroup(this._helpOption);
+    return this;
+  }
+  /**
+   * Lazy create help option.
+   * Returns null if has been disabled with .helpOption(false).
+   *
+   * @returns {(Option | null)} the help option
+   * @package
+   */
+  _getHelpOption() {
+    if (this._helpOption === void 0) {
+      this.helpOption(void 0, void 0);
+    }
+    return this._helpOption;
+  }
+  /**
+   * Supply your own option to use for the built-in help option.
+   * This is an alternative to using helpOption() to customise the flags and description etc.
+   *
+   * @param {Option} option
+   * @return {Command} `this` command for chaining
+   */
+  addHelpOption(option) {
+    this._helpOption = option;
+    this._initOptionGroup(option);
+    return this;
+  }
+  /**
+   * Output help information and exit.
+   *
+   * Outputs built-in help, and custom text added using `.addHelpText()`.
+   *
+   * @param {{ error: boolean }} [contextOptions] - pass {error:true} to write to stderr instead of stdout
+   */
+  help(contextOptions) {
+    this.outputHelp(contextOptions);
+    let exitCode = Number(import_node_process.default.exitCode ?? 0);
+    if (exitCode === 0 && contextOptions && typeof contextOptions !== "function" && contextOptions.error) {
+      exitCode = 1;
+    }
+    this._exit(exitCode, "commander.help", "(outputHelp)");
+  }
+  /**
+   * // Do a little typing to coordinate emit and listener for the help text events.
+   * @typedef HelpTextEventContext
+   * @type {object}
+   * @property {boolean} error
+   * @property {Command} command
+   * @property {function} write
+   */
+  /**
+   * Add additional text to be displayed with the built-in help.
+   *
+   * Position is 'before' or 'after' to affect just this command,
+   * and 'beforeAll' or 'afterAll' to affect this command and all its subcommands.
+   *
+   * @param {string} position - before or after built-in help
+   * @param {(string | Function)} text - string to add, or a function returning a string
+   * @return {Command} `this` command for chaining
+   */
+  addHelpText(position, text) {
+    const allowedValues = ["beforeAll", "before", "after", "afterAll"];
+    if (!allowedValues.includes(position)) {
+      throw new Error(`Unexpected value for position to addHelpText.
+Expecting one of '${allowedValues.join("', '")}'`);
+    }
+    const helpEvent = `${position}Help`;
+    this.on(helpEvent, (context) => {
+      let helpStr;
+      if (typeof text === "function") {
+        helpStr = text({ error: context.error, command: context.command });
+      } else {
+        helpStr = text;
+      }
+      if (helpStr) {
+        context.write(`${helpStr}
+`);
+      }
+    });
+    return this;
+  }
+  /**
+   * Output help information if help flags specified
+   *
+   * @param {Array} args - array of options to search for help flags
+   * @private
+   */
+  _outputHelpIfRequested(args) {
+    const helpOption = this._getHelpOption();
+    const helpRequested = helpOption && args.find((arg) => helpOption.is(arg));
+    if (helpRequested) {
+      this.outputHelp();
+      this._exit(0, "commander.helpDisplayed", "(outputHelp)");
+    }
+  }
+};
+function incrementNodeInspectorPort(args) {
+  return args.map((arg) => {
+    if (!arg.startsWith("--inspect")) {
+      return arg;
+    }
+    let debugOption;
+    let debugHost = "127.0.0.1";
+    let debugPort = "9229";
+    let match;
+    if ((match = arg.match(/^(--inspect(-brk)?)$/)) !== null) {
+      debugOption = match[1];
+    } else if ((match = arg.match(/^(--inspect(-brk|-port)?)=([^:]+)$/)) !== null) {
+      debugOption = match[1];
+      if (/^\d+$/.test(match[3])) {
+        debugPort = match[3];
+      } else {
+        debugHost = match[3];
+      }
+    } else if ((match = arg.match(/^(--inspect(-brk|-port)?)=([^:]+):(\d+)$/)) !== null) {
+      debugOption = match[1];
+      debugHost = match[3];
+      debugPort = match[4];
+    }
+    if (debugOption && debugPort !== "0") {
+      return `${debugOption}=${debugHost}:${parseInt(debugPort) + 1}`;
+    }
+    return arg;
+  });
+}
+function useColor() {
+  if (import_node_process.default.env.NO_COLOR || import_node_process.default.env.FORCE_COLOR === "0" || import_node_process.default.env.FORCE_COLOR === "false")
+    return false;
+  if (import_node_process.default.env.FORCE_COLOR || import_node_process.default.env.CLICOLOR_FORCE !== void 0)
+    return true;
+  return void 0;
+}
+
+// node_modules/commander/index.js
+var program = new Command();
+
+// packages/cli/src/index.ts
+var import_node_path9 = require("node:path");
+var import_node_fs12 = require("node:fs");
+
+// packages/core/src/config.ts
+var import_node_fs5 = require("node:fs");
+var import_node_path3 = require("node:path");
+var import_yaml = __toESM(require_dist(), 1);
+var configSchema = external_exports.object({
+  upgrade: external_exports.object({ from: external_exports.string(), to: external_exports.string() }).strict().optional(),
+  language: external_exports.enum(["typescript", "python"]).default("typescript"),
+  pythonCommand: external_exports.string().default("python"),
+  vendors: external_exports.object({ stripe: external_exports.object({ enabled: external_exports.boolean().default(true), sdkVersion: external_exports.string().regex(/^\d+\.\d+\.\d+$/).optional(), requestApiVersion: external_exports.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(), webhookVersion: external_exports.string().optional() }).strict().default({ enabled: true }) }).strict().default({ stripe: { enabled: true } }),
+  include: external_exports.array(external_exports.string()).default(["src/**/*.ts", "src/**/*.tsx"]),
+  exclude: external_exports.array(external_exports.string()).default(["**/node_modules/**", "**/*.d.ts"]),
+  verification: external_exports.array(external_exports.object({ command: external_exports.string().min(1), args: external_exports.array(external_exports.string()).default([]), timeoutMs: external_exports.number().int().min(100).max(6e5).default(12e4) }).strict()).default([]),
+  sources: external_exports.object({ timeoutMs: external_exports.number().int().min(100).max(6e4).default(1e4), retries: external_exports.number().int().min(0).max(3).default(2) }).strict().default({ timeoutMs: 1e4, retries: 2 }),
+  llm: external_exports.object({ enabled: external_exports.boolean().default(false), provider: external_exports.literal("openai"), model: external_exports.string().min(1), apiKeyEnv: external_exports.string().regex(/^[A-Z_][A-Z0-9_]*$/).default("OPENAI_API_KEY"), maxRequests: external_exports.number().int().min(1).max(3).default(1), maxInputTokens: external_exports.number().int().min(100).max(16e3).default(4e3), maxOutputTokens: external_exports.number().int().min(100).max(8e3).default(2e3), timeoutMs: external_exports.number().int().min(100).max(6e4).default(3e4), retries: external_exports.number().int().min(0).max(2).default(0) }).strict().optional(),
+  pr: external_exports.object({ base: external_exports.string().default("main"), draft: external_exports.boolean().default(true) }).strict().default({ base: "main", draft: true })
+}).strict();
+function loadConfig(root, name = "changelume.yml") {
+  const path3 = (0, import_node_path3.resolve)(root, name);
+  return configSchema.parse((0, import_node_fs5.existsSync)(path3) ? (0, import_yaml.parse)((0, import_node_fs5.readFileSync)(path3, "utf8")) : {});
+}
+var exampleConfig = `vendors:
+  stripe:
+    enabled: true
+include: ['src/**/*.ts', 'src/**/*.tsx']
+exclude: ['**/node_modules/**', '**/*.d.ts']
+# Commands execute customer code. Configure only commands you trust.
+verification: []
+pr:
+  base: main
+  draft: true
+# llm:
+#   enabled: true
+#   provider: openai
+#   model: YOUR_MODEL
+#   apiKeyEnv: OPENAI_API_KEY
+`;
+
+// packages/core/src/pipeline.ts
+var import_node_fs11 = require("node:fs");
+var import_node_crypto2 = require("node:crypto");
+var import_node_path8 = require("node:path");
+var import_node_os = require("node:os");
+var import_node_child_process4 = require("node:child_process");
+
+// fixtures/sources/stripe-python-v5-changelog.md
+var stripe_python_v5_changelog_default = "# Changelog\n\n## 5.0.0 - 2022-11-16\n\nBreaking changes that arose during code generation of the library that we postponed for the next major version. For changes to the Stripe products, read more at https://stripe.com/docs/upgrades#2022-11-15.\n\n\"\u26A0\uFE0F\" symbol highlights breaking changes.\n\n* [#895](https://github.com/stripe/stripe-python/pull/895) Next major release changes\n* [#889](https://github.com/stripe/stripe-python/pull/889) API Updates\n\n* [#888](https://github.com/stripe/stripe-python/pull/888) Do not run Coveralls if secret token is not available\n* [#875](https://github.com/stripe/stripe-python/pull/875) hide misleading ssl security warning in python>=2.7.9\n\n### \u26A0\uFE0F Changed\n- Dropped support for Python version 3.4 and 3.5 (#881). We now support Python 2.7 or 3.6+.\n- Fixed mixtyped names for two OAuth exceptions: `UnsupportedGrantTypError`->`UnsupportedGrantTypeError` and `UnsupportedResponseTypError`->`UnsupportedResponseTypeError` (#872).\n\n### Deprecated\n- Deprecate `save` method on resources (#887). Use `modify` instead.\n   ```python\n  # Before\n  customer = stripe.Customer.retrieve(\"cus_123\")\n  customer.email = \"example@test.com\"\n  customer.save()\n\n  # After\n  stripe.Customer.modify(\"cus_123\", email=\"example@test.com\")\n   ```\n\n### \u26A0\uFE0F Removed\n- Removed `Orders` resource (#882).\n- Removed `SKU` resource (#883).\n\n## 4.2.0 - 2022-09-23\n* [#877](https://github.com/stripe/stripe-python/pull/877) API Updates\n  * Add `upcoming_lines` method to the `Invoice` resource.\n* [#873](https://github.com/stripe/stripe-python/pull/873) Add abstract methods for SearchableAPIResource\n* [#867](https://github.com/stripe/stripe-python/pull/867) API Updates\n  * Update links in documentation to be absolute.\n\n## 4.1.0 - 2022-08-19\n* [#861](https://github.com/stripe/stripe-python/pull/861) API Updates\n  * Add support for new resource `CustomerCashBalanceTransaction`\n* [#860](https://github.com/stripe/stripe-python/pull/860) Add a support section to the readme\n* [#717](https://github.com/stripe/stripe-python/pull/717) Fix test TestCharge.test_is_saveable().\n\n## 4.0.2 - 2022-08-03\n* [#855](https://github.com/stripe/stripe-python/pull/855) Fix issue where auto_paging_iter failed on nested list objects.\n\n## 4.0.1 - 2022-08-02\n* [#850](https://github.com/stripe/stripe-python/pull/850) Fix incorrect handling of additional request parameters\n  * Fixes issue where using special parameter like `api_key`, `idempotency_key`, `stripe_version`, `stripe_account`, `headers` can cause a `Received unknown parameter error`.\n\n## 4.0.0 - 2022-08-02\n\nBreaking changes that arose during code generation of the library that we postponed for the next major version. For changes to the SDK, read more detailed description at https://github.com/stripe/stripe-python/wiki/Migration-guide-for-v4. For changes to the Stripe products, read more at https://stripe.com/docs/upgrades#2022-08-01.\n\n\"\u26A0\uFE0F\" symbol highlights breaking changes.\n\n* [#847](https://github.com/stripe/stripe-python/pull/847) API Updates\n* [#845](https://github.com/stripe/stripe-python/pull/845) Next major release changes\n* [#836](https://github.com/stripe/stripe-python/pull/836) API Updates. Add Price.create tests.\n* [#835](https://github.com/stripe/stripe-python/pull/835) API Updates. Use auto-generation for credit_note and invoice methods.\n\n### \u26A0\uFE0F Removed\n- Removed deprecated `AlipayAccount`, `BitcoinReceiver`, `BitcoinTransaction`, `IssuerFraudRecord`, `Recipient`, `RecipientTransfer`, and  `ThreeDSecure` classes.\n- Removed deprecated `Charge.update_dispute` and `Charge.close_dispute` methods that were using legacy REST API endpoint. Prefer [Dispute.modify](https://stripe.com/docs/api/disputes/update?lang=python) and [Dispute.close](https://stripe.com/docs/api/disputes/close?lang=python)\n- Removed deprecated `Card.details` method and `CardDetails` resource. The REST API endpoint is not longer supported.\n- Removed the deprecated `Source.source_transactions` method. Prefer `SubscriptionItem.list_source_transactions`\n- Removed the deprecated `SubscriptionItem.usage_record_summaries` method. Prefer `SubscriptionItem.list_usage_record_summaries`\n- Removed the deprecated `Charge.refund` method. Prefer [Refund.create](https://stripe.com/docs/api/refunds/create)\n\n### \u26A0\uFE0F Changed\n- To be consistent with other resource methods, `ApplicationFee.refund` returns an instance of `ApplicationFee` and doesn't mutate the instance of `ApplicationFee`.\n- To be consistent with other resource methods, the `Customer.delete_discount` no longer resets the `discount` property to `None` and returns the deleted discount instead. If you were relying on this behavior, reset the discount property manually:\n- The `LineItem` resource now inherits from `StripeObject` as it has no methods of it's own.\n- To be consistent with other resource methods, the `Subscription.delete_discount` returns an instance of deleted discount and doesn't mutate the instance of `Subscription`.\n- Update the CA certificate bundle.\n- Request sending logic unified across standard and custom methods (https://github.com/stripe/stripe-python/pull/832)\n\n## 3.5.0 - 2022-06-30\n* [#831](https://github.com/stripe/stripe-python/pull/831) API Updates\n  * Add support for `deliver_card`, `fail_card`, `return_card`, and `ship_card` test helper methods on resource `Issuing.Card`\n  * Switch from using `instance_url` to computing method path in place for custom methods.\n  * Switch from using explicit class methods for test helpers instead of using meta-programming.\n\n## 3.4.0 - 2022-06-17\n* [#824](https://github.com/stripe/stripe-python/pull/824) API Updates\n  * Add support for `fund_cash_balance` test helper method on resource `Customer`\n* [#823](https://github.com/stripe/stripe-python/pull/823) Trigger workflows on beta branches\n\n## 3.3.0 - 2022-06-08\n* [#818](https://github.com/stripe/stripe-python/pull/818) fix: Update cash balance methods to no longer require nested ID.\n\n## 3.2.0 - 2022-05-23\n* [#812](https://github.com/stripe/stripe-python/pull/812) API Updates\n  * Add support for new resource `Apps.Secret`\n\n## 3.1.0 - 2022-05-19\n* [#810](https://github.com/stripe/stripe-python/pull/810) API Updates\n  * Add support for new resources `Treasury.CreditReversal`, `Treasury.DebitReversal`, `Treasury.FinancialAccountFeatures`, `Treasury.FinancialAccount`, `Treasury.FlowDetails`, `Treasury.InboundTransfer`, `Treasury.OutboundPayment`, `Treasury.OutboundTransfer`, `Treasury.ReceivedCredit`, `Treasury.ReceivedDebit`, `Treasury.TransactionEntry`, and `Treasury.Transaction`\n  * Add support for `retrieve_payment_method` method on resource `Customer`\n  * Add support for `list_owners` and `list` methods on resource `FinancialConnections.Account`\n* [#719](https://github.com/stripe/stripe-python/pull/719) Set daemon attribute instead of using setDaemon method that was deprecated in Python 3.10\n* [#767](https://github.com/stripe/stripe-python/pull/767) Bump vendored six to 1.16.0\n* [#806](https://github.com/stripe/stripe-python/pull/806) Start testing on pypy-3.8\n* [#811](https://github.com/stripe/stripe-python/pull/811) Add sanitize_id method\n\n\n## 3.0.0 - 2022-05-09\n* [#809](https://github.com/stripe/stripe-python/pull/809) Release of major version v3.0.0. The [migration guide](https://github.com/stripe/stripe-python/wiki/Migration-Guide-for-v3) contains more information.\n  (\u26A0\uFE0F = breaking changes):\n  * \u26A0\uFE0F Replace the legacy `Order` API with the new `Order` API.\n    * New methods: `cancel`, `list_line_items`, `reopen`, and `submit`\n    * Removed methods: `pay` and `return_order`\n    * Removed resources: `OrderItem` and `OrderReturn`\n  * \u26A0\uFE0F Rename `financial_connections.account.refresh` to `financial_connections.refresh_account`\n  * Add support for `amount_discount`, `amount_tax`, and `product` on `LineItem`\n\n## 2.76.0 - 2022-05-05\n* [#808](https://github.com/stripe/stripe-python/pull/808) API Updates\n  * Add support for new resources `FinancialConnections.AccountOwner`, `FinancialConnections.AccountOwnership`, `FinancialConnections.Account`, and `FinancialConnections.Session`\n\n## 2.75.0 - 2022-05-03\n* [#805](https://github.com/stripe/stripe-python/pull/805) API Updates\n  * Add support for new resource `CashBalance`\n\n## 2.74.0 - 2022-04-21\n* [#796](https://github.com/stripe/stripe-python/pull/796) API Updates\n  * Add support for `expire` test helper method on resource `Refund`\n\n## 2.73.0 - 2022-04-18\n* [#792](https://github.com/stripe/stripe-python/pull/792) [#794](https://github.com/stripe/stripe-python/pull/794) [#795](https://github.com/stripe/stripe-python/pull/795) API Updates\n  * Add support for new resources `FundingInstructions` and `Terminal.Configuration`\n\n## 2.72.0 - 2022-04-13\n* [#791](https://github.com/stripe/stripe-python/pull/791) API Updates\n  * Add support for `increment_authorization` method on resource `PaymentIntent`\n\n## 2.71.0 - 2022-04-08\n* [#788](https://github.com/stripe/stripe-python/pull/788) API Updates\n  * Add support for `apply_customer_balance` method on resource `PaymentIntent`\n\n## 2.70.0 - 2022-03-30\n* [#785](https://github.com/stripe/stripe-python/pull/785) API Updates\n  * Add support for `cancel_action`, `process_payment_intent`, `process_setup_intent`, and `set_reader_display` methods on resource `Terminal.Reader`\n\n## 2.69.0 - 2022-03-29\n* [#783](https://github.com/stripe/stripe-python/pull/783) API Updates\n  * Add support for Search API\n    * Add support for `search` method on resources `Charge`, `Customer`, `Invoice`, `PaymentIntent`, `Price`, `Product`, and `Subscription`\n* [#784](https://github.com/stripe/stripe-python/pull/784) Pin click dependency to 8.0.4 to avoid breakage in black\n* [#773](https://github.com/stripe/stripe-python/pull/773) Add infrastructure for test-helper methods\n* [#782](https://github.com/stripe/stripe-python/pull/782) Revert Orders to use qualified name for upload_api_base\n\n## 2.68.0 - 2022-03-23\n* [#781](https://github.com/stripe/stripe-python/pull/781) API Updates\n  * Add support for `cancel` method on resource `Refund`\n* [#777](https://github.com/stripe/stripe-python/pull/777) Add support for SearchResult.\n\n## 2.67.0 - 2022-03-01\n* [#774](https://github.com/stripe/stripe-python/pull/774) API Updates\n  * Add support for new resource `TestHelpers.TestClock`\n\n## 2.66.0 - 2022-02-16\n* [#771](https://github.com/stripe/stripe-python/pull/771) API Updates\n  * Add support for `verify_microdeposits` method on resources `PaymentIntent` and `SetupIntent`\n\n## 2.65.0 - 2022-01-20\n* [#766](https://github.com/stripe/stripe-python/pull/766) API Updates\n  * Add support for new resource `PaymentLink`\n* [#763](https://github.com/stripe/stripe-python/pull/763) Start testing Python 3.10\n\n## 2.64.0 - 2021-12-21\n* [#757](https://github.com/stripe/stripe-python/pull/757) Update class custom methods to save list object parameters.\n* [#756](https://github.com/stripe/stripe-python/pull/756) Introduce custom listing methods on objects.\n* [#754](https://github.com/stripe/stripe-python/pull/754) Clarify metadata deletion message.\n\n## 2.63.0 - 2021-11-16\n* [#748](https://github.com/stripe/stripe-python/pull/748) API Updates\n  * Add support for new resource `ShippingRate`\n\n## 2.62.0 - 2021-11-11\n* [#745](https://github.com/stripe/stripe-python/pull/745) API Updates\n  * Add support for `expire` method on resource `Checkout.Session`\n\n## 2.61.0 - 2021-10-11\n* [#738](https://github.com/stripe/stripe-python/pull/738) API Updates\n  * Add support for `list_payment_methods` method on resource `Customer`\n* [#736](https://github.com/stripe/stripe-python/pull/736) Stop sending raw exception message as part of Stripe user agent.\n\n## 2.60.0 - 2021-07-14\n* [#728](https://github.com/stripe/stripe-python/pull/728) API Updates\n  * Add support for `list_computed_upfront_line_items` method on resource `Quote`\n\n## 2.59.0 - 2021-07-09\n* [#727](https://github.com/stripe/stripe-python/pull/727) [#725](https://github.com/stripe/stripe-python/pull/725) Add support for new `Quote` API.\n\n## 2.58.0 - 2021-06-04\n* [#722](https://github.com/stripe/stripe-python/pull/722) API Updates\n  * Add support for new `TaxCode` API.\n\n## 2.57.0 - 2021-05-19\n* [#720](https://github.com/stripe/stripe-python/pull/720) Add support for Identity VerificationSession and VerificationReport APIs\n\n## 2.56.0 - 2021-02-22\n* [#713](https://github.com/stripe/stripe-python/pull/713) Add support for the Billing Portal Configuration API\n\n## 2.55.2 - 2021-02-05\n* [#704](https://github.com/stripe/stripe-python/pull/704) Fix CA bundle path issue\n\n## 2.55.1 - 2020-12-01\n* [#698](https://github.com/stripe/stripe-python/pull/698) Fix issue where StripeObjects in lists would not be converted to dicts\n* [#699](https://github.com/stripe/stripe-python/pull/699) Start testing Python 3.9\n* [#691](https://github.com/stripe/stripe-python/pull/691) Include the examples in the built sources\n\n## 2.55.0 - 2020-10-14\n* [#684](https://github.com/stripe/stripe-python/pull/684) Add support for the Payout Reverse API\n\n## 2.54.0 - 2020-09-29\n* [#681](https://github.com/stripe/stripe-python/pull/681) Add support for the `SetupAttempt` resource and List API\n* 2.52.0 and 2.53.0 were empty releases that contained no additional changes.\n\n## 2.51.0 - 2020-09-02\n* [#676](https://github.com/stripe/stripe-python/pull/676) Add support for the Issuing Dispute Submit API\n\n## 2.50.0 - 2020-08-05\n* [#669](https://github.com/stripe/stripe-python/pull/669) Add support for the `PromotionCode` resource and APIs\n\n## 2.49.0 - 2020-07-17\n* [#665](https://github.com/stripe/stripe-python/pull/665) Support stripe.File.create(stripe_version='...')\n\n## 2.48.0 - 2020-05-11\n* [#655](https://github.com/stripe/stripe-python/pull/655) Add support for the `LineItem` resource and APIs\n\n## 2.47.0 - 2020-04-29\n* [#652](https://github.com/stripe/stripe-python/pull/652) Add support for the `Price` resource and APIs\n\n## 2.46.0 - 2020-04-22\n* [#651](https://github.com/stripe/stripe-python/pull/651) Add support for `billing_portal` namespace and `Session` resource and APIs\n\n## 2.45.0 - 2020-04-06\n* [#648](https://github.com/stripe/stripe-python/pull/648) Add support for Express links in `authorize_url` for `OAuth`\n\n## 2.44.0 - 2020-03-23\n* [#646](https://github.com/stripe/stripe-python/pull/646) Allow overriding API key in OAuth methods\n\n## 2.43.0 - 2020-02-26\n* [#644](https://github.com/stripe/stripe-python/pull/644) Add support for listing Checkout `Session`\n\n## 2.42.0 - 2020-01-14\n* [#640](https://github.com/stripe/stripe-python/pull/640) Add support for `CreditNoteLineItem`\n* [#639](https://github.com/stripe/stripe-python/pull/639) Pin black version\n* [#637](https://github.com/stripe/stripe-python/pull/637) Start testing Python 3.8\n\n## 2.41.1 - 2019-12-30\n* [#636](https://github.com/stripe/stripe-python/pull/636) Fix uploading files with Unicode names (Python 2.7)\n* [#635](https://github.com/stripe/stripe-python/pull/635) Update Python API docs inline link\n* [#631](https://github.com/stripe/stripe-python/pull/631) Update `proxy.py`\n\n## 2.41.0 - 2019-11-26\n* [#630](https://github.com/stripe/stripe-python/pull/630) Add support for `CreditNote` preview\n\n## 2.40.0 - 2019-11-08\n* [#627](https://github.com/stripe/stripe-python/pull/627) Add list_usage_record_summaries and list_source_transactions\n\n## 2.39.0 - 2019-11-06\n* [#625](https://github.com/stripe/stripe-python/pull/625) Add support for `Mandate`\n\n## 2.38.0 - 2019-10-29\n* [#623](https://github.com/stripe/stripe-python/pull/623) Add support for reverse pagination\n* [#624](https://github.com/stripe/stripe-python/pull/624) Contributor Convenant\n\n## 2.37.2 - 2019-10-04\n* [#621](https://github.com/stripe/stripe-python/pull/621) Implement support for stripe-should-retry and retry-after headers\n\n## 2.37.1 - 2019-09-26\n* [#620](https://github.com/stripe/stripe-python/pull/620) Check that `error` is a dict before trying to use it to create a `StripeError`\n\n## 2.37.0 - 2019-09-26\n* [#619](https://github.com/stripe/stripe-python/pull/619) Add `ErrorObject` to `StripeError` exceptions\n* [#616](https://github.com/stripe/stripe-python/pull/616) Pass `CFLAGS` and `LDFLAGS` when running tests\n\n## 2.36.2 - 2019-09-12\n* [#614](https://github.com/stripe/stripe-python/pull/614) Use `OrderedDict` to maintain key order in API requests and responses\n\n## 2.36.1 - 2019-09-11\n* [#612](https://github.com/stripe/stripe-python/pull/612) Use `ListObject` properties as default values in request methods\n\n## 2.36.0 - 2019-09-10\n* [#610](https://github.com/stripe/stripe-python/pull/610) Add support for header parameters in `ListObject` request methods\n\n## 2.35.1 - 2019-08-20\n* [#605](https://github.com/stripe/stripe-python/pull/605) Fix automatic retries of failed requests\n* [#606](https://github.com/stripe/stripe-python/pull/606) Clarify what `max_network_retries` does\n\n## 2.35.0 - 2019-08-12\n* [#607](https://github.com/stripe/stripe-python/pull/607) Add `SubscriptionItem.create_usage_record` method\n\n## 2.34.0 - 2019-08-09\n* [#604](https://github.com/stripe/stripe-python/pull/604) Remove subscription schedule revisions\n  - This is technically a breaking change. We've chosen to release it as a minor vesion bump because the associated API is unused.\n\n## 2.33.2 - 2019-08-06\n* [#601](https://github.com/stripe/stripe-python/pull/601) Add support for passing full objects instead of IDs to custom methods\n* [#603](https://github.com/stripe/stripe-python/pull/603) Bump vendored six to latest version\n\n## 2.33.1 - 2019-08-06\n* [#599](https://github.com/stripe/stripe-python/pull/599) Fix `del` statement to not raise `KeyError`\n\n## 2.33.0 - 2019-07-30\n* [#595](https://github.com/stripe/stripe-python/pull/595) Listing `BalanceTransaction` objects now uses `/v1/balance_transactions` instead of `/v1/balance/history`\n\n## 2.32.1 - 2019-07-08\n* [#592](https://github.com/stripe/stripe-python/pull/592) Fix argument name conflict\n\n## 2.32.0 - 2019-06-27\n* [#590](https://github.com/stripe/stripe-python/pull/590) Add support for the `SetupIntent` resource and APIs\n\n## 2.31.0 - 2019-06-24\n* [#587](https://github.com/stripe/stripe-python/pull/587) Enable request latency telemetry by default\n\n## 2.30.1 - 2019-06-20\n* [#589](https://github.com/stripe/stripe-python/pull/589) Fix support for `CustomerBalanceTransaction`\n\n## 2.30.0 - 2019-06-17\n* [#564](https://github.com/stripe/stripe-python/pull/564) Add support for `CustomerBalanceTransaction` resource and APIs\n\n## 2.29.4 - 2019-06-03\n* [#583](https://github.com/stripe/stripe-python/pull/583) Remove Poetry and reinstate `setup.py`\n\n## 2.29.3 - 2019-05-31\nVersion 2.29.2 was non-functional due to a bugged `version.py` file. This release is identical to 2.29.2 save for the version number.\n\n## 2.29.2 - 2019-05-31\n* [#561](https://github.com/stripe/stripe-python/pull/561) Replace pipenv with poetry\n\n## 2.29.1 - 2019-05-31\n* [#578](https://github.com/stripe/stripe-python/pull/578) Verify signatures before deserializing events\n\n## 2.29.0 - 2019-05-23\n* [#575](https://github.com/stripe/stripe-python/pull/575) Add support for `radar.early_fraud_warning` resource\n\n## 2.28.2 - 2019-05-23\n* [#574](https://github.com/stripe/stripe-python/pull/574) Fix a few more code quality issues\n\n## 2.28.1 - 2019-05-20\n* [#572](https://github.com/stripe/stripe-python/pull/572) Fix a few code quality issues\n\n## 2.28.0 - 2019-05-14\n* [#566](https://github.com/stripe/stripe-python/pull/566) Add support for the `Capability` resource and APIs\n\n## 2.27.0 - 2019-04-24\n* [#554](https://github.com/stripe/stripe-python/pull/554) Add support for the `TaxRate` resource and APIs\n\n## 2.26.0 - 2019-04-22\n* [#555](https://github.com/stripe/stripe-python/pull/555) Add support for the `TaxId` resource and APIs\n\n## 2.25.0 - 2019-04-18\n* [#551](https://github.com/stripe/stripe-python/pull/551) Add support for the `CreditNote` resource and APIs\n\n## 2.24.1 - 2019-04-08\n* [#550](https://github.com/stripe/stripe-python/pull/550) Fix encoding of nested parameters in multipart requests\n\n## 2.24.0 - 2019-04-03\n* [#543](https://github.com/stripe/stripe-python/pull/543) Add `delete` class method on deletable API resources\n* [#547](https://github.com/stripe/stripe-python/pull/547) Add class methods for all custom API requests (e.g. `Charge.capture`)\n\n## 2.23.0 - 2019-03-18\n* [#537](https://github.com/stripe/stripe-python/pull/537) Add support for the `PaymentMethod` resource and APIs\n* [#540](https://github.com/stripe/stripe-python/pull/540) Add support for retrieving a Checkout `Session`\n* [#542](https://github.com/stripe/stripe-python/pull/542) Add support for deleting a Terminal `Location` and `Reader`\n\n## 2.22.0 - 2019-03-14\n* [#541](https://github.com/stripe/stripe-python/pull/541) Add `stripe.util.convert_to_dict` method for converting `StripeObject` instances to regular `dict`s\n\n## 2.21.0 - 2019-02-12\n* [#532](https://github.com/stripe/stripe-python/pull/532) Add support for subscription schedules\n\n## 2.20.3 - 2019-01-30\n* [#530](https://github.com/stripe/stripe-python/pull/530) Fix client telemetry implementation\n\n## 2.20.2 - 2019-01-30\n* [#534](https://github.com/stripe/stripe-python/pull/534) Fix session initialization for multi-threaded environments\n\n## 2.20.1 - 2019-01-30\n* [#531](https://github.com/stripe/stripe-python/pull/531) Make `RequestsClient` thread-safe\n\n## 2.20.0 - 2019-01-29\n* [#526](https://github.com/stripe/stripe-python/pull/526) Reuse the default HTTP client by default\n\n## 2.19.0 - 2019-01-23\n* [#524](https://github.com/stripe/stripe-python/pull/524) Rename `CheckoutSession` to `Session` and move it under the `checkout` namespace. This is a breaking change, but we've reached out to affected merchants and all new merchants would use the new approach.\n\n## 2.18.1 - 2019-01-21\n* [#525](https://github.com/stripe/stripe-python/pull/525) Properly serialize `individual` on `Account` objects\n\n## 2.18.0 - 2019-01-15\n* [#518](https://github.com/stripe/stripe-python/pull/518) Add configurable telemetry to gather information on client-side request latency\n\n## 2.17.0 - 2018-12-21\n* [#510](https://github.com/stripe/stripe-python/pull/510) Add support for Checkout sessions\n\n## 2.16.0 - 2018-12-10\n* [#507](https://github.com/stripe/stripe-python/pull/507) Add support for account links\n\n## 2.15.0 - 2018-11-30\n* [#503](https://github.com/stripe/stripe-python/pull/503) Add support for providing custom CA certificate bundle\n\n## 2.14.0 - 2018-11-28\n* [#500](https://github.com/stripe/stripe-python/pull/500) Add support for `Review` for Radar\n\n## 2.13.0 - 2018-11-27\n* [#489](https://github.com/stripe/stripe-python/pull/489) Add support for `ValueList` and `ValueListItem` for Radar\n\n## 2.12.1 - 2018-11-22\n* [#495](https://github.com/stripe/stripe-python/pull/495) Make `StripeResponse` a new-style class\n\n## 2.12.0 - 2018-11-08\n* [#483](https://github.com/stripe/stripe-python/pull/483) Add new API endpoints for the `Invoice` resource.\n\n## 2.11.1 - 2018-11-08\n* [#491](https://github.com/stripe/stripe-python/pull/491) Bump minimum requests version to 2.20.0 (for [CVE-2018-18074](https://nvd.nist.gov/vuln/detail/CVE-2018-18074))\n\n## 2.11.0 - 2018-10-30\n* [#482](https://github.com/stripe/stripe-python/pull/482) Add support for the `Person` resource\n* [#484](https://github.com/stripe/stripe-python/pull/484) Add support for the `WebhookEndpoint` resource\n\n## 2.10.1 - 2018-10-02\n* [#481](https://github.com/stripe/stripe-python/pull/481) Correct behavior of `stripe.max_network_retries` if it's reset after initial use\n\n## 2.10.0 - 2018-09-24\n* [#478](https://github.com/stripe/stripe-python/pull/478) Add support for Stripe Terminal\n\n## 2.9.0 - 2018-09-24\n* [#477](https://github.com/stripe/stripe-python/pull/477) Rename `FileUpload` to `File`\n\n## 2.8.1 - 2018-09-13\n* [#474](https://github.com/stripe/stripe-python/pull/474) Don't URL-encode square brackets\n* [#473](https://github.com/stripe/stripe-python/pull/473) Integer-index encode all arrays\n\n## 2.8.0 - 2018-09-10\n* [#470](https://github.com/stripe/stripe-python/pull/470) Add support for automatic network retries\n\n## 2.7.0 - 2018-09-05\n* [#469](https://github.com/stripe/stripe-python/pull/469) Add support for reporting resources\n\n## 2.6.0 - 2018-08-23\n* [#467](https://github.com/stripe/stripe-python/pull/467) Add support for usage record summaries\n\n## 2.5.0 - 2018-08-16\n* [#463](https://github.com/stripe/stripe-python/pull/463) Remove unsupported Bitcoin endpoints (this is technically a breaking change, but we're releasing as a minor version because none of these APIs were usable anyway)\n\n## 2.4.0 - 2018-08-03\n* [#460](https://github.com/stripe/stripe-python/pull/460) Add cancel support for topups\n* [#461](https://github.com/stripe/stripe-python/pull/461) Add support for file links\n\n## 2.3.0 - 2018-07-27\n* [#456](https://github.com/stripe/stripe-python/pull/456) Add support for Sigma scheduled query run objects\n\n## 2.2.0 - 2018-07-26\n* [#455](https://github.com/stripe/stripe-python/pull/455) Add support for Stripe Issuing\n\n## 2.1.0 - 2018-07-25\n* [#452](https://github.com/stripe/stripe-python/pull/452) Add `InvoiceLineItem` class\n\n## 2.0.3 - 2018-07-19\n* [#450](https://github.com/stripe/stripe-python/pull/450) Internal improvements to `ApiResource.class_url`\n\n## 2.0.2 - 2018-07-18\n* [#448](https://github.com/stripe/stripe-python/pull/448) Avoid duplicate dependency on `requests` with Python 2.7\n\n## 2.0.1 - 2018-07-10\n* [#445](https://github.com/stripe/stripe-python/pull/445) Fix `setup.py`\n\n## 2.0.0 - 2018-07-10\nMajor version release. List of backwards incompatible changes to watch out for:\n* The minimum Python versions are now 2.7 / 3.4. If you're using Python 2.6 or 3.3, consider upgrading to a more recent version.\n* Stripe exception classes should now be accessed via `stripe.error` rather than just `stripe`\n* Some older deprecated methods have been removed\n* Trying to detach an unattached source will now raise a `stripe.error.InvalidRequestError` exception instead of a `NotImplementedError` exception\n\nFor more information, check out the [migration guide for v2](https://github.com/stripe/stripe-python/wiki/Migration-guide-for-v2)\n\nPull requests included in this release:\n* [#385](https://github.com/stripe/stripe-python/pull/385) Drop support for Python 2.6 and 3.3\n* [#384](https://github.com/stripe/stripe-python/pull/384) Use py.test for tests\n* [#399](https://github.com/stripe/stripe-python/pull/399) Remove deprecated code\n* [#402](https://github.com/stripe/stripe-python/pull/402) Remove `util.json` and use `json` module directly everywhere\n* [#403](https://github.com/stripe/stripe-python/pull/403) Update setup.py and test flow\n* [#410](https://github.com/stripe/stripe-python/pull/410) Use pipenv\n* [#415](https://github.com/stripe/stripe-python/pull/415) Change exception when detaching unattached sources from `NotImplementedError` to `stripe.error.InvalidRequestError`\n\n## 1.84.2 - 2018-07-06\n* [#441](https://github.com/stripe/stripe-python/pull/441) Better (hopefully) fix for serialization of empty `ListObject`s\n\n## 1.84.1 - 2018-07-04\n* [#439](https://github.com/stripe/stripe-python/pull/439) Fix serialization of empty `ListObject`s\n\n## 1.84.0 - 2018-06-29\n* [#436](https://github.com/stripe/stripe-python/pull/436) Add support for payment intents\n\n## 1.83.0 - 2018-06-28\n* [#437](https://github.com/stripe/stripe-python/pull/437) Add support for `partner_id` in `stripe.set_app_info()`\n\n## 1.82.2 - 2018-06-19\n* [#365](https://github.com/stripe/stripe-python/pull/365) Add `__repr__` methods to `StripeError` exception classes\n\n## 1.82.1 - 2018-05-14\n* [#430](https://github.com/stripe/stripe-python/pull/430) Handle the case where request ID is `None` when formatting errors\n\n## 1.82.0 - 2018-05-13\n* [#422](https://github.com/stripe/stripe-python/pull/422) Add `user_mesage` to `StripeError` for a way in Python 3 to avoid the \"Request req_...:\" string normally appended to error messages\n\n## 1.81.0 - 2018-05-10\n* [#425](https://github.com/stripe/stripe-python/pull/425) Add support for issuer fraud records\n\n## 1.80.0 - 2018-04-24\n* [#421](https://github.com/stripe/stripe-python/pull/421) Add support for flexible billing and usage records\n\n## 1.79.1 - 2018-02-27\n* [#401](https://github.com/stripe/stripe-python/pull/401) Drop conditional dependencies that incorrectly led to an added `simplejson` dependency in Python 3+ after switching to universal wheel\n\n## 1.79.0 - 2018-02-23\n* [#397](https://github.com/stripe/stripe-python/pull/397) Build universal wheels by default\n* [#398](https://github.com/stripe/stripe-python/pull/398) Add support for `code` attribute on all Stripe exceptions\n\n## 1.78.0 - 2018-02-21\n* [#396](https://github.com/stripe/stripe-python/pull/396) Add support for topups\n\n## 1.77.2 - 2018-02-08\n* [#394](https://github.com/stripe/stripe-python/pull/394) Make `last_response` available after calling `save()`\n\n## 1.77.1 - 2018-01-12\n* [#389](https://github.com/stripe/stripe-python/pull/389) Register unsaved attributes on assignment regardless of new value\n\n## 1.77.0 - 2017-12-21\n* [#371](https://github.com/stripe/stripe-python/pull/371) Add accessor `last_response` on `StripeObject` for accessing request ID and other metadata\n\n## 1.76.0 - 2017-12-21\n* [#382](https://github.com/stripe/stripe-python/pull/382) Add new `IdempotencyError` type\n\n## 1.75.3 - 2017-12-05\n* [#378](https://github.com/stripe/stripe-python/pull/378) Log encoded version of parameters instead of raw POST data\n\n## 1.75.2 - 2017-12-05\n* (Accidental no-op release. See 1.75.3.)\n\n## 1.75.1 - 2017-11-29\n* [#372](https://github.com/stripe/stripe-python/pull/372) Add only changed values to `_unsaved_values` in `StripeObject`\n* [#375](https://github.com/stripe/stripe-python/pull/375) Use a custom JSON encoder to handle `datetime` objects when serializing `StripeObject`s\n\n## 1.75.0 - 2017-11-08\n* [#369](https://github.com/stripe/stripe-python/pull/369) Make custom actions on various resources (e.g. `Account.reject`) more consistent with other APIs\n\n## 1.74.0 - 2017-11-07\n* [#368](https://github.com/stripe/stripe-python/pull/368) Remove API that allowed the creation of new disputes (this was an erroneous addition; it never worked because the API would not allow it)\n\n## 1.73.0 - 2017-11-02\n* [#364](https://github.com/stripe/stripe-python/pull/364) Switch to vendored version of the `six` package for compatibility between Python 2 and 3\n\n## 1.72.0 - 2017-10-31\n* [#361](https://github.com/stripe/stripe-python/pull/361) Support for exchange rates APIs\n\n## 1.71.2 - 2017-10-31\n* [#362](https://github.com/stripe/stripe-python/pull/362) Fix balance transaction and invoice item conversion into `StripeObject`s\n\n## 1.71.1 - 2017-10-27\n* [#360](https://github.com/stripe/stripe-python/pull/360) Fix `BytesWarning` being issued on logging in Python 3\n\n## 1.71.0 - 2017-10-26\n* [#359](https://github.com/stripe/stripe-python/pull/359) Support for listing source transactions\n\n## 1.70.0 - 2017-10-23\n* [#356](https://github.com/stripe/stripe-python/pull/356) Support uploading files with `StringIO` in addition to a file on disk\n\n## 1.69.0 - 2017-10-20\n* [#351](https://github.com/stripe/stripe-python/pull/351) Break resource.py module into separate ones for each type of resource\n    * Classes are still into resource.py for backwards compatibility\n* [#353](https://github.com/stripe/stripe-python/pull/353) Fix unpickling `StripeObject` in Python 3\n\n## 1.68.0 - 2017-10-19\n* [#350](https://github.com/stripe/stripe-python/pull/350) Add static methods to manipulate resources from parent\n    * `Account` gains methods for external accounts and login links (e.g. `.create_account`, `create_login_link`)\n    * `ApplicationFee` gains methods for refunds\n    * `Customer` gains methods for sources\n    * `Transfer` gains methods for reversals\n\n## 1.67.0 - 2017-10-11\n* [#349](https://github.com/stripe/stripe-python/pull/349) Rename source `delete` to `detach` (and deprecate the former)\n\n## 1.66.0 - 2017-09-29\n* Support length reads on list objects\n\n## 1.65.1 - 2017-09-21\n* Handle `bytearray` and `bytes` (in addition to string) in `Webhook.construct_event`\n\n## 1.65.0 - 2017-09-07\n* Add support for passing a `stripe_version` argument to all API requests\n\n## 1.64.0 - 2017-09-01\n* Error when an invalid type (i.e. non-string) passed as an API method argument\n\n## 1.63.1 - 2017-09-01\n* Fix serialization of `items` on Relay order creation and order return\n\n## 1.63.0 - 2017-08-29\n* Add support for `InvalidClientError` OAuth error\n\n## 1.62.1 - 2017-08-07\n* Change serialization of subscription items on update to encoded as an integer-indexed map\n\n## 1.62.0 - 2017-06-27\n* `pay` on invoice can now take parameter\n\n## 1.61.0 - 2017-06-24\n* Expose `code` on `InvalidRequestError`\n\n## 1.60.0 - 2017-06-19\n* Add support for ephemeral keys\n\n## 1.59.0 - 2017-06-07\n* Refactor OAuth implementation to have dedicated classes for errors\n\n## 1.58.0 - 2017-06-02\n* Re-use connections with Pycurl\n\n## 1.57.1 - 2017-05-31\n* Fix the pycurl client\n\n## 1.57.0 - 2017-05-26\n* Add `api_key` parameter to webhook's `construct_event`\n\n## 1.56.0 - 2017-05-25\n* Add support for account login links\n\n## 1.55.2 - 2017-05-11\n* Remove Requests constraint from 1.55.1 now that they've patched (as of 2.14.2)\n\n## 1.55.1 - 2017-05-10\n* Constrain Requests to < 2.13.0 if on setuptools < 18.0.0\n\n## 1.55.0 - 2017-04-28\n* Support for checking webhook signatures\n\n## 1.54.0 - 2017-04-28\n* Add `stripe.set_app_info` for use by plugin creators\n\n## 1.53.0 - 2017-04-06\n* Add support for payouts and recipient transfers\n\n## 1.52.0 - 2017-04-06\n* No-op release: peg test suite to a specific API version\n\n## 1.51.0 - 2017-03-20\n* Support OAuth operations (getting a token and deauthorizing)\n\n## 1.50.0 - 2017-03-17\n* Support for detaching sources from customers\n\n## 1.49.0 - 2017-03-13\n* Accept `session` argument for `RequestsClient`\n\n## 1.48.1 - 2017-02-21\n* Fix encoding of parameters when fetching upcoming invoices\n\n## 1.48.0 - 2017-02-21\n* Add `Account.modify_external_account` to modify an account in one API call\n* Add `Customer.modify_source` to modify a source in one API call\n\n## 1.47.0 - 2017-01-18\n* Allow sources to be updated\n\n## 1.46.0 - 2017-01-06\n* Use internal session for Requests for connection pooling\n\n## 1.45.0 - 2017-01-06\n* request logging goes to stderr now\n* Logs properly handle unicode\n* Format is now the same between logging logs, and console logs\n\n## 1.44.0 - 2016-12-16\n* Add request logging and some mechanisms to enable it when debugging\n\n## 1.43.0 - 2016-11-30\n* Add support for verifying sources\n\n## 1.42.0 - 2016-11-21\n* Add retrieve method for 3-D Secure resources\n\n## 1.41.1 - 2016-10-26\n* Implement __copy__ and __deepcopy__ on StripeObject to fix these operations\n\n## 1.41.0 - 2016-10-12\n* Add `Source` model for generic payment sources\n\n## 1.40.1 - 2016-10-10\n* Return subscription model instance on subscription create/modify\n\n## 1.40.0 - 2016-10-07\n* Add configurable timeout for Requests HTTP library\n\n## 1.39.0 - 2016-10-06\n* Add support for subscription items\n* Add proxy support for pycurl, Requests, urlfetch, and urllib2 libraries\n\n## 1.38.0 - 2016-09-15\n* Add support for Apple Pay domains\n\n## 1.37.0 - 2016-07-12\n* Add `ThreeDSecure` model for 3-D secure payments\n\n## 1.36.0 - 2016-06-29\n* Add `update` class method to resources that can be updated\n\n## 1.35.0 - 2016-05-24\n* Add support for returning Relay orders\n\n## 1.34.0 - 2016-05-20\n* Add support for Alipay accounts\n\n## 1.33.0 - 2016-05-04\n* Add support for the new `/v1/subscriptions` endpoint\n  * `stripe.Subscription.retrieve`\n  * `stripe.Subscription.update`\n  * `stripe.Subscription.create`\n  * `stripe.Subscription.list`\n\n## 1.32.2 - 2016-04-12\n* Fix bug where file uploads could not be properly listed\n\n## 1.32.1 - 2016-04-11\n* Fix bug where request parameters were not passed between pages with `auto_paging_iter`\n\n## 1.32.0 - 2016-03-31\n* Update CA cert bundle for compatibility with OpenSSL versions below 1.0.1\n\n## 1.31.1 - 2016-03-24\n* Fix uploading of binary files in Python 3\n\n## 1.31.0 - 2016-03-15\n* Add `reject` on `Account` to support the new API feature\n\n## 1.30.0 - 2016-02-27\n* Add `CountrySpec` model for looking up country payment information\n\n## 1.29.1 - 2016-02-01\n* Update bundled CA certs\n\n## 1.29.0 - 2016-01-26\n* Add support for deleting Relay products and SKUs\n\n## 1.28.0 - 2016-01-04\n* Add an automatic paginating iterator to lists available via `auto_paging_iter`\n* List objects are now iterable\n* Error messages set to `None` are now handled properly\n* The `all` method on list objects has been deprecated in favor of `list`\n* Calls to `instance_url` are now side effect free\n\n## 1.27.1 - 2015-10-02\n* Official Python 3.4 & 3.5 compatibility\n* Add configurable HTTP client\n* Add ability to delete attributes\n\n## 1.27.0 - 2015-09-14\n* Products, SKUs, Orders resources\n\n## 1.26.0 - 2015-09-11\n* Add support for new 429 rate limit response\n\n## 1.25.0 - 2015-08-17\n* Added refund listing, creation and retrieval\n\n## 1.24.1 - 2015-08-05\n* Fix error handling for Python 2.6\n\n## 1.24.0 - 2015-08-03\n* Managed accounts can now be deleted\n* Added dispute listing and retrieval\n\n## 1.23.0 - 2015-07-06\n* Include response headers in exceptions\n\n## 1.22.3 - 2015-06-04\n* Fix saving `additional_owners` on managed accounts\n\n## 1.22.2 - 2015-04-08\n* Fix saving manage accounts\n\n## 1.22.1 - 2015-03-30\n* Pass `stripe_account` to Balance.retrieve\n\n## 1.22.0 - 2015-03-22\n* Added methods for updating and saving arrays of objects\n\n## 1.21.0 - 2015-02-19\n* Added Bitcoin Receiver update and delete methods\n\n## 1.20.2 - 2015-01-21\n* Remove support for top-level bitcoin transactions\n\n## 1.20.1 - 2015-01-07\n* Adding bitcoin receiver and transaction objects\n\n## 1.20.0 - 2014-12-23\n* Adding support for file uploads resource\n\n## 1.19.1 - 2014-10-23\n* Remove redundant manual SSL blacklist preflight check\n\n## 1.19.0 - 2014-07-26\n* Application Fee refunds now a list instead of array\n\n## 1.18.0 - 2014-06-17\n* Add metadata for disputes and refunds\n\n## 1.17.0 - 2014-06-10\n* Remove official support for Python 2.5\n\n## 1.16.0 - 2014-05-28\n* Support for canceling transfers\n\n## 1.15.1 - 2014-05-21\n* Support cards for recipients.\n\n## 1.14.1 - 2014-05-19\n* Disable loading the ssl module on the Google App Engine dev server.\n\n## 1.14.0 - 2014-04-09\n* Use DER encoded certificate for checksumming\n* Don't rely on SNI support in integration tests\n\n## 1.13.0 - 2014-04-09\n* Update bundled ca-certificates\n* Add certificate blacklist for CVE-2014-0160 mitigation\n\n## 1.12.2 - 2014-03-13\n* Fix syntax errors in setup.py metadata\n\n## 1.12.1 - 2014-03-13\n* Added license and other metadata in setup.py\n* Fix `__repr__` in Python 3\n* Support pickling of responses\n\n## 1.12.0 - 2014-01-29\n* Added support for multiple subscriptions per customer\n\n## 1.11.0 - 2013-12-05\n* Added extensive unit tests\n* Extended functional test coverage\n* Refactored code into modules and out of stripe/__init__.py\n* Abstracted http library selection and use from the `APIRequestor` into `stripe.http_client`\n* Refactored `StripeObject` to inherit from `dict` and avoid direct access of `__dict__`.\n* PEP8ified the codebase and enforced with a test.\n* Proper encoding of timezone aware datetimes\n\n### Backwards incompatible changes\n* The `to_dict` and `values` methods on resources no longer recursively convert objects to plain `dict`s.  All resources now inherit from `dict` but are functionally different in that you cannot set a value to an empty string and cannot delete items.\n* The `previous_metadata` attribute on resources is now protected.\n* Timezone aware `datetime` objects passed to the API will now be encoded in a way that does not depend on the local system time.  If you are passing timezone-aware datetimes to our API and your server time is not already in UTC, this will change the value passed to our API.\n\n## 1.10.8 - 2013-12-02\n* Add stripe.ApplicationFee resource\n\n## 1.9.8 - 2013-10-17\n* Removed incorrect test.\n\n## 1.9.7 - 2013-10-10\n* Add support for metadata.\n\n## 1.9.6 - 2013-10-08\n* Fix issue with support for closing disputes.\n\n## 1.9.5 - 2013-09-18\n* Add support for closing disputes.\n\n## 1.9.4 - 2013-08-13\n* Add stripe.Balance and stripe.BalanceTransaction resources\n\n## 1.9.3 - 2013-08-12\n* Add support for unsetting attributes by setting to None.\n  Setting properties to a blank string is now an error.\n\n## 1.9.2 - 2013-07-12\n* Add support for multiple cards API\n\n## 1.9.1 - 2013-05-03\n* Remove 'id' from the list of permanent attributes\n\n## 1.9.0 - 2013-04-25\n* Support for Python 3 (github issue #32)\n\n## 1.8.0 - 2013-04-11\n* Allow transfers to be creatable\n* Add new stripe.Recipient resource\n\n## 1.7.10 - 2013-02-21\n* Add 'id' to the list of permanent attributes\n\n## 1.7.9 - 2013-02-01\n* Add support for passing options when retrieving Stripe objects; e.g., stripe.Charge.retrieve(\"foo\", params={\"expand\":[\"customer\"]})\n\n## 1.7.8 - 2013-01-15\n* Add support for setting a Stripe API version override\n\n## 1.7.7 - 2012-12-18\n* Update requests version check to work with requests 1.x.x (github issue #24)\n\n## 1.7.6 - 2012-11-08\n* Add support for updating charge disputes\n\n## 1.7.5 - 2012-10-30\n* Add support for creating invoices\n* Add support for new invoice lines return format\n* Add support for new List objects\n\n## 1.7.4 - 2012-08-31\n* Add update and pay methods for Invoice resource\n\n## 1.7.3 - 2012-08-15\n* Add new stripe.Account resource\n* Remove uncaptured_charge tests (this has been deprecated from the API).\n\n## 1.7.2 - 2012-05-31\n* Fix a bug that would cause nested objects to be mis-rendered in __str__ and __repr__ methods (github issues #17, #18)\n\n## 1.7.1 - 2012-05-21\n* Prefer App Engine's urlfetch over requests, as that's the only thing that will work in App Engine's environment. Previously, if requests was available in the App Engine environment, we would attempt to use it.\n\n## 1.7.0 - 2012-05-17\n* Add new delete_discount method to stripe.Customer\n* Add new stripe.Transfer resource\n* Switch from using HTTP Basic auth to Bearer auth. (Note: Stripe will support Basic auth for the indefinite future, but recommends Bearer auth when possible going forward)\n* Numerous test suite improvements\n\n## 1.6.1 - 2011-09-14\n* Parameters with value None are no longer included in API requests\n";
+
+// packages/core/src/upgrade.ts
+var import_node_fs6 = require("node:fs");
+var targetEntry = { "version": "12.0.0", "resolved": "https://registry.npmjs.org/stripe/-/stripe-12.0.0.tgz", "integrity": "sha512-9zdcWApF4Yg2WG4GVv1qnvAv+h5KD103gKwbTsTyk5G3lf9h4vN0FXGQ5d5eWKP9itAjt0D5gZtWG7cLPzyLxw==", "license": "MIT", "dependencies": { "@types/node": ">=8.1.0", "qs": "^6.11.0" }, "engines": { "node": ">=12.*" } };
+function upgradeEdits(root, config2) {
+  if (!config2.upgrade) return [];
+  if (!config2.vendors.stripe.enabled) throw new Error("Enable Stripe before requesting an upgrade");
+  const { from, to } = config2.upgrade;
+  if (config2.language !== "typescript" || from !== "11.18.0" || to !== "12.0.0") throw new Error("Supported upgrade: TypeScript Stripe 11.18.0 -> 12.0.0 only; other transitions require manual planning");
+  const manifestText = (0, import_node_fs6.readFileSync)(contained(root, "package.json"), "utf8"), lockText = (0, import_node_fs6.readFileSync)(contained(root, "package-lock.json"), "utf8");
+  const manifest2 = JSON.parse(manifestText), lock = JSON.parse(lockText);
+  const group = manifest2.dependencies?.stripe ? "dependencies" : "devDependencies";
+  if (manifest2[group]?.stripe === to && lock.packages?.["node_modules/stripe"]?.version === to && lock.packages?.[""]?.[group]?.stripe === to) return [];
+  if (manifest2[group]?.stripe !== from || lock.lockfileVersion !== 3 || lock.packages?.["node_modules/stripe"]?.version !== from || lock.packages?.[""]?.[group]?.stripe !== from) throw new Error("Upgrade requires matching exact manifest and npm v3 lockfile versions");
+  if (Object.keys(lock.packages).some((k) => k.endsWith("/node_modules/stripe") && k !== "node_modules/stripe") || manifest2.workspaces) throw new Error("Upgrade does not support workspaces or nested Stripe installations");
+  const dependencies = lock.packages["node_modules/stripe"].dependencies;
+  if (JSON.stringify(Object.entries(dependencies ?? {}).sort()) !== JSON.stringify(Object.entries(targetEntry.dependencies).sort())) throw new Error("SDK dependency graph differs; regenerate the lockfile manually");
+  for (const name of Object.keys(targetEntry.dependencies)) if (!lock.packages["node_modules/" + name]) throw new Error("Incomplete lockfile dependency graph");
+  manifest2[group].stripe = to;
+  lock.packages[""][group].stripe = to;
+  lock.packages["node_modules/stripe"] = targetEntry;
+  return [{ path: "package.json", beforeHash: hash2(manifestText), content: JSON.stringify(manifest2, null, 2) + "\n" }, { path: "package-lock.json", beforeHash: hash2(lockText), content: JSON.stringify(lock, null, 2) + "\n" }];
 }
 
 // packages/core/src/languages/typescript/analyze.ts
 var import_ts_morph2 = __toESM(require_ts_morph(), 1);
-var import_node_fs5 = require("node:fs");
+var import_node_fs7 = require("node:fs");
 var import_node_path5 = require("node:path");
 
 // packages/core/src/languages/typescript/links.ts
@@ -272339,6 +276453,8 @@ var import_node_path4 = require("node:path");
 function discoverLinks(root, files, inventory) {
   const project = new import_ts_morph.Project({ skipAddingFilesFromTsConfig: true, skipFileDependencyResolution: true });
   const sources = files.map((file2) => project.addSourceFileAtPath(file2));
+  const bindings = /* @__PURE__ */ new Map();
+  let safe = true;
   const exports2 = /* @__PURE__ */ new Map();
   for (const source of sources) {
     const constructors = new Set(source.getImportDeclarations().filter((i) => i.getModuleSpecifierValue() === "stripe" && !i.isTypeOnly()).flatMap((i) => [i.getDefaultImport(), ...i.getNamedImports().filter((n) => !n.isTypeOnly() && ["Stripe", "default"].includes(n.getName())).map((n) => n.getAliasNode() ?? n.getNameNode())]).map((n) => n?.getSymbol()).filter(Boolean));
@@ -272360,10 +276476,28 @@ function discoverLinks(root, files, inventory) {
         if (statement && import_ts_morph.Node.isReturnStatement(statement) && isClient(statement.getExpression())) names.add("factory:" + fn.getName());
       }
     }
+    for (const declaration of source.getVariableDeclarations().filter((d) => names.has(d.getName()))) {
+      const symbol2 = declaration.getNameNode().getSymbol();
+      for (const id of source.getDescendantsOfKind(import_ts_morph.SyntaxKind.Identifier).filter((id2) => id2.getSymbol() === symbol2)) {
+        const parent = id.getParent();
+        if (import_ts_morph.Node.isVariableDeclaration(parent) && parent.getNameNode() === id) continue;
+        if (import_ts_morph.Node.isPropertyAccessExpression(parent) && parent.getExpression() === id && import_ts_morph.Node.isPropertyAccessExpression(parent.getParent()) && import_ts_morph.Node.isCallExpression(parent.getParent()?.getParent())) continue;
+        safe = false;
+      }
+    }
+    for (const fn of source.getFunctions().filter((fn2) => names.has("factory:" + fn2.getName()))) {
+      const symbol2 = fn.getNameNode()?.getSymbol();
+      for (const id of source.getDescendantsOfKind(import_ts_morph.SyntaxKind.Identifier).filter((id2) => id2.getSymbol() === symbol2)) {
+        const parent = id.getParent();
+        if (import_ts_morph.Node.isFunctionDeclaration(parent) && parent.getNameNode() === id || import_ts_morph.Node.isCallExpression(parent) && parent.getExpression() === id) continue;
+        safe = false;
+      }
+    }
     exports2.set(source.getFilePath(), names);
   }
   for (const source of sources) {
     const clients = /* @__PURE__ */ new Set();
+    const localNames = /* @__PURE__ */ new Set();
     for (const imp of source.getImportDeclarations()) {
       const specifier = imp.getModuleSpecifierValue();
       if (!specifier.startsWith(".") || imp.isTypeOnly()) continue;
@@ -272372,15 +276506,35 @@ function discoverLinks(root, files, inventory) {
       if (!names) continue;
       for (const imported of imp.getNamedImports().filter((n) => !n.isTypeOnly())) {
         const local = imported.getAliasNode() ?? imported.getNameNode();
-        if (names.has(imported.getName())) clients.add(local.getSymbol());
+        if (names.has(imported.getName())) {
+          clients.add(local.getSymbol());
+          localNames.add(local.getStart());
+        }
+        if (names.has("factory:" + imported.getName())) {
+          for (const id of source.getDescendantsOfKind(import_ts_morph.SyntaxKind.Identifier).filter((id2) => id2.getSymbol() === local.getSymbol())) {
+            const parent = id.getParent();
+            if (import_ts_morph.Node.isImportSpecifier(parent) || import_ts_morph.Node.isCallExpression(parent) && parent.getExpression() === id) continue;
+            safe = false;
+          }
+        }
         if (names.has("factory:" + imported.getName())) for (const variable of source.getVariableDeclarations()) {
           const init = variable.getInitializer();
           if (init && import_ts_morph.Node.isCallExpression(init) && init.getExpression().getSymbol() === local.getSymbol() && variable.getVariableStatement()?.getDeclarationKind() === "const" && import_ts_morph.Node.isIdentifier(variable.getNameNode())) {
             const symbol2 = variable.getNameNode().getSymbol();
-            if (symbol2) clients.add(symbol2);
+            if (symbol2) {
+              clients.add(symbol2);
+              localNames.add(variable.getNameNode().getStart());
+            }
           }
         }
       }
+    }
+    bindings.set(source.getFilePath(), localNames);
+    for (const id of source.getDescendantsOfKind(import_ts_morph.SyntaxKind.Identifier).filter((id2) => clients.has(id2.getSymbol()))) {
+      const parent = id.getParent();
+      if (import_ts_morph.Node.isImportSpecifier(parent) || import_ts_morph.Node.isVariableDeclaration(parent) && parent.getNameNode() === id) continue;
+      if (import_ts_morph.Node.isPropertyAccessExpression(parent) && parent.getExpression() === id && import_ts_morph.Node.isPropertyAccessExpression(parent.getParent()) && import_ts_morph.Node.isCallExpression(parent.getParent()?.getParent())) continue;
+      safe = false;
     }
     for (const call of source.getDescendantsOfKind(import_ts_morph.SyntaxKind.CallExpression)) {
       let base = call.getExpression();
@@ -272392,6 +276546,7 @@ function discoverLinks(root, files, inventory) {
       if (import_ts_morph.Node.isIdentifier(base) && clients.has(base.getSymbol())) inventory.usages.push({ file: (0, import_node_path4.relative)(root, source.getFilePath()).replaceAll("\\", "/"), line: call.getStartLineNumber(), kind: "unsupported", symbol: `Traced cross-file Stripe client: ${segments.join(".")}; inventory only, verify wrappers and versions manually`, requestApiVersion: "unknown" });
     }
   }
+  return safe ? bindings : /* @__PURE__ */ new Map();
 }
 
 // packages/core/src/languages/typescript/analyze.ts
@@ -272411,12 +276566,12 @@ var lockSchema = external_exports.object({ lockfileVersion: external_exports.num
 function sourceFiles(root, config2) {
   const paths = [];
   function walk(dir) {
-    for (const entry of (0, import_node_fs5.readdirSync)(dir, { withFileTypes: true })) {
+    for (const entry of (0, import_node_fs7.readdirSync)(dir, { withFileTypes: true })) {
       if (["node_modules", ".git", ".changelume"].includes(entry.name) || entry.isSymbolicLink()) continue;
       const full = (0, import_node_path5.resolve)(dir, entry.name), rel = (0, import_node_path5.relative)(root, full).replaceAll("\\", "/");
       if (entry.isDirectory()) walk(full);
       else if (/\.tsx?$/.test(rel) && config2.include.some((g) => (0, import_node_path5.matchesGlob)(rel, g)) && !config2.exclude.some((g) => (0, import_node_path5.matchesGlob)(rel, g))) {
-        if ((0, import_node_fs5.lstatSync)(full).size > 2e5) throw new Error("Source file size limit exceeded: " + rel);
+        if ((0, import_node_fs7.lstatSync)(full).size > 2e5) throw new Error("Source file size limit exceeded: " + rel);
         paths.push(full);
         if (paths.length > 5e3) throw new Error("Source file count limit exceeded");
       }
@@ -272432,12 +276587,12 @@ function analyze(root, config2) {
     return { inventory, edits: [] };
   }
   inventory.moduleMode = "unknown";
-  if ((0, import_node_fs5.existsSync)((0, import_node_path5.resolve)(root, "package.json"))) {
-    const p = manifest.parse(JSON.parse((0, import_node_fs5.readFileSync)((0, import_node_path5.resolve)(root, "package.json"), "utf8")));
+  if ((0, import_node_fs7.existsSync)((0, import_node_path5.resolve)(root, "package.json"))) {
+    const p = manifest.parse(JSON.parse((0, import_node_fs7.readFileSync)((0, import_node_path5.resolve)(root, "package.json"), "utf8")));
     inventory.declared = p.dependencies?.stripe ?? p.devDependencies?.stripe;
     inventory.moduleMode = p.type === "module" ? "esm" : p.type === "commonjs" ? "commonjs" : "unknown";
   }
-  if ((0, import_node_fs5.existsSync)((0, import_node_path5.resolve)(root, "tsconfig.json"))) {
+  if ((0, import_node_fs7.existsSync)((0, import_node_path5.resolve)(root, "tsconfig.json"))) {
     const result = import_ts_morph2.ts.readConfigFile((0, import_node_path5.resolve)(root, "tsconfig.json"), import_ts_morph2.ts.sys.readFile);
     if (result.error || result.config.extends) inventory.moduleMode = "unknown";
     else {
@@ -272447,8 +276602,8 @@ function analyze(root, config2) {
     }
   }
   inventory.limitations.push("Constructor aliases are removed in Stripe 12 ESM; CommonJS retains them. Module-mode inference uses root package/tsconfig only; nested settings and bundler rewrites require manual review.");
-  if ((0, import_node_fs5.existsSync)((0, import_node_path5.resolve)(root, "package-lock.json"))) {
-    const lock = lockSchema.parse(JSON.parse((0, import_node_fs5.readFileSync)((0, import_node_path5.resolve)(root, "package-lock.json"), "utf8")));
+  if ((0, import_node_fs7.existsSync)((0, import_node_path5.resolve)(root, "package-lock.json"))) {
+    const lock = lockSchema.parse(JSON.parse((0, import_node_fs7.readFileSync)((0, import_node_path5.resolve)(root, "package-lock.json"), "utf8")));
     inventory.resolved = lock.packages?.["node_modules/stripe"]?.version ?? lock.dependencies?.stripe?.version;
     inventory.versionOrigin = "package-lock.json (root installation)";
     if (Object.keys(lock.packages ?? {}).some((k) => k.endsWith("/node_modules/stripe") && k !== "node_modules/stripe")) inventory.limitations.push("Nested Stripe installations are unsupported; root version cannot establish their applicability");
@@ -272457,17 +276612,23 @@ function analyze(root, config2) {
     inventory.resolved = config2.vendors.stripe.sdkVersion;
     inventory.versionOrigin = "explicit configuration override";
   }
-  if (!(0, import_node_fs5.existsSync)((0, import_node_path5.resolve)(root, "node_modules/stripe"))) inventory.limitations.push("Stripe dependencies absent: lexical symbol binding available, SDK type checking unavailable; no dependencies installed");
+  if (!(0, import_node_fs7.existsSync)((0, import_node_path5.resolve)(root, "node_modules/stripe"))) inventory.limitations.push("Stripe dependencies absent: lexical symbol binding available, SDK type checking unavailable; no dependencies installed");
   const project = new import_ts_morph2.Project({ skipAddingFilesFromTsConfig: true, skipFileDependencyResolution: true, compilerOptions: { target: import_ts_morph2.ts.ScriptTarget.ESNext, jsx: import_ts_morph2.ts.JsxEmit.Preserve, noResolve: true } });
   const sources = sourceFiles(root, config2).map((file2) => project.addSourceFileAtPath(file2));
   const projectUnsafe = sources.some(unsafeConstructorReferences);
   if (projectUnsafe) inventory.limitations.push("A Stripe constructor binding escapes supported analysis in this repository; constructor and request-option edits are conservatively declined.");
+  const linked = discoverLinks(root, sourceFiles(root, config2), inventory);
   const edits = [];
   for (const file2 of sourceFiles(root, config2)) {
     const source = project.addSourceFileAtPath(file2), name = (0, import_node_path5.relative)(root, file2).replaceAll("\\", "/"), before = source.getFullText();
     const imports = source.getImportDeclarations().filter((d) => d.getModuleSpecifierValue() === "stripe");
     const roots = new Set(imports.filter((d) => !d.isTypeOnly()).flatMap((d) => [d.getDefaultImport(), ...d.getNamedImports().filter((n) => !n.isTypeOnly() && ["Stripe", "default"].includes(n.getName())).map((n) => n.getAliasNode() ?? n.getNameNode())]).map((n) => n?.getSymbol()).filter(Boolean));
     const clients = /* @__PURE__ */ new Set();
+    const linkedNames = linked.get(source.getFilePath()) ?? /* @__PURE__ */ new Set();
+    for (const id of source.getDescendantsOfKind(import_ts_morph2.SyntaxKind.Identifier)) if (linkedNames.has(id.getStart())) {
+      const parent = id.getParent();
+      if (import_ts_morph2.Node.isImportSpecifier(parent) || import_ts_morph2.Node.isVariableDeclaration(parent) && parent.getNameNode() === id) clients.add(id.getSymbol());
+    }
     const clientVersions = /* @__PURE__ */ new Map();
     const add = (node2, kind, symbol2, extra = {}) => inventory.usages.push({ file: name, line: node2.getStartLineNumber(), kind, symbol: symbol2, ...extra });
     const isRoot = (node2) => import_ts_morph2.Node.isIdentifier(node2) && roots.has(node2.getSymbol());
@@ -272550,6 +276711,7 @@ function analyze(root, config2) {
           const references = source.getDescendantsOfKind(import_ts_morph2.SyntaxKind.Identifier).filter((id) => id.getSymbol() === base.getSymbol());
           const safe = references.every((id) => {
             const p = id.getParent();
+            if (import_ts_morph2.Node.isImportSpecifier(p)) return true;
             if (import_ts_morph2.Node.isVariableDeclaration(p)) return p.getVariableStatement()?.getDeclarationKind() === "const";
             return import_ts_morph2.Node.isPropertyAccessExpression(p) && p.getExpression() === id && import_ts_morph2.Node.isPropertyAccessExpression(p.getParent()) && import_ts_morph2.Node.isCallExpression(p.getParent()?.getParent());
           });
@@ -272595,24 +276757,23 @@ function analyze(root, config2) {
     const text = source.getFullText();
     if (text !== before) edits.push({ path: name, beforeHash: hash2(before), content: text });
   }
-  discoverLinks(root, sourceFiles(root, config2), inventory);
   return { inventory, edits };
 }
 
 // packages/core/src/languages/python/analyze.ts
-var import_node_fs6 = require("node:fs");
+var import_node_fs8 = require("node:fs");
 var import_node_path6 = require("node:path");
 var import_node_child_process2 = require("node:child_process");
 
 // packages/core/src/languages/python/analyze.py
-var analyze_default = 'import ast, json, sys\ntext=sys.stdin.buffer.read().decode("utf8")\ntree=ast.parse(text)\nroots={n.asname or "stripe" for n in tree.body if isinstance(n,ast.Import) for n in n.names if n.name=="stripe"}\nmapping={"UnsupportedGrantTypError":"UnsupportedGrantTypeError","UnsupportedResponseTypError":"UnsupportedResponseTypeError"}\n# Scope changes and module mutation require human review.\nunsafe=any(isinstance(n,(ast.FunctionDef,ast.AsyncFunctionDef,ast.ClassDef,ast.Lambda)) or isinstance(n,ast.Name) and n.id in roots and isinstance(n.ctx,ast.Store) or isinstance(n,ast.Attribute) and isinstance(n.ctx,ast.Store) for n in ast.walk(tree))\nparents={child:node for node in ast.walk(tree) for child in ast.iter_child_nodes(node)}\nfor node in ast.walk(tree):\n if isinstance(node,ast.Name) and node.id in roots:\n  parent=parents.get(node); grand=parents.get(parent)\n  if not (isinstance(parent,ast.Attribute) and parent.attr=="oauth_error" and isinstance(grand,ast.Attribute) and grand.attr in mapping):unsafe=True\n if isinstance(node,(ast.Import,ast.ImportFrom)):\n  for alias in node.names:\n   if (alias.asname or alias.name) in roots and not (isinstance(node,ast.Import) and alias.name=="stripe"):unsafe=True\nlines=text.splitlines(keepends=True); offsets=[0]\nfor line in lines: offsets.append(offsets[-1]+len(line.encode("utf8")))\nedits=[]; usages=[]\nfor n in ast.walk(tree):\n if isinstance(n,ast.Attribute) and n.attr in mapping and isinstance(n.value,ast.Attribute) and n.value.attr=="oauth_error" and isinstance(n.value.value,ast.Name) and n.value.value.id in roots:\n  end=offsets[n.end_lineno-1]+n.end_col_offset\n  usages.append({"line":n.lineno,"symbol":n.attr,"kind":"unsupported" if unsafe else "field","changeId":"stripe-python-5-oauth-exceptions","editPlanned":not unsafe,"replacement":mapping[n.attr]})\n  if not unsafe: edits.append((end-len(n.attr),end,mapping[n.attr]))\ndata=text.encode("utf8")\nfor start,end,value in sorted(edits,reverse=True):data=data[:start]+value.encode()+data[end:]\nprint(json.dumps({"content":data.decode(),"usages":usages,"unsafe":unsafe}))\n';
+var analyze_default = 'import ast, json, sys\ntext=sys.stdin.buffer.read().decode("utf8")\ntree=ast.parse(text)\nroots={n.asname or "stripe" for n in tree.body if isinstance(n,ast.Import) for n in n.names if n.name=="stripe"}\nmapping={"UnsupportedGrantTypError":"UnsupportedGrantTypeError","UnsupportedResponseTypError":"UnsupportedResponseTypeError"}\n# Scope changes and module mutation require human review.\nunsafe=any(isinstance(n,ast.ExceptHandler) and n.name in roots or isinstance(n,(ast.MatchAs,ast.MatchStar)) and n.name in roots or isinstance(n,ast.arg) and n.arg in roots or isinstance(n,(ast.FunctionDef,ast.AsyncFunctionDef,ast.ClassDef)) and n.name in roots or isinstance(n,ast.Name) and n.id in roots and isinstance(n.ctx,ast.Store) or isinstance(n,ast.Attribute) and isinstance(n.ctx,(ast.Store,ast.Del)) for n in ast.walk(tree))\nparents={child:node for node in ast.walk(tree) for child in ast.iter_child_nodes(node)}\nfor node in ast.walk(tree):\n if isinstance(node,ast.Name) and node.id in roots:\n  parent=parents.get(node); grand=parents.get(parent)\n  if not (isinstance(parent,ast.Attribute)):unsafe=True\n if isinstance(node,(ast.Import,ast.ImportFrom)):\n  for alias in node.names:\n   if (alias.asname or alias.name) in roots and not (isinstance(node,ast.Import) and alias.name=="stripe"):unsafe=True\nlines=text.splitlines(keepends=True); offsets=[0]\nfor line in lines: offsets.append(offsets[-1]+len(line.encode("utf8")))\nedits=[]; usages=[]\nfor n in ast.walk(tree):\n if isinstance(n,ast.Attribute) and n.attr in mapping and isinstance(n.value,ast.Attribute) and n.value.attr=="oauth_error" and isinstance(n.value.value,ast.Name) and n.value.value.id in roots:\n  end=offsets[n.end_lineno-1]+n.end_col_offset\n  usages.append({"line":n.lineno,"symbol":n.attr,"kind":"unsupported" if unsafe else "field","changeId":"stripe-python-5-oauth-exceptions","editPlanned":not unsafe,"replacement":mapping[n.attr]})\n  if not unsafe: edits.append((end-len(n.attr),end,mapping[n.attr]))\ndata=text.encode("utf8")\nfor start,end,value in sorted(edits,reverse=True):data=data[:start]+value.encode()+data[end:]\nprint(json.dumps({"content":data.decode(),"usages":usages,"unsafe":unsafe}))\n';
 
 // packages/core/src/languages/python/analyze.ts
 var pythonAdapter = { id: "python", analyze(root, config2) {
-  const inventory = { vendor: "stripe", sdkPackage: "stripe", versionOrigin: "unknown", usages: [], limitations: ["Python preview: top-level import stripe[ as alias], stripe.oauth_error OAuth exception spelling only; scopes and attribute mutations decline edits. Exact requirements.txt pin required."], webhookVersion: "unknown" };
+  const inventory = { vendor: "stripe", sdkPackage: "stripe", versionOrigin: "unknown", usages: [], limitations: ["Python preview: top-level import stripe[ as alias], stripe.oauth_error OAuth exception spelling only; shadowed imports, module escapes and attribute mutations decline edits. Exact requirements.txt pin required."], webhookVersion: "unknown" };
   const requirements = (0, import_node_path6.resolve)(root, "requirements.txt");
-  if ((0, import_node_fs6.existsSync)(requirements)) {
-    const text = (0, import_node_fs6.readFileSync)(requirements, "utf8");
+  if ((0, import_node_fs8.existsSync)(requirements)) {
+    const text = (0, import_node_fs8.readFileSync)(requirements, "utf8");
     const directives = text.split(/\r?\n/).filter((line) => /^\s*stripe(?:[=<>!~;\s\[]|$)/i.test(line));
     const versions = [...text.matchAll(/^stripe==([0-9]+\.[0-9]+\.[0-9]+)\s*$/gm)];
     if (versions.length === 1 && directives.length === 1 && !/^\s*-(r|c|e|\-)/m.test(text)) {
@@ -272625,7 +276786,7 @@ var pythonAdapter = { id: "python", analyze(root, config2) {
   let count = 0;
   if (!config2.vendors.stripe.enabled) return { inventory, edits };
   function walk(dir) {
-    for (const entry of (0, import_node_fs6.readdirSync)(dir, { withFileTypes: true })) {
+    for (const entry of (0, import_node_fs8.readdirSync)(dir, { withFileTypes: true })) {
       if (entry.isSymbolicLink() || [".git", ".changelume", ".venv", "venv", "node_modules", "__pycache__"].includes(entry.name)) continue;
       const path3 = (0, import_node_path6.resolve)(dir, entry.name);
       if (entry.isDirectory()) {
@@ -272635,7 +276796,7 @@ var pythonAdapter = { id: "python", analyze(root, config2) {
       const name = (0, import_node_path6.relative)(root, path3).replaceAll("\\", "/");
       if (!name.endsWith(".py") || !config2.include.some((g) => (0, import_node_path6.matchesGlob)(name, g)) || config2.exclude.some((g) => (0, import_node_path6.matchesGlob)(name, g))) continue;
       if (++count > 5e3) throw new Error("Python source count limit exceeded");
-      const before = (0, import_node_fs6.readFileSync)(path3, "utf8");
+      const before = (0, import_node_fs8.readFileSync)(path3, "utf8");
       if (Buffer.byteLength(before) > 2e5) throw new Error("Python source size limit exceeded");
       const result = (0, import_node_child_process2.spawnSync)(config2.pythonCommand, ["-I", "-c", analyze_default], { input: before, encoding: "utf8", timeout: 1e4, maxBuffer: 1e6, windowsHide: true });
       if (result.status !== 0) throw new Error("Python AST analysis failed; ensure pythonCommand points to Python 3. No customer code is executed.");
@@ -272661,7 +276822,7 @@ var pythonAdapter = { id: "python", analyze(root, config2) {
 var adapters = { typescript: { id: "typescript", analyze }, python: pythonAdapter };
 
 // packages/core/src/vendors/stripe/sources.ts
-var import_node_fs7 = require("node:fs");
+var import_node_fs9 = require("node:fs");
 var import_node_path7 = require("node:path");
 
 // fixtures/sources/stripe-v12-changelog.md
@@ -272714,9 +276875,9 @@ async function collectSources(root, offline, config2, fetcher = fetch) {
   if (!offline) {
     const path3 = contained(root, ".changelume/cache/stripe.json");
     let origin = "network";
-    if ((0, import_node_fs7.existsSync)(path3)) {
+    if ((0, import_node_fs9.existsSync)(path3)) {
       try {
-        const c = cacheSchema.safeParse(JSON.parse((0, import_node_fs7.readFileSync)(path3, "utf8")));
+        const c = cacheSchema.safeParse(JSON.parse((0, import_node_fs9.readFileSync)(path3, "utf8")));
         if (c.success && c.data.url === currentUrl && hash2(c.data.text) === c.data.sha256 && Date.now() - c.data.fetchedAt >= 0 && Date.now() - c.data.fetchedAt < 36e5) {
           text = c.data.text;
           origin = "cache";
@@ -272727,8 +276888,8 @@ async function collectSources(root, offline, config2, fetcher = fetch) {
     if (origin === "network") {
       text = await fetchSource(currentUrl, config2.sources, fetcher);
       releaseHeadings(text);
-      (0, import_node_fs7.mkdirSync)((0, import_node_path7.resolve)(root, ".changelume/cache"), { recursive: true });
-      (0, import_node_fs7.writeFileSync)(path3, JSON.stringify({ url: currentUrl, text, sha256: hash2(text), fetchedAt: Date.now() }));
+      (0, import_node_fs9.mkdirSync)((0, import_node_path7.resolve)(root, ".changelume/cache"), { recursive: true });
+      (0, import_node_fs9.writeFileSync)(path3, JSON.stringify({ url: currentUrl, text, sha256: hash2(text), fetchedAt: Date.now() }));
     }
     evidence.push({ url: currentUrl, sha256: hash2(text), origin, release: "observed changelog" });
   }
@@ -272736,14 +276897,14 @@ async function collectSources(root, offline, config2, fetcher = fetch) {
   const observations = contained(root, `.changelume/observations/stripe-${offline ? "offline" : "online"}.json`);
   let previous = [];
   try {
-    previous = observationSchema.parse(JSON.parse((0, import_node_fs7.readFileSync)(observations, "utf8"))).releases;
+    previous = observationSchema.parse(JSON.parse((0, import_node_fs9.readFileSync)(observations, "utf8"))).releases;
   } catch {
   }
   const newlyObserved = releases.filter((r) => !previous.includes(r));
-  (0, import_node_fs7.mkdirSync)((0, import_node_path7.resolve)(root, ".changelume/observations"), { recursive: true });
+  (0, import_node_fs9.mkdirSync)((0, import_node_path7.resolve)(root, ".changelume/observations"), { recursive: true });
   const temporary = contained(root, `.changelume/observations/stripe-${offline ? "offline" : "online"}.tmp`);
-  (0, import_node_fs7.writeFileSync)(temporary, JSON.stringify({ schemaVersion: 1, releases, sourceHash: hash2(text), observedAt: Date.now() }));
-  (0, import_node_fs7.renameSync)(temporary, observations);
+  (0, import_node_fs9.writeFileSync)(temporary, JSON.stringify({ schemaVersion: 1, releases, sourceHash: hash2(text), observedAt: Date.now() }));
+  (0, import_node_fs9.renameSync)(temporary, observations);
   return { evidence, releases, newlyObserved, unclassified: ["Stripe v12 default request API version change requires manual compatibility review.", ...releases.filter((r) => r !== "12.0.0").map((r) => r === "11.0.0" ? "Release 11.0.0: partially classified; legacy request-option rules cover only documented patterns. Other changes require manual review." : `Release ${r}: observed, changes unclassified (no recipe)`)] };
 }
 
@@ -273385,20 +277546,20 @@ var parseLogLevel = (maybeLevel, sourceName, client) => {
   loggerFor(client).warn(`${sourceName} was set to ${JSON.stringify(maybeLevel)}, expected one of ${JSON.stringify(Object.keys(levelNumbers))}`);
   return void 0;
 };
-function noop() {
+function noop3() {
 }
 function makeLogFn(fnLevel, logger, logLevel) {
   if (!logger || levelNumbers[fnLevel] > levelNumbers[logLevel]) {
-    return noop;
+    return noop3;
   } else {
     return logger[fnLevel].bind(logger);
   }
 }
 var noopLogger = {
-  error: noop,
-  warn: noop,
-  info: noop,
-  debug: noop
+  error: noop3,
+  warn: noop3,
+  info: noop3,
+  debug: noop3
 };
 var cachedLoggers = /* @__PURE__ */ new WeakMap();
 function loggerFor(client) {
@@ -274166,7 +278327,7 @@ function addRequestID(value, response) {
 }
 
 // node_modules/openai/version.mjs
-var VERSION = "7.45.1";
+var VERSION9 = "7.45.1";
 
 // node_modules/openai/internal/detect-platform.mjs
 var isRunningInBrowser = () => {
@@ -274194,7 +278355,7 @@ var getPlatformProperties = () => {
   if (detectedPlatform === "deno") {
     return {
       "X-Stainless-Lang": "js",
-      "X-Stainless-Package-Version": VERSION,
+      "X-Stainless-Package-Version": VERSION9,
       "X-Stainless-OS": normalizePlatform(Deno.build.os),
       "X-Stainless-Arch": normalizeArch(Deno.build.arch),
       "X-Stainless-Runtime": "deno",
@@ -274204,7 +278365,7 @@ var getPlatformProperties = () => {
   if (typeof EdgeRuntime !== "undefined") {
     return {
       "X-Stainless-Lang": "js",
-      "X-Stainless-Package-Version": VERSION,
+      "X-Stainless-Package-Version": VERSION9,
       "X-Stainless-OS": "Unknown",
       "X-Stainless-Arch": `other:${EdgeRuntime}`,
       "X-Stainless-Runtime": "edge",
@@ -274214,7 +278375,7 @@ var getPlatformProperties = () => {
   if (detectedPlatform === "node") {
     return {
       "X-Stainless-Lang": "js",
-      "X-Stainless-Package-Version": VERSION,
+      "X-Stainless-Package-Version": VERSION9,
       "X-Stainless-OS": normalizePlatform(globalThis.process.platform ?? "unknown"),
       "X-Stainless-Arch": normalizeArch(globalThis.process.arch ?? "unknown"),
       "X-Stainless-Runtime": "node",
@@ -274225,7 +278386,7 @@ var getPlatformProperties = () => {
   if (browserInfo) {
     return {
       "X-Stainless-Lang": "js",
-      "X-Stainless-Package-Version": VERSION,
+      "X-Stainless-Package-Version": VERSION9,
       "X-Stainless-OS": "Unknown",
       "X-Stainless-Arch": "unknown",
       "X-Stainless-Runtime": `browser:${browserInfo.browser}`,
@@ -274234,7 +278395,7 @@ var getPlatformProperties = () => {
   }
   return {
     "X-Stainless-Lang": "js",
-    "X-Stainless-Package-Version": VERSION,
+    "X-Stainless-Package-Version": VERSION9,
     "X-Stainless-OS": "Unknown",
     "X-Stainless-Arch": "unknown",
     "X-Stainless-Runtime": "unknown",
@@ -295087,7 +299248,7 @@ var OpenAI = class {
     return stringifyQuery(query);
   }
   getUserAgent() {
-    return `${this.constructor.name}/JS ${VERSION}`;
+    return `${this.constructor.name}/JS ${VERSION9}`;
   }
   defaultIdempotencyKey() {
     return `stainless-node-retry-${uuid42()}`;
@@ -296340,7 +300501,7 @@ var _a6;
 _a6 = brand_privateBedrockClient;
 
 // packages/core/src/llm/provider.ts
-var import_node_fs8 = require("node:fs");
+var import_node_fs10 = require("node:fs");
 var import_ts_morph3 = __toESM(require_ts_morph(), 1);
 function assertNoCredentials(text) {
   let credential = /(?:sk|rk)_(?:live|test)_[a-zA-Z0-9]+|sk-[a-zA-Z0-9_-]{12,}|gh[pousr]_[a-zA-Z0-9]+|-----BEGIN .*PRIVATE KEY|(?:api[_-]?key|password|secret|token)\s*[:=]\s*['"][^'"]+['"]/i.test(text);
@@ -296356,7 +300517,7 @@ function assertNoCredentials(text) {
 }
 function contextFor(root, p) {
   const files = p.edits.map((e) => {
-    const content = (0, import_node_fs8.readFileSync)(contained(root, e.path), "utf8");
+    const content = (0, import_node_fs10.readFileSync)(contained(root, e.path), "utf8");
     assertNoCredentials(content);
     return { path: e.path, beforeHash: e.beforeHash, content };
   });
@@ -296411,10 +300572,12 @@ function redactDiagnostics(value) {
 var baselineSchema = external_exports.object({ schemaVersion: external_exports.literal(1), accepted: external_exports.array(external_exports.string()), sources: external_exports.array(external_exports.object({ url: external_exports.string().url(), sha256: external_exports.string().regex(/^[a-f0-9]{64}$/) })), observedReleases: external_exports.array(external_exports.string()) }).strict();
 function baseline(root) {
   const path3 = contained(root, "changelume.lock.json");
-  return (0, import_node_fs9.existsSync)(path3) ? baselineSchema.parse(JSON.parse((0, import_node_fs9.readFileSync)(path3, "utf8"))) : { schemaVersion: 1, accepted: [], sources: [], observedReleases: [] };
+  return (0, import_node_fs11.existsSync)(path3) ? baselineSchema.parse(JSON.parse((0, import_node_fs11.readFileSync)(path3, "utf8"))) : { schemaVersion: 1, accepted: [], sources: [], observedReleases: [] };
 }
 async function plan(root, config2, offline = false) {
-  const accepted = baseline(root), { inventory, edits } = adapters[config2.language].analyze(root, config2);
+  const dependencyEdits = upgradeEdits(root, config2);
+  const accepted = baseline(root), { inventory, edits } = adapters[config2.language].analyze(root, config2.upgrade ? { ...config2, vendors: { stripe: { ...config2.vendors.stripe, sdkVersion: config2.upgrade.to } } } : config2);
+  edits.push(...dependencyEdits);
   const sources = config2.language === "python" ? { evidence: [], releases: [], newlyObserved: [], unclassified: [] } : await collectSources(root, offline, config2);
   if (config2.language === "python") {
     sources.evidence = [{ url: "https://raw.githubusercontent.com/stripe/stripe-python/v5.0.0/CHANGELOG.md", sha256: hash2(stripe_python_v5_changelog_default), origin: "offline snapshot", release: "5.0.0" }];
@@ -296428,7 +300591,7 @@ async function plan(root, config2, offline = false) {
   for (const u of inventory.usages.filter((u2) => u2.kind === "unsupported" && !u2.changeId)) findings.push({ changeId: CHANGE_ID, location: { file: u.file, line: u.line, symbol: u.symbol }, outcome: "unsupported analysis", explanation: u.symbol });
   for (const u of inventory.usages.filter((u2) => u2.kind === "client" && u2.requestApiVersion === "unknown")) findings.push({ changeId: "stripe-node-12-api-default", location: { file: u.file, line: u.line, symbol: u.symbol }, outcome: "possible impact", explanation: "Request API version is unknown; SDK, account and webhook versions are independent." });
   if (!findings.length) findings.push({ changeId: CHANGE_ID, outcome: "no detected impact within supported analysis", explanation: "No supported obsolete constructor aliases found; this does not establish overall Stripe compatibility." });
-  return { id: config2.language === "python" ? "stripe-python-5-oauth-exceptions" : inventory.usages.some((u) => u.changeId) ? "stripe-supported-recipes-v1" : CHANGE_ID, revision: revision(root), inventory, evidence: sources.evidence, observedReleases: sources.releases, newlyObserved: sources.newlyObserved, unclassified: sources.unclassified, findings, edits, preconditions: ["Clean Git working tree for migration", "Selected language adapter and recipe-specific import/usage pattern", "Recipe-specific SDK versions and unambiguous package resolution; see preview support matrix", "Expected file hashes and canonical source paths match"], manualSteps: ["Review Stripe API compatibility and webhook endpoint versions separately.", "No SDK upgrade is performed. For Stripe 11, update dependencies and lockfile separately after reviewing all v12 changes.", "Review unclassified release changes; accepting this recipe does not accept them."], verification: config2.verification, acceptedBaseline: accepted, llm: { used: false } };
+  return { upgrade: config2.upgrade, id: config2.upgrade ? `stripe-node-upgrade-${config2.upgrade.from}-to-${config2.upgrade.to}` : config2.language === "python" ? "stripe-python-5-oauth-exceptions" : inventory.usages.some((u) => u.changeId) ? "stripe-supported-recipes-v1" : CHANGE_ID, revision: revision(root), inventory, evidence: sources.evidence, observedReleases: sources.releases, newlyObserved: sources.newlyObserved, unclassified: sources.unclassified, findings, edits, preconditions: ["Clean Git working tree for migration", "Selected language adapter and recipe-specific import/usage pattern", "Recipe-specific SDK versions and unambiguous package resolution; see preview support matrix", "Expected file hashes and canonical source paths match"], manualSteps: [...config2.upgrade ? [`SDK upgrade ${config2.upgrade.from} -> ${config2.upgrade.to}; configured installation and behavioral verification must pass.`] : [], "Review Stripe API compatibility and webhook endpoint versions separately.", config2.upgrade ? "Review remaining v12 changes before accepting the upgrade." : "No SDK upgrade is performed.", "Review unclassified release changes; accepting this recipe does not accept them."], verification: config2.verification, acceptedBaseline: accepted, llm: { used: false } };
 }
 function verify(root, commands) {
   const results = [];
@@ -296478,28 +300641,30 @@ function publicPlan(p) {
 }
 function saveReport(root, p, verification = { status: "skipped", results: [] }) {
   const dir = contained(root, ".changelume");
-  (0, import_node_fs9.mkdirSync)(dir, { recursive: true });
+  (0, import_node_fs11.mkdirSync)(dir, { recursive: true });
   persistQueue(root, p);
-  (0, import_node_fs9.writeFileSync)(contained(root, ".changelume/report.json"), JSON.stringify({ plan: publicPlan(p), verification }, null, 2) + "\n");
+  saveProposal(root, p, verification);
+  (0, import_node_fs11.writeFileSync)(contained(root, ".changelume/report.json"), JSON.stringify({ plan: publicPlan(p), verification }, null, 2) + "\n");
   const diagnostics = verification.results.map((r, i) => `
 ### Command ${i + 1} diagnostics${r.outputTruncated ? " (truncated)" : ""}
 
 ` + [r.stdout, r.stderr].filter(Boolean).join("\n").split("\n").map((line) => "    " + line).join("\n")).join("\n");
-  (0, import_node_fs9.writeFileSync)(contained(root, ".changelume/report.md"), markdown(p, verification) + (diagnostics ? "\n## Verification output\n" + diagnostics + "\n" : ""));
+  (0, import_node_fs11.writeFileSync)(contained(root, ".changelume/report.md"), markdown(p, verification) + (diagnostics ? "\n## Verification output\n" + diagnostics + "\n" : ""));
 }
-function candidate(root, p, runVerification = true, cleanup = (path3) => (0, import_node_fs9.rmSync)(path3, { recursive: true, force: true })) {
+function candidate(root, p, runVerification = true, cleanup = (path3) => (0, import_node_fs11.rmSync)(path3, { recursive: true, force: true })) {
+  if (p.upgrade && runVerification && !p.verification.length) throw new Error("SDK upgrades require configured installation and behavioral verification");
   assertClean(root);
   if (revision(root) !== p.revision) throw new Error("Repository revision changed");
-  validateEdits(root, { edits: p.edits }, p.edits.map((e) => e.path));
+  validateEdits(root, { edits: p.edits }, p.edits.map((e) => e.path), false, Boolean(p.upgrade));
   for (const e of p.edits) if (!git(root, "ls-files", "--stage", "--", e.path).startsWith("100644 ")) throw new Error("Migration only edits regular tracked source files");
   const edits = [...p.edits];
   for (const e of edits) assertNoCredentials(e.content);
   if (edits.length) {
     const previous = baseline(root), path3 = contained(root, "changelume.lock.json");
     const next = { schemaVersion: 1, accepted: [.../* @__PURE__ */ new Set([...previous.accepted, ...p.inventory.usages.filter((u) => u.editPlanned && p.edits.some((e) => e.path === u.file)).map((u) => u.changeId ?? CHANGE_ID), p.id])], sources: p.evidence.filter((e) => e.origin === "offline snapshot").map(({ url: url2, sha256 }) => ({ url: url2, sha256 })), observedReleases: previous.observedReleases };
-    edits.push({ path: "changelume.lock.json", beforeHash: hash2((0, import_node_fs9.existsSync)(path3) ? (0, import_node_fs9.readFileSync)(path3) : ""), content: JSON.stringify(next, null, 2) + "\n" });
+    edits.push({ path: "changelume.lock.json", beforeHash: hash2((0, import_node_fs11.existsSync)(path3) ? (0, import_node_fs11.readFileSync)(path3) : ""), content: JSON.stringify(next, null, 2) + "\n" });
   }
-  const temp = (0, import_node_fs9.mkdtempSync)((0, import_node_path8.resolve)((0, import_node_os.tmpdir)(), "changelume-"));
+  const temp = (0, import_node_fs11.mkdtempSync)((0, import_node_path8.resolve)((0, import_node_os.tmpdir)(), "changelume-"));
   let patch = "", verification = { status: "skipped", results: [] };
   try {
     git(temp, "clone", "--quiet", "--no-hardlinks", "--", root, "candidate");
@@ -296507,8 +300672,8 @@ function candidate(root, p, runVerification = true, cleanup = (path3) => (0, imp
     git(checkout, "checkout", "--quiet", "--detach", p.revision);
     for (const e of edits) {
       const path3 = contained(checkout, e.path);
-      (0, import_node_fs9.mkdirSync)((0, import_node_path8.dirname)(path3), { recursive: true });
-      (0, import_node_fs9.writeFileSync)(path3, e.content);
+      (0, import_node_fs11.mkdirSync)((0, import_node_path8.dirname)(path3), { recursive: true });
+      (0, import_node_fs11.writeFileSync)(path3, e.content);
     }
     if (edits.length) git(checkout, "add", "--intent-to-add", "--", ...edits.map((e) => e.path));
     patch = git(checkout, "diff", "--no-ext-diff", "--no-textconv", "--binary", "--unified=0", "HEAD") + "\n";
@@ -296525,26 +300690,26 @@ function candidate(root, p, runVerification = true, cleanup = (path3) => (0, imp
     }
   }
   const bundle = { schemaVersion: 1, revision: p.revision, plan: p, edits, patchHash: hash2(patch), verification };
-  (0, import_node_fs9.mkdirSync)(contained(root, ".changelume"), { recursive: true });
-  (0, import_node_fs9.writeFileSync)(contained(root, ".changelume/migration.patch"), patch);
-  (0, import_node_fs9.writeFileSync)(contained(root, ".changelume/bundle.json"), JSON.stringify(bundle, null, 2) + "\n");
+  (0, import_node_fs11.mkdirSync)(contained(root, ".changelume"), { recursive: true });
+  (0, import_node_fs11.writeFileSync)(contained(root, ".changelume/migration.patch"), patch);
+  (0, import_node_fs11.writeFileSync)(contained(root, ".changelume/bundle.json"), JSON.stringify(bundle, null, 2) + "\n");
   saveReport(root, p, verification);
   return bundle;
 }
-function applyCandidate(root, b, replace = import_node_fs9.renameSync) {
+function applyCandidate(root, b, replace = import_node_fs11.renameSync) {
   assertClean(root);
   if (revision(root) !== b.revision) throw new Error("Repository revision changed");
   if (b.verification.status === "failed") throw new Error("Verification failed; patch and report preserved, source not changed");
-  validateEdits(root, { edits: b.edits }, [...b.plan.edits.map((e) => e.path), "changelume.lock.json"], true);
+  validateEdits(root, { edits: b.edits }, [...b.plan.edits.map((e) => e.path), "changelume.lock.json"], true, Boolean(b.plan.upgrade));
   const recovery = contained(root, `.changelume/recovery/${(0, import_node_crypto2.randomUUID)()}`);
-  (0, import_node_fs9.mkdirSync)(recovery, { recursive: true });
+  (0, import_node_fs11.mkdirSync)(recovery, { recursive: true });
   const originals = b.edits.map((e, i) => {
-    const path3 = contained(root, e.path), existed = (0, import_node_fs9.existsSync)(path3);
-    if (existed) (0, import_node_fs9.writeFileSync)((0, import_node_path8.resolve)(recovery, `${i}.original`), (0, import_node_fs9.readFileSync)(path3));
-    (0, import_node_fs9.writeFileSync)((0, import_node_path8.resolve)(recovery, `${i}.candidate`), e.content);
+    const path3 = contained(root, e.path), existed = (0, import_node_fs11.existsSync)(path3);
+    if (existed) (0, import_node_fs11.writeFileSync)((0, import_node_path8.resolve)(recovery, `${i}.original`), (0, import_node_fs11.readFileSync)(path3));
+    (0, import_node_fs11.writeFileSync)((0, import_node_path8.resolve)(recovery, `${i}.candidate`), e.content);
     return { path: e.path, existed };
   });
-  (0, import_node_fs9.writeFileSync)((0, import_node_path8.resolve)(recovery, "manifest.json"), JSON.stringify({ revision: b.revision, originals }, null, 2));
+  (0, import_node_fs11.writeFileSync)((0, import_node_path8.resolve)(recovery, "manifest.json"), JSON.stringify({ revision: b.revision, originals }, null, 2));
   const applied = [];
   try {
     for (const [i, e] of b.edits.entries()) {
@@ -296557,8 +300722,8 @@ function applyCandidate(root, b, replace = import_node_fs9.renameSync) {
       try {
         const original = originals[i];
         const path3 = contained(root, original.path);
-        if (original.existed) (0, import_node_fs9.writeFileSync)(path3, (0, import_node_fs9.readFileSync)((0, import_node_path8.resolve)(recovery, `${i}.original`)));
-        else (0, import_node_fs9.rmSync)(path3);
+        if (original.existed) (0, import_node_fs11.writeFileSync)(path3, (0, import_node_fs11.readFileSync)((0, import_node_path8.resolve)(recovery, `${i}.original`)));
+        else (0, import_node_fs11.rmSync)(path3);
       } catch {
         restored = false;
       }
@@ -296566,4074 +300731,24 @@ function applyCandidate(root, b, replace = import_node_fs9.renameSync) {
     throw new Error(`Migration application failed; ${restored ? "original files restored" : "rollback incomplete"}. Recovery copies and manifest: ${recovery}. Report and patch preserved.`);
   }
   try {
-    (0, import_node_fs9.rmSync)(recovery, { recursive: true, force: true });
+    (0, import_node_fs11.rmSync)(recovery, { recursive: true, force: true });
   } catch {
   }
 }
 function persistQueue(root, p) {
   const path3 = contained(root, ".changelume/monitor/queue.json");
-  (0, import_node_fs9.mkdirSync)((0, import_node_path8.dirname)(path3), { recursive: true });
+  (0, import_node_fs11.mkdirSync)((0, import_node_path8.dirname)(path3), { recursive: true });
   let previous = {};
   try {
-    previous = JSON.parse((0, import_node_fs9.readFileSync)(path3, "utf8")).history ?? {};
+    previous = JSON.parse((0, import_node_fs11.readFileSync)(path3, "utf8")).history ?? {};
   } catch {
   }
   const now = (/* @__PURE__ */ new Date()).toISOString();
   const items = reviewQueue(root, p).map((item) => ({ ...item, firstSeen: previous[item.id]?.firstSeen ?? now, lastSeen: now }));
   const history = { ...previous, ...Object.fromEntries(items.map((item) => [item.id, { firstSeen: item.firstSeen }])) };
-  (0, import_node_fs9.writeFileSync)(path3, JSON.stringify({ schemaVersion: 1, revision: p.revision, items, history }, null, 2) + "\n");
-  (0, import_node_fs9.writeFileSync)(contained(root, ".changelume/queue.json"), JSON.stringify({ schemaVersion: 1, revision: p.revision, items }, null, 2) + "\n");
+  (0, import_node_fs11.writeFileSync)(path3, JSON.stringify({ schemaVersion: 1, revision: p.revision, items, history }, null, 2) + "\n");
+  (0, import_node_fs11.writeFileSync)(contained(root, ".changelume/queue.json"), JSON.stringify({ schemaVersion: 1, revision: p.revision, items }, null, 2) + "\n");
 }
-
-// node_modules/universal-user-agent/index.js
-function getUserAgent() {
-  if (typeof navigator === "object" && "userAgent" in navigator) {
-    return navigator.userAgent;
-  }
-  if (typeof process === "object" && process.version !== void 0) {
-    return `Node.js/${process.version.substr(1)} (${process.platform}; ${process.arch})`;
-  }
-  return "<environment undetectable>";
-}
-
-// node_modules/before-after-hook/lib/register.js
-function register(state2, name, method, options) {
-  if (typeof method !== "function") {
-    throw new Error("method for before hook must be a function");
-  }
-  if (!options) {
-    options = {};
-  }
-  if (Array.isArray(name)) {
-    return name.reverse().reduce((callback, name2) => {
-      return register.bind(null, state2, name2, callback, options);
-    }, method)();
-  }
-  return Promise.resolve().then(() => {
-    if (!state2.registry[name]) {
-      return method(options);
-    }
-    return state2.registry[name].reduce((method2, registered) => {
-      return registered.hook.bind(null, method2, options);
-    }, method)();
-  });
-}
-
-// node_modules/before-after-hook/lib/add.js
-function addHook(state2, kind, name, hook2) {
-  const orig = hook2;
-  if (!state2.registry[name]) {
-    state2.registry[name] = [];
-  }
-  if (kind === "before") {
-    hook2 = (method, options) => {
-      return Promise.resolve().then(orig.bind(null, options)).then(method.bind(null, options));
-    };
-  }
-  if (kind === "after") {
-    hook2 = (method, options) => {
-      let result;
-      return Promise.resolve().then(method.bind(null, options)).then((result_) => {
-        result = result_;
-        return orig(result, options);
-      }).then(() => {
-        return result;
-      });
-    };
-  }
-  if (kind === "error") {
-    hook2 = (method, options) => {
-      return Promise.resolve().then(method.bind(null, options)).catch((error62) => {
-        return orig(error62, options);
-      });
-    };
-  }
-  state2.registry[name].push({
-    hook: hook2,
-    orig
-  });
-}
-
-// node_modules/before-after-hook/lib/remove.js
-function removeHook(state2, name, method) {
-  if (!state2.registry[name]) {
-    return;
-  }
-  const index = state2.registry[name].map((registered) => {
-    return registered.orig;
-  }).indexOf(method);
-  if (index === -1) {
-    return;
-  }
-  state2.registry[name].splice(index, 1);
-}
-
-// node_modules/before-after-hook/index.js
-var bind = Function.bind;
-var bindable = bind.bind(bind);
-function bindApi(hook2, state2, name) {
-  const removeHookRef = bindable(removeHook, null).apply(
-    null,
-    name ? [state2, name] : [state2]
-  );
-  hook2.api = { remove: removeHookRef };
-  hook2.remove = removeHookRef;
-  ["before", "error", "after", "wrap"].forEach((kind) => {
-    const args = name ? [state2, kind, name] : [state2, kind];
-    hook2[kind] = hook2.api[kind] = bindable(addHook, null).apply(null, args);
-  });
-}
-function Singular() {
-  const singularHookName = /* @__PURE__ */ Symbol("Singular");
-  const singularHookState = {
-    registry: {}
-  };
-  const singularHook = register.bind(null, singularHookState, singularHookName);
-  bindApi(singularHook, singularHookState, singularHookName);
-  return singularHook;
-}
-function Collection() {
-  const state2 = {
-    registry: {}
-  };
-  const hook2 = register.bind(null, state2);
-  bindApi(hook2, state2);
-  return hook2;
-}
-var before_after_hook_default = { Singular, Collection };
-
-// node_modules/@octokit/endpoint/dist-bundle/index.js
-var VERSION2 = "0.0.0-development";
-var userAgent = `octokit-endpoint.js/${VERSION2} ${getUserAgent()}`;
-var DEFAULTS = {
-  method: "GET",
-  baseUrl: "https://api.github.com",
-  headers: {
-    accept: "application/vnd.github.v3+json",
-    "user-agent": userAgent
-  },
-  mediaType: {
-    format: ""
-  }
-};
-function lowercaseKeys(object2) {
-  if (!object2) {
-    return {};
-  }
-  return Object.keys(object2).reduce((newObj, key) => {
-    newObj[key.toLowerCase()] = object2[key];
-    return newObj;
-  }, {});
-}
-function isPlainObject2(value) {
-  if (typeof value !== "object" || value === null) return false;
-  if (Object.prototype.toString.call(value) !== "[object Object]") return false;
-  const proto = Object.getPrototypeOf(value);
-  if (proto === null) return true;
-  const Ctor = Object.prototype.hasOwnProperty.call(proto, "constructor") && proto.constructor;
-  return typeof Ctor === "function" && Ctor instanceof Ctor && Function.prototype.call(Ctor) === Function.prototype.call(value);
-}
-function mergeDeep(defaults2, options) {
-  const result = Object.assign({}, defaults2);
-  Object.keys(options).forEach((key) => {
-    if (isPlainObject2(options[key])) {
-      if (!(key in defaults2)) Object.assign(result, { [key]: options[key] });
-      else result[key] = mergeDeep(defaults2[key], options[key]);
-    } else {
-      Object.assign(result, { [key]: options[key] });
-    }
-  });
-  return result;
-}
-function removeUndefinedProperties(obj) {
-  for (const key in obj) {
-    if (obj[key] === void 0) {
-      delete obj[key];
-    }
-  }
-  return obj;
-}
-function merge2(defaults2, route, options) {
-  if (typeof route === "string") {
-    let [method, url2] = route.split(" ");
-    options = Object.assign(url2 ? { method, url: url2 } : { url: method }, options);
-  } else {
-    options = Object.assign({}, route);
-  }
-  options.headers = lowercaseKeys(options.headers);
-  removeUndefinedProperties(options);
-  removeUndefinedProperties(options.headers);
-  const mergedOptions = mergeDeep(defaults2 || {}, options);
-  if (options.url === "/graphql") {
-    if (defaults2 && defaults2.mediaType.previews?.length) {
-      mergedOptions.mediaType.previews = defaults2.mediaType.previews.filter(
-        (preview) => !mergedOptions.mediaType.previews.includes(preview)
-      ).concat(mergedOptions.mediaType.previews);
-    }
-    mergedOptions.mediaType.previews = (mergedOptions.mediaType.previews || []).map((preview) => preview.replace(/-preview/, ""));
-  }
-  return mergedOptions;
-}
-function addQueryParameters(url2, parameters) {
-  const separator = /\?/.test(url2) ? "&" : "?";
-  const names = Object.keys(parameters);
-  if (names.length === 0) {
-    return url2;
-  }
-  return url2 + separator + names.map((name) => {
-    if (name === "q") {
-      return "q=" + parameters.q.split("+").map(encodeURIComponent).join("+");
-    }
-    return `${name}=${encodeURIComponent(parameters[name])}`;
-  }).join("&");
-}
-var urlVariableRegex = /\{[^{}}]+\}/g;
-function removeNonChars(variableName) {
-  return variableName.replace(/(?:^\W+)|(?:(?<!\W)\W+$)/g, "").split(/,/);
-}
-function extractUrlVariableNames(url2) {
-  const matches = url2.match(urlVariableRegex);
-  if (!matches) {
-    return [];
-  }
-  return matches.map(removeNonChars).reduce((a, b) => a.concat(b), []);
-}
-function omit2(object2, keysToOmit) {
-  const result = { __proto__: null };
-  for (const key of Object.keys(object2)) {
-    if (keysToOmit.indexOf(key) === -1) {
-      result[key] = object2[key];
-    }
-  }
-  return result;
-}
-function encodeReserved(str) {
-  return str.split(/(%[0-9A-Fa-f]{2})/g).map(function(part) {
-    if (!/%[0-9A-Fa-f]/.test(part)) {
-      part = encodeURI(part).replace(/%5B/g, "[").replace(/%5D/g, "]");
-    }
-    return part;
-  }).join("");
-}
-function encodeUnreserved(str) {
-  return encodeURIComponent(str).replace(/[!'()*]/g, function(c) {
-    return "%" + c.charCodeAt(0).toString(16).toUpperCase();
-  });
-}
-function encodeValue(operator, value, key) {
-  value = operator === "+" || operator === "#" ? encodeReserved(value) : encodeUnreserved(value);
-  if (key) {
-    return encodeUnreserved(key) + "=" + value;
-  } else {
-    return value;
-  }
-}
-function isDefined(value) {
-  return value !== void 0 && value !== null;
-}
-function isKeyOperator(operator) {
-  return operator === ";" || operator === "&" || operator === "?";
-}
-function getValues(context, operator, key, modifier) {
-  var value = context[key], result = [];
-  if (isDefined(value) && value !== "") {
-    if (typeof value === "string" || typeof value === "number" || typeof value === "bigint" || typeof value === "boolean") {
-      value = value.toString();
-      if (modifier && modifier !== "*") {
-        value = value.substring(0, parseInt(modifier, 10));
-      }
-      result.push(
-        encodeValue(operator, value, isKeyOperator(operator) ? key : "")
-      );
-    } else {
-      if (modifier === "*") {
-        if (Array.isArray(value)) {
-          value.filter(isDefined).forEach(function(value2) {
-            result.push(
-              encodeValue(operator, value2, isKeyOperator(operator) ? key : "")
-            );
-          });
-        } else {
-          Object.keys(value).forEach(function(k) {
-            if (isDefined(value[k])) {
-              result.push(encodeValue(operator, value[k], k));
-            }
-          });
-        }
-      } else {
-        const tmp = [];
-        if (Array.isArray(value)) {
-          value.filter(isDefined).forEach(function(value2) {
-            tmp.push(encodeValue(operator, value2));
-          });
-        } else {
-          Object.keys(value).forEach(function(k) {
-            if (isDefined(value[k])) {
-              tmp.push(encodeUnreserved(k));
-              tmp.push(encodeValue(operator, value[k].toString()));
-            }
-          });
-        }
-        if (isKeyOperator(operator)) {
-          result.push(encodeUnreserved(key) + "=" + tmp.join(","));
-        } else if (tmp.length !== 0) {
-          result.push(tmp.join(","));
-        }
-      }
-    }
-  } else {
-    if (operator === ";") {
-      if (isDefined(value)) {
-        result.push(encodeUnreserved(key));
-      }
-    } else if (value === "" && (operator === "&" || operator === "?")) {
-      result.push(encodeUnreserved(key) + "=");
-    } else if (value === "") {
-      result.push("");
-    }
-  }
-  return result;
-}
-function parseUrl(template) {
-  return {
-    expand: expand.bind(null, template)
-  };
-}
-function expand(template, context) {
-  var operators = ["+", "#", ".", "/", ";", "?", "&"];
-  template = template.replace(
-    /\{([^\{\}]+)\}|([^\{\}]+)/g,
-    function(_, expression, literal2) {
-      if (expression) {
-        let operator = "";
-        const values = [];
-        if (operators.indexOf(expression.charAt(0)) !== -1) {
-          operator = expression.charAt(0);
-          expression = expression.substr(1);
-        }
-        expression.split(/,/g).forEach(function(variable) {
-          var tmp = /([^:\*]*)(?::(\d+)|(\*))?/.exec(variable);
-          values.push(getValues(context, operator, tmp[1], tmp[2] || tmp[3]));
-        });
-        if (operator && operator !== "+") {
-          var separator = ",";
-          if (operator === "?") {
-            separator = "&";
-          } else if (operator !== "#") {
-            separator = operator;
-          }
-          return (values.length !== 0 ? operator : "") + values.join(separator);
-        } else {
-          return values.join(",");
-        }
-      } else {
-        return encodeReserved(literal2);
-      }
-    }
-  );
-  if (template === "/") {
-    return template;
-  } else {
-    return template.replace(/\/$/, "");
-  }
-}
-function parse4(options) {
-  let method = options.method.toUpperCase();
-  let url2 = (options.url || "/").replace(/:([a-z]\w+)/g, "{$1}");
-  let headers = Object.assign({}, options.headers);
-  let body;
-  let parameters = omit2(options, [
-    "method",
-    "baseUrl",
-    "url",
-    "headers",
-    "request",
-    "mediaType"
-  ]);
-  const urlVariableNames = extractUrlVariableNames(url2);
-  url2 = parseUrl(url2).expand(parameters);
-  if (!/^http/.test(url2)) {
-    url2 = options.baseUrl + url2;
-  }
-  const omittedParameters = Object.keys(options).filter((option) => urlVariableNames.includes(option)).concat("baseUrl");
-  const remainingParameters = omit2(parameters, omittedParameters);
-  const isBinaryRequest = /application\/octet-stream/i.test(headers.accept);
-  if (!isBinaryRequest) {
-    if (options.mediaType.format) {
-      headers.accept = headers.accept.split(/,/).map(
-        (format) => format.replace(
-          /application\/vnd(\.\w+)(\.v3)?(\.\w+)?(\+json)?$/,
-          `application/vnd$1$2.${options.mediaType.format}`
-        )
-      ).join(",");
-    }
-    if (url2.endsWith("/graphql")) {
-      if (options.mediaType.previews?.length) {
-        const previewsFromAcceptHeader = headers.accept.match(/(?<![\w-])[\w-]+(?=-preview)/g) || [];
-        headers.accept = previewsFromAcceptHeader.concat(options.mediaType.previews).map((preview) => {
-          const format = options.mediaType.format ? `.${options.mediaType.format}` : "+json";
-          return `application/vnd.github.${preview}-preview${format}`;
-        }).join(",");
-      }
-    }
-  }
-  if (["GET", "HEAD"].includes(method)) {
-    url2 = addQueryParameters(url2, remainingParameters);
-  } else {
-    if ("data" in remainingParameters) {
-      body = remainingParameters.data;
-    } else {
-      if (Object.keys(remainingParameters).length) {
-        body = remainingParameters;
-      }
-    }
-  }
-  if (!headers["content-type"] && typeof body !== "undefined") {
-    headers["content-type"] = "application/json; charset=utf-8";
-  }
-  if (["PATCH", "PUT"].includes(method) && typeof body === "undefined") {
-    body = "";
-  }
-  return Object.assign(
-    { method, url: url2, headers },
-    typeof body !== "undefined" ? { body } : null,
-    options.request ? { request: options.request } : null
-  );
-}
-function endpointWithDefaults(defaults2, route, options) {
-  return parse4(merge2(defaults2, route, options));
-}
-function withDefaults(oldDefaults, newDefaults) {
-  const DEFAULTS2 = merge2(oldDefaults, newDefaults);
-  const endpoint2 = endpointWithDefaults.bind(null, DEFAULTS2);
-  return Object.assign(endpoint2, {
-    DEFAULTS: DEFAULTS2,
-    defaults: withDefaults.bind(null, DEFAULTS2),
-    merge: merge2.bind(null, DEFAULTS2),
-    parse: parse4
-  });
-}
-var endpoint = withDefaults(null, DEFAULTS);
-
-// node_modules/content-type/dist/index.js
-var SP = 32;
-var HTAB = 9;
-var SEMI = 59;
-var EQ = 61;
-var DQUOTE = 34;
-var BSLASH = 92;
-var COMMA = 44;
-var LOWER_CASE = 1;
-var OWS = 2;
-var SEMI_FLAG = 4;
-var COMMA_FLAG = 8;
-var TOKEN_FLAG = 16;
-var NON_ASCII = 65280;
-var CASE_FLAGS = LOWER_CASE | NON_ASCII;
-var CHAR_MAP = new Uint8Array(256);
-CHAR_MAP[HTAB] |= OWS;
-CHAR_MAP[SP] |= OWS;
-CHAR_MAP[SEMI] |= SEMI_FLAG;
-CHAR_MAP[COMMA] |= COMMA_FLAG;
-for (let code = 128; code <= 255; code++) {
-  CHAR_MAP[code] |= LOWER_CASE;
-}
-for (const char of "!#$%&'*+-.^_`|~") {
-  CHAR_MAP[char.charCodeAt(0)] |= TOKEN_FLAG;
-}
-for (let code = 48; code <= 57; code++) {
-  CHAR_MAP[code] |= TOKEN_FLAG;
-}
-for (let code = 65; code <= 90; code++) {
-  CHAR_MAP[code] |= LOWER_CASE | TOKEN_FLAG;
-}
-for (let code = 97; code <= 122; code++) {
-  CHAR_MAP[code] |= TOKEN_FLAG;
-}
-var NullObject = /* @__PURE__ */ (() => {
-  const C = function() {
-  };
-  C.prototype = /* @__PURE__ */ Object.create(null);
-  return C;
-})();
-function parse5(header, options) {
-  const stopFlags = SEMI_FLAG | (options?.comma === true ? COMMA_FLAG : 0);
-  const len = header.length;
-  let valueStart = options?.start ?? 0;
-  while ((CHAR_MAP[header.charCodeAt(valueStart)] & OWS) !== 0) {
-    valueStart++;
-  }
-  let index = valueStart;
-  let typeFlags = 0;
-  let whitespace = -1;
-  let stop = options?.parameters === false ? COMMA_FLAG : 0;
-  while (index < len) {
-    const code = header.charCodeAt(index);
-    const flags = CHAR_MAP[code];
-    if ((flags & stopFlags) !== 0) {
-      stop |= flags & COMMA_FLAG;
-      break;
-    }
-    if ((flags & OWS) !== 0) {
-      if (whitespace === -1)
-        whitespace = index;
-    } else {
-      whitespace = -1;
-    }
-    typeFlags |= code & NON_ASCII | flags;
-    index++;
-  }
-  const valueEnd = whitespace === -1 ? index : whitespace;
-  const value = header.slice(valueStart, valueEnd);
-  const type = (typeFlags & CASE_FLAGS) === 0 ? value : value.toLowerCase();
-  if (index === len || stop !== 0) {
-    return { type, index, parameters: new NullObject() };
-  }
-  return parseParameters(header, type, index, len, stopFlags);
-}
-function parseParameters(header, type, index, len, stopFlags) {
-  const parameters = new NullObject();
-  parameter: while (index < len) {
-    index++;
-    while ((CHAR_MAP[header.charCodeAt(index)] & OWS) !== 0) {
-      index++;
-    }
-    const keyStart = index;
-    let keyFlags = 0;
-    let keyWhitespace = -1;
-    while (index < len) {
-      const code = header.charCodeAt(index);
-      const flags = CHAR_MAP[code];
-      if ((flags & stopFlags) !== 0) {
-        if ((flags & COMMA_FLAG) !== 0)
-          break parameter;
-        continue parameter;
-      }
-      if (code === EQ) {
-        const keyEnd = keyWhitespace === -1 ? index : keyWhitespace;
-        const value = header.slice(keyStart, keyEnd);
-        const key = (keyFlags & CASE_FLAGS) === 0 ? value : value.toLowerCase();
-        index++;
-        while ((CHAR_MAP[header.charCodeAt(index)] & OWS) !== 0) {
-          index++;
-        }
-        if (index < len && header.charCodeAt(index) === DQUOTE) {
-          const quotedStart = ++index;
-          let escaped = false;
-          while (index < len) {
-            const code2 = header.charCodeAt(index);
-            if (code2 === DQUOTE) {
-              if (parameters[key] === void 0) {
-                parameters[key] = escaped ? unescapeQuotedPairs(header, quotedStart, index) : header.slice(quotedStart, index);
-              }
-              index++;
-              let stop2 = 0;
-              while (index < len) {
-                const code3 = header.charCodeAt(index);
-                const flags2 = CHAR_MAP[code3];
-                if ((flags2 & stopFlags) !== 0) {
-                  stop2 = flags2 & COMMA_FLAG;
-                  break;
-                }
-                index++;
-              }
-              if (stop2 !== 0)
-                break parameter;
-              continue parameter;
-            }
-            if (code2 === BSLASH && index + 1 < len) {
-              escaped = true;
-              index += 2;
-              continue;
-            }
-            index++;
-          }
-          continue parameter;
-        }
-        const valueStart = index;
-        let stop = 0;
-        let valueWhitespace = -1;
-        while (index < len) {
-          const code2 = header.charCodeAt(index);
-          const flags2 = CHAR_MAP[code2];
-          if ((flags2 & stopFlags) !== 0) {
-            stop = flags2 & COMMA_FLAG;
-            break;
-          }
-          if ((flags2 & OWS) !== 0) {
-            if (valueWhitespace === -1)
-              valueWhitespace = index;
-          } else {
-            valueWhitespace = -1;
-          }
-          index++;
-        }
-        if (parameters[key] === void 0) {
-          const valueEnd = valueWhitespace === -1 ? index : valueWhitespace;
-          parameters[key] = header.slice(valueStart, valueEnd);
-        }
-        if (stop !== 0)
-          break parameter;
-        continue parameter;
-      }
-      if ((flags & OWS) !== 0) {
-        if (keyWhitespace === -1)
-          keyWhitespace = index;
-      } else {
-        keyWhitespace = -1;
-      }
-      keyFlags |= code & NON_ASCII | flags;
-      index++;
-    }
-  }
-  return { type, index, parameters };
-}
-function unescapeQuotedPairs(str, start, end) {
-  let result = "";
-  for (let index = start; index < end; index++) {
-    if (str.charCodeAt(index) === BSLASH) {
-      result += str.slice(start, index);
-      start = ++index;
-    }
-  }
-  return result + str.slice(start, end);
-}
-
-// node_modules/json-with-bigint/json-with-bigint.js
-var intRegex = /^-?\d+$/;
-var noiseValue = /^-?\d+n+$/;
-var originalStringify = JSON.stringify;
-var originalParse = JSON.parse;
-var customFormat = /^-?\d+n$/;
-var bigIntsStringify = /([\[:])?"(-?\d+)n"($|\s*[,\}\]])/g;
-var noiseStringify = /([\[:])?("-?\d+n+)n("$|"\s*[,\}\]])/g;
-var isUnstringifiable = (val) => val === void 0 || typeof val === "function" || typeof val === "symbol";
-var isRawJSON = (val) => val !== null && typeof val === "object" && val.constructor && val.constructor.name === "RawJSON";
-var stringifyIteratively = (rootValue, replacer, spaceParam) => {
-  let space = "";
-  if (typeof spaceParam === "number") {
-    space = " ".repeat(Math.min(10, Math.max(0, Math.floor(spaceParam))));
-  } else if (typeof spaceParam === "string") {
-    space = spaceParam.slice(0, 10);
-  }
-  const isFunctionReplacer = typeof replacer === "function";
-  const propertyList = Array.isArray(replacer) ? new Set(replacer.map(String)) : null;
-  const prepareVal = (parent, key, val) => {
-    const isObject2 = val !== null && typeof val === "object";
-    const hasToJSON = isObject2 && typeof val.toJSON === "function";
-    if (hasToJSON) {
-      val = val.toJSON(key);
-    }
-    const isNoise = typeof val === "string" && noiseValue.test(val);
-    if (isNoise) return val + "n";
-    const isBigInt = typeof val === "bigint";
-    if (isBigInt) {
-      const supportsRawJSON = "rawJSON" in JSON;
-      if (supportsRawJSON) return JSON.rawJSON(val.toString());
-      return val.toString() + "n";
-    }
-    if (isFunctionReplacer) {
-      val = replacer.call(parent, key, val);
-    }
-    const isPostReplacerObject = val !== null && typeof val === "object";
-    if (isPostReplacerObject) {
-      const isPrimitiveWrapper = val instanceof Number || val instanceof String || val instanceof Boolean;
-      if (isPrimitiveWrapper) {
-        val = val.valueOf();
-      }
-    }
-    return val;
-  };
-  const rootProcessed = prepareVal({ "": rootValue }, "", rootValue);
-  if (isUnstringifiable(rootProcessed)) {
-    return void 0;
-  }
-  const isRootPrimitive = rootProcessed === null || typeof rootProcessed !== "object";
-  const isRootNativeRawJSON = isRawJSON(rootProcessed);
-  if (isRootPrimitive || isRootNativeRawJSON) {
-    return originalStringify(rootProcessed);
-  }
-  const chunks = [];
-  let level = 0;
-  const stack = [
-    {
-      parent: { "": rootProcessed },
-      key: "",
-      val: rootProcessed,
-      isArray: Array.isArray(rootProcessed),
-      keys: Array.isArray(rootProcessed) ? null : Object.keys(rootProcessed),
-      index: 0,
-      first: true
-    }
-  ];
-  const visited = new WeakSet([rootProcessed]);
-  while (stack.length > 0) {
-    const node2 = stack[stack.length - 1];
-    if (node2.index === 0) {
-      chunks.push(node2.isArray ? "[" : "{");
-      level++;
-    }
-    let isDone = false;
-    if (node2.isArray) {
-      if (node2.index < node2.val.length) {
-        if (!node2.first) chunks.push(",");
-        if (space) chunks.push("\n" + space.repeat(level));
-        const childRaw = node2.val[node2.index];
-        const childVal = prepareVal(node2.val, String(node2.index), childRaw);
-        if (isUnstringifiable(childVal)) {
-          chunks.push("null");
-          node2.first = false;
-          node2.index++;
-        } else {
-          const isComplexObject = childVal !== null && typeof childVal === "object";
-          const isNativeRaw = isRawJSON(childVal);
-          if (isComplexObject && !isNativeRaw) {
-            if (visited.has(childVal)) {
-              throw new TypeError("Converting circular structure to JSON");
-            }
-            visited.add(childVal);
-            stack.push({
-              parent: node2.val,
-              key: String(node2.index),
-              val: childVal,
-              isArray: Array.isArray(childVal),
-              keys: Array.isArray(childVal) ? null : Object.keys(childVal),
-              index: 0,
-              first: true
-            });
-            node2.first = false;
-            node2.index++;
-          } else {
-            chunks.push(originalStringify(childVal));
-            node2.first = false;
-            node2.index++;
-          }
-        }
-      } else {
-        isDone = true;
-      }
-    } else {
-      while (node2.index < node2.keys.length) {
-        const k = node2.keys[node2.index++];
-        const isFilteredOutByArray = propertyList && !propertyList.has(k);
-        if (isFilteredOutByArray) continue;
-        const childRaw = node2.val[k];
-        const childVal = prepareVal(node2.val, k, childRaw);
-        if (isUnstringifiable(childVal)) continue;
-        if (!node2.first) chunks.push(",");
-        if (space) {
-          chunks.push("\n" + space.repeat(level) + originalStringify(k) + ": ");
-        } else {
-          chunks.push(originalStringify(k) + ":");
-        }
-        const isComplexObject = childVal !== null && typeof childVal === "object";
-        const isNativeRaw = isRawJSON(childVal);
-        if (isComplexObject && !isNativeRaw) {
-          if (visited.has(childVal)) {
-            throw new TypeError("Converting circular structure to JSON");
-          }
-          visited.add(childVal);
-          stack.push({
-            parent: node2.val,
-            key: k,
-            val: childVal,
-            isArray: Array.isArray(childVal),
-            keys: Array.isArray(childVal) ? null : Object.keys(childVal),
-            index: 0,
-            first: true
-          });
-          node2.first = false;
-          break;
-        } else {
-          chunks.push(originalStringify(childVal));
-          node2.first = false;
-        }
-      }
-      const isNodeFullyProcessed = node2.index >= node2.keys.length && stack[stack.length - 1] === node2;
-      if (isNodeFullyProcessed) {
-        isDone = true;
-      }
-    }
-    if (isDone) {
-      level--;
-      if (!node2.first && space) chunks.push("\n" + space.repeat(level));
-      chunks.push(node2.isArray ? "]" : "}");
-      visited.delete(node2.val);
-      stack.pop();
-    }
-  }
-  return chunks.join("");
-};
-var JSONStringify = (value, replacer, space) => {
-  try {
-    const supportsRawJSON = "rawJSON" in JSON;
-    if (supportsRawJSON) {
-      return originalStringify(
-        value,
-        (key, val) => {
-          if (typeof val === "bigint") return JSON.rawJSON(val.toString());
-          const hasFunctionReplacer = typeof replacer === "function";
-          if (hasFunctionReplacer) return replacer(key, val);
-          const isKeyInArrayReplacer = Array.isArray(replacer) && replacer.includes(key);
-          if (isKeyInArrayReplacer) return val;
-          return val;
-        },
-        space
-      );
-    }
-    if (!value) return originalStringify(value, replacer, space);
-    const convertedToCustomJSON = originalStringify(
-      value,
-      (key, val) => {
-        const isNoise = typeof val === "string" && noiseValue.test(val);
-        if (isNoise) return val.toString() + "n";
-        if (typeof val === "bigint") return val.toString() + "n";
-        const hasFunctionReplacer = typeof replacer === "function";
-        if (hasFunctionReplacer) return replacer(key, val);
-        const isKeyInArrayReplacer = Array.isArray(replacer) && replacer.includes(key);
-        if (isKeyInArrayReplacer) return val;
-        return val;
-      },
-      space
-    );
-    const processedJSON = convertedToCustomJSON.replace(
-      bigIntsStringify,
-      "$1$2$3"
-    );
-    const denoisedJSON = processedJSON.replace(noiseStringify, "$1$2$3");
-    return denoisedJSON;
-  } catch (error62) {
-    if (error62 instanceof RangeError) {
-      const convertedJSON = stringifyIteratively(value, replacer, space);
-      if (convertedJSON === void 0) return void 0;
-      const supportsRawJSON = "rawJSON" in JSON;
-      if (supportsRawJSON) return convertedJSON;
-      const processedJSON = convertedJSON.replace(bigIntsStringify, "$1$2$3");
-      return processedJSON.replace(noiseStringify, "$1$2$3");
-    }
-    throw error62;
-  }
-};
-var featureCache = /* @__PURE__ */ new Map();
-var isContextSourceSupported = () => {
-  const parseFingerprint = JSON.parse.toString();
-  if (featureCache.has(parseFingerprint)) {
-    return featureCache.get(parseFingerprint);
-  }
-  try {
-    const result = JSON.parse(
-      "1",
-      (_, __, context) => !!context?.source && context.source === "1"
-    );
-    featureCache.set(parseFingerprint, result);
-    return result;
-  } catch {
-    featureCache.set(parseFingerprint, false);
-    return false;
-  }
-};
-var convertMarkedBigIntsReviver = (key, value, context, userReviver) => {
-  const isCustomFormatBigInt = typeof value === "string" && customFormat.test(value);
-  if (isCustomFormatBigInt) return BigInt(value.slice(0, -1));
-  const isNoiseValue = typeof value === "string" && noiseValue.test(value);
-  if (isNoiseValue) return value.slice(0, -1);
-  const hasUserReviver = typeof userReviver === "function";
-  if (!hasUserReviver) return value;
-  return userReviver(key, value, context);
-};
-var JSONParseV2 = (text, reviver) => {
-  return JSON.parse(text, (key, value, context) => {
-    const isNumber = typeof value === "number";
-    const isOutOfBounds = value > Number.MAX_SAFE_INTEGER || value < Number.MIN_SAFE_INTEGER;
-    const isBigNumber = isNumber && isOutOfBounds;
-    const isInt = context && intRegex.test(context.source);
-    const isBigInt = isBigNumber && isInt;
-    if (isBigInt) return BigInt(context.source);
-    const hasCustomReviver = typeof reviver === "function";
-    if (!hasCustomReviver) return value;
-    return reviver(key, value, context);
-  });
-};
-var MAX_INT = Number.MAX_SAFE_INTEGER.toString();
-var MAX_DIGITS = MAX_INT.length;
-var stringsOrLargeNumbers = /"(?:[^"\\]|\\.)*"|-?(0|[1-9][0-9]*)(\.[0-9]+)?([eE][+-]?[0-9]+)?/g;
-var noiseValueWithQuotes = /^"-?\d+n+"$/;
-var applyReviverIteratively = (parsed, userReviver) => {
-  const rootHolder = { "": parsed };
-  const stack = [{ parent: rootHolder, key: "", visited: false }];
-  while (stack.length > 0) {
-    const node2 = stack[stack.length - 1];
-    if (!node2.visited) {
-      node2.visited = true;
-      const value = node2.parent[node2.key];
-      const isComplexObject = value !== null && typeof value === "object";
-      if (isComplexObject) {
-        const keys = Object.keys(value);
-        for (let i = keys.length - 1; i >= 0; i--) {
-          stack.push({ parent: value, key: keys[i], visited: false });
-        }
-      }
-    } else {
-      const { parent, key } = node2;
-      let value = parent[key];
-      if (typeof value === "string") {
-        const isCustomFormatBigInt = customFormat.test(value);
-        if (isCustomFormatBigInt) {
-          value = BigInt(value.slice(0, -1));
-        } else {
-          const isNoise = noiseValue.test(value);
-          if (isNoise) value = value.slice(0, -1);
-        }
-      }
-      const hasUserReviver = typeof userReviver === "function";
-      if (hasUserReviver) {
-        value = userReviver.call(parent, key, value);
-      }
-      const isDeleted = value === void 0;
-      if (isDeleted) {
-        delete parent[key];
-      } else {
-        parent[key] = value;
-      }
-      stack.pop();
-    }
-  }
-  return rootHolder[""];
-};
-var serializeBigInts = (text) => {
-  return text.replace(
-    stringsOrLargeNumbers,
-    (match, digits, fractional, exponential) => {
-      const isString = match[0] === '"';
-      const isNoise = isString && noiseValueWithQuotes.test(match);
-      if (isNoise) return match.substring(0, match.length - 1) + 'n"';
-      const hasFractionalOrExponential = fractional || exponential;
-      const isLessThanMaxSafeInt = digits && (digits.length < MAX_DIGITS || digits.length === MAX_DIGITS && digits <= MAX_INT);
-      const isStandardValue = isString || hasFractionalOrExponential || isLessThanMaxSafeInt;
-      if (isStandardValue) return match;
-      return '"' + match + 'n"';
-    }
-  );
-};
-var JSONParse = (text, reviver) => {
-  if (!text) return originalParse(text, reviver);
-  try {
-    if (isContextSourceSupported()) return JSONParseV2(text, reviver);
-    const serializedData = serializeBigInts(text);
-    return originalParse(
-      serializedData,
-      (key, value, context) => convertMarkedBigIntsReviver(key, value, context, reviver)
-    );
-  } catch (error62) {
-    if (error62 instanceof RangeError) {
-      const serializedData = serializeBigInts(text);
-      const parsed = originalParse(serializedData);
-      return applyReviverIteratively(parsed, reviver);
-    }
-    throw error62;
-  }
-};
-
-// node_modules/@octokit/request-error/dist-src/index.js
-var RequestError = class extends Error {
-  name;
-  /**
-   * http status code
-   */
-  status;
-  /**
-   * Request options that lead to the error.
-   */
-  request;
-  /**
-   * Response object if a response was received
-   */
-  response;
-  constructor(message, statusCode, options) {
-    super(message, { cause: options.cause });
-    this.name = "HttpError";
-    this.status = Number.parseInt(statusCode);
-    if (Number.isNaN(this.status)) {
-      this.status = 0;
-    }
-    if ("response" in options) {
-      this.response = options.response;
-    }
-    const requestCopy = Object.assign({}, options.request);
-    if (options.request.headers.authorization) {
-      requestCopy.headers = Object.assign({}, options.request.headers, {
-        authorization: options.request.headers.authorization.replace(
-          /(?<! ) .*$/,
-          " [REDACTED]"
-        )
-      });
-    }
-    requestCopy.url = requestCopy.url.replace(/\bclient_secret=\w+/g, "client_secret=[REDACTED]").replace(/\baccess_token=\w+/g, "access_token=[REDACTED]");
-    this.request = requestCopy;
-  }
-};
-
-// node_modules/@octokit/request/dist-bundle/index.js
-var VERSION3 = "10.0.16";
-var defaults_default = {
-  headers: {
-    "user-agent": `octokit-request.js/${VERSION3} ${getUserAgent()}`
-  }
-};
-function isPlainObject3(value) {
-  if (typeof value !== "object" || value === null) return false;
-  if (Object.prototype.toString.call(value) !== "[object Object]") return false;
-  const proto = Object.getPrototypeOf(value);
-  if (proto === null) return true;
-  const Ctor = Object.prototype.hasOwnProperty.call(proto, "constructor") && proto.constructor;
-  return typeof Ctor === "function" && Ctor instanceof Ctor && Function.prototype.call(Ctor) === Function.prototype.call(value);
-}
-var noop2 = () => "";
-async function fetchWrapper(requestOptions) {
-  const fetch2 = requestOptions.request?.fetch || globalThis.fetch;
-  if (!fetch2) {
-    throw new Error(
-      "fetch is not set. Please pass a fetch implementation as new Octokit({ request: { fetch }}). Learn more at https://github.com/octokit/octokit.js/#fetch-missing"
-    );
-  }
-  const log = requestOptions.request?.log || console;
-  const parseSuccessResponseBody = requestOptions.request?.parseSuccessResponseBody !== false;
-  const body = isPlainObject3(requestOptions.body) || Array.isArray(requestOptions.body) ? JSONStringify(requestOptions.body) : requestOptions.body;
-  const requestHeaders = Object.fromEntries(
-    Object.entries(requestOptions.headers).map(([name, value]) => [
-      name,
-      String(value)
-    ])
-  );
-  let fetchResponse;
-  try {
-    fetchResponse = await fetch2(requestOptions.url, {
-      method: requestOptions.method,
-      body,
-      redirect: requestOptions.request?.redirect,
-      headers: requestHeaders,
-      signal: requestOptions.request?.signal,
-      // duplex must be set if request.body is ReadableStream or Async Iterables.
-      // See https://fetch.spec.whatwg.org/#dom-requestinit-duplex.
-      ...requestOptions.body && { duplex: "half" }
-    });
-  } catch (error62) {
-    let message = "Unknown Error";
-    if (error62 instanceof Error) {
-      if (error62.name === "AbortError") {
-        error62.status = 500;
-        throw error62;
-      }
-      message = error62.message;
-      if (error62.name === "TypeError" && "cause" in error62) {
-        if (error62.cause instanceof Error) {
-          message = error62.cause.message;
-        } else if (typeof error62.cause === "string") {
-          message = error62.cause;
-        }
-      }
-    }
-    const requestError = new RequestError(message, 500, {
-      request: requestOptions
-    });
-    requestError.cause = error62;
-    throw requestError;
-  }
-  const status = fetchResponse.status;
-  const url2 = fetchResponse.url;
-  const responseHeaders = {};
-  for (const [key, value] of fetchResponse.headers) {
-    responseHeaders[key] = value;
-  }
-  const octokitResponse = {
-    url: url2,
-    status,
-    headers: responseHeaders,
-    data: ""
-  };
-  if ("deprecation" in responseHeaders) {
-    const matches = responseHeaders.link && responseHeaders.link.match(/<([^<>]+)>; rel="deprecation"/);
-    const deprecationLink = matches && matches.pop();
-    log.warn(
-      `[@octokit/request] "${requestOptions.method} ${requestOptions.url}" is deprecated. It is scheduled to be removed on ${responseHeaders.sunset}${deprecationLink ? `. See ${deprecationLink}` : ""}`
-    );
-  }
-  if (status === 204 || status === 205) {
-    return octokitResponse;
-  }
-  if (requestOptions.method === "HEAD") {
-    if (status < 400) {
-      return octokitResponse;
-    }
-    throw new RequestError(fetchResponse.statusText, status, {
-      response: octokitResponse,
-      request: requestOptions
-    });
-  }
-  if (status === 304) {
-    octokitResponse.data = await getResponseData(fetchResponse);
-    throw new RequestError("Not modified", status, {
-      response: octokitResponse,
-      request: requestOptions
-    });
-  }
-  if (status >= 400) {
-    octokitResponse.data = await getResponseData(fetchResponse);
-    throw new RequestError(toErrorMessage(octokitResponse.data), status, {
-      response: octokitResponse,
-      request: requestOptions
-    });
-  }
-  octokitResponse.data = parseSuccessResponseBody ? await getResponseData(fetchResponse) : fetchResponse.body;
-  return octokitResponse;
-}
-async function getResponseData(response) {
-  const contentType = response.headers.get("content-type");
-  if (!contentType) {
-    return response.text().catch(noop2);
-  }
-  const mimetype = parse5(contentType);
-  if (isJSONResponse(mimetype)) {
-    let text = "";
-    try {
-      text = await response.text();
-      return JSONParse(text);
-    } catch (err) {
-      return text;
-    }
-  } else if (mimetype.type.startsWith("text/") || // `application/octet-stream` is the canonical "arbitrary binary" type
-  // (RFC 2046) and must never be decoded as text, even when the response
-  // carries a (misleading) `charset=utf-8` parameter — see #751.
-  mimetype.parameters.charset?.toLowerCase() === "utf-8" && mimetype.type !== "application/octet-stream") {
-    return response.text().catch(noop2);
-  } else {
-    return response.arrayBuffer().catch(
-      /* v8 ignore next -- @preserve */
-      () => new ArrayBuffer(0)
-    );
-  }
-}
-function isJSONResponse(mimetype) {
-  return mimetype.type === "application/json" || mimetype.type === "application/scim+json";
-}
-function toErrorMessage(data) {
-  if (typeof data === "string") {
-    return data;
-  }
-  if (data instanceof ArrayBuffer) {
-    return "Unknown error";
-  }
-  if (typeof data === "object" && data !== null && "message" in data) {
-    const objectData = data;
-    const suffix = "documentation_url" in objectData ? ` - ${objectData.documentation_url}` : "";
-    return Array.isArray(objectData.errors) ? `${objectData.message}: ${objectData.errors.map((v) => JSON.stringify(v)).join(", ")}${suffix}` : `${objectData.message}${suffix}`;
-  }
-  return `Unknown error: ${JSON.stringify(data)}`;
-}
-function withDefaults2(oldEndpoint, newDefaults) {
-  const endpoint2 = oldEndpoint.defaults(newDefaults);
-  const newApi = function(route, parameters) {
-    const endpointOptions = endpoint2.merge(route, parameters);
-    if (!endpointOptions.request || !endpointOptions.request.hook) {
-      return fetchWrapper(endpoint2.parse(endpointOptions));
-    }
-    const request2 = (route2, parameters2) => {
-      return fetchWrapper(
-        endpoint2.parse(endpoint2.merge(route2, parameters2))
-      );
-    };
-    Object.assign(request2, {
-      endpoint: endpoint2,
-      defaults: withDefaults2.bind(null, endpoint2)
-    });
-    return endpointOptions.request.hook(request2, endpointOptions);
-  };
-  return Object.assign(newApi, {
-    endpoint: endpoint2,
-    defaults: withDefaults2.bind(null, endpoint2)
-  });
-}
-var request = withDefaults2(endpoint, defaults_default);
-
-// node_modules/@octokit/graphql/dist-bundle/index.js
-var VERSION4 = "0.0.0-development";
-function _buildMessageForResponseErrors(data) {
-  return `Request failed due to following response errors:
-` + data.errors.map((e) => ` - ${e.message}`).join("\n");
-}
-var GraphqlResponseError = class extends Error {
-  constructor(request2, headers, response) {
-    super(_buildMessageForResponseErrors(response));
-    this.request = request2;
-    this.headers = headers;
-    this.response = response;
-    this.errors = response.errors;
-    this.data = response.data;
-    if (Error.captureStackTrace) {
-      Error.captureStackTrace(this, this.constructor);
-    }
-  }
-  request;
-  headers;
-  response;
-  name = "GraphqlResponseError";
-  errors;
-  data;
-};
-var NON_VARIABLE_OPTIONS = [
-  "method",
-  "baseUrl",
-  "url",
-  "headers",
-  "request",
-  "query",
-  "mediaType",
-  "operationName"
-];
-var FORBIDDEN_VARIABLE_OPTIONS = ["query", "method", "url"];
-var GHES_V3_SUFFIX_REGEX = /\/api\/v3\/?$/;
-function graphql(request2, query, options) {
-  if (options) {
-    if (typeof query === "string" && "query" in options) {
-      return Promise.reject(
-        new Error(`[@octokit/graphql] "query" cannot be used as variable name`)
-      );
-    }
-    for (const key in options) {
-      if (!FORBIDDEN_VARIABLE_OPTIONS.includes(key)) continue;
-      return Promise.reject(
-        new Error(
-          `[@octokit/graphql] "${key}" cannot be used as variable name`
-        )
-      );
-    }
-  }
-  const parsedOptions = typeof query === "string" ? Object.assign({ query }, options) : query;
-  const requestOptions = Object.keys(
-    parsedOptions
-  ).reduce((result, key) => {
-    if (NON_VARIABLE_OPTIONS.includes(key)) {
-      result[key] = parsedOptions[key];
-      return result;
-    }
-    if (!result.variables) {
-      result.variables = {};
-    }
-    result.variables[key] = parsedOptions[key];
-    return result;
-  }, {});
-  const baseUrl = parsedOptions.baseUrl || request2.endpoint.DEFAULTS.baseUrl;
-  if (GHES_V3_SUFFIX_REGEX.test(baseUrl)) {
-    requestOptions.url = baseUrl.replace(GHES_V3_SUFFIX_REGEX, "/api/graphql");
-  }
-  return request2(requestOptions).then((response) => {
-    if (response.data.errors) {
-      const headers = {};
-      for (const key of Object.keys(response.headers)) {
-        headers[key] = response.headers[key];
-      }
-      throw new GraphqlResponseError(
-        requestOptions,
-        headers,
-        response.data
-      );
-    }
-    return response.data.data;
-  });
-}
-function withDefaults3(request2, newDefaults) {
-  const newRequest = request2.defaults(newDefaults);
-  const newApi = (query, options) => {
-    return graphql(newRequest, query, options);
-  };
-  return Object.assign(newApi, {
-    defaults: withDefaults3.bind(null, newRequest),
-    endpoint: newRequest.endpoint
-  });
-}
-var graphql2 = withDefaults3(request, {
-  headers: {
-    "user-agent": `octokit-graphql.js/${VERSION4} ${getUserAgent()}`
-  },
-  method: "POST",
-  url: "/graphql"
-});
-function withCustomRequest(customRequest) {
-  return withDefaults3(customRequest, {
-    method: "POST",
-    url: "/graphql"
-  });
-}
-
-// node_modules/@octokit/auth-token/dist-bundle/index.js
-var b64url = "(?:[a-zA-Z0-9_-]+)";
-var sep2 = "\\.";
-var jwtRE = new RegExp(`^${b64url}${sep2}${b64url}${sep2}${b64url}$`);
-var isJWT = jwtRE.test.bind(jwtRE);
-async function auth(token) {
-  const isApp = isJWT(token);
-  const isInstallation = token.startsWith("v1.") || token.startsWith("ghs_");
-  const isUserToServer = token.startsWith("ghu_");
-  const tokenType = isApp ? "app" : isInstallation ? "installation" : isUserToServer ? "user-to-server" : "oauth";
-  return {
-    type: "token",
-    token,
-    tokenType
-  };
-}
-function withAuthorizationPrefix(token) {
-  if (token.split(/\./).length === 3) {
-    return `bearer ${token}`;
-  }
-  return `token ${token}`;
-}
-async function hook(token, request2, route, parameters) {
-  const endpoint2 = request2.endpoint.merge(
-    route,
-    parameters
-  );
-  endpoint2.headers.authorization = withAuthorizationPrefix(token);
-  return request2(endpoint2);
-}
-var createTokenAuth = function createTokenAuth2(token) {
-  if (!token) {
-    throw new Error("[@octokit/auth-token] No token passed to createTokenAuth");
-  }
-  if (typeof token !== "string") {
-    throw new Error(
-      "[@octokit/auth-token] Token passed to createTokenAuth is not a string"
-    );
-  }
-  token = token.replace(/^(token|bearer) +/i, "");
-  return Object.assign(auth.bind(null, token), {
-    hook: hook.bind(null, token)
-  });
-};
-
-// node_modules/@octokit/core/dist-src/version.js
-var VERSION5 = "7.0.8";
-
-// node_modules/@octokit/core/dist-src/index.js
-var noop3 = () => {
-};
-var consoleWarn = console.warn.bind(console);
-var consoleError = console.error.bind(console);
-function createLogger(logger = {}) {
-  if (typeof logger.debug !== "function") {
-    logger.debug = noop3;
-  }
-  if (typeof logger.info !== "function") {
-    logger.info = noop3;
-  }
-  if (typeof logger.warn !== "function") {
-    logger.warn = consoleWarn;
-  }
-  if (typeof logger.error !== "function") {
-    logger.error = consoleError;
-  }
-  return logger;
-}
-var userAgentTrail = `octokit-core.js/${VERSION5} ${getUserAgent()}`;
-var Octokit = class {
-  static VERSION = VERSION5;
-  static defaults(defaults2) {
-    const OctokitWithDefaults = class extends this {
-      constructor(...args) {
-        const options = args[0] || {};
-        if (typeof defaults2 === "function") {
-          super(defaults2(options));
-          return;
-        }
-        super(
-          Object.assign(
-            {},
-            defaults2,
-            options,
-            options.userAgent && defaults2.userAgent ? {
-              userAgent: `${options.userAgent} ${defaults2.userAgent}`
-            } : null
-          )
-        );
-      }
-    };
-    return OctokitWithDefaults;
-  }
-  static plugins = [];
-  /**
-   * Attach a plugin (or many) to your Octokit instance.
-   *
-   * @example
-   * const API = Octokit.plugin(plugin1, plugin2, plugin3, ...)
-   */
-  static plugin(...newPlugins) {
-    const currentPlugins = this.plugins;
-    const NewOctokit = class extends this {
-      static plugins = currentPlugins.concat(
-        newPlugins.filter((plugin) => !currentPlugins.includes(plugin))
-      );
-    };
-    return NewOctokit;
-  }
-  constructor(options = {}) {
-    const hook2 = new before_after_hook_default.Collection();
-    const requestDefaults = {
-      baseUrl: request.endpoint.DEFAULTS.baseUrl,
-      headers: {},
-      request: Object.assign({}, options.request, {
-        // @ts-ignore internal usage only, no need to type
-        hook: hook2.bind(null, "request")
-      }),
-      mediaType: {
-        previews: [],
-        format: ""
-      }
-    };
-    requestDefaults.headers["user-agent"] = options.userAgent ? `${options.userAgent} ${userAgentTrail}` : userAgentTrail;
-    if (options.baseUrl) {
-      requestDefaults.baseUrl = options.baseUrl;
-    }
-    if (options.previews) {
-      requestDefaults.mediaType.previews = options.previews;
-    }
-    if (options.timeZone) {
-      requestDefaults.headers["time-zone"] = options.timeZone;
-    }
-    this.request = request.defaults(requestDefaults);
-    this.graphql = withCustomRequest(this.request).defaults(requestDefaults);
-    this.log = createLogger(options.log);
-    this.hook = hook2;
-    if (!options.authStrategy) {
-      if (!options.auth) {
-        this.auth = async () => ({
-          type: "unauthenticated"
-        });
-      } else {
-        const auth2 = createTokenAuth(options.auth);
-        hook2.wrap("request", auth2.hook);
-        this.auth = auth2;
-      }
-    } else {
-      const { authStrategy, ...otherOptions } = options;
-      const auth2 = authStrategy(
-        Object.assign(
-          {
-            request: this.request,
-            log: this.log,
-            // we pass the current octokit instance as well as its constructor options
-            // to allow for authentication strategies that return a new octokit instance
-            // that shares the same internal state as the current one. The original
-            // requirement for this was the "event-octokit" authentication strategy
-            // of https://github.com/probot/octokit-auth-probot.
-            octokit: this,
-            octokitOptions: otherOptions
-          },
-          options.auth
-        )
-      );
-      hook2.wrap("request", auth2.hook);
-      this.auth = auth2;
-    }
-    const classConstructor = this.constructor;
-    for (let i = 0; i < classConstructor.plugins.length; ++i) {
-      Object.assign(this, classConstructor.plugins[i](this, options));
-    }
-  }
-  // assigned during constructor
-  request;
-  graphql;
-  log;
-  hook;
-  // TODO: type `octokit.auth` based on passed options.authStrategy
-  auth;
-};
-
-// node_modules/@octokit/plugin-request-log/dist-src/version.js
-var VERSION6 = "6.0.0";
-
-// node_modules/@octokit/plugin-request-log/dist-src/index.js
-function requestLog(octokit) {
-  octokit.hook.wrap("request", (request2, options) => {
-    octokit.log.debug("request", options);
-    const start = Date.now();
-    const requestOptions = octokit.request.endpoint.parse(options);
-    const path3 = requestOptions.url.replace(options.baseUrl, "");
-    return request2(options).then((response) => {
-      const requestId = response.headers["x-github-request-id"];
-      octokit.log.info(
-        `${requestOptions.method} ${path3} - ${response.status} with id ${requestId} in ${Date.now() - start}ms`
-      );
-      return response;
-    }).catch((error62) => {
-      const requestId = error62.response?.headers["x-github-request-id"] || "UNKNOWN";
-      octokit.log.error(
-        `${requestOptions.method} ${path3} - ${error62.status} with id ${requestId} in ${Date.now() - start}ms`
-      );
-      throw error62;
-    });
-  });
-}
-requestLog.VERSION = VERSION6;
-
-// node_modules/@octokit/plugin-paginate-rest/dist-bundle/index.js
-var VERSION7 = "0.0.0-development";
-function normalizePaginatedListResponse(response) {
-  if (!response.data) {
-    return {
-      ...response,
-      data: []
-    };
-  }
-  const responseNeedsNormalization = ("total_count" in response.data || "total_commits" in response.data) && !("url" in response.data);
-  if (!responseNeedsNormalization) return response;
-  const incompleteResults = response.data.incomplete_results;
-  const repositorySelection = response.data.repository_selection;
-  const totalCount = response.data.total_count;
-  const totalCommits = response.data.total_commits;
-  delete response.data.incomplete_results;
-  delete response.data.repository_selection;
-  delete response.data.total_count;
-  delete response.data.total_commits;
-  const namespaceKey = Object.keys(response.data)[0];
-  const data = response.data[namespaceKey];
-  response.data = data;
-  if (typeof incompleteResults !== "undefined") {
-    response.data.incomplete_results = incompleteResults;
-  }
-  if (typeof repositorySelection !== "undefined") {
-    response.data.repository_selection = repositorySelection;
-  }
-  response.data.total_count = totalCount;
-  response.data.total_commits = totalCommits;
-  return response;
-}
-function iterator(octokit, route, parameters) {
-  const options = typeof route === "function" ? route.endpoint(parameters) : octokit.request.endpoint(route, parameters);
-  const requestMethod = typeof route === "function" ? route : octokit.request;
-  const method = options.method;
-  const headers = options.headers;
-  let url2 = options.url;
-  return {
-    [Symbol.asyncIterator]: () => ({
-      async next() {
-        if (!url2) return { done: true };
-        try {
-          const response = await requestMethod({ method, url: url2, headers });
-          const normalizedResponse = normalizePaginatedListResponse(response);
-          url2 = ((normalizedResponse.headers.link || "").match(
-            /<([^<>]+)>;\s*rel="next"/
-          ) || [])[1];
-          if (!url2 && "total_commits" in normalizedResponse.data) {
-            const parsedUrl = new URL(normalizedResponse.url);
-            const params = parsedUrl.searchParams;
-            const page = parseInt(params.get("page") || "1", 10);
-            const per_page = parseInt(params.get("per_page") || "250", 10);
-            if (page * per_page < normalizedResponse.data.total_commits) {
-              params.set("page", String(page + 1));
-              url2 = parsedUrl.toString();
-            }
-          }
-          return { value: normalizedResponse };
-        } catch (error62) {
-          if (error62.status !== 409) throw error62;
-          url2 = "";
-          return {
-            value: {
-              status: 200,
-              headers: {},
-              data: []
-            }
-          };
-        }
-      }
-    })
-  };
-}
-function paginate(octokit, route, parameters, mapFn) {
-  if (typeof parameters === "function") {
-    mapFn = parameters;
-    parameters = void 0;
-  }
-  return gather(
-    octokit,
-    [],
-    iterator(octokit, route, parameters)[Symbol.asyncIterator](),
-    mapFn
-  );
-}
-function gather(octokit, results, iterator2, mapFn) {
-  return iterator2.next().then((result) => {
-    if (result.done) {
-      return results;
-    }
-    let earlyExit = false;
-    function done() {
-      earlyExit = true;
-    }
-    results = results.concat(
-      mapFn ? mapFn(result.value, done) : result.value.data
-    );
-    if (earlyExit) {
-      return results;
-    }
-    return gather(octokit, results, iterator2, mapFn);
-  });
-}
-var composePaginateRest = Object.assign(paginate, {
-  iterator
-});
-function paginateRest(octokit) {
-  return {
-    paginate: Object.assign(paginate.bind(null, octokit), {
-      iterator: iterator.bind(null, octokit)
-    })
-  };
-}
-paginateRest.VERSION = VERSION7;
-
-// node_modules/@octokit/plugin-rest-endpoint-methods/dist-src/version.js
-var VERSION8 = "17.0.0";
-
-// node_modules/@octokit/plugin-rest-endpoint-methods/dist-src/generated/endpoints.js
-var Endpoints = {
-  actions: {
-    addCustomLabelsToSelfHostedRunnerForOrg: [
-      "POST /orgs/{org}/actions/runners/{runner_id}/labels"
-    ],
-    addCustomLabelsToSelfHostedRunnerForRepo: [
-      "POST /repos/{owner}/{repo}/actions/runners/{runner_id}/labels"
-    ],
-    addRepoAccessToSelfHostedRunnerGroupInOrg: [
-      "PUT /orgs/{org}/actions/runner-groups/{runner_group_id}/repositories/{repository_id}"
-    ],
-    addSelectedRepoToOrgSecret: [
-      "PUT /orgs/{org}/actions/secrets/{secret_name}/repositories/{repository_id}"
-    ],
-    addSelectedRepoToOrgVariable: [
-      "PUT /orgs/{org}/actions/variables/{name}/repositories/{repository_id}"
-    ],
-    approveWorkflowRun: [
-      "POST /repos/{owner}/{repo}/actions/runs/{run_id}/approve"
-    ],
-    cancelWorkflowRun: [
-      "POST /repos/{owner}/{repo}/actions/runs/{run_id}/cancel"
-    ],
-    createEnvironmentVariable: [
-      "POST /repos/{owner}/{repo}/environments/{environment_name}/variables"
-    ],
-    createHostedRunnerForOrg: ["POST /orgs/{org}/actions/hosted-runners"],
-    createOrUpdateEnvironmentSecret: [
-      "PUT /repos/{owner}/{repo}/environments/{environment_name}/secrets/{secret_name}"
-    ],
-    createOrUpdateOrgSecret: ["PUT /orgs/{org}/actions/secrets/{secret_name}"],
-    createOrUpdateRepoSecret: [
-      "PUT /repos/{owner}/{repo}/actions/secrets/{secret_name}"
-    ],
-    createOrgVariable: ["POST /orgs/{org}/actions/variables"],
-    createRegistrationTokenForOrg: [
-      "POST /orgs/{org}/actions/runners/registration-token"
-    ],
-    createRegistrationTokenForRepo: [
-      "POST /repos/{owner}/{repo}/actions/runners/registration-token"
-    ],
-    createRemoveTokenForOrg: ["POST /orgs/{org}/actions/runners/remove-token"],
-    createRemoveTokenForRepo: [
-      "POST /repos/{owner}/{repo}/actions/runners/remove-token"
-    ],
-    createRepoVariable: ["POST /repos/{owner}/{repo}/actions/variables"],
-    createWorkflowDispatch: [
-      "POST /repos/{owner}/{repo}/actions/workflows/{workflow_id}/dispatches"
-    ],
-    deleteActionsCacheById: [
-      "DELETE /repos/{owner}/{repo}/actions/caches/{cache_id}"
-    ],
-    deleteActionsCacheByKey: [
-      "DELETE /repos/{owner}/{repo}/actions/caches{?key,ref}"
-    ],
-    deleteArtifact: [
-      "DELETE /repos/{owner}/{repo}/actions/artifacts/{artifact_id}"
-    ],
-    deleteCustomImageFromOrg: [
-      "DELETE /orgs/{org}/actions/hosted-runners/images/custom/{image_definition_id}"
-    ],
-    deleteCustomImageVersionFromOrg: [
-      "DELETE /orgs/{org}/actions/hosted-runners/images/custom/{image_definition_id}/versions/{version}"
-    ],
-    deleteEnvironmentSecret: [
-      "DELETE /repos/{owner}/{repo}/environments/{environment_name}/secrets/{secret_name}"
-    ],
-    deleteEnvironmentVariable: [
-      "DELETE /repos/{owner}/{repo}/environments/{environment_name}/variables/{name}"
-    ],
-    deleteHostedRunnerForOrg: [
-      "DELETE /orgs/{org}/actions/hosted-runners/{hosted_runner_id}"
-    ],
-    deleteOrgSecret: ["DELETE /orgs/{org}/actions/secrets/{secret_name}"],
-    deleteOrgVariable: ["DELETE /orgs/{org}/actions/variables/{name}"],
-    deleteRepoSecret: [
-      "DELETE /repos/{owner}/{repo}/actions/secrets/{secret_name}"
-    ],
-    deleteRepoVariable: [
-      "DELETE /repos/{owner}/{repo}/actions/variables/{name}"
-    ],
-    deleteSelfHostedRunnerFromOrg: [
-      "DELETE /orgs/{org}/actions/runners/{runner_id}"
-    ],
-    deleteSelfHostedRunnerFromRepo: [
-      "DELETE /repos/{owner}/{repo}/actions/runners/{runner_id}"
-    ],
-    deleteWorkflowRun: ["DELETE /repos/{owner}/{repo}/actions/runs/{run_id}"],
-    deleteWorkflowRunLogs: [
-      "DELETE /repos/{owner}/{repo}/actions/runs/{run_id}/logs"
-    ],
-    disableSelectedRepositoryGithubActionsOrganization: [
-      "DELETE /orgs/{org}/actions/permissions/repositories/{repository_id}"
-    ],
-    disableWorkflow: [
-      "PUT /repos/{owner}/{repo}/actions/workflows/{workflow_id}/disable"
-    ],
-    downloadArtifact: [
-      "GET /repos/{owner}/{repo}/actions/artifacts/{artifact_id}/{archive_format}"
-    ],
-    downloadJobLogsForWorkflowRun: [
-      "GET /repos/{owner}/{repo}/actions/jobs/{job_id}/logs"
-    ],
-    downloadWorkflowRunAttemptLogs: [
-      "GET /repos/{owner}/{repo}/actions/runs/{run_id}/attempts/{attempt_number}/logs"
-    ],
-    downloadWorkflowRunLogs: [
-      "GET /repos/{owner}/{repo}/actions/runs/{run_id}/logs"
-    ],
-    enableSelectedRepositoryGithubActionsOrganization: [
-      "PUT /orgs/{org}/actions/permissions/repositories/{repository_id}"
-    ],
-    enableWorkflow: [
-      "PUT /repos/{owner}/{repo}/actions/workflows/{workflow_id}/enable"
-    ],
-    forceCancelWorkflowRun: [
-      "POST /repos/{owner}/{repo}/actions/runs/{run_id}/force-cancel"
-    ],
-    generateRunnerJitconfigForOrg: [
-      "POST /orgs/{org}/actions/runners/generate-jitconfig"
-    ],
-    generateRunnerJitconfigForRepo: [
-      "POST /repos/{owner}/{repo}/actions/runners/generate-jitconfig"
-    ],
-    getActionsCacheList: ["GET /repos/{owner}/{repo}/actions/caches"],
-    getActionsCacheUsage: ["GET /repos/{owner}/{repo}/actions/cache/usage"],
-    getActionsCacheUsageByRepoForOrg: [
-      "GET /orgs/{org}/actions/cache/usage-by-repository"
-    ],
-    getActionsCacheUsageForOrg: ["GET /orgs/{org}/actions/cache/usage"],
-    getAllowedActionsOrganization: [
-      "GET /orgs/{org}/actions/permissions/selected-actions"
-    ],
-    getAllowedActionsRepository: [
-      "GET /repos/{owner}/{repo}/actions/permissions/selected-actions"
-    ],
-    getArtifact: ["GET /repos/{owner}/{repo}/actions/artifacts/{artifact_id}"],
-    getCustomImageForOrg: [
-      "GET /orgs/{org}/actions/hosted-runners/images/custom/{image_definition_id}"
-    ],
-    getCustomImageVersionForOrg: [
-      "GET /orgs/{org}/actions/hosted-runners/images/custom/{image_definition_id}/versions/{version}"
-    ],
-    getCustomOidcSubClaimForRepo: [
-      "GET /repos/{owner}/{repo}/actions/oidc/customization/sub"
-    ],
-    getEnvironmentPublicKey: [
-      "GET /repos/{owner}/{repo}/environments/{environment_name}/secrets/public-key"
-    ],
-    getEnvironmentSecret: [
-      "GET /repos/{owner}/{repo}/environments/{environment_name}/secrets/{secret_name}"
-    ],
-    getEnvironmentVariable: [
-      "GET /repos/{owner}/{repo}/environments/{environment_name}/variables/{name}"
-    ],
-    getGithubActionsDefaultWorkflowPermissionsOrganization: [
-      "GET /orgs/{org}/actions/permissions/workflow"
-    ],
-    getGithubActionsDefaultWorkflowPermissionsRepository: [
-      "GET /repos/{owner}/{repo}/actions/permissions/workflow"
-    ],
-    getGithubActionsPermissionsOrganization: [
-      "GET /orgs/{org}/actions/permissions"
-    ],
-    getGithubActionsPermissionsRepository: [
-      "GET /repos/{owner}/{repo}/actions/permissions"
-    ],
-    getHostedRunnerForOrg: [
-      "GET /orgs/{org}/actions/hosted-runners/{hosted_runner_id}"
-    ],
-    getHostedRunnersGithubOwnedImagesForOrg: [
-      "GET /orgs/{org}/actions/hosted-runners/images/github-owned"
-    ],
-    getHostedRunnersLimitsForOrg: [
-      "GET /orgs/{org}/actions/hosted-runners/limits"
-    ],
-    getHostedRunnersMachineSpecsForOrg: [
-      "GET /orgs/{org}/actions/hosted-runners/machine-sizes"
-    ],
-    getHostedRunnersPartnerImagesForOrg: [
-      "GET /orgs/{org}/actions/hosted-runners/images/partner"
-    ],
-    getHostedRunnersPlatformsForOrg: [
-      "GET /orgs/{org}/actions/hosted-runners/platforms"
-    ],
-    getJobForWorkflowRun: ["GET /repos/{owner}/{repo}/actions/jobs/{job_id}"],
-    getOrgPublicKey: ["GET /orgs/{org}/actions/secrets/public-key"],
-    getOrgSecret: ["GET /orgs/{org}/actions/secrets/{secret_name}"],
-    getOrgVariable: ["GET /orgs/{org}/actions/variables/{name}"],
-    getPendingDeploymentsForRun: [
-      "GET /repos/{owner}/{repo}/actions/runs/{run_id}/pending_deployments"
-    ],
-    getRepoPermissions: [
-      "GET /repos/{owner}/{repo}/actions/permissions",
-      {},
-      { renamed: ["actions", "getGithubActionsPermissionsRepository"] }
-    ],
-    getRepoPublicKey: ["GET /repos/{owner}/{repo}/actions/secrets/public-key"],
-    getRepoSecret: ["GET /repos/{owner}/{repo}/actions/secrets/{secret_name}"],
-    getRepoVariable: ["GET /repos/{owner}/{repo}/actions/variables/{name}"],
-    getReviewsForRun: [
-      "GET /repos/{owner}/{repo}/actions/runs/{run_id}/approvals"
-    ],
-    getSelfHostedRunnerForOrg: ["GET /orgs/{org}/actions/runners/{runner_id}"],
-    getSelfHostedRunnerForRepo: [
-      "GET /repos/{owner}/{repo}/actions/runners/{runner_id}"
-    ],
-    getWorkflow: ["GET /repos/{owner}/{repo}/actions/workflows/{workflow_id}"],
-    getWorkflowAccessToRepository: [
-      "GET /repos/{owner}/{repo}/actions/permissions/access"
-    ],
-    getWorkflowRun: ["GET /repos/{owner}/{repo}/actions/runs/{run_id}"],
-    getWorkflowRunAttempt: [
-      "GET /repos/{owner}/{repo}/actions/runs/{run_id}/attempts/{attempt_number}"
-    ],
-    getWorkflowRunUsage: [
-      "GET /repos/{owner}/{repo}/actions/runs/{run_id}/timing"
-    ],
-    getWorkflowUsage: [
-      "GET /repos/{owner}/{repo}/actions/workflows/{workflow_id}/timing"
-    ],
-    listArtifactsForRepo: ["GET /repos/{owner}/{repo}/actions/artifacts"],
-    listCustomImageVersionsForOrg: [
-      "GET /orgs/{org}/actions/hosted-runners/images/custom/{image_definition_id}/versions"
-    ],
-    listCustomImagesForOrg: [
-      "GET /orgs/{org}/actions/hosted-runners/images/custom"
-    ],
-    listEnvironmentSecrets: [
-      "GET /repos/{owner}/{repo}/environments/{environment_name}/secrets"
-    ],
-    listEnvironmentVariables: [
-      "GET /repos/{owner}/{repo}/environments/{environment_name}/variables"
-    ],
-    listGithubHostedRunnersInGroupForOrg: [
-      "GET /orgs/{org}/actions/runner-groups/{runner_group_id}/hosted-runners"
-    ],
-    listHostedRunnersForOrg: ["GET /orgs/{org}/actions/hosted-runners"],
-    listJobsForWorkflowRun: [
-      "GET /repos/{owner}/{repo}/actions/runs/{run_id}/jobs"
-    ],
-    listJobsForWorkflowRunAttempt: [
-      "GET /repos/{owner}/{repo}/actions/runs/{run_id}/attempts/{attempt_number}/jobs"
-    ],
-    listLabelsForSelfHostedRunnerForOrg: [
-      "GET /orgs/{org}/actions/runners/{runner_id}/labels"
-    ],
-    listLabelsForSelfHostedRunnerForRepo: [
-      "GET /repos/{owner}/{repo}/actions/runners/{runner_id}/labels"
-    ],
-    listOrgSecrets: ["GET /orgs/{org}/actions/secrets"],
-    listOrgVariables: ["GET /orgs/{org}/actions/variables"],
-    listRepoOrganizationSecrets: [
-      "GET /repos/{owner}/{repo}/actions/organization-secrets"
-    ],
-    listRepoOrganizationVariables: [
-      "GET /repos/{owner}/{repo}/actions/organization-variables"
-    ],
-    listRepoSecrets: ["GET /repos/{owner}/{repo}/actions/secrets"],
-    listRepoVariables: ["GET /repos/{owner}/{repo}/actions/variables"],
-    listRepoWorkflows: ["GET /repos/{owner}/{repo}/actions/workflows"],
-    listRunnerApplicationsForOrg: ["GET /orgs/{org}/actions/runners/downloads"],
-    listRunnerApplicationsForRepo: [
-      "GET /repos/{owner}/{repo}/actions/runners/downloads"
-    ],
-    listSelectedReposForOrgSecret: [
-      "GET /orgs/{org}/actions/secrets/{secret_name}/repositories"
-    ],
-    listSelectedReposForOrgVariable: [
-      "GET /orgs/{org}/actions/variables/{name}/repositories"
-    ],
-    listSelectedRepositoriesEnabledGithubActionsOrganization: [
-      "GET /orgs/{org}/actions/permissions/repositories"
-    ],
-    listSelfHostedRunnersForOrg: ["GET /orgs/{org}/actions/runners"],
-    listSelfHostedRunnersForRepo: ["GET /repos/{owner}/{repo}/actions/runners"],
-    listWorkflowRunArtifacts: [
-      "GET /repos/{owner}/{repo}/actions/runs/{run_id}/artifacts"
-    ],
-    listWorkflowRuns: [
-      "GET /repos/{owner}/{repo}/actions/workflows/{workflow_id}/runs"
-    ],
-    listWorkflowRunsForRepo: ["GET /repos/{owner}/{repo}/actions/runs"],
-    reRunJobForWorkflowRun: [
-      "POST /repos/{owner}/{repo}/actions/jobs/{job_id}/rerun"
-    ],
-    reRunWorkflow: ["POST /repos/{owner}/{repo}/actions/runs/{run_id}/rerun"],
-    reRunWorkflowFailedJobs: [
-      "POST /repos/{owner}/{repo}/actions/runs/{run_id}/rerun-failed-jobs"
-    ],
-    removeAllCustomLabelsFromSelfHostedRunnerForOrg: [
-      "DELETE /orgs/{org}/actions/runners/{runner_id}/labels"
-    ],
-    removeAllCustomLabelsFromSelfHostedRunnerForRepo: [
-      "DELETE /repos/{owner}/{repo}/actions/runners/{runner_id}/labels"
-    ],
-    removeCustomLabelFromSelfHostedRunnerForOrg: [
-      "DELETE /orgs/{org}/actions/runners/{runner_id}/labels/{name}"
-    ],
-    removeCustomLabelFromSelfHostedRunnerForRepo: [
-      "DELETE /repos/{owner}/{repo}/actions/runners/{runner_id}/labels/{name}"
-    ],
-    removeSelectedRepoFromOrgSecret: [
-      "DELETE /orgs/{org}/actions/secrets/{secret_name}/repositories/{repository_id}"
-    ],
-    removeSelectedRepoFromOrgVariable: [
-      "DELETE /orgs/{org}/actions/variables/{name}/repositories/{repository_id}"
-    ],
-    reviewCustomGatesForRun: [
-      "POST /repos/{owner}/{repo}/actions/runs/{run_id}/deployment_protection_rule"
-    ],
-    reviewPendingDeploymentsForRun: [
-      "POST /repos/{owner}/{repo}/actions/runs/{run_id}/pending_deployments"
-    ],
-    setAllowedActionsOrganization: [
-      "PUT /orgs/{org}/actions/permissions/selected-actions"
-    ],
-    setAllowedActionsRepository: [
-      "PUT /repos/{owner}/{repo}/actions/permissions/selected-actions"
-    ],
-    setCustomLabelsForSelfHostedRunnerForOrg: [
-      "PUT /orgs/{org}/actions/runners/{runner_id}/labels"
-    ],
-    setCustomLabelsForSelfHostedRunnerForRepo: [
-      "PUT /repos/{owner}/{repo}/actions/runners/{runner_id}/labels"
-    ],
-    setCustomOidcSubClaimForRepo: [
-      "PUT /repos/{owner}/{repo}/actions/oidc/customization/sub"
-    ],
-    setGithubActionsDefaultWorkflowPermissionsOrganization: [
-      "PUT /orgs/{org}/actions/permissions/workflow"
-    ],
-    setGithubActionsDefaultWorkflowPermissionsRepository: [
-      "PUT /repos/{owner}/{repo}/actions/permissions/workflow"
-    ],
-    setGithubActionsPermissionsOrganization: [
-      "PUT /orgs/{org}/actions/permissions"
-    ],
-    setGithubActionsPermissionsRepository: [
-      "PUT /repos/{owner}/{repo}/actions/permissions"
-    ],
-    setSelectedReposForOrgSecret: [
-      "PUT /orgs/{org}/actions/secrets/{secret_name}/repositories"
-    ],
-    setSelectedReposForOrgVariable: [
-      "PUT /orgs/{org}/actions/variables/{name}/repositories"
-    ],
-    setSelectedRepositoriesEnabledGithubActionsOrganization: [
-      "PUT /orgs/{org}/actions/permissions/repositories"
-    ],
-    setWorkflowAccessToRepository: [
-      "PUT /repos/{owner}/{repo}/actions/permissions/access"
-    ],
-    updateEnvironmentVariable: [
-      "PATCH /repos/{owner}/{repo}/environments/{environment_name}/variables/{name}"
-    ],
-    updateHostedRunnerForOrg: [
-      "PATCH /orgs/{org}/actions/hosted-runners/{hosted_runner_id}"
-    ],
-    updateOrgVariable: ["PATCH /orgs/{org}/actions/variables/{name}"],
-    updateRepoVariable: [
-      "PATCH /repos/{owner}/{repo}/actions/variables/{name}"
-    ]
-  },
-  activity: {
-    checkRepoIsStarredByAuthenticatedUser: ["GET /user/starred/{owner}/{repo}"],
-    deleteRepoSubscription: ["DELETE /repos/{owner}/{repo}/subscription"],
-    deleteThreadSubscription: [
-      "DELETE /notifications/threads/{thread_id}/subscription"
-    ],
-    getFeeds: ["GET /feeds"],
-    getRepoSubscription: ["GET /repos/{owner}/{repo}/subscription"],
-    getThread: ["GET /notifications/threads/{thread_id}"],
-    getThreadSubscriptionForAuthenticatedUser: [
-      "GET /notifications/threads/{thread_id}/subscription"
-    ],
-    listEventsForAuthenticatedUser: ["GET /users/{username}/events"],
-    listNotificationsForAuthenticatedUser: ["GET /notifications"],
-    listOrgEventsForAuthenticatedUser: [
-      "GET /users/{username}/events/orgs/{org}"
-    ],
-    listPublicEvents: ["GET /events"],
-    listPublicEventsForRepoNetwork: ["GET /networks/{owner}/{repo}/events"],
-    listPublicEventsForUser: ["GET /users/{username}/events/public"],
-    listPublicOrgEvents: ["GET /orgs/{org}/events"],
-    listReceivedEventsForUser: ["GET /users/{username}/received_events"],
-    listReceivedPublicEventsForUser: [
-      "GET /users/{username}/received_events/public"
-    ],
-    listRepoEvents: ["GET /repos/{owner}/{repo}/events"],
-    listRepoNotificationsForAuthenticatedUser: [
-      "GET /repos/{owner}/{repo}/notifications"
-    ],
-    listReposStarredByAuthenticatedUser: ["GET /user/starred"],
-    listReposStarredByUser: ["GET /users/{username}/starred"],
-    listReposWatchedByUser: ["GET /users/{username}/subscriptions"],
-    listStargazersForRepo: ["GET /repos/{owner}/{repo}/stargazers"],
-    listWatchedReposForAuthenticatedUser: ["GET /user/subscriptions"],
-    listWatchersForRepo: ["GET /repos/{owner}/{repo}/subscribers"],
-    markNotificationsAsRead: ["PUT /notifications"],
-    markRepoNotificationsAsRead: ["PUT /repos/{owner}/{repo}/notifications"],
-    markThreadAsDone: ["DELETE /notifications/threads/{thread_id}"],
-    markThreadAsRead: ["PATCH /notifications/threads/{thread_id}"],
-    setRepoSubscription: ["PUT /repos/{owner}/{repo}/subscription"],
-    setThreadSubscription: [
-      "PUT /notifications/threads/{thread_id}/subscription"
-    ],
-    starRepoForAuthenticatedUser: ["PUT /user/starred/{owner}/{repo}"],
-    unstarRepoForAuthenticatedUser: ["DELETE /user/starred/{owner}/{repo}"]
-  },
-  apps: {
-    addRepoToInstallation: [
-      "PUT /user/installations/{installation_id}/repositories/{repository_id}",
-      {},
-      { renamed: ["apps", "addRepoToInstallationForAuthenticatedUser"] }
-    ],
-    addRepoToInstallationForAuthenticatedUser: [
-      "PUT /user/installations/{installation_id}/repositories/{repository_id}"
-    ],
-    checkToken: ["POST /applications/{client_id}/token"],
-    createFromManifest: ["POST /app-manifests/{code}/conversions"],
-    createInstallationAccessToken: [
-      "POST /app/installations/{installation_id}/access_tokens"
-    ],
-    deleteAuthorization: ["DELETE /applications/{client_id}/grant"],
-    deleteInstallation: ["DELETE /app/installations/{installation_id}"],
-    deleteToken: ["DELETE /applications/{client_id}/token"],
-    getAuthenticated: ["GET /app"],
-    getBySlug: ["GET /apps/{app_slug}"],
-    getInstallation: ["GET /app/installations/{installation_id}"],
-    getOrgInstallation: ["GET /orgs/{org}/installation"],
-    getRepoInstallation: ["GET /repos/{owner}/{repo}/installation"],
-    getSubscriptionPlanForAccount: [
-      "GET /marketplace_listing/accounts/{account_id}"
-    ],
-    getSubscriptionPlanForAccountStubbed: [
-      "GET /marketplace_listing/stubbed/accounts/{account_id}"
-    ],
-    getUserInstallation: ["GET /users/{username}/installation"],
-    getWebhookConfigForApp: ["GET /app/hook/config"],
-    getWebhookDelivery: ["GET /app/hook/deliveries/{delivery_id}"],
-    listAccountsForPlan: ["GET /marketplace_listing/plans/{plan_id}/accounts"],
-    listAccountsForPlanStubbed: [
-      "GET /marketplace_listing/stubbed/plans/{plan_id}/accounts"
-    ],
-    listInstallationReposForAuthenticatedUser: [
-      "GET /user/installations/{installation_id}/repositories"
-    ],
-    listInstallationRequestsForAuthenticatedApp: [
-      "GET /app/installation-requests"
-    ],
-    listInstallations: ["GET /app/installations"],
-    listInstallationsForAuthenticatedUser: ["GET /user/installations"],
-    listPlans: ["GET /marketplace_listing/plans"],
-    listPlansStubbed: ["GET /marketplace_listing/stubbed/plans"],
-    listReposAccessibleToInstallation: ["GET /installation/repositories"],
-    listSubscriptionsForAuthenticatedUser: ["GET /user/marketplace_purchases"],
-    listSubscriptionsForAuthenticatedUserStubbed: [
-      "GET /user/marketplace_purchases/stubbed"
-    ],
-    listWebhookDeliveries: ["GET /app/hook/deliveries"],
-    redeliverWebhookDelivery: [
-      "POST /app/hook/deliveries/{delivery_id}/attempts"
-    ],
-    removeRepoFromInstallation: [
-      "DELETE /user/installations/{installation_id}/repositories/{repository_id}",
-      {},
-      { renamed: ["apps", "removeRepoFromInstallationForAuthenticatedUser"] }
-    ],
-    removeRepoFromInstallationForAuthenticatedUser: [
-      "DELETE /user/installations/{installation_id}/repositories/{repository_id}"
-    ],
-    resetToken: ["PATCH /applications/{client_id}/token"],
-    revokeInstallationAccessToken: ["DELETE /installation/token"],
-    scopeToken: ["POST /applications/{client_id}/token/scoped"],
-    suspendInstallation: ["PUT /app/installations/{installation_id}/suspended"],
-    unsuspendInstallation: [
-      "DELETE /app/installations/{installation_id}/suspended"
-    ],
-    updateWebhookConfigForApp: ["PATCH /app/hook/config"]
-  },
-  billing: {
-    getGithubActionsBillingOrg: ["GET /orgs/{org}/settings/billing/actions"],
-    getGithubActionsBillingUser: [
-      "GET /users/{username}/settings/billing/actions"
-    ],
-    getGithubBillingPremiumRequestUsageReportOrg: [
-      "GET /organizations/{org}/settings/billing/premium_request/usage"
-    ],
-    getGithubBillingPremiumRequestUsageReportUser: [
-      "GET /users/{username}/settings/billing/premium_request/usage"
-    ],
-    getGithubBillingUsageReportOrg: [
-      "GET /organizations/{org}/settings/billing/usage"
-    ],
-    getGithubBillingUsageReportUser: [
-      "GET /users/{username}/settings/billing/usage"
-    ],
-    getGithubPackagesBillingOrg: ["GET /orgs/{org}/settings/billing/packages"],
-    getGithubPackagesBillingUser: [
-      "GET /users/{username}/settings/billing/packages"
-    ],
-    getSharedStorageBillingOrg: [
-      "GET /orgs/{org}/settings/billing/shared-storage"
-    ],
-    getSharedStorageBillingUser: [
-      "GET /users/{username}/settings/billing/shared-storage"
-    ]
-  },
-  campaigns: {
-    createCampaign: ["POST /orgs/{org}/campaigns"],
-    deleteCampaign: ["DELETE /orgs/{org}/campaigns/{campaign_number}"],
-    getCampaignSummary: ["GET /orgs/{org}/campaigns/{campaign_number}"],
-    listOrgCampaigns: ["GET /orgs/{org}/campaigns"],
-    updateCampaign: ["PATCH /orgs/{org}/campaigns/{campaign_number}"]
-  },
-  checks: {
-    create: ["POST /repos/{owner}/{repo}/check-runs"],
-    createSuite: ["POST /repos/{owner}/{repo}/check-suites"],
-    get: ["GET /repos/{owner}/{repo}/check-runs/{check_run_id}"],
-    getSuite: ["GET /repos/{owner}/{repo}/check-suites/{check_suite_id}"],
-    listAnnotations: [
-      "GET /repos/{owner}/{repo}/check-runs/{check_run_id}/annotations"
-    ],
-    listForRef: ["GET /repos/{owner}/{repo}/commits/{ref}/check-runs"],
-    listForSuite: [
-      "GET /repos/{owner}/{repo}/check-suites/{check_suite_id}/check-runs"
-    ],
-    listSuitesForRef: ["GET /repos/{owner}/{repo}/commits/{ref}/check-suites"],
-    rerequestRun: [
-      "POST /repos/{owner}/{repo}/check-runs/{check_run_id}/rerequest"
-    ],
-    rerequestSuite: [
-      "POST /repos/{owner}/{repo}/check-suites/{check_suite_id}/rerequest"
-    ],
-    setSuitesPreferences: [
-      "PATCH /repos/{owner}/{repo}/check-suites/preferences"
-    ],
-    update: ["PATCH /repos/{owner}/{repo}/check-runs/{check_run_id}"]
-  },
-  codeScanning: {
-    commitAutofix: [
-      "POST /repos/{owner}/{repo}/code-scanning/alerts/{alert_number}/autofix/commits"
-    ],
-    createAutofix: [
-      "POST /repos/{owner}/{repo}/code-scanning/alerts/{alert_number}/autofix"
-    ],
-    createVariantAnalysis: [
-      "POST /repos/{owner}/{repo}/code-scanning/codeql/variant-analyses"
-    ],
-    deleteAnalysis: [
-      "DELETE /repos/{owner}/{repo}/code-scanning/analyses/{analysis_id}{?confirm_delete}"
-    ],
-    deleteCodeqlDatabase: [
-      "DELETE /repos/{owner}/{repo}/code-scanning/codeql/databases/{language}"
-    ],
-    getAlert: [
-      "GET /repos/{owner}/{repo}/code-scanning/alerts/{alert_number}",
-      {},
-      { renamedParameters: { alert_id: "alert_number" } }
-    ],
-    getAnalysis: [
-      "GET /repos/{owner}/{repo}/code-scanning/analyses/{analysis_id}"
-    ],
-    getAutofix: [
-      "GET /repos/{owner}/{repo}/code-scanning/alerts/{alert_number}/autofix"
-    ],
-    getCodeqlDatabase: [
-      "GET /repos/{owner}/{repo}/code-scanning/codeql/databases/{language}"
-    ],
-    getDefaultSetup: ["GET /repos/{owner}/{repo}/code-scanning/default-setup"],
-    getSarif: ["GET /repos/{owner}/{repo}/code-scanning/sarifs/{sarif_id}"],
-    getVariantAnalysis: [
-      "GET /repos/{owner}/{repo}/code-scanning/codeql/variant-analyses/{codeql_variant_analysis_id}"
-    ],
-    getVariantAnalysisRepoTask: [
-      "GET /repos/{owner}/{repo}/code-scanning/codeql/variant-analyses/{codeql_variant_analysis_id}/repos/{repo_owner}/{repo_name}"
-    ],
-    listAlertInstances: [
-      "GET /repos/{owner}/{repo}/code-scanning/alerts/{alert_number}/instances"
-    ],
-    listAlertsForOrg: ["GET /orgs/{org}/code-scanning/alerts"],
-    listAlertsForRepo: ["GET /repos/{owner}/{repo}/code-scanning/alerts"],
-    listAlertsInstances: [
-      "GET /repos/{owner}/{repo}/code-scanning/alerts/{alert_number}/instances",
-      {},
-      { renamed: ["codeScanning", "listAlertInstances"] }
-    ],
-    listCodeqlDatabases: [
-      "GET /repos/{owner}/{repo}/code-scanning/codeql/databases"
-    ],
-    listRecentAnalyses: ["GET /repos/{owner}/{repo}/code-scanning/analyses"],
-    updateAlert: [
-      "PATCH /repos/{owner}/{repo}/code-scanning/alerts/{alert_number}"
-    ],
-    updateDefaultSetup: [
-      "PATCH /repos/{owner}/{repo}/code-scanning/default-setup"
-    ],
-    uploadSarif: ["POST /repos/{owner}/{repo}/code-scanning/sarifs"]
-  },
-  codeSecurity: {
-    attachConfiguration: [
-      "POST /orgs/{org}/code-security/configurations/{configuration_id}/attach"
-    ],
-    attachEnterpriseConfiguration: [
-      "POST /enterprises/{enterprise}/code-security/configurations/{configuration_id}/attach"
-    ],
-    createConfiguration: ["POST /orgs/{org}/code-security/configurations"],
-    createConfigurationForEnterprise: [
-      "POST /enterprises/{enterprise}/code-security/configurations"
-    ],
-    deleteConfiguration: [
-      "DELETE /orgs/{org}/code-security/configurations/{configuration_id}"
-    ],
-    deleteConfigurationForEnterprise: [
-      "DELETE /enterprises/{enterprise}/code-security/configurations/{configuration_id}"
-    ],
-    detachConfiguration: [
-      "DELETE /orgs/{org}/code-security/configurations/detach"
-    ],
-    getConfiguration: [
-      "GET /orgs/{org}/code-security/configurations/{configuration_id}"
-    ],
-    getConfigurationForRepository: [
-      "GET /repos/{owner}/{repo}/code-security-configuration"
-    ],
-    getConfigurationsForEnterprise: [
-      "GET /enterprises/{enterprise}/code-security/configurations"
-    ],
-    getConfigurationsForOrg: ["GET /orgs/{org}/code-security/configurations"],
-    getDefaultConfigurations: [
-      "GET /orgs/{org}/code-security/configurations/defaults"
-    ],
-    getDefaultConfigurationsForEnterprise: [
-      "GET /enterprises/{enterprise}/code-security/configurations/defaults"
-    ],
-    getRepositoriesForConfiguration: [
-      "GET /orgs/{org}/code-security/configurations/{configuration_id}/repositories"
-    ],
-    getRepositoriesForEnterpriseConfiguration: [
-      "GET /enterprises/{enterprise}/code-security/configurations/{configuration_id}/repositories"
-    ],
-    getSingleConfigurationForEnterprise: [
-      "GET /enterprises/{enterprise}/code-security/configurations/{configuration_id}"
-    ],
-    setConfigurationAsDefault: [
-      "PUT /orgs/{org}/code-security/configurations/{configuration_id}/defaults"
-    ],
-    setConfigurationAsDefaultForEnterprise: [
-      "PUT /enterprises/{enterprise}/code-security/configurations/{configuration_id}/defaults"
-    ],
-    updateConfiguration: [
-      "PATCH /orgs/{org}/code-security/configurations/{configuration_id}"
-    ],
-    updateEnterpriseConfiguration: [
-      "PATCH /enterprises/{enterprise}/code-security/configurations/{configuration_id}"
-    ]
-  },
-  codesOfConduct: {
-    getAllCodesOfConduct: ["GET /codes_of_conduct"],
-    getConductCode: ["GET /codes_of_conduct/{key}"]
-  },
-  codespaces: {
-    addRepositoryForSecretForAuthenticatedUser: [
-      "PUT /user/codespaces/secrets/{secret_name}/repositories/{repository_id}"
-    ],
-    addSelectedRepoToOrgSecret: [
-      "PUT /orgs/{org}/codespaces/secrets/{secret_name}/repositories/{repository_id}"
-    ],
-    checkPermissionsForDevcontainer: [
-      "GET /repos/{owner}/{repo}/codespaces/permissions_check"
-    ],
-    codespaceMachinesForAuthenticatedUser: [
-      "GET /user/codespaces/{codespace_name}/machines"
-    ],
-    createForAuthenticatedUser: ["POST /user/codespaces"],
-    createOrUpdateOrgSecret: [
-      "PUT /orgs/{org}/codespaces/secrets/{secret_name}"
-    ],
-    createOrUpdateRepoSecret: [
-      "PUT /repos/{owner}/{repo}/codespaces/secrets/{secret_name}"
-    ],
-    createOrUpdateSecretForAuthenticatedUser: [
-      "PUT /user/codespaces/secrets/{secret_name}"
-    ],
-    createWithPrForAuthenticatedUser: [
-      "POST /repos/{owner}/{repo}/pulls/{pull_number}/codespaces"
-    ],
-    createWithRepoForAuthenticatedUser: [
-      "POST /repos/{owner}/{repo}/codespaces"
-    ],
-    deleteForAuthenticatedUser: ["DELETE /user/codespaces/{codespace_name}"],
-    deleteFromOrganization: [
-      "DELETE /orgs/{org}/members/{username}/codespaces/{codespace_name}"
-    ],
-    deleteOrgSecret: ["DELETE /orgs/{org}/codespaces/secrets/{secret_name}"],
-    deleteRepoSecret: [
-      "DELETE /repos/{owner}/{repo}/codespaces/secrets/{secret_name}"
-    ],
-    deleteSecretForAuthenticatedUser: [
-      "DELETE /user/codespaces/secrets/{secret_name}"
-    ],
-    exportForAuthenticatedUser: [
-      "POST /user/codespaces/{codespace_name}/exports"
-    ],
-    getCodespacesForUserInOrg: [
-      "GET /orgs/{org}/members/{username}/codespaces"
-    ],
-    getExportDetailsForAuthenticatedUser: [
-      "GET /user/codespaces/{codespace_name}/exports/{export_id}"
-    ],
-    getForAuthenticatedUser: ["GET /user/codespaces/{codespace_name}"],
-    getOrgPublicKey: ["GET /orgs/{org}/codespaces/secrets/public-key"],
-    getOrgSecret: ["GET /orgs/{org}/codespaces/secrets/{secret_name}"],
-    getPublicKeyForAuthenticatedUser: [
-      "GET /user/codespaces/secrets/public-key"
-    ],
-    getRepoPublicKey: [
-      "GET /repos/{owner}/{repo}/codespaces/secrets/public-key"
-    ],
-    getRepoSecret: [
-      "GET /repos/{owner}/{repo}/codespaces/secrets/{secret_name}"
-    ],
-    getSecretForAuthenticatedUser: [
-      "GET /user/codespaces/secrets/{secret_name}"
-    ],
-    listDevcontainersInRepositoryForAuthenticatedUser: [
-      "GET /repos/{owner}/{repo}/codespaces/devcontainers"
-    ],
-    listForAuthenticatedUser: ["GET /user/codespaces"],
-    listInOrganization: [
-      "GET /orgs/{org}/codespaces",
-      {},
-      { renamedParameters: { org_id: "org" } }
-    ],
-    listInRepositoryForAuthenticatedUser: [
-      "GET /repos/{owner}/{repo}/codespaces"
-    ],
-    listOrgSecrets: ["GET /orgs/{org}/codespaces/secrets"],
-    listRepoSecrets: ["GET /repos/{owner}/{repo}/codespaces/secrets"],
-    listRepositoriesForSecretForAuthenticatedUser: [
-      "GET /user/codespaces/secrets/{secret_name}/repositories"
-    ],
-    listSecretsForAuthenticatedUser: ["GET /user/codespaces/secrets"],
-    listSelectedReposForOrgSecret: [
-      "GET /orgs/{org}/codespaces/secrets/{secret_name}/repositories"
-    ],
-    preFlightWithRepoForAuthenticatedUser: [
-      "GET /repos/{owner}/{repo}/codespaces/new"
-    ],
-    publishForAuthenticatedUser: [
-      "POST /user/codespaces/{codespace_name}/publish"
-    ],
-    removeRepositoryForSecretForAuthenticatedUser: [
-      "DELETE /user/codespaces/secrets/{secret_name}/repositories/{repository_id}"
-    ],
-    removeSelectedRepoFromOrgSecret: [
-      "DELETE /orgs/{org}/codespaces/secrets/{secret_name}/repositories/{repository_id}"
-    ],
-    repoMachinesForAuthenticatedUser: [
-      "GET /repos/{owner}/{repo}/codespaces/machines"
-    ],
-    setRepositoriesForSecretForAuthenticatedUser: [
-      "PUT /user/codespaces/secrets/{secret_name}/repositories"
-    ],
-    setSelectedReposForOrgSecret: [
-      "PUT /orgs/{org}/codespaces/secrets/{secret_name}/repositories"
-    ],
-    startForAuthenticatedUser: ["POST /user/codespaces/{codespace_name}/start"],
-    stopForAuthenticatedUser: ["POST /user/codespaces/{codespace_name}/stop"],
-    stopInOrganization: [
-      "POST /orgs/{org}/members/{username}/codespaces/{codespace_name}/stop"
-    ],
-    updateForAuthenticatedUser: ["PATCH /user/codespaces/{codespace_name}"]
-  },
-  copilot: {
-    addCopilotSeatsForTeams: [
-      "POST /orgs/{org}/copilot/billing/selected_teams"
-    ],
-    addCopilotSeatsForUsers: [
-      "POST /orgs/{org}/copilot/billing/selected_users"
-    ],
-    cancelCopilotSeatAssignmentForTeams: [
-      "DELETE /orgs/{org}/copilot/billing/selected_teams"
-    ],
-    cancelCopilotSeatAssignmentForUsers: [
-      "DELETE /orgs/{org}/copilot/billing/selected_users"
-    ],
-    copilotMetricsForOrganization: ["GET /orgs/{org}/copilot/metrics"],
-    copilotMetricsForTeam: ["GET /orgs/{org}/team/{team_slug}/copilot/metrics"],
-    getCopilotOrganizationDetails: ["GET /orgs/{org}/copilot/billing"],
-    getCopilotSeatDetailsForUser: [
-      "GET /orgs/{org}/members/{username}/copilot"
-    ],
-    listCopilotSeats: ["GET /orgs/{org}/copilot/billing/seats"]
-  },
-  credentials: { revoke: ["POST /credentials/revoke"] },
-  dependabot: {
-    addSelectedRepoToOrgSecret: [
-      "PUT /orgs/{org}/dependabot/secrets/{secret_name}/repositories/{repository_id}"
-    ],
-    createOrUpdateOrgSecret: [
-      "PUT /orgs/{org}/dependabot/secrets/{secret_name}"
-    ],
-    createOrUpdateRepoSecret: [
-      "PUT /repos/{owner}/{repo}/dependabot/secrets/{secret_name}"
-    ],
-    deleteOrgSecret: ["DELETE /orgs/{org}/dependabot/secrets/{secret_name}"],
-    deleteRepoSecret: [
-      "DELETE /repos/{owner}/{repo}/dependabot/secrets/{secret_name}"
-    ],
-    getAlert: ["GET /repos/{owner}/{repo}/dependabot/alerts/{alert_number}"],
-    getOrgPublicKey: ["GET /orgs/{org}/dependabot/secrets/public-key"],
-    getOrgSecret: ["GET /orgs/{org}/dependabot/secrets/{secret_name}"],
-    getRepoPublicKey: [
-      "GET /repos/{owner}/{repo}/dependabot/secrets/public-key"
-    ],
-    getRepoSecret: [
-      "GET /repos/{owner}/{repo}/dependabot/secrets/{secret_name}"
-    ],
-    listAlertsForEnterprise: [
-      "GET /enterprises/{enterprise}/dependabot/alerts"
-    ],
-    listAlertsForOrg: ["GET /orgs/{org}/dependabot/alerts"],
-    listAlertsForRepo: ["GET /repos/{owner}/{repo}/dependabot/alerts"],
-    listOrgSecrets: ["GET /orgs/{org}/dependabot/secrets"],
-    listRepoSecrets: ["GET /repos/{owner}/{repo}/dependabot/secrets"],
-    listSelectedReposForOrgSecret: [
-      "GET /orgs/{org}/dependabot/secrets/{secret_name}/repositories"
-    ],
-    removeSelectedRepoFromOrgSecret: [
-      "DELETE /orgs/{org}/dependabot/secrets/{secret_name}/repositories/{repository_id}"
-    ],
-    repositoryAccessForOrg: [
-      "GET /organizations/{org}/dependabot/repository-access"
-    ],
-    setRepositoryAccessDefaultLevel: [
-      "PUT /organizations/{org}/dependabot/repository-access/default-level"
-    ],
-    setSelectedReposForOrgSecret: [
-      "PUT /orgs/{org}/dependabot/secrets/{secret_name}/repositories"
-    ],
-    updateAlert: [
-      "PATCH /repos/{owner}/{repo}/dependabot/alerts/{alert_number}"
-    ],
-    updateRepositoryAccessForOrg: [
-      "PATCH /organizations/{org}/dependabot/repository-access"
-    ]
-  },
-  dependencyGraph: {
-    createRepositorySnapshot: [
-      "POST /repos/{owner}/{repo}/dependency-graph/snapshots"
-    ],
-    diffRange: [
-      "GET /repos/{owner}/{repo}/dependency-graph/compare/{basehead}"
-    ],
-    exportSbom: ["GET /repos/{owner}/{repo}/dependency-graph/sbom"]
-  },
-  emojis: { get: ["GET /emojis"] },
-  enterpriseTeamMemberships: {
-    add: [
-      "PUT /enterprises/{enterprise}/teams/{enterprise-team}/memberships/{username}"
-    ],
-    bulkAdd: [
-      "POST /enterprises/{enterprise}/teams/{enterprise-team}/memberships/add"
-    ],
-    bulkRemove: [
-      "POST /enterprises/{enterprise}/teams/{enterprise-team}/memberships/remove"
-    ],
-    get: [
-      "GET /enterprises/{enterprise}/teams/{enterprise-team}/memberships/{username}"
-    ],
-    list: ["GET /enterprises/{enterprise}/teams/{enterprise-team}/memberships"],
-    remove: [
-      "DELETE /enterprises/{enterprise}/teams/{enterprise-team}/memberships/{username}"
-    ]
-  },
-  enterpriseTeamOrganizations: {
-    add: [
-      "PUT /enterprises/{enterprise}/teams/{enterprise-team}/organizations/{org}"
-    ],
-    bulkAdd: [
-      "POST /enterprises/{enterprise}/teams/{enterprise-team}/organizations/add"
-    ],
-    bulkRemove: [
-      "POST /enterprises/{enterprise}/teams/{enterprise-team}/organizations/remove"
-    ],
-    delete: [
-      "DELETE /enterprises/{enterprise}/teams/{enterprise-team}/organizations/{org}"
-    ],
-    getAssignment: [
-      "GET /enterprises/{enterprise}/teams/{enterprise-team}/organizations/{org}"
-    ],
-    getAssignments: [
-      "GET /enterprises/{enterprise}/teams/{enterprise-team}/organizations"
-    ]
-  },
-  enterpriseTeams: {
-    create: ["POST /enterprises/{enterprise}/teams"],
-    delete: ["DELETE /enterprises/{enterprise}/teams/{team_slug}"],
-    get: ["GET /enterprises/{enterprise}/teams/{team_slug}"],
-    list: ["GET /enterprises/{enterprise}/teams"],
-    update: ["PATCH /enterprises/{enterprise}/teams/{team_slug}"]
-  },
-  gists: {
-    checkIsStarred: ["GET /gists/{gist_id}/star"],
-    create: ["POST /gists"],
-    createComment: ["POST /gists/{gist_id}/comments"],
-    delete: ["DELETE /gists/{gist_id}"],
-    deleteComment: ["DELETE /gists/{gist_id}/comments/{comment_id}"],
-    fork: ["POST /gists/{gist_id}/forks"],
-    get: ["GET /gists/{gist_id}"],
-    getComment: ["GET /gists/{gist_id}/comments/{comment_id}"],
-    getRevision: ["GET /gists/{gist_id}/{sha}"],
-    list: ["GET /gists"],
-    listComments: ["GET /gists/{gist_id}/comments"],
-    listCommits: ["GET /gists/{gist_id}/commits"],
-    listForUser: ["GET /users/{username}/gists"],
-    listForks: ["GET /gists/{gist_id}/forks"],
-    listPublic: ["GET /gists/public"],
-    listStarred: ["GET /gists/starred"],
-    star: ["PUT /gists/{gist_id}/star"],
-    unstar: ["DELETE /gists/{gist_id}/star"],
-    update: ["PATCH /gists/{gist_id}"],
-    updateComment: ["PATCH /gists/{gist_id}/comments/{comment_id}"]
-  },
-  git: {
-    createBlob: ["POST /repos/{owner}/{repo}/git/blobs"],
-    createCommit: ["POST /repos/{owner}/{repo}/git/commits"],
-    createRef: ["POST /repos/{owner}/{repo}/git/refs"],
-    createTag: ["POST /repos/{owner}/{repo}/git/tags"],
-    createTree: ["POST /repos/{owner}/{repo}/git/trees"],
-    deleteRef: ["DELETE /repos/{owner}/{repo}/git/refs/{ref}"],
-    getBlob: ["GET /repos/{owner}/{repo}/git/blobs/{file_sha}"],
-    getCommit: ["GET /repos/{owner}/{repo}/git/commits/{commit_sha}"],
-    getRef: ["GET /repos/{owner}/{repo}/git/ref/{ref}"],
-    getTag: ["GET /repos/{owner}/{repo}/git/tags/{tag_sha}"],
-    getTree: ["GET /repos/{owner}/{repo}/git/trees/{tree_sha}"],
-    listMatchingRefs: ["GET /repos/{owner}/{repo}/git/matching-refs/{ref}"],
-    updateRef: ["PATCH /repos/{owner}/{repo}/git/refs/{ref}"]
-  },
-  gitignore: {
-    getAllTemplates: ["GET /gitignore/templates"],
-    getTemplate: ["GET /gitignore/templates/{name}"]
-  },
-  hostedCompute: {
-    createNetworkConfigurationForOrg: [
-      "POST /orgs/{org}/settings/network-configurations"
-    ],
-    deleteNetworkConfigurationFromOrg: [
-      "DELETE /orgs/{org}/settings/network-configurations/{network_configuration_id}"
-    ],
-    getNetworkConfigurationForOrg: [
-      "GET /orgs/{org}/settings/network-configurations/{network_configuration_id}"
-    ],
-    getNetworkSettingsForOrg: [
-      "GET /orgs/{org}/settings/network-settings/{network_settings_id}"
-    ],
-    listNetworkConfigurationsForOrg: [
-      "GET /orgs/{org}/settings/network-configurations"
-    ],
-    updateNetworkConfigurationForOrg: [
-      "PATCH /orgs/{org}/settings/network-configurations/{network_configuration_id}"
-    ]
-  },
-  interactions: {
-    getRestrictionsForAuthenticatedUser: ["GET /user/interaction-limits"],
-    getRestrictionsForOrg: ["GET /orgs/{org}/interaction-limits"],
-    getRestrictionsForRepo: ["GET /repos/{owner}/{repo}/interaction-limits"],
-    getRestrictionsForYourPublicRepos: [
-      "GET /user/interaction-limits",
-      {},
-      { renamed: ["interactions", "getRestrictionsForAuthenticatedUser"] }
-    ],
-    removeRestrictionsForAuthenticatedUser: ["DELETE /user/interaction-limits"],
-    removeRestrictionsForOrg: ["DELETE /orgs/{org}/interaction-limits"],
-    removeRestrictionsForRepo: [
-      "DELETE /repos/{owner}/{repo}/interaction-limits"
-    ],
-    removeRestrictionsForYourPublicRepos: [
-      "DELETE /user/interaction-limits",
-      {},
-      { renamed: ["interactions", "removeRestrictionsForAuthenticatedUser"] }
-    ],
-    setRestrictionsForAuthenticatedUser: ["PUT /user/interaction-limits"],
-    setRestrictionsForOrg: ["PUT /orgs/{org}/interaction-limits"],
-    setRestrictionsForRepo: ["PUT /repos/{owner}/{repo}/interaction-limits"],
-    setRestrictionsForYourPublicRepos: [
-      "PUT /user/interaction-limits",
-      {},
-      { renamed: ["interactions", "setRestrictionsForAuthenticatedUser"] }
-    ]
-  },
-  issues: {
-    addAssignees: [
-      "POST /repos/{owner}/{repo}/issues/{issue_number}/assignees"
-    ],
-    addBlockedByDependency: [
-      "POST /repos/{owner}/{repo}/issues/{issue_number}/dependencies/blocked_by"
-    ],
-    addLabels: ["POST /repos/{owner}/{repo}/issues/{issue_number}/labels"],
-    addSubIssue: [
-      "POST /repos/{owner}/{repo}/issues/{issue_number}/sub_issues"
-    ],
-    checkUserCanBeAssigned: ["GET /repos/{owner}/{repo}/assignees/{assignee}"],
-    checkUserCanBeAssignedToIssue: [
-      "GET /repos/{owner}/{repo}/issues/{issue_number}/assignees/{assignee}"
-    ],
-    create: ["POST /repos/{owner}/{repo}/issues"],
-    createComment: [
-      "POST /repos/{owner}/{repo}/issues/{issue_number}/comments"
-    ],
-    createLabel: ["POST /repos/{owner}/{repo}/labels"],
-    createMilestone: ["POST /repos/{owner}/{repo}/milestones"],
-    deleteComment: [
-      "DELETE /repos/{owner}/{repo}/issues/comments/{comment_id}"
-    ],
-    deleteLabel: ["DELETE /repos/{owner}/{repo}/labels/{name}"],
-    deleteMilestone: [
-      "DELETE /repos/{owner}/{repo}/milestones/{milestone_number}"
-    ],
-    get: ["GET /repos/{owner}/{repo}/issues/{issue_number}"],
-    getComment: ["GET /repos/{owner}/{repo}/issues/comments/{comment_id}"],
-    getEvent: ["GET /repos/{owner}/{repo}/issues/events/{event_id}"],
-    getLabel: ["GET /repos/{owner}/{repo}/labels/{name}"],
-    getMilestone: ["GET /repos/{owner}/{repo}/milestones/{milestone_number}"],
-    getParent: ["GET /repos/{owner}/{repo}/issues/{issue_number}/parent"],
-    list: ["GET /issues"],
-    listAssignees: ["GET /repos/{owner}/{repo}/assignees"],
-    listComments: ["GET /repos/{owner}/{repo}/issues/{issue_number}/comments"],
-    listCommentsForRepo: ["GET /repos/{owner}/{repo}/issues/comments"],
-    listDependenciesBlockedBy: [
-      "GET /repos/{owner}/{repo}/issues/{issue_number}/dependencies/blocked_by"
-    ],
-    listDependenciesBlocking: [
-      "GET /repos/{owner}/{repo}/issues/{issue_number}/dependencies/blocking"
-    ],
-    listEvents: ["GET /repos/{owner}/{repo}/issues/{issue_number}/events"],
-    listEventsForRepo: ["GET /repos/{owner}/{repo}/issues/events"],
-    listEventsForTimeline: [
-      "GET /repos/{owner}/{repo}/issues/{issue_number}/timeline"
-    ],
-    listForAuthenticatedUser: ["GET /user/issues"],
-    listForOrg: ["GET /orgs/{org}/issues"],
-    listForRepo: ["GET /repos/{owner}/{repo}/issues"],
-    listLabelsForMilestone: [
-      "GET /repos/{owner}/{repo}/milestones/{milestone_number}/labels"
-    ],
-    listLabelsForRepo: ["GET /repos/{owner}/{repo}/labels"],
-    listLabelsOnIssue: [
-      "GET /repos/{owner}/{repo}/issues/{issue_number}/labels"
-    ],
-    listMilestones: ["GET /repos/{owner}/{repo}/milestones"],
-    listSubIssues: [
-      "GET /repos/{owner}/{repo}/issues/{issue_number}/sub_issues"
-    ],
-    lock: ["PUT /repos/{owner}/{repo}/issues/{issue_number}/lock"],
-    removeAllLabels: [
-      "DELETE /repos/{owner}/{repo}/issues/{issue_number}/labels"
-    ],
-    removeAssignees: [
-      "DELETE /repos/{owner}/{repo}/issues/{issue_number}/assignees"
-    ],
-    removeDependencyBlockedBy: [
-      "DELETE /repos/{owner}/{repo}/issues/{issue_number}/dependencies/blocked_by/{issue_id}"
-    ],
-    removeLabel: [
-      "DELETE /repos/{owner}/{repo}/issues/{issue_number}/labels/{name}"
-    ],
-    removeSubIssue: [
-      "DELETE /repos/{owner}/{repo}/issues/{issue_number}/sub_issue"
-    ],
-    reprioritizeSubIssue: [
-      "PATCH /repos/{owner}/{repo}/issues/{issue_number}/sub_issues/priority"
-    ],
-    setLabels: ["PUT /repos/{owner}/{repo}/issues/{issue_number}/labels"],
-    unlock: ["DELETE /repos/{owner}/{repo}/issues/{issue_number}/lock"],
-    update: ["PATCH /repos/{owner}/{repo}/issues/{issue_number}"],
-    updateComment: ["PATCH /repos/{owner}/{repo}/issues/comments/{comment_id}"],
-    updateLabel: ["PATCH /repos/{owner}/{repo}/labels/{name}"],
-    updateMilestone: [
-      "PATCH /repos/{owner}/{repo}/milestones/{milestone_number}"
-    ]
-  },
-  licenses: {
-    get: ["GET /licenses/{license}"],
-    getAllCommonlyUsed: ["GET /licenses"],
-    getForRepo: ["GET /repos/{owner}/{repo}/license"]
-  },
-  markdown: {
-    render: ["POST /markdown"],
-    renderRaw: [
-      "POST /markdown/raw",
-      { headers: { "content-type": "text/plain; charset=utf-8" } }
-    ]
-  },
-  meta: {
-    get: ["GET /meta"],
-    getAllVersions: ["GET /versions"],
-    getOctocat: ["GET /octocat"],
-    getZen: ["GET /zen"],
-    root: ["GET /"]
-  },
-  migrations: {
-    deleteArchiveForAuthenticatedUser: [
-      "DELETE /user/migrations/{migration_id}/archive"
-    ],
-    deleteArchiveForOrg: [
-      "DELETE /orgs/{org}/migrations/{migration_id}/archive"
-    ],
-    downloadArchiveForOrg: [
-      "GET /orgs/{org}/migrations/{migration_id}/archive"
-    ],
-    getArchiveForAuthenticatedUser: [
-      "GET /user/migrations/{migration_id}/archive"
-    ],
-    getStatusForAuthenticatedUser: ["GET /user/migrations/{migration_id}"],
-    getStatusForOrg: ["GET /orgs/{org}/migrations/{migration_id}"],
-    listForAuthenticatedUser: ["GET /user/migrations"],
-    listForOrg: ["GET /orgs/{org}/migrations"],
-    listReposForAuthenticatedUser: [
-      "GET /user/migrations/{migration_id}/repositories"
-    ],
-    listReposForOrg: ["GET /orgs/{org}/migrations/{migration_id}/repositories"],
-    listReposForUser: [
-      "GET /user/migrations/{migration_id}/repositories",
-      {},
-      { renamed: ["migrations", "listReposForAuthenticatedUser"] }
-    ],
-    startForAuthenticatedUser: ["POST /user/migrations"],
-    startForOrg: ["POST /orgs/{org}/migrations"],
-    unlockRepoForAuthenticatedUser: [
-      "DELETE /user/migrations/{migration_id}/repos/{repo_name}/lock"
-    ],
-    unlockRepoForOrg: [
-      "DELETE /orgs/{org}/migrations/{migration_id}/repos/{repo_name}/lock"
-    ]
-  },
-  oidc: {
-    getOidcCustomSubTemplateForOrg: [
-      "GET /orgs/{org}/actions/oidc/customization/sub"
-    ],
-    updateOidcCustomSubTemplateForOrg: [
-      "PUT /orgs/{org}/actions/oidc/customization/sub"
-    ]
-  },
-  orgs: {
-    addSecurityManagerTeam: [
-      "PUT /orgs/{org}/security-managers/teams/{team_slug}",
-      {},
-      {
-        deprecated: "octokit.rest.orgs.addSecurityManagerTeam() is deprecated, see https://docs.github.com/rest/orgs/security-managers#add-a-security-manager-team"
-      }
-    ],
-    assignTeamToOrgRole: [
-      "PUT /orgs/{org}/organization-roles/teams/{team_slug}/{role_id}"
-    ],
-    assignUserToOrgRole: [
-      "PUT /orgs/{org}/organization-roles/users/{username}/{role_id}"
-    ],
-    blockUser: ["PUT /orgs/{org}/blocks/{username}"],
-    cancelInvitation: ["DELETE /orgs/{org}/invitations/{invitation_id}"],
-    checkBlockedUser: ["GET /orgs/{org}/blocks/{username}"],
-    checkMembershipForUser: ["GET /orgs/{org}/members/{username}"],
-    checkPublicMembershipForUser: ["GET /orgs/{org}/public_members/{username}"],
-    convertMemberToOutsideCollaborator: [
-      "PUT /orgs/{org}/outside_collaborators/{username}"
-    ],
-    createArtifactStorageRecord: [
-      "POST /orgs/{org}/artifacts/metadata/storage-record"
-    ],
-    createInvitation: ["POST /orgs/{org}/invitations"],
-    createIssueType: ["POST /orgs/{org}/issue-types"],
-    createWebhook: ["POST /orgs/{org}/hooks"],
-    customPropertiesForOrgsCreateOrUpdateOrganizationValues: [
-      "PATCH /organizations/{org}/org-properties/values"
-    ],
-    customPropertiesForOrgsGetOrganizationValues: [
-      "GET /organizations/{org}/org-properties/values"
-    ],
-    customPropertiesForReposCreateOrUpdateOrganizationDefinition: [
-      "PUT /orgs/{org}/properties/schema/{custom_property_name}"
-    ],
-    customPropertiesForReposCreateOrUpdateOrganizationDefinitions: [
-      "PATCH /orgs/{org}/properties/schema"
-    ],
-    customPropertiesForReposCreateOrUpdateOrganizationValues: [
-      "PATCH /orgs/{org}/properties/values"
-    ],
-    customPropertiesForReposDeleteOrganizationDefinition: [
-      "DELETE /orgs/{org}/properties/schema/{custom_property_name}"
-    ],
-    customPropertiesForReposGetOrganizationDefinition: [
-      "GET /orgs/{org}/properties/schema/{custom_property_name}"
-    ],
-    customPropertiesForReposGetOrganizationDefinitions: [
-      "GET /orgs/{org}/properties/schema"
-    ],
-    customPropertiesForReposGetOrganizationValues: [
-      "GET /orgs/{org}/properties/values"
-    ],
-    delete: ["DELETE /orgs/{org}"],
-    deleteAttestationsBulk: ["POST /orgs/{org}/attestations/delete-request"],
-    deleteAttestationsById: [
-      "DELETE /orgs/{org}/attestations/{attestation_id}"
-    ],
-    deleteAttestationsBySubjectDigest: [
-      "DELETE /orgs/{org}/attestations/digest/{subject_digest}"
-    ],
-    deleteIssueType: ["DELETE /orgs/{org}/issue-types/{issue_type_id}"],
-    deleteWebhook: ["DELETE /orgs/{org}/hooks/{hook_id}"],
-    disableSelectedRepositoryImmutableReleasesOrganization: [
-      "DELETE /orgs/{org}/settings/immutable-releases/repositories/{repository_id}"
-    ],
-    enableSelectedRepositoryImmutableReleasesOrganization: [
-      "PUT /orgs/{org}/settings/immutable-releases/repositories/{repository_id}"
-    ],
-    get: ["GET /orgs/{org}"],
-    getImmutableReleasesSettings: [
-      "GET /orgs/{org}/settings/immutable-releases"
-    ],
-    getImmutableReleasesSettingsRepositories: [
-      "GET /orgs/{org}/settings/immutable-releases/repositories"
-    ],
-    getMembershipForAuthenticatedUser: ["GET /user/memberships/orgs/{org}"],
-    getMembershipForUser: ["GET /orgs/{org}/memberships/{username}"],
-    getOrgRole: ["GET /orgs/{org}/organization-roles/{role_id}"],
-    getOrgRulesetHistory: ["GET /orgs/{org}/rulesets/{ruleset_id}/history"],
-    getOrgRulesetVersion: [
-      "GET /orgs/{org}/rulesets/{ruleset_id}/history/{version_id}"
-    ],
-    getWebhook: ["GET /orgs/{org}/hooks/{hook_id}"],
-    getWebhookConfigForOrg: ["GET /orgs/{org}/hooks/{hook_id}/config"],
-    getWebhookDelivery: [
-      "GET /orgs/{org}/hooks/{hook_id}/deliveries/{delivery_id}"
-    ],
-    list: ["GET /organizations"],
-    listAppInstallations: ["GET /orgs/{org}/installations"],
-    listArtifactStorageRecords: [
-      "GET /orgs/{org}/artifacts/{subject_digest}/metadata/storage-records"
-    ],
-    listAttestationRepositories: ["GET /orgs/{org}/attestations/repositories"],
-    listAttestations: ["GET /orgs/{org}/attestations/{subject_digest}"],
-    listAttestationsBulk: [
-      "POST /orgs/{org}/attestations/bulk-list{?per_page,before,after}"
-    ],
-    listBlockedUsers: ["GET /orgs/{org}/blocks"],
-    listFailedInvitations: ["GET /orgs/{org}/failed_invitations"],
-    listForAuthenticatedUser: ["GET /user/orgs"],
-    listForUser: ["GET /users/{username}/orgs"],
-    listInvitationTeams: ["GET /orgs/{org}/invitations/{invitation_id}/teams"],
-    listIssueTypes: ["GET /orgs/{org}/issue-types"],
-    listMembers: ["GET /orgs/{org}/members"],
-    listMembershipsForAuthenticatedUser: ["GET /user/memberships/orgs"],
-    listOrgRoleTeams: ["GET /orgs/{org}/organization-roles/{role_id}/teams"],
-    listOrgRoleUsers: ["GET /orgs/{org}/organization-roles/{role_id}/users"],
-    listOrgRoles: ["GET /orgs/{org}/organization-roles"],
-    listOrganizationFineGrainedPermissions: [
-      "GET /orgs/{org}/organization-fine-grained-permissions"
-    ],
-    listOutsideCollaborators: ["GET /orgs/{org}/outside_collaborators"],
-    listPatGrantRepositories: [
-      "GET /orgs/{org}/personal-access-tokens/{pat_id}/repositories"
-    ],
-    listPatGrantRequestRepositories: [
-      "GET /orgs/{org}/personal-access-token-requests/{pat_request_id}/repositories"
-    ],
-    listPatGrantRequests: ["GET /orgs/{org}/personal-access-token-requests"],
-    listPatGrants: ["GET /orgs/{org}/personal-access-tokens"],
-    listPendingInvitations: ["GET /orgs/{org}/invitations"],
-    listPublicMembers: ["GET /orgs/{org}/public_members"],
-    listSecurityManagerTeams: [
-      "GET /orgs/{org}/security-managers",
-      {},
-      {
-        deprecated: "octokit.rest.orgs.listSecurityManagerTeams() is deprecated, see https://docs.github.com/rest/orgs/security-managers#list-security-manager-teams"
-      }
-    ],
-    listWebhookDeliveries: ["GET /orgs/{org}/hooks/{hook_id}/deliveries"],
-    listWebhooks: ["GET /orgs/{org}/hooks"],
-    pingWebhook: ["POST /orgs/{org}/hooks/{hook_id}/pings"],
-    redeliverWebhookDelivery: [
-      "POST /orgs/{org}/hooks/{hook_id}/deliveries/{delivery_id}/attempts"
-    ],
-    removeMember: ["DELETE /orgs/{org}/members/{username}"],
-    removeMembershipForUser: ["DELETE /orgs/{org}/memberships/{username}"],
-    removeOutsideCollaborator: [
-      "DELETE /orgs/{org}/outside_collaborators/{username}"
-    ],
-    removePublicMembershipForAuthenticatedUser: [
-      "DELETE /orgs/{org}/public_members/{username}"
-    ],
-    removeSecurityManagerTeam: [
-      "DELETE /orgs/{org}/security-managers/teams/{team_slug}",
-      {},
-      {
-        deprecated: "octokit.rest.orgs.removeSecurityManagerTeam() is deprecated, see https://docs.github.com/rest/orgs/security-managers#remove-a-security-manager-team"
-      }
-    ],
-    reviewPatGrantRequest: [
-      "POST /orgs/{org}/personal-access-token-requests/{pat_request_id}"
-    ],
-    reviewPatGrantRequestsInBulk: [
-      "POST /orgs/{org}/personal-access-token-requests"
-    ],
-    revokeAllOrgRolesTeam: [
-      "DELETE /orgs/{org}/organization-roles/teams/{team_slug}"
-    ],
-    revokeAllOrgRolesUser: [
-      "DELETE /orgs/{org}/organization-roles/users/{username}"
-    ],
-    revokeOrgRoleTeam: [
-      "DELETE /orgs/{org}/organization-roles/teams/{team_slug}/{role_id}"
-    ],
-    revokeOrgRoleUser: [
-      "DELETE /orgs/{org}/organization-roles/users/{username}/{role_id}"
-    ],
-    setImmutableReleasesSettings: [
-      "PUT /orgs/{org}/settings/immutable-releases"
-    ],
-    setImmutableReleasesSettingsRepositories: [
-      "PUT /orgs/{org}/settings/immutable-releases/repositories"
-    ],
-    setMembershipForUser: ["PUT /orgs/{org}/memberships/{username}"],
-    setPublicMembershipForAuthenticatedUser: [
-      "PUT /orgs/{org}/public_members/{username}"
-    ],
-    unblockUser: ["DELETE /orgs/{org}/blocks/{username}"],
-    update: ["PATCH /orgs/{org}"],
-    updateIssueType: ["PUT /orgs/{org}/issue-types/{issue_type_id}"],
-    updateMembershipForAuthenticatedUser: [
-      "PATCH /user/memberships/orgs/{org}"
-    ],
-    updatePatAccess: ["POST /orgs/{org}/personal-access-tokens/{pat_id}"],
-    updatePatAccesses: ["POST /orgs/{org}/personal-access-tokens"],
-    updateWebhook: ["PATCH /orgs/{org}/hooks/{hook_id}"],
-    updateWebhookConfigForOrg: ["PATCH /orgs/{org}/hooks/{hook_id}/config"]
-  },
-  packages: {
-    deletePackageForAuthenticatedUser: [
-      "DELETE /user/packages/{package_type}/{package_name}"
-    ],
-    deletePackageForOrg: [
-      "DELETE /orgs/{org}/packages/{package_type}/{package_name}"
-    ],
-    deletePackageForUser: [
-      "DELETE /users/{username}/packages/{package_type}/{package_name}"
-    ],
-    deletePackageVersionForAuthenticatedUser: [
-      "DELETE /user/packages/{package_type}/{package_name}/versions/{package_version_id}"
-    ],
-    deletePackageVersionForOrg: [
-      "DELETE /orgs/{org}/packages/{package_type}/{package_name}/versions/{package_version_id}"
-    ],
-    deletePackageVersionForUser: [
-      "DELETE /users/{username}/packages/{package_type}/{package_name}/versions/{package_version_id}"
-    ],
-    getAllPackageVersionsForAPackageOwnedByAnOrg: [
-      "GET /orgs/{org}/packages/{package_type}/{package_name}/versions",
-      {},
-      { renamed: ["packages", "getAllPackageVersionsForPackageOwnedByOrg"] }
-    ],
-    getAllPackageVersionsForAPackageOwnedByTheAuthenticatedUser: [
-      "GET /user/packages/{package_type}/{package_name}/versions",
-      {},
-      {
-        renamed: [
-          "packages",
-          "getAllPackageVersionsForPackageOwnedByAuthenticatedUser"
-        ]
-      }
-    ],
-    getAllPackageVersionsForPackageOwnedByAuthenticatedUser: [
-      "GET /user/packages/{package_type}/{package_name}/versions"
-    ],
-    getAllPackageVersionsForPackageOwnedByOrg: [
-      "GET /orgs/{org}/packages/{package_type}/{package_name}/versions"
-    ],
-    getAllPackageVersionsForPackageOwnedByUser: [
-      "GET /users/{username}/packages/{package_type}/{package_name}/versions"
-    ],
-    getPackageForAuthenticatedUser: [
-      "GET /user/packages/{package_type}/{package_name}"
-    ],
-    getPackageForOrganization: [
-      "GET /orgs/{org}/packages/{package_type}/{package_name}"
-    ],
-    getPackageForUser: [
-      "GET /users/{username}/packages/{package_type}/{package_name}"
-    ],
-    getPackageVersionForAuthenticatedUser: [
-      "GET /user/packages/{package_type}/{package_name}/versions/{package_version_id}"
-    ],
-    getPackageVersionForOrganization: [
-      "GET /orgs/{org}/packages/{package_type}/{package_name}/versions/{package_version_id}"
-    ],
-    getPackageVersionForUser: [
-      "GET /users/{username}/packages/{package_type}/{package_name}/versions/{package_version_id}"
-    ],
-    listDockerMigrationConflictingPackagesForAuthenticatedUser: [
-      "GET /user/docker/conflicts"
-    ],
-    listDockerMigrationConflictingPackagesForOrganization: [
-      "GET /orgs/{org}/docker/conflicts"
-    ],
-    listDockerMigrationConflictingPackagesForUser: [
-      "GET /users/{username}/docker/conflicts"
-    ],
-    listPackagesForAuthenticatedUser: ["GET /user/packages"],
-    listPackagesForOrganization: ["GET /orgs/{org}/packages"],
-    listPackagesForUser: ["GET /users/{username}/packages"],
-    restorePackageForAuthenticatedUser: [
-      "POST /user/packages/{package_type}/{package_name}/restore{?token}"
-    ],
-    restorePackageForOrg: [
-      "POST /orgs/{org}/packages/{package_type}/{package_name}/restore{?token}"
-    ],
-    restorePackageForUser: [
-      "POST /users/{username}/packages/{package_type}/{package_name}/restore{?token}"
-    ],
-    restorePackageVersionForAuthenticatedUser: [
-      "POST /user/packages/{package_type}/{package_name}/versions/{package_version_id}/restore"
-    ],
-    restorePackageVersionForOrg: [
-      "POST /orgs/{org}/packages/{package_type}/{package_name}/versions/{package_version_id}/restore"
-    ],
-    restorePackageVersionForUser: [
-      "POST /users/{username}/packages/{package_type}/{package_name}/versions/{package_version_id}/restore"
-    ]
-  },
-  privateRegistries: {
-    createOrgPrivateRegistry: ["POST /orgs/{org}/private-registries"],
-    deleteOrgPrivateRegistry: [
-      "DELETE /orgs/{org}/private-registries/{secret_name}"
-    ],
-    getOrgPrivateRegistry: ["GET /orgs/{org}/private-registries/{secret_name}"],
-    getOrgPublicKey: ["GET /orgs/{org}/private-registries/public-key"],
-    listOrgPrivateRegistries: ["GET /orgs/{org}/private-registries"],
-    updateOrgPrivateRegistry: [
-      "PATCH /orgs/{org}/private-registries/{secret_name}"
-    ]
-  },
-  projects: {
-    addItemForOrg: ["POST /orgs/{org}/projectsV2/{project_number}/items"],
-    addItemForUser: [
-      "POST /users/{username}/projectsV2/{project_number}/items"
-    ],
-    deleteItemForOrg: [
-      "DELETE /orgs/{org}/projectsV2/{project_number}/items/{item_id}"
-    ],
-    deleteItemForUser: [
-      "DELETE /users/{username}/projectsV2/{project_number}/items/{item_id}"
-    ],
-    getFieldForOrg: [
-      "GET /orgs/{org}/projectsV2/{project_number}/fields/{field_id}"
-    ],
-    getFieldForUser: [
-      "GET /users/{username}/projectsV2/{project_number}/fields/{field_id}"
-    ],
-    getForOrg: ["GET /orgs/{org}/projectsV2/{project_number}"],
-    getForUser: ["GET /users/{username}/projectsV2/{project_number}"],
-    getOrgItem: ["GET /orgs/{org}/projectsV2/{project_number}/items/{item_id}"],
-    getUserItem: [
-      "GET /users/{username}/projectsV2/{project_number}/items/{item_id}"
-    ],
-    listFieldsForOrg: ["GET /orgs/{org}/projectsV2/{project_number}/fields"],
-    listFieldsForUser: [
-      "GET /users/{username}/projectsV2/{project_number}/fields"
-    ],
-    listForOrg: ["GET /orgs/{org}/projectsV2"],
-    listForUser: ["GET /users/{username}/projectsV2"],
-    listItemsForOrg: ["GET /orgs/{org}/projectsV2/{project_number}/items"],
-    listItemsForUser: [
-      "GET /users/{username}/projectsV2/{project_number}/items"
-    ],
-    updateItemForOrg: [
-      "PATCH /orgs/{org}/projectsV2/{project_number}/items/{item_id}"
-    ],
-    updateItemForUser: [
-      "PATCH /users/{username}/projectsV2/{project_number}/items/{item_id}"
-    ]
-  },
-  pulls: {
-    checkIfMerged: ["GET /repos/{owner}/{repo}/pulls/{pull_number}/merge"],
-    create: ["POST /repos/{owner}/{repo}/pulls"],
-    createReplyForReviewComment: [
-      "POST /repos/{owner}/{repo}/pulls/{pull_number}/comments/{comment_id}/replies"
-    ],
-    createReview: ["POST /repos/{owner}/{repo}/pulls/{pull_number}/reviews"],
-    createReviewComment: [
-      "POST /repos/{owner}/{repo}/pulls/{pull_number}/comments"
-    ],
-    deletePendingReview: [
-      "DELETE /repos/{owner}/{repo}/pulls/{pull_number}/reviews/{review_id}"
-    ],
-    deleteReviewComment: [
-      "DELETE /repos/{owner}/{repo}/pulls/comments/{comment_id}"
-    ],
-    dismissReview: [
-      "PUT /repos/{owner}/{repo}/pulls/{pull_number}/reviews/{review_id}/dismissals"
-    ],
-    get: ["GET /repos/{owner}/{repo}/pulls/{pull_number}"],
-    getReview: [
-      "GET /repos/{owner}/{repo}/pulls/{pull_number}/reviews/{review_id}"
-    ],
-    getReviewComment: ["GET /repos/{owner}/{repo}/pulls/comments/{comment_id}"],
-    list: ["GET /repos/{owner}/{repo}/pulls"],
-    listCommentsForReview: [
-      "GET /repos/{owner}/{repo}/pulls/{pull_number}/reviews/{review_id}/comments"
-    ],
-    listCommits: ["GET /repos/{owner}/{repo}/pulls/{pull_number}/commits"],
-    listFiles: ["GET /repos/{owner}/{repo}/pulls/{pull_number}/files"],
-    listRequestedReviewers: [
-      "GET /repos/{owner}/{repo}/pulls/{pull_number}/requested_reviewers"
-    ],
-    listReviewComments: [
-      "GET /repos/{owner}/{repo}/pulls/{pull_number}/comments"
-    ],
-    listReviewCommentsForRepo: ["GET /repos/{owner}/{repo}/pulls/comments"],
-    listReviews: ["GET /repos/{owner}/{repo}/pulls/{pull_number}/reviews"],
-    merge: ["PUT /repos/{owner}/{repo}/pulls/{pull_number}/merge"],
-    removeRequestedReviewers: [
-      "DELETE /repos/{owner}/{repo}/pulls/{pull_number}/requested_reviewers"
-    ],
-    requestReviewers: [
-      "POST /repos/{owner}/{repo}/pulls/{pull_number}/requested_reviewers"
-    ],
-    submitReview: [
-      "POST /repos/{owner}/{repo}/pulls/{pull_number}/reviews/{review_id}/events"
-    ],
-    update: ["PATCH /repos/{owner}/{repo}/pulls/{pull_number}"],
-    updateBranch: [
-      "PUT /repos/{owner}/{repo}/pulls/{pull_number}/update-branch"
-    ],
-    updateReview: [
-      "PUT /repos/{owner}/{repo}/pulls/{pull_number}/reviews/{review_id}"
-    ],
-    updateReviewComment: [
-      "PATCH /repos/{owner}/{repo}/pulls/comments/{comment_id}"
-    ]
-  },
-  rateLimit: { get: ["GET /rate_limit"] },
-  reactions: {
-    createForCommitComment: [
-      "POST /repos/{owner}/{repo}/comments/{comment_id}/reactions"
-    ],
-    createForIssue: [
-      "POST /repos/{owner}/{repo}/issues/{issue_number}/reactions"
-    ],
-    createForIssueComment: [
-      "POST /repos/{owner}/{repo}/issues/comments/{comment_id}/reactions"
-    ],
-    createForPullRequestReviewComment: [
-      "POST /repos/{owner}/{repo}/pulls/comments/{comment_id}/reactions"
-    ],
-    createForRelease: [
-      "POST /repos/{owner}/{repo}/releases/{release_id}/reactions"
-    ],
-    createForTeamDiscussionCommentInOrg: [
-      "POST /orgs/{org}/teams/{team_slug}/discussions/{discussion_number}/comments/{comment_number}/reactions"
-    ],
-    createForTeamDiscussionInOrg: [
-      "POST /orgs/{org}/teams/{team_slug}/discussions/{discussion_number}/reactions"
-    ],
-    deleteForCommitComment: [
-      "DELETE /repos/{owner}/{repo}/comments/{comment_id}/reactions/{reaction_id}"
-    ],
-    deleteForIssue: [
-      "DELETE /repos/{owner}/{repo}/issues/{issue_number}/reactions/{reaction_id}"
-    ],
-    deleteForIssueComment: [
-      "DELETE /repos/{owner}/{repo}/issues/comments/{comment_id}/reactions/{reaction_id}"
-    ],
-    deleteForPullRequestComment: [
-      "DELETE /repos/{owner}/{repo}/pulls/comments/{comment_id}/reactions/{reaction_id}"
-    ],
-    deleteForRelease: [
-      "DELETE /repos/{owner}/{repo}/releases/{release_id}/reactions/{reaction_id}"
-    ],
-    deleteForTeamDiscussion: [
-      "DELETE /orgs/{org}/teams/{team_slug}/discussions/{discussion_number}/reactions/{reaction_id}"
-    ],
-    deleteForTeamDiscussionComment: [
-      "DELETE /orgs/{org}/teams/{team_slug}/discussions/{discussion_number}/comments/{comment_number}/reactions/{reaction_id}"
-    ],
-    listForCommitComment: [
-      "GET /repos/{owner}/{repo}/comments/{comment_id}/reactions"
-    ],
-    listForIssue: ["GET /repos/{owner}/{repo}/issues/{issue_number}/reactions"],
-    listForIssueComment: [
-      "GET /repos/{owner}/{repo}/issues/comments/{comment_id}/reactions"
-    ],
-    listForPullRequestReviewComment: [
-      "GET /repos/{owner}/{repo}/pulls/comments/{comment_id}/reactions"
-    ],
-    listForRelease: [
-      "GET /repos/{owner}/{repo}/releases/{release_id}/reactions"
-    ],
-    listForTeamDiscussionCommentInOrg: [
-      "GET /orgs/{org}/teams/{team_slug}/discussions/{discussion_number}/comments/{comment_number}/reactions"
-    ],
-    listForTeamDiscussionInOrg: [
-      "GET /orgs/{org}/teams/{team_slug}/discussions/{discussion_number}/reactions"
-    ]
-  },
-  repos: {
-    acceptInvitation: [
-      "PATCH /user/repository_invitations/{invitation_id}",
-      {},
-      { renamed: ["repos", "acceptInvitationForAuthenticatedUser"] }
-    ],
-    acceptInvitationForAuthenticatedUser: [
-      "PATCH /user/repository_invitations/{invitation_id}"
-    ],
-    addAppAccessRestrictions: [
-      "POST /repos/{owner}/{repo}/branches/{branch}/protection/restrictions/apps",
-      {},
-      { mapToData: "apps" }
-    ],
-    addCollaborator: ["PUT /repos/{owner}/{repo}/collaborators/{username}"],
-    addStatusCheckContexts: [
-      "POST /repos/{owner}/{repo}/branches/{branch}/protection/required_status_checks/contexts",
-      {},
-      { mapToData: "contexts" }
-    ],
-    addTeamAccessRestrictions: [
-      "POST /repos/{owner}/{repo}/branches/{branch}/protection/restrictions/teams",
-      {},
-      { mapToData: "teams" }
-    ],
-    addUserAccessRestrictions: [
-      "POST /repos/{owner}/{repo}/branches/{branch}/protection/restrictions/users",
-      {},
-      { mapToData: "users" }
-    ],
-    cancelPagesDeployment: [
-      "POST /repos/{owner}/{repo}/pages/deployments/{pages_deployment_id}/cancel"
-    ],
-    checkAutomatedSecurityFixes: [
-      "GET /repos/{owner}/{repo}/automated-security-fixes"
-    ],
-    checkCollaborator: ["GET /repos/{owner}/{repo}/collaborators/{username}"],
-    checkImmutableReleases: ["GET /repos/{owner}/{repo}/immutable-releases"],
-    checkPrivateVulnerabilityReporting: [
-      "GET /repos/{owner}/{repo}/private-vulnerability-reporting"
-    ],
-    checkVulnerabilityAlerts: [
-      "GET /repos/{owner}/{repo}/vulnerability-alerts"
-    ],
-    codeownersErrors: ["GET /repos/{owner}/{repo}/codeowners/errors"],
-    compareCommits: ["GET /repos/{owner}/{repo}/compare/{base}...{head}"],
-    compareCommitsWithBasehead: [
-      "GET /repos/{owner}/{repo}/compare/{basehead}"
-    ],
-    createAttestation: ["POST /repos/{owner}/{repo}/attestations"],
-    createAutolink: ["POST /repos/{owner}/{repo}/autolinks"],
-    createCommitComment: [
-      "POST /repos/{owner}/{repo}/commits/{commit_sha}/comments"
-    ],
-    createCommitSignatureProtection: [
-      "POST /repos/{owner}/{repo}/branches/{branch}/protection/required_signatures"
-    ],
-    createCommitStatus: ["POST /repos/{owner}/{repo}/statuses/{sha}"],
-    createDeployKey: ["POST /repos/{owner}/{repo}/keys"],
-    createDeployment: ["POST /repos/{owner}/{repo}/deployments"],
-    createDeploymentBranchPolicy: [
-      "POST /repos/{owner}/{repo}/environments/{environment_name}/deployment-branch-policies"
-    ],
-    createDeploymentProtectionRule: [
-      "POST /repos/{owner}/{repo}/environments/{environment_name}/deployment_protection_rules"
-    ],
-    createDeploymentStatus: [
-      "POST /repos/{owner}/{repo}/deployments/{deployment_id}/statuses"
-    ],
-    createDispatchEvent: ["POST /repos/{owner}/{repo}/dispatches"],
-    createForAuthenticatedUser: ["POST /user/repos"],
-    createFork: ["POST /repos/{owner}/{repo}/forks"],
-    createInOrg: ["POST /orgs/{org}/repos"],
-    createOrUpdateEnvironment: [
-      "PUT /repos/{owner}/{repo}/environments/{environment_name}"
-    ],
-    createOrUpdateFileContents: ["PUT /repos/{owner}/{repo}/contents/{path}"],
-    createOrgRuleset: ["POST /orgs/{org}/rulesets"],
-    createPagesDeployment: ["POST /repos/{owner}/{repo}/pages/deployments"],
-    createPagesSite: ["POST /repos/{owner}/{repo}/pages"],
-    createRelease: ["POST /repos/{owner}/{repo}/releases"],
-    createRepoRuleset: ["POST /repos/{owner}/{repo}/rulesets"],
-    createUsingTemplate: [
-      "POST /repos/{template_owner}/{template_repo}/generate"
-    ],
-    createWebhook: ["POST /repos/{owner}/{repo}/hooks"],
-    customPropertiesForReposCreateOrUpdateRepositoryValues: [
-      "PATCH /repos/{owner}/{repo}/properties/values"
-    ],
-    customPropertiesForReposGetRepositoryValues: [
-      "GET /repos/{owner}/{repo}/properties/values"
-    ],
-    declineInvitation: [
-      "DELETE /user/repository_invitations/{invitation_id}",
-      {},
-      { renamed: ["repos", "declineInvitationForAuthenticatedUser"] }
-    ],
-    declineInvitationForAuthenticatedUser: [
-      "DELETE /user/repository_invitations/{invitation_id}"
-    ],
-    delete: ["DELETE /repos/{owner}/{repo}"],
-    deleteAccessRestrictions: [
-      "DELETE /repos/{owner}/{repo}/branches/{branch}/protection/restrictions"
-    ],
-    deleteAdminBranchProtection: [
-      "DELETE /repos/{owner}/{repo}/branches/{branch}/protection/enforce_admins"
-    ],
-    deleteAnEnvironment: [
-      "DELETE /repos/{owner}/{repo}/environments/{environment_name}"
-    ],
-    deleteAutolink: ["DELETE /repos/{owner}/{repo}/autolinks/{autolink_id}"],
-    deleteBranchProtection: [
-      "DELETE /repos/{owner}/{repo}/branches/{branch}/protection"
-    ],
-    deleteCommitComment: ["DELETE /repos/{owner}/{repo}/comments/{comment_id}"],
-    deleteCommitSignatureProtection: [
-      "DELETE /repos/{owner}/{repo}/branches/{branch}/protection/required_signatures"
-    ],
-    deleteDeployKey: ["DELETE /repos/{owner}/{repo}/keys/{key_id}"],
-    deleteDeployment: [
-      "DELETE /repos/{owner}/{repo}/deployments/{deployment_id}"
-    ],
-    deleteDeploymentBranchPolicy: [
-      "DELETE /repos/{owner}/{repo}/environments/{environment_name}/deployment-branch-policies/{branch_policy_id}"
-    ],
-    deleteFile: ["DELETE /repos/{owner}/{repo}/contents/{path}"],
-    deleteInvitation: [
-      "DELETE /repos/{owner}/{repo}/invitations/{invitation_id}"
-    ],
-    deleteOrgRuleset: ["DELETE /orgs/{org}/rulesets/{ruleset_id}"],
-    deletePagesSite: ["DELETE /repos/{owner}/{repo}/pages"],
-    deletePullRequestReviewProtection: [
-      "DELETE /repos/{owner}/{repo}/branches/{branch}/protection/required_pull_request_reviews"
-    ],
-    deleteRelease: ["DELETE /repos/{owner}/{repo}/releases/{release_id}"],
-    deleteReleaseAsset: [
-      "DELETE /repos/{owner}/{repo}/releases/assets/{asset_id}"
-    ],
-    deleteRepoRuleset: ["DELETE /repos/{owner}/{repo}/rulesets/{ruleset_id}"],
-    deleteWebhook: ["DELETE /repos/{owner}/{repo}/hooks/{hook_id}"],
-    disableAutomatedSecurityFixes: [
-      "DELETE /repos/{owner}/{repo}/automated-security-fixes"
-    ],
-    disableDeploymentProtectionRule: [
-      "DELETE /repos/{owner}/{repo}/environments/{environment_name}/deployment_protection_rules/{protection_rule_id}"
-    ],
-    disableImmutableReleases: [
-      "DELETE /repos/{owner}/{repo}/immutable-releases"
-    ],
-    disablePrivateVulnerabilityReporting: [
-      "DELETE /repos/{owner}/{repo}/private-vulnerability-reporting"
-    ],
-    disableVulnerabilityAlerts: [
-      "DELETE /repos/{owner}/{repo}/vulnerability-alerts"
-    ],
-    downloadArchive: [
-      "GET /repos/{owner}/{repo}/zipball/{ref}",
-      {},
-      { renamed: ["repos", "downloadZipballArchive"] }
-    ],
-    downloadTarballArchive: ["GET /repos/{owner}/{repo}/tarball/{ref}"],
-    downloadZipballArchive: ["GET /repos/{owner}/{repo}/zipball/{ref}"],
-    enableAutomatedSecurityFixes: [
-      "PUT /repos/{owner}/{repo}/automated-security-fixes"
-    ],
-    enableImmutableReleases: ["PUT /repos/{owner}/{repo}/immutable-releases"],
-    enablePrivateVulnerabilityReporting: [
-      "PUT /repos/{owner}/{repo}/private-vulnerability-reporting"
-    ],
-    enableVulnerabilityAlerts: [
-      "PUT /repos/{owner}/{repo}/vulnerability-alerts"
-    ],
-    generateReleaseNotes: [
-      "POST /repos/{owner}/{repo}/releases/generate-notes"
-    ],
-    get: ["GET /repos/{owner}/{repo}"],
-    getAccessRestrictions: [
-      "GET /repos/{owner}/{repo}/branches/{branch}/protection/restrictions"
-    ],
-    getAdminBranchProtection: [
-      "GET /repos/{owner}/{repo}/branches/{branch}/protection/enforce_admins"
-    ],
-    getAllDeploymentProtectionRules: [
-      "GET /repos/{owner}/{repo}/environments/{environment_name}/deployment_protection_rules"
-    ],
-    getAllEnvironments: ["GET /repos/{owner}/{repo}/environments"],
-    getAllStatusCheckContexts: [
-      "GET /repos/{owner}/{repo}/branches/{branch}/protection/required_status_checks/contexts"
-    ],
-    getAllTopics: ["GET /repos/{owner}/{repo}/topics"],
-    getAppsWithAccessToProtectedBranch: [
-      "GET /repos/{owner}/{repo}/branches/{branch}/protection/restrictions/apps"
-    ],
-    getAutolink: ["GET /repos/{owner}/{repo}/autolinks/{autolink_id}"],
-    getBranch: ["GET /repos/{owner}/{repo}/branches/{branch}"],
-    getBranchProtection: [
-      "GET /repos/{owner}/{repo}/branches/{branch}/protection"
-    ],
-    getBranchRules: ["GET /repos/{owner}/{repo}/rules/branches/{branch}"],
-    getClones: ["GET /repos/{owner}/{repo}/traffic/clones"],
-    getCodeFrequencyStats: ["GET /repos/{owner}/{repo}/stats/code_frequency"],
-    getCollaboratorPermissionLevel: [
-      "GET /repos/{owner}/{repo}/collaborators/{username}/permission"
-    ],
-    getCombinedStatusForRef: ["GET /repos/{owner}/{repo}/commits/{ref}/status"],
-    getCommit: ["GET /repos/{owner}/{repo}/commits/{ref}"],
-    getCommitActivityStats: ["GET /repos/{owner}/{repo}/stats/commit_activity"],
-    getCommitComment: ["GET /repos/{owner}/{repo}/comments/{comment_id}"],
-    getCommitSignatureProtection: [
-      "GET /repos/{owner}/{repo}/branches/{branch}/protection/required_signatures"
-    ],
-    getCommunityProfileMetrics: ["GET /repos/{owner}/{repo}/community/profile"],
-    getContent: ["GET /repos/{owner}/{repo}/contents/{path}"],
-    getContributorsStats: ["GET /repos/{owner}/{repo}/stats/contributors"],
-    getCustomDeploymentProtectionRule: [
-      "GET /repos/{owner}/{repo}/environments/{environment_name}/deployment_protection_rules/{protection_rule_id}"
-    ],
-    getDeployKey: ["GET /repos/{owner}/{repo}/keys/{key_id}"],
-    getDeployment: ["GET /repos/{owner}/{repo}/deployments/{deployment_id}"],
-    getDeploymentBranchPolicy: [
-      "GET /repos/{owner}/{repo}/environments/{environment_name}/deployment-branch-policies/{branch_policy_id}"
-    ],
-    getDeploymentStatus: [
-      "GET /repos/{owner}/{repo}/deployments/{deployment_id}/statuses/{status_id}"
-    ],
-    getEnvironment: [
-      "GET /repos/{owner}/{repo}/environments/{environment_name}"
-    ],
-    getLatestPagesBuild: ["GET /repos/{owner}/{repo}/pages/builds/latest"],
-    getLatestRelease: ["GET /repos/{owner}/{repo}/releases/latest"],
-    getOrgRuleSuite: ["GET /orgs/{org}/rulesets/rule-suites/{rule_suite_id}"],
-    getOrgRuleSuites: ["GET /orgs/{org}/rulesets/rule-suites"],
-    getOrgRuleset: ["GET /orgs/{org}/rulesets/{ruleset_id}"],
-    getOrgRulesets: ["GET /orgs/{org}/rulesets"],
-    getPages: ["GET /repos/{owner}/{repo}/pages"],
-    getPagesBuild: ["GET /repos/{owner}/{repo}/pages/builds/{build_id}"],
-    getPagesDeployment: [
-      "GET /repos/{owner}/{repo}/pages/deployments/{pages_deployment_id}"
-    ],
-    getPagesHealthCheck: ["GET /repos/{owner}/{repo}/pages/health"],
-    getParticipationStats: ["GET /repos/{owner}/{repo}/stats/participation"],
-    getPullRequestReviewProtection: [
-      "GET /repos/{owner}/{repo}/branches/{branch}/protection/required_pull_request_reviews"
-    ],
-    getPunchCardStats: ["GET /repos/{owner}/{repo}/stats/punch_card"],
-    getReadme: ["GET /repos/{owner}/{repo}/readme"],
-    getReadmeInDirectory: ["GET /repos/{owner}/{repo}/readme/{dir}"],
-    getRelease: ["GET /repos/{owner}/{repo}/releases/{release_id}"],
-    getReleaseAsset: ["GET /repos/{owner}/{repo}/releases/assets/{asset_id}"],
-    getReleaseByTag: ["GET /repos/{owner}/{repo}/releases/tags/{tag}"],
-    getRepoRuleSuite: [
-      "GET /repos/{owner}/{repo}/rulesets/rule-suites/{rule_suite_id}"
-    ],
-    getRepoRuleSuites: ["GET /repos/{owner}/{repo}/rulesets/rule-suites"],
-    getRepoRuleset: ["GET /repos/{owner}/{repo}/rulesets/{ruleset_id}"],
-    getRepoRulesetHistory: [
-      "GET /repos/{owner}/{repo}/rulesets/{ruleset_id}/history"
-    ],
-    getRepoRulesetVersion: [
-      "GET /repos/{owner}/{repo}/rulesets/{ruleset_id}/history/{version_id}"
-    ],
-    getRepoRulesets: ["GET /repos/{owner}/{repo}/rulesets"],
-    getStatusChecksProtection: [
-      "GET /repos/{owner}/{repo}/branches/{branch}/protection/required_status_checks"
-    ],
-    getTeamsWithAccessToProtectedBranch: [
-      "GET /repos/{owner}/{repo}/branches/{branch}/protection/restrictions/teams"
-    ],
-    getTopPaths: ["GET /repos/{owner}/{repo}/traffic/popular/paths"],
-    getTopReferrers: ["GET /repos/{owner}/{repo}/traffic/popular/referrers"],
-    getUsersWithAccessToProtectedBranch: [
-      "GET /repos/{owner}/{repo}/branches/{branch}/protection/restrictions/users"
-    ],
-    getViews: ["GET /repos/{owner}/{repo}/traffic/views"],
-    getWebhook: ["GET /repos/{owner}/{repo}/hooks/{hook_id}"],
-    getWebhookConfigForRepo: [
-      "GET /repos/{owner}/{repo}/hooks/{hook_id}/config"
-    ],
-    getWebhookDelivery: [
-      "GET /repos/{owner}/{repo}/hooks/{hook_id}/deliveries/{delivery_id}"
-    ],
-    listActivities: ["GET /repos/{owner}/{repo}/activity"],
-    listAttestations: [
-      "GET /repos/{owner}/{repo}/attestations/{subject_digest}"
-    ],
-    listAutolinks: ["GET /repos/{owner}/{repo}/autolinks"],
-    listBranches: ["GET /repos/{owner}/{repo}/branches"],
-    listBranchesForHeadCommit: [
-      "GET /repos/{owner}/{repo}/commits/{commit_sha}/branches-where-head"
-    ],
-    listCollaborators: ["GET /repos/{owner}/{repo}/collaborators"],
-    listCommentsForCommit: [
-      "GET /repos/{owner}/{repo}/commits/{commit_sha}/comments"
-    ],
-    listCommitCommentsForRepo: ["GET /repos/{owner}/{repo}/comments"],
-    listCommitStatusesForRef: [
-      "GET /repos/{owner}/{repo}/commits/{ref}/statuses"
-    ],
-    listCommits: ["GET /repos/{owner}/{repo}/commits"],
-    listContributors: ["GET /repos/{owner}/{repo}/contributors"],
-    listCustomDeploymentRuleIntegrations: [
-      "GET /repos/{owner}/{repo}/environments/{environment_name}/deployment_protection_rules/apps"
-    ],
-    listDeployKeys: ["GET /repos/{owner}/{repo}/keys"],
-    listDeploymentBranchPolicies: [
-      "GET /repos/{owner}/{repo}/environments/{environment_name}/deployment-branch-policies"
-    ],
-    listDeploymentStatuses: [
-      "GET /repos/{owner}/{repo}/deployments/{deployment_id}/statuses"
-    ],
-    listDeployments: ["GET /repos/{owner}/{repo}/deployments"],
-    listForAuthenticatedUser: ["GET /user/repos"],
-    listForOrg: ["GET /orgs/{org}/repos"],
-    listForUser: ["GET /users/{username}/repos"],
-    listForks: ["GET /repos/{owner}/{repo}/forks"],
-    listInvitations: ["GET /repos/{owner}/{repo}/invitations"],
-    listInvitationsForAuthenticatedUser: ["GET /user/repository_invitations"],
-    listLanguages: ["GET /repos/{owner}/{repo}/languages"],
-    listPagesBuilds: ["GET /repos/{owner}/{repo}/pages/builds"],
-    listPublic: ["GET /repositories"],
-    listPullRequestsAssociatedWithCommit: [
-      "GET /repos/{owner}/{repo}/commits/{commit_sha}/pulls"
-    ],
-    listReleaseAssets: [
-      "GET /repos/{owner}/{repo}/releases/{release_id}/assets"
-    ],
-    listReleases: ["GET /repos/{owner}/{repo}/releases"],
-    listTags: ["GET /repos/{owner}/{repo}/tags"],
-    listTeams: ["GET /repos/{owner}/{repo}/teams"],
-    listWebhookDeliveries: [
-      "GET /repos/{owner}/{repo}/hooks/{hook_id}/deliveries"
-    ],
-    listWebhooks: ["GET /repos/{owner}/{repo}/hooks"],
-    merge: ["POST /repos/{owner}/{repo}/merges"],
-    mergeUpstream: ["POST /repos/{owner}/{repo}/merge-upstream"],
-    pingWebhook: ["POST /repos/{owner}/{repo}/hooks/{hook_id}/pings"],
-    redeliverWebhookDelivery: [
-      "POST /repos/{owner}/{repo}/hooks/{hook_id}/deliveries/{delivery_id}/attempts"
-    ],
-    removeAppAccessRestrictions: [
-      "DELETE /repos/{owner}/{repo}/branches/{branch}/protection/restrictions/apps",
-      {},
-      { mapToData: "apps" }
-    ],
-    removeCollaborator: [
-      "DELETE /repos/{owner}/{repo}/collaborators/{username}"
-    ],
-    removeStatusCheckContexts: [
-      "DELETE /repos/{owner}/{repo}/branches/{branch}/protection/required_status_checks/contexts",
-      {},
-      { mapToData: "contexts" }
-    ],
-    removeStatusCheckProtection: [
-      "DELETE /repos/{owner}/{repo}/branches/{branch}/protection/required_status_checks"
-    ],
-    removeTeamAccessRestrictions: [
-      "DELETE /repos/{owner}/{repo}/branches/{branch}/protection/restrictions/teams",
-      {},
-      { mapToData: "teams" }
-    ],
-    removeUserAccessRestrictions: [
-      "DELETE /repos/{owner}/{repo}/branches/{branch}/protection/restrictions/users",
-      {},
-      { mapToData: "users" }
-    ],
-    renameBranch: ["POST /repos/{owner}/{repo}/branches/{branch}/rename"],
-    replaceAllTopics: ["PUT /repos/{owner}/{repo}/topics"],
-    requestPagesBuild: ["POST /repos/{owner}/{repo}/pages/builds"],
-    setAdminBranchProtection: [
-      "POST /repos/{owner}/{repo}/branches/{branch}/protection/enforce_admins"
-    ],
-    setAppAccessRestrictions: [
-      "PUT /repos/{owner}/{repo}/branches/{branch}/protection/restrictions/apps",
-      {},
-      { mapToData: "apps" }
-    ],
-    setStatusCheckContexts: [
-      "PUT /repos/{owner}/{repo}/branches/{branch}/protection/required_status_checks/contexts",
-      {},
-      { mapToData: "contexts" }
-    ],
-    setTeamAccessRestrictions: [
-      "PUT /repos/{owner}/{repo}/branches/{branch}/protection/restrictions/teams",
-      {},
-      { mapToData: "teams" }
-    ],
-    setUserAccessRestrictions: [
-      "PUT /repos/{owner}/{repo}/branches/{branch}/protection/restrictions/users",
-      {},
-      { mapToData: "users" }
-    ],
-    testPushWebhook: ["POST /repos/{owner}/{repo}/hooks/{hook_id}/tests"],
-    transfer: ["POST /repos/{owner}/{repo}/transfer"],
-    update: ["PATCH /repos/{owner}/{repo}"],
-    updateBranchProtection: [
-      "PUT /repos/{owner}/{repo}/branches/{branch}/protection"
-    ],
-    updateCommitComment: ["PATCH /repos/{owner}/{repo}/comments/{comment_id}"],
-    updateDeploymentBranchPolicy: [
-      "PUT /repos/{owner}/{repo}/environments/{environment_name}/deployment-branch-policies/{branch_policy_id}"
-    ],
-    updateInformationAboutPagesSite: ["PUT /repos/{owner}/{repo}/pages"],
-    updateInvitation: [
-      "PATCH /repos/{owner}/{repo}/invitations/{invitation_id}"
-    ],
-    updateOrgRuleset: ["PUT /orgs/{org}/rulesets/{ruleset_id}"],
-    updatePullRequestReviewProtection: [
-      "PATCH /repos/{owner}/{repo}/branches/{branch}/protection/required_pull_request_reviews"
-    ],
-    updateRelease: ["PATCH /repos/{owner}/{repo}/releases/{release_id}"],
-    updateReleaseAsset: [
-      "PATCH /repos/{owner}/{repo}/releases/assets/{asset_id}"
-    ],
-    updateRepoRuleset: ["PUT /repos/{owner}/{repo}/rulesets/{ruleset_id}"],
-    updateStatusCheckPotection: [
-      "PATCH /repos/{owner}/{repo}/branches/{branch}/protection/required_status_checks",
-      {},
-      { renamed: ["repos", "updateStatusCheckProtection"] }
-    ],
-    updateStatusCheckProtection: [
-      "PATCH /repos/{owner}/{repo}/branches/{branch}/protection/required_status_checks"
-    ],
-    updateWebhook: ["PATCH /repos/{owner}/{repo}/hooks/{hook_id}"],
-    updateWebhookConfigForRepo: [
-      "PATCH /repos/{owner}/{repo}/hooks/{hook_id}/config"
-    ],
-    uploadReleaseAsset: [
-      "POST /repos/{owner}/{repo}/releases/{release_id}/assets{?name,label}",
-      { baseUrl: "https://uploads.github.com" }
-    ]
-  },
-  search: {
-    code: ["GET /search/code"],
-    commits: ["GET /search/commits"],
-    issuesAndPullRequests: ["GET /search/issues"],
-    labels: ["GET /search/labels"],
-    repos: ["GET /search/repositories"],
-    topics: ["GET /search/topics"],
-    users: ["GET /search/users"]
-  },
-  secretScanning: {
-    createPushProtectionBypass: [
-      "POST /repos/{owner}/{repo}/secret-scanning/push-protection-bypasses"
-    ],
-    getAlert: [
-      "GET /repos/{owner}/{repo}/secret-scanning/alerts/{alert_number}"
-    ],
-    getScanHistory: ["GET /repos/{owner}/{repo}/secret-scanning/scan-history"],
-    listAlertsForOrg: ["GET /orgs/{org}/secret-scanning/alerts"],
-    listAlertsForRepo: ["GET /repos/{owner}/{repo}/secret-scanning/alerts"],
-    listLocationsForAlert: [
-      "GET /repos/{owner}/{repo}/secret-scanning/alerts/{alert_number}/locations"
-    ],
-    listOrgPatternConfigs: [
-      "GET /orgs/{org}/secret-scanning/pattern-configurations"
-    ],
-    updateAlert: [
-      "PATCH /repos/{owner}/{repo}/secret-scanning/alerts/{alert_number}"
-    ],
-    updateOrgPatternConfigs: [
-      "PATCH /orgs/{org}/secret-scanning/pattern-configurations"
-    ]
-  },
-  securityAdvisories: {
-    createFork: [
-      "POST /repos/{owner}/{repo}/security-advisories/{ghsa_id}/forks"
-    ],
-    createPrivateVulnerabilityReport: [
-      "POST /repos/{owner}/{repo}/security-advisories/reports"
-    ],
-    createRepositoryAdvisory: [
-      "POST /repos/{owner}/{repo}/security-advisories"
-    ],
-    createRepositoryAdvisoryCveRequest: [
-      "POST /repos/{owner}/{repo}/security-advisories/{ghsa_id}/cve"
-    ],
-    getGlobalAdvisory: ["GET /advisories/{ghsa_id}"],
-    getRepositoryAdvisory: [
-      "GET /repos/{owner}/{repo}/security-advisories/{ghsa_id}"
-    ],
-    listGlobalAdvisories: ["GET /advisories"],
-    listOrgRepositoryAdvisories: ["GET /orgs/{org}/security-advisories"],
-    listRepositoryAdvisories: ["GET /repos/{owner}/{repo}/security-advisories"],
-    updateRepositoryAdvisory: [
-      "PATCH /repos/{owner}/{repo}/security-advisories/{ghsa_id}"
-    ]
-  },
-  teams: {
-    addOrUpdateMembershipForUserInOrg: [
-      "PUT /orgs/{org}/teams/{team_slug}/memberships/{username}"
-    ],
-    addOrUpdateRepoPermissionsInOrg: [
-      "PUT /orgs/{org}/teams/{team_slug}/repos/{owner}/{repo}"
-    ],
-    checkPermissionsForRepoInOrg: [
-      "GET /orgs/{org}/teams/{team_slug}/repos/{owner}/{repo}"
-    ],
-    create: ["POST /orgs/{org}/teams"],
-    createDiscussionCommentInOrg: [
-      "POST /orgs/{org}/teams/{team_slug}/discussions/{discussion_number}/comments"
-    ],
-    createDiscussionInOrg: ["POST /orgs/{org}/teams/{team_slug}/discussions"],
-    deleteDiscussionCommentInOrg: [
-      "DELETE /orgs/{org}/teams/{team_slug}/discussions/{discussion_number}/comments/{comment_number}"
-    ],
-    deleteDiscussionInOrg: [
-      "DELETE /orgs/{org}/teams/{team_slug}/discussions/{discussion_number}"
-    ],
-    deleteInOrg: ["DELETE /orgs/{org}/teams/{team_slug}"],
-    getByName: ["GET /orgs/{org}/teams/{team_slug}"],
-    getDiscussionCommentInOrg: [
-      "GET /orgs/{org}/teams/{team_slug}/discussions/{discussion_number}/comments/{comment_number}"
-    ],
-    getDiscussionInOrg: [
-      "GET /orgs/{org}/teams/{team_slug}/discussions/{discussion_number}"
-    ],
-    getMembershipForUserInOrg: [
-      "GET /orgs/{org}/teams/{team_slug}/memberships/{username}"
-    ],
-    list: ["GET /orgs/{org}/teams"],
-    listChildInOrg: ["GET /orgs/{org}/teams/{team_slug}/teams"],
-    listDiscussionCommentsInOrg: [
-      "GET /orgs/{org}/teams/{team_slug}/discussions/{discussion_number}/comments"
-    ],
-    listDiscussionsInOrg: ["GET /orgs/{org}/teams/{team_slug}/discussions"],
-    listForAuthenticatedUser: ["GET /user/teams"],
-    listMembersInOrg: ["GET /orgs/{org}/teams/{team_slug}/members"],
-    listPendingInvitationsInOrg: [
-      "GET /orgs/{org}/teams/{team_slug}/invitations"
-    ],
-    listReposInOrg: ["GET /orgs/{org}/teams/{team_slug}/repos"],
-    removeMembershipForUserInOrg: [
-      "DELETE /orgs/{org}/teams/{team_slug}/memberships/{username}"
-    ],
-    removeRepoInOrg: [
-      "DELETE /orgs/{org}/teams/{team_slug}/repos/{owner}/{repo}"
-    ],
-    updateDiscussionCommentInOrg: [
-      "PATCH /orgs/{org}/teams/{team_slug}/discussions/{discussion_number}/comments/{comment_number}"
-    ],
-    updateDiscussionInOrg: [
-      "PATCH /orgs/{org}/teams/{team_slug}/discussions/{discussion_number}"
-    ],
-    updateInOrg: ["PATCH /orgs/{org}/teams/{team_slug}"]
-  },
-  users: {
-    addEmailForAuthenticated: [
-      "POST /user/emails",
-      {},
-      { renamed: ["users", "addEmailForAuthenticatedUser"] }
-    ],
-    addEmailForAuthenticatedUser: ["POST /user/emails"],
-    addSocialAccountForAuthenticatedUser: ["POST /user/social_accounts"],
-    block: ["PUT /user/blocks/{username}"],
-    checkBlocked: ["GET /user/blocks/{username}"],
-    checkFollowingForUser: ["GET /users/{username}/following/{target_user}"],
-    checkPersonIsFollowedByAuthenticated: ["GET /user/following/{username}"],
-    createGpgKeyForAuthenticated: [
-      "POST /user/gpg_keys",
-      {},
-      { renamed: ["users", "createGpgKeyForAuthenticatedUser"] }
-    ],
-    createGpgKeyForAuthenticatedUser: ["POST /user/gpg_keys"],
-    createPublicSshKeyForAuthenticated: [
-      "POST /user/keys",
-      {},
-      { renamed: ["users", "createPublicSshKeyForAuthenticatedUser"] }
-    ],
-    createPublicSshKeyForAuthenticatedUser: ["POST /user/keys"],
-    createSshSigningKeyForAuthenticatedUser: ["POST /user/ssh_signing_keys"],
-    deleteAttestationsBulk: [
-      "POST /users/{username}/attestations/delete-request"
-    ],
-    deleteAttestationsById: [
-      "DELETE /users/{username}/attestations/{attestation_id}"
-    ],
-    deleteAttestationsBySubjectDigest: [
-      "DELETE /users/{username}/attestations/digest/{subject_digest}"
-    ],
-    deleteEmailForAuthenticated: [
-      "DELETE /user/emails",
-      {},
-      { renamed: ["users", "deleteEmailForAuthenticatedUser"] }
-    ],
-    deleteEmailForAuthenticatedUser: ["DELETE /user/emails"],
-    deleteGpgKeyForAuthenticated: [
-      "DELETE /user/gpg_keys/{gpg_key_id}",
-      {},
-      { renamed: ["users", "deleteGpgKeyForAuthenticatedUser"] }
-    ],
-    deleteGpgKeyForAuthenticatedUser: ["DELETE /user/gpg_keys/{gpg_key_id}"],
-    deletePublicSshKeyForAuthenticated: [
-      "DELETE /user/keys/{key_id}",
-      {},
-      { renamed: ["users", "deletePublicSshKeyForAuthenticatedUser"] }
-    ],
-    deletePublicSshKeyForAuthenticatedUser: ["DELETE /user/keys/{key_id}"],
-    deleteSocialAccountForAuthenticatedUser: ["DELETE /user/social_accounts"],
-    deleteSshSigningKeyForAuthenticatedUser: [
-      "DELETE /user/ssh_signing_keys/{ssh_signing_key_id}"
-    ],
-    follow: ["PUT /user/following/{username}"],
-    getAuthenticated: ["GET /user"],
-    getById: ["GET /user/{account_id}"],
-    getByUsername: ["GET /users/{username}"],
-    getContextForUser: ["GET /users/{username}/hovercard"],
-    getGpgKeyForAuthenticated: [
-      "GET /user/gpg_keys/{gpg_key_id}",
-      {},
-      { renamed: ["users", "getGpgKeyForAuthenticatedUser"] }
-    ],
-    getGpgKeyForAuthenticatedUser: ["GET /user/gpg_keys/{gpg_key_id}"],
-    getPublicSshKeyForAuthenticated: [
-      "GET /user/keys/{key_id}",
-      {},
-      { renamed: ["users", "getPublicSshKeyForAuthenticatedUser"] }
-    ],
-    getPublicSshKeyForAuthenticatedUser: ["GET /user/keys/{key_id}"],
-    getSshSigningKeyForAuthenticatedUser: [
-      "GET /user/ssh_signing_keys/{ssh_signing_key_id}"
-    ],
-    list: ["GET /users"],
-    listAttestations: ["GET /users/{username}/attestations/{subject_digest}"],
-    listAttestationsBulk: [
-      "POST /users/{username}/attestations/bulk-list{?per_page,before,after}"
-    ],
-    listBlockedByAuthenticated: [
-      "GET /user/blocks",
-      {},
-      { renamed: ["users", "listBlockedByAuthenticatedUser"] }
-    ],
-    listBlockedByAuthenticatedUser: ["GET /user/blocks"],
-    listEmailsForAuthenticated: [
-      "GET /user/emails",
-      {},
-      { renamed: ["users", "listEmailsForAuthenticatedUser"] }
-    ],
-    listEmailsForAuthenticatedUser: ["GET /user/emails"],
-    listFollowedByAuthenticated: [
-      "GET /user/following",
-      {},
-      { renamed: ["users", "listFollowedByAuthenticatedUser"] }
-    ],
-    listFollowedByAuthenticatedUser: ["GET /user/following"],
-    listFollowersForAuthenticatedUser: ["GET /user/followers"],
-    listFollowersForUser: ["GET /users/{username}/followers"],
-    listFollowingForUser: ["GET /users/{username}/following"],
-    listGpgKeysForAuthenticated: [
-      "GET /user/gpg_keys",
-      {},
-      { renamed: ["users", "listGpgKeysForAuthenticatedUser"] }
-    ],
-    listGpgKeysForAuthenticatedUser: ["GET /user/gpg_keys"],
-    listGpgKeysForUser: ["GET /users/{username}/gpg_keys"],
-    listPublicEmailsForAuthenticated: [
-      "GET /user/public_emails",
-      {},
-      { renamed: ["users", "listPublicEmailsForAuthenticatedUser"] }
-    ],
-    listPublicEmailsForAuthenticatedUser: ["GET /user/public_emails"],
-    listPublicKeysForUser: ["GET /users/{username}/keys"],
-    listPublicSshKeysForAuthenticated: [
-      "GET /user/keys",
-      {},
-      { renamed: ["users", "listPublicSshKeysForAuthenticatedUser"] }
-    ],
-    listPublicSshKeysForAuthenticatedUser: ["GET /user/keys"],
-    listSocialAccountsForAuthenticatedUser: ["GET /user/social_accounts"],
-    listSocialAccountsForUser: ["GET /users/{username}/social_accounts"],
-    listSshSigningKeysForAuthenticatedUser: ["GET /user/ssh_signing_keys"],
-    listSshSigningKeysForUser: ["GET /users/{username}/ssh_signing_keys"],
-    setPrimaryEmailVisibilityForAuthenticated: [
-      "PATCH /user/email/visibility",
-      {},
-      { renamed: ["users", "setPrimaryEmailVisibilityForAuthenticatedUser"] }
-    ],
-    setPrimaryEmailVisibilityForAuthenticatedUser: [
-      "PATCH /user/email/visibility"
-    ],
-    unblock: ["DELETE /user/blocks/{username}"],
-    unfollow: ["DELETE /user/following/{username}"],
-    updateAuthenticated: ["PATCH /user"]
-  }
-};
-var endpoints_default = Endpoints;
-
-// node_modules/@octokit/plugin-rest-endpoint-methods/dist-src/endpoints-to-methods.js
-var endpointMethodsMap = /* @__PURE__ */ new Map();
-for (const [scope, endpoints2] of Object.entries(endpoints_default)) {
-  for (const [methodName, endpoint2] of Object.entries(endpoints2)) {
-    const [route, defaults2, decorations] = endpoint2;
-    const [method, url2] = route.split(/ /);
-    const endpointDefaults = Object.assign(
-      {
-        method,
-        url: url2
-      },
-      defaults2
-    );
-    if (!endpointMethodsMap.has(scope)) {
-      endpointMethodsMap.set(scope, /* @__PURE__ */ new Map());
-    }
-    endpointMethodsMap.get(scope).set(methodName, {
-      scope,
-      methodName,
-      endpointDefaults,
-      decorations
-    });
-  }
-}
-var handler = {
-  has({ scope }, methodName) {
-    return endpointMethodsMap.get(scope).has(methodName);
-  },
-  getOwnPropertyDescriptor(target, methodName) {
-    return {
-      value: this.get(target, methodName),
-      // ensures method is in the cache
-      configurable: true,
-      writable: true,
-      enumerable: true
-    };
-  },
-  defineProperty(target, methodName, descriptor) {
-    Object.defineProperty(target.cache, methodName, descriptor);
-    return true;
-  },
-  deleteProperty(target, methodName) {
-    delete target.cache[methodName];
-    return true;
-  },
-  ownKeys({ scope }) {
-    return [...endpointMethodsMap.get(scope).keys()];
-  },
-  set(target, methodName, value) {
-    return target.cache[methodName] = value;
-  },
-  get({ octokit, scope, cache }, methodName) {
-    if (cache[methodName]) {
-      return cache[methodName];
-    }
-    const method = endpointMethodsMap.get(scope).get(methodName);
-    if (!method) {
-      return void 0;
-    }
-    const { endpointDefaults, decorations } = method;
-    if (decorations) {
-      cache[methodName] = decorate(
-        octokit,
-        scope,
-        methodName,
-        endpointDefaults,
-        decorations
-      );
-    } else {
-      cache[methodName] = octokit.request.defaults(endpointDefaults);
-    }
-    return cache[methodName];
-  }
-};
-function endpointsToMethods(octokit) {
-  const newMethods = {};
-  for (const scope of endpointMethodsMap.keys()) {
-    newMethods[scope] = new Proxy({ octokit, scope, cache: {} }, handler);
-  }
-  return newMethods;
-}
-function decorate(octokit, scope, methodName, defaults2, decorations) {
-  const requestWithDefaults = octokit.request.defaults(defaults2);
-  function withDecorations(...args) {
-    let options = requestWithDefaults.endpoint.merge(...args);
-    if (decorations.mapToData) {
-      options = Object.assign({}, options, {
-        data: options[decorations.mapToData],
-        [decorations.mapToData]: void 0
-      });
-      return requestWithDefaults(options);
-    }
-    if (decorations.renamed) {
-      const [newScope, newMethodName] = decorations.renamed;
-      octokit.log.warn(
-        `octokit.${scope}.${methodName}() has been renamed to octokit.${newScope}.${newMethodName}()`
-      );
-    }
-    if (decorations.deprecated) {
-      octokit.log.warn(decorations.deprecated);
-    }
-    if (decorations.renamedParameters) {
-      const options2 = requestWithDefaults.endpoint.merge(...args);
-      for (const [name, alias] of Object.entries(
-        decorations.renamedParameters
-      )) {
-        if (name in options2) {
-          octokit.log.warn(
-            `"${name}" parameter is deprecated for "octokit.${scope}.${methodName}()". Use "${alias}" instead`
-          );
-          if (!(alias in options2)) {
-            options2[alias] = options2[name];
-          }
-          delete options2[name];
-        }
-      }
-      return requestWithDefaults(options2);
-    }
-    return requestWithDefaults(...args);
-  }
-  return Object.assign(withDecorations, requestWithDefaults);
-}
-
-// node_modules/@octokit/plugin-rest-endpoint-methods/dist-src/index.js
-function restEndpointMethods(octokit) {
-  const api = endpointsToMethods(octokit);
-  return {
-    rest: api
-  };
-}
-restEndpointMethods.VERSION = VERSION8;
-function legacyRestEndpointMethods(octokit) {
-  const api = endpointsToMethods(octokit);
-  return {
-    ...api,
-    rest: api
-  };
-}
-legacyRestEndpointMethods.VERSION = VERSION8;
-
-// node_modules/@octokit/rest/dist-src/version.js
-var VERSION9 = "22.0.1";
-
-// node_modules/@octokit/rest/dist-src/index.js
-var Octokit2 = Octokit.plugin(requestLog, legacyRestEndpointMethods, paginateRest).defaults(
-  {
-    userAgent: `octokit-rest.js/${VERSION9}`
-  }
-);
 
 // packages/core/src/github/publish.ts
 async function publish(b, config2, repository, client = new Octokit2({ auth: process.env.GITHUB_TOKEN })) {
@@ -300676,24 +300791,30 @@ async function publish(b, config2, repository, client = new Octokit2({ auth: pro
 }
 
 // packages/cli/src/index.ts
-var cli = new Command().name("changelume").description("Local, evidence-backed Stripe migration MVP").version("0.3.0-rc.1");
-for (const name of ["init", "doctor", "review", "scan", "plan", "migrate"]) {
+var cli = new Command().name("changelume").description("Local, evidence-backed Stripe migration MVP").version("0.4.0-rc.1");
+for (const name of ["init", "doctor", "proposal", "review", "scan", "plan", "migrate"]) {
   const command = cli.command(name).option("--cwd <path>", "Customer repository", process.cwd()).option("--config <path>", "Configuration file", "changelume.yml").option("--json", "Machine-readable output").option("--offline", "Use bundled official historical snapshot");
   if (name === "plan" || name === "migrate") command.option("--inspect-llm-context", "Print exact selected context without sending");
+  if (name === "proposal") command.option("--refresh-pr", "Refresh recorded PR state from GitHub");
   if (name === "review") command.option("--acknowledge <id>", "Record human acknowledgement, separate from migration acceptance").option("--note <text>", "Reason for acknowledgement").option("--pending", "Show only pending items").option("--category <name>", "supported, unsupported, or manual review");
   if (name === "migrate") command.option("--dry-run", "Generate patch without changing customer source").option("--publish-pr", "Explicitly publish migration PR").option("--repository <owner/repo>", "GitHub repository").option("--llm", "Use explicitly configured LLM provider").option("--context-hash <sha256>", "Hash of inspected context");
   command.action(async (options) => {
     const root = (0, import_node_path9.resolve)(options.cwd);
     if (name === "init") {
       const target = contained(root, options.config);
-      if ((0, import_node_fs10.existsSync)(target)) throw new Error("Configuration already exists");
-      (0, import_node_fs10.writeFileSync)(target, exampleConfig);
+      if ((0, import_node_fs12.existsSync)(target)) throw new Error("Configuration already exists");
+      (0, import_node_fs12.writeFileSync)(target, exampleConfig);
       console.log(options.json ? JSON.stringify({ created: target }) : `Created ${target}. Commit it before migrating.`);
       return;
     }
     const config2 = loadConfig(root, options.config), p = await plan(root, config2, options.offline);
+    if (name === "proposal") {
+      saveReport(root, p);
+      console.log(JSON.stringify(options.refreshPr ? await refreshProposal(root) : saveProposal(root, p), null, 2));
+      return;
+    }
     if (name === "doctor") {
-      const checks = { node: process.version, git: git(root, "--version"), revision: p.revision, language: config2.language, lockfile: (0, import_node_fs10.existsSync)((0, import_node_path9.resolve)(root, config2.language === "python" ? "requirements.txt" : "package-lock.json")), verificationCommands: config2.verification.length, moduleMode: p.inventory.moduleMode, limitations: p.inventory.limitations };
+      const checks = { node: process.version, git: git(root, "--version"), revision: p.revision, language: config2.language, lockfile: (0, import_node_fs12.existsSync)((0, import_node_path9.resolve)(root, config2.language === "python" ? "requirements.txt" : "package-lock.json")), verificationCommands: config2.verification.length, moduleMode: p.inventory.moduleMode, limitations: p.inventory.limitations };
       console.log(JSON.stringify(checks, null, 2));
       return;
     }
@@ -300721,12 +300842,13 @@ ${i.summary}`).join("\n\n"));
     if (options.dryRun && options.publishPr) throw new Error("--dry-run cannot publish a PR");
     assertClean(root);
     if (options.llm) {
+      if (config2.upgrade) throw new Error("Upgrade plans require deterministic edits");
       if (config2.language !== "typescript") throw new Error("Python preview supports deterministic edits only");
       if (!config2.llm?.enabled || !options.contextHash) throw new Error("LLM requires enabled configuration, model, and inspected --context-hash");
       p.edits = await assistedEdits(root, p, new OpenAIProvider(config2.llm), options.contextHash);
     }
     const b = candidate(root, p);
-    if (b.verification.status === "failed") {
+    if (b.verification.status === "failed" || config2.upgrade && b.verification.status !== "passed") {
       process.exitCode = 1;
       console.log(options.json ? JSON.stringify({ plan: publicPlan(p), verification: b.verification }) : markdown(p, b.verification));
       return;
@@ -300736,6 +300858,7 @@ ${i.summary}`).join("\n\n"));
       const repository = options.repository ?? process.env.GITHUB_REPOSITORY;
       if (!repository) throw new Error("--repository owner/repo required");
       pr = await publish(b, config2, repository);
+      saveProposal(root, p, b.verification, pr);
     } else if (!options.dryRun) applyCandidate(root, b);
     console.log(options.json ? JSON.stringify({ plan: publicPlan(p), verification: b.verification, pr }, null, 2) : markdown(p, b.verification) + (pr ? JSON.stringify(pr) : "\nPatch: .changelume/migration.patch\n"));
   });

@@ -93,3 +93,7 @@ Repeated scans track observed releases in disposable `.changelume/observations/`
 ## 0.3 preview
 
 [Install, benchmark, monitoring and Python guide](docs/preview-0.3.0.md). Private controlled evaluation; no npm package published.
+
+## 0.4 application repair iteration
+
+See [application repair, explicit upgrade and evaluation guide](docs/preview-0.4.0.md). This supersedes inventory-only linked-option limitations for the selected documented patterns. Other coverage limits remain explicit.

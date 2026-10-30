@@ -91,6 +91,15 @@ jobs:
         with:
           name: changelume-candidate
           path: .changelume/
+      - uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684
+        with:
+          path: |
+            .changelume/observations/
+            .changelume/cache/
+            .changelume/monitor/
+          key: changelume-observations-${{ github.ref_name }}-${{ github.run_id }}-published
+          restore-keys: |
+            changelume-observations-${{ github.ref_name }}-
       - uses: ./
         env:
           GITHUB_TOKEN: ${{ github.token }}

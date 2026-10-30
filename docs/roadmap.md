@@ -39,3 +39,7 @@ Defer additional vendors, broad LLM-generated migrations, and new migration reci
 ## 0.3 preview iteration
 
 Benchmark, three adjacent-literal setter migrations, persistent review snapshots, Python adapter and preview packaging: see [preview guide](preview-0.3.0.md). Independent feedback and public publication remain release gates.
+
+## 0.4 application repair iteration
+
+See [application repair, explicit upgrade and evaluation guide](preview-0.4.0.md). This supersedes inventory-only linked-option limitations for the selected documented patterns. Other coverage limits remain explicit.

@@ -1,3 +1,4 @@
+import {saveProposal} from './proposal.js';
 import { resolve } from 'node:path';
 import { readFileSync, writeFileSync, appendFileSync } from 'node:fs';
 import { z } from 'zod';
@@ -40,6 +41,6 @@ async function main() {
   if(input('verification')!=='passed'||input('verified-patch-hash')!==expected.patchHash) throw new Error('Publication requires passed verification tied to this patch');
   expected.verification={status:'passed',results:config.verification.map(c=>({command:[c.command,...c.args].join(' '),exitCode:0,timedOut:false}))};
   if(!config.verification.length) throw new Error('No configured verification');
-  const pr=await publish(expected,config,process.env.GITHUB_REPOSITORY??'');output('pr-url',pr.url);
+  const pr=await publish(expected,config,process.env.GITHUB_REPOSITORY??'');saveProposal(root,p,expected.verification,pr);output('pr-url',pr.url);
 }
 main().catch(error=>{console.error('Changelume Action failed: '+redactDiagnostics(error instanceof Error?error.message:'Unknown failure').slice(0,2048));console.error('Inspect the analysis/verification artifacts; confirm revision, digests, configuration, and repository permissions before retrying.');process.exitCode=1;});
